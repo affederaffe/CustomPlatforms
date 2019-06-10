@@ -21,7 +21,7 @@ public class SpectrogramColumns : MonoBehaviour
         }
         else
         {
-            processedSamples = this._spectrogramData.ProcessedSamples;
+            processedSamples = this._spectrogramData.ProcessedSamples.ToArray();
         }
         
         for (int i = 0; i < processedSamples.Length; i++)

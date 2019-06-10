@@ -2,10 +2,10 @@
   "$schema": "https://github.com/nike4613/BSIPA-MetadataFileSchema/master/Schema.json",
   "author": "Rolo",
   "description": "A plugin to support custom platforms and environments",
-  "gameVersion": "0.13.2",
+  "gameVersion": "1.1.0",
   "id": "Custom Platforms",
   "name": "Custom Platforms",
-  "version": "2.8.1",
+  "version": "2.8.2",
   "features": [
     
   ],
