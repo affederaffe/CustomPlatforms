@@ -6,6 +6,7 @@ namespace CustomFloorPlugin
     {
         public string platName = "MyCustomPlatform";
         public string platAuthor = "MyName";
+        public string platHash = "";
         public Sprite icon;
 
         public bool hideHighway = false;
