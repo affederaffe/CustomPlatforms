@@ -3,6 +3,7 @@ using System.Linq;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Security.Cryptography;
 
 namespace CustomFloorPlugin
 {
@@ -65,6 +66,19 @@ namespace CustomFloorPlugin
                 platforms.Add(newPlatform);
                 Plugin.logger.Info("Loaded: " + newPlatform.name);
             }
+
+            using (var md5 = MD5.Create())
+            {
+                using (var stream = File.OpenRead(bundlePath))
+                {
+                    byte[] hash = md5.ComputeHash(stream);
+                    newPlatform.platHash = BitConverter
+                        .ToString(hash)
+                        .Replace("-", string.Empty)
+                        .ToLower();
+                }
+            }
+
             return newPlatform;
         }
         

@@ -21,11 +21,10 @@ namespace CustomFloorPlugin
         public override TableCell CellForIdx(int idx)
         {
             CustomPlatform platform = PlatformManager.Instance.GetPlatform(idx);
-
-            LevelListTableCell _tableCell = GetTableCell(idx, false);
+            LevelListTableCell _tableCell = GetTableCell(false);
             _tableCell.GetPrivateField<TextMeshProUGUI>("_songNameText").text = platform.platName;
             _tableCell.GetPrivateField<TextMeshProUGUI>("_authorText").text = platform.platAuthor;
-            _tableCell.GetPrivateField<UnityEngine.UI.Image>("_coverImage").sprite = platform.icon;
+            _tableCell.GetPrivateField<UnityEngine.UI.RawImage>("_coverRawImage").texture = platform.icon != null? platform.icon.texture : UnityEngine.Texture2D.blackTexture;
             _tableCell.reuseIdentifier = "PlatformListCell";
             return _tableCell;
         }

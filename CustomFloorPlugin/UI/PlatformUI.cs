@@ -4,7 +4,7 @@ using CustomUI.MenuButton;
 using CustomUI.Settings;
 using CustomUI.BeatSaber;
 using CustomFloorPlugin.Util;
-
+using CustomUI.Utilities;
 namespace CustomFloorPlugin
 {
     class PlatformUI : MonoBehaviour

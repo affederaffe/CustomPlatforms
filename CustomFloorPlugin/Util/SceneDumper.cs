@@ -6,7 +6,7 @@ using StreamWriter = System.IO.StreamWriter;
 
 using UnityEngine;
 
-namespace CustomFloorPlugin
+namespace CustomFloorPlugin.Util
 {
     public static class SceneDumper
     {

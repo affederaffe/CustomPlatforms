@@ -2,7 +2,7 @@
 using IPA;
 using UnityEngine.SceneManagement;
 using CustomFloorPlugin.Util;
-
+using CustomUI.Utilities;
 namespace CustomFloorPlugin
 {
     public class Plugin : IBeatSaberPlugin

@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-
+using CustomUI.Utilities;
 namespace CustomFloorPlugin
 {
     public class SpectrogramMaterialManager : MonoBehaviour

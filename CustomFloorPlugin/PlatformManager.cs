@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 using System.Linq;
-using CustomFloorPlugin.Util;
+using CustomUI.Utilities;
 
 namespace CustomFloorPlugin
 {
