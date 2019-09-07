@@ -18,7 +18,7 @@ namespace CustomFloorPlugin
             return PlatformManager.Instance.GetPlatforms().Length;
         }
 
-        public override TableCell CellForIdx(int idx)
+        public override TableCell CellForIdx(TableView t, int idx)
         {
             CustomPlatform platform = PlatformManager.Instance.GetPlatform(idx);
             LevelListTableCell _tableCell = GetTableCell(false);

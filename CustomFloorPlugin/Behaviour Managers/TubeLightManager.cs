@@ -5,6 +5,7 @@ using UnityEngine;
 using System.Reflection;
 using CustomFloorPlugin.Util;
 using CustomUI.Utilities;
+using Harmony;
 
 namespace CustomFloorPlugin
 {
@@ -12,11 +13,13 @@ namespace CustomFloorPlugin
     {
         public static void CreateAdditionalLightSwitchControllers()
         {
-            LightSwitchEventEffect templateSwitchEffect = Resources.FindObjectsOfTypeAll<LightSwitchEventEffect>().FirstOrDefault();
+            LightSwitchEventEffect templateSwitchEffect = Resources.FindObjectsOfTypeAll<LightSwitchEventEffect>().LastOrDefault();
 
             for (int i = 6; i < 16; i++)
             {
                 LightSwitchEventEffect newSwitchEffect = ReflectionUtil.CopyComponent(templateSwitchEffect, typeof(LightSwitchEventEffect), typeof(LightSwitchEventEffect), templateSwitchEffect.gameObject) as LightSwitchEventEffect;
+                var lightManager = Resources.FindObjectsOfTypeAll<LightWithIdManager>().FirstOrDefault();
+                //newSwitchEffect.SetPrivateField("_lightManager", lightManager);
                 newSwitchEffect.SetPrivateField("_lightsID", i);
                 newSwitchEffect.SetPrivateField("_event", (BeatmapEventType)(i-1));
             }
@@ -26,16 +29,13 @@ namespace CustomFloorPlugin
         public static void UpdateEventTubeLightList()
         {
 
-            LightSwitchEventEffect[] lightSwitchEvents = Resources.FindObjectsOfTypeAll<LightSwitchEventEffect>();
-            foreach (LightSwitchEventEffect switchEffect in lightSwitchEvents)
-            {
-                ReflectionUtil.SetPrivateField(
-                    switchEffect,
-                    "_lights",
-                    BSLight.GetLightsWithID(switchEffect.LightsID)
-                );
-            }
-            
+            //LightSwitchEventEffect[] lightSwitchEvents = Resources.FindObjectsOfTypeAll<LightSwitchEventEffect>();
+            //foreach (LightSwitchEventEffect switchEffect in lightSwitchEvents)
+            //{
+            //    var lightManager = switchEffect.GetPrivateField<LightWithIdManager>("_lightManager");
+            //    switchEffect.SetColor(lightManager.GetColorForId(switchEffect.LightsID));
+            //}
+
         }
     }
 }

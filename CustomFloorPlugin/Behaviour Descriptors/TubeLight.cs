@@ -55,7 +55,7 @@ namespace CustomFloorPlugin
         private void Awake()
         {
             var prefab = Resources.FindObjectsOfTypeAll<TubeBloomPrePassLight>().First(x => x.name == "Neon");
-            
+
             TubeLight[] localDescriptors = GetComponentsInChildren<TubeLight>(true);
 
             if (localDescriptors == null) return;
@@ -63,6 +63,7 @@ namespace CustomFloorPlugin
             TubeLight tl = this;
             
             tubeBloomLight = Instantiate(prefab);
+
             tubeBloomLight.transform.SetParent(tl.transform);
             tubeBloomLight.transform.localRotation = Quaternion.identity;
             tubeBloomLight.transform.localPosition = Vector3.zero;
@@ -79,14 +80,28 @@ namespace CustomFloorPlugin
                 MeshBloomPrePassLight meshbloom = ReflectionUtil.CopyComponent(tubeBloomLight, typeof(TubeBloomPrePassLight), typeof(MeshBloomPrePassLight), tubeBloomLight.gameObject) as MeshBloomPrePassLight;
                 meshbloom.Init(tl.GetComponent<Renderer>());
                 tubeBloomLight.gameObject.SetActive(true);
-                Destroy(tubeBloomLight);
+                DestroyImmediate(tubeBloomLight);
                 tubeBloomLight = meshbloom;
+                tubeBloomLight.gameObject.SetActive(false);
             }
+            var lightWithId = tubeBloomLight.GetComponent<LightWithId>();
+            //Plugin.logger.Log(IPA.Logging.Logger.Level.Debug, $"LightWithId: {(lightWithId==null?"null":"exists")}");
+            lightWithId.SetPrivateField("_tubeBloomPrePassLight", tubeBloomLight);
+            Plugin.logger.Log(IPA.Logging.Logger.Level.Debug, $"Trying to set light _ID to: {(int)tl.lightsID}");
+
+
+            var runtimeFields = typeof(LightWithId).GetTypeInfo().GetRuntimeFields();
+            runtimeFields.First(f => f.Name == "_ID").SetValue(lightWithId, (int)tl.lightsID);
+            var manager = Resources.FindObjectsOfTypeAll<LightWithIdManager>().FirstOrDefault();
+            runtimeFields.First(f => f.Name == "_lighManager").SetValue(lightWithId, manager);
+            //manager.SetColorForId((int)tl.lightsID, tl.color);
+
 
             tubeBloomLight.SetPrivateField("_width", tl.width * 2);
             tubeBloomLight.SetPrivateField("_length", tl.length);
             tubeBloomLight.SetPrivateField("_center", tl.center);
             tubeBloomLight.SetPrivateField("_transform", tubeBloomLight.transform);
+            tubeBloomLight.SetPrivateField("_maxAlpha", 0.3f);
             var parabox = tubeBloomLight.GetComponentInChildren<ParametricBoxController>();
             tubeBloomLight.SetPrivateField("_parametricBoxController", parabox);
             var parasprite = tubeBloomLight.GetComponentInChildren<Parametric3SliceSpriteController>();
@@ -94,14 +109,17 @@ namespace CustomFloorPlugin
             parasprite.Init();
             parasprite.GetComponent<MeshRenderer>().enabled = false;
 
+            
+
             tubeBloomLight.color = tl.color * 0.9f;
 
-            var prop = typeof(BSLight).GetField("_ID", BindingFlags.NonPublic | BindingFlags.Instance);
-            prop.SetValue(tubeBloomLight, (int)tl.lightsID);
+            tubeBloomLight.gameObject.SetActive(true);
+
+
 
             //tubeBloomLight.InvokePrivateMethod("OnDisable", new object[0]);
             tubeBloomLight.Refresh();
-            TubeLightManager.UpdateEventTubeLightList();
+            //TubeLightManager.UpdateEventTubeLightList();
         }
 
 
