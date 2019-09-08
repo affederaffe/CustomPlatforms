@@ -24,6 +24,7 @@ public class MeshBloomPrePassLight : TubeBloomPrePassLight
     {
         base.Refresh();
         renderer.material.color = color;
+
         _parametricBoxController.enabled = false;
     }
 }
@@ -32,10 +33,15 @@ public class MeshBloomPrePassLightPatch
 {
     [HarmonyPatch(typeof(TubeBloomPrePassLight))]
     [HarmonyPatch("color", MethodType.Setter)]
-    public static bool Prefix(MeshBloomPrePassLight __instance, Color _color)
+    public static bool Prefix(TubeBloomPrePassLight __instance, Color _color)
     {
-        __instance.color = _color;
-        if (__instance.renderer.material != null) __instance.renderer.material.color = _color;
-        return false;
+        if (__instance is MeshBloomPrePassLight)
+        {
+            var mesh = (MeshBloomPrePassLight)__instance;
+            __instance.color = _color;
+            if (mesh.renderer.material != null) mesh.renderer.material.color = _color;
+            return false;
+        }
+        return true;
     }
 }

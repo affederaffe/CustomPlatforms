@@ -39,6 +39,7 @@ namespace CustomFloorPlugin
         public float center = 0.5f;
         public Color color = Color.white;
         public LightsID lightsID = LightsID.Static;
+        private LightWithIdManager lightManager;
         
         private void OnDrawGizmos()
         {
@@ -63,7 +64,6 @@ namespace CustomFloorPlugin
             TubeLight tl = this;
             
             tubeBloomLight = Instantiate(prefab);
-
             tubeBloomLight.transform.SetParent(tl.transform);
             tubeBloomLight.transform.localRotation = Quaternion.identity;
             tubeBloomLight.transform.localPosition = Vector3.zero;
@@ -82,26 +82,35 @@ namespace CustomFloorPlugin
                 tubeBloomLight.gameObject.SetActive(true);
                 DestroyImmediate(tubeBloomLight);
                 tubeBloomLight = meshbloom;
-                tubeBloomLight.gameObject.SetActive(false);
             }
+            tubeBloomLight.gameObject.SetActive(false);
+
             var lightWithId = tubeBloomLight.GetComponent<LightWithId>();
-            //Plugin.logger.Log(IPA.Logging.Logger.Level.Debug, $"LightWithId: {(lightWithId==null?"null":"exists")}");
-            lightWithId.SetPrivateField("_tubeBloomPrePassLight", tubeBloomLight);
-            Plugin.logger.Log(IPA.Logging.Logger.Level.Debug, $"Trying to set light _ID to: {(int)tl.lightsID}");
+            if(lightWithId)
+            {
+                //Plugin.logger.Log(IPA.Logging.Logger.Level.Debug, $"LightWithId: {(lightWithId==null?"null":"exists")}");
+                lightWithId.SetPrivateField("_tubeBloomPrePassLight", tubeBloomLight);
+                //Plugin.logger.Log(IPA.Logging.Logger.Level.Debug, $"Trying to set light _ID to: {(int)tl.lightsID}");
+                var runtimeFields = typeof(LightWithId).GetTypeInfo().GetRuntimeFields();
+                runtimeFields.First(f => f.Name == "_ID").SetValue(lightWithId, (int)tl.lightsID);
+                var lightManagers = Resources.FindObjectsOfTypeAll<LightWithIdManager>();
+                //foreach(var l in lightManagers)
+                //{
+                //    Plugin.logger.Log(IPA.Logging.Logger.Level.Debug, $"LightManager: {l.name}");
+                //}
+                lightManager = lightManagers.FirstOrDefault();
+                runtimeFields.First(f => f.Name == "_lighManager").SetValue(lightWithId, lightManager);
+                //lightManager.RegisterLight(lightWithId);
+                //manager.SetColorForId((int)tl.lightsID, Color.green);
+            }
 
-
-            var runtimeFields = typeof(LightWithId).GetTypeInfo().GetRuntimeFields();
-            runtimeFields.First(f => f.Name == "_ID").SetValue(lightWithId, (int)tl.lightsID);
-            var manager = Resources.FindObjectsOfTypeAll<LightWithIdManager>().FirstOrDefault();
-            runtimeFields.First(f => f.Name == "_lighManager").SetValue(lightWithId, manager);
-            //manager.SetColorForId((int)tl.lightsID, tl.color);
 
 
             tubeBloomLight.SetPrivateField("_width", tl.width * 2);
             tubeBloomLight.SetPrivateField("_length", tl.length);
             tubeBloomLight.SetPrivateField("_center", tl.center);
             tubeBloomLight.SetPrivateField("_transform", tubeBloomLight.transform);
-            tubeBloomLight.SetPrivateField("_maxAlpha", 0.3f);
+            tubeBloomLight.SetPrivateField("_maxAlpha", 0.1f);
             var parabox = tubeBloomLight.GetComponentInChildren<ParametricBoxController>();
             tubeBloomLight.SetPrivateField("_parametricBoxController", parabox);
             var parasprite = tubeBloomLight.GetComponentInChildren<Parametric3SliceSpriteController>();
@@ -109,9 +118,7 @@ namespace CustomFloorPlugin
             parasprite.Init();
             parasprite.GetComponent<MeshRenderer>().enabled = false;
 
-            
-
-            tubeBloomLight.color = tl.color * 0.9f;
+            tubeBloomLight.color = color * 0.9f;
 
             tubeBloomLight.gameObject.SetActive(true);
 
@@ -122,12 +129,18 @@ namespace CustomFloorPlugin
             //TubeLightManager.UpdateEventTubeLightList();
         }
 
-
         private void OnEnable()
         {
             BSEvents.menuSceneLoaded += SetColorToDefault;
             BSEvents.menuSceneLoadedFresh += SetColorToDefault;
+            BSEvents.beatmapEvent += SetColorToCurrent;
             SetColorToDefault();
+            tubeBloomLight.Refresh();
+        }
+
+        private void SetColorToCurrent(BeatmapEventData obj)
+        {
+            tubeBloomLight.color = lightManager.GetColorForId((int)lightsID) * 0.9f;
             tubeBloomLight.Refresh();
         }
 
@@ -135,6 +148,7 @@ namespace CustomFloorPlugin
         {
             BSEvents.menuSceneLoaded -= SetColorToDefault;
             BSEvents.menuSceneLoadedFresh -= SetColorToDefault;
+            BSEvents.beatmapEvent -= SetColorToCurrent;
         }
 
         private void SetColorToDefault()
