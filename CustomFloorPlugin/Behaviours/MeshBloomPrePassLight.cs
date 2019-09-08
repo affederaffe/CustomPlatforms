@@ -29,14 +29,14 @@ public class MeshBloomPrePassLight : TubeBloomPrePassLight
     }
 }
 
-//public class MeshBloomPrePassLightPatch
-//{
-//    [HarmonyPatch(typeof(MeshBloomPrePassLight))]
-//    [HarmonyPatch("color", MethodType.Setter)]
-//    public static bool Prefix(MeshBloomPrePassLight __instance, Color _color)
-//    {
-//        __instance.color = _color;
-//        if (__instance.renderer.material != null) __instance.renderer.material.color = _color;
-//        return false;
-//    }
-//}
+public class MeshBloomPrePassLightPatch
+{
+    [HarmonyPatch(typeof(MeshBloomPrePassLight))]
+    [HarmonyPatch("color", MethodType.Setter)]
+    public static bool Prefix(MeshBloomPrePassLight __instance, Color _color)
+    {
+        __instance.color = _color;
+        if (__instance.renderer.material != null) __instance.renderer.material.color = _color;
+        return false;
+    }
+}

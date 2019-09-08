@@ -93,11 +93,8 @@ namespace CustomFloorPlugin
                 runtimeFields.First(f => f.Name == "_ID").SetValue(lightWithId, (int)tl.lightsID);
                 //var lightManagers = Resources.FindObjectsOfTypeAll<LightWithIdManager>();
                 //lightManager = lightManagers.FirstOrDefault();
-                if(!lightManager)
-                {
-                    lightManager = new GameObject("CustomPlatformsLightManager").AddComponent<LightWithIdManager>();
-                    DontDestroyOnLoad(lightManager.gameObject);
-                }
+                
+                lightManager = new GameObject("CustomPlatformsLightManager").AddComponent<LightWithIdManager>();
                 runtimeFields.First(f => f.Name == "_lighManager").SetValue(lightWithId, lightManager);
 
             }
@@ -120,41 +117,36 @@ namespace CustomFloorPlugin
             //TubeLightManager.UpdateEventTubeLightList();
         }
 
+        private void GameSceneLoaded()
+        {
+            tubeBloomLight.color = Color.black.ColorWithAlpha(0);
+            tubeBloomLight.Refresh();
+        }
+
+        private void OnBeatmapEvent(BeatmapEventData obj)
+        {
+            int type = (int)obj.type+1;
+            if (type == (int)lightsID)
+            {
+                tubeBloomLight.color = lightManager.GetColorForId(type) * 0.9f;
+                tubeBloomLight.Refresh();
+            }
+        }
+
         private void OnEnable()
         {
             BSEvents.menuSceneLoaded += SetColorToDefault;
             BSEvents.menuSceneLoadedFresh += SetColorToDefault;
-            BSEvents.beatmapEvent += BeatmapEvent;
+            BSEvents.beatmapEvent += OnBeatmapEvent;
             BSEvents.gameSceneLoaded += GameSceneLoaded;
             SetColorToDefault();
-            tubeBloomLight.Refresh();
-        }
-
-        private void GameSceneLoaded()
-        {
-            SetColorToCurrent((int)lightsID);
-        }
-
-        private void BeatmapEvent(BeatmapEventData obj)
-        {
-             SetColorToCurrent((int)obj.type);
-        }
-
-        private void SetColorToCurrent(int type)
-        {
-            var newColor = lightManager.GetColorForId(type);
-            if (tubeBloomLight.color != newColor)
-            {
-                tubeBloomLight.color = newColor * 0.9f;
-                tubeBloomLight.Refresh();
-            }
         }
 
         private void OnDisable()
         {
             BSEvents.menuSceneLoaded -= SetColorToDefault;
             BSEvents.menuSceneLoadedFresh -= SetColorToDefault;
-            BSEvents.beatmapEvent -= BeatmapEvent;
+            BSEvents.beatmapEvent -= OnBeatmapEvent;
             BSEvents.gameSceneLoaded -= GameSceneLoaded;
         }
 
