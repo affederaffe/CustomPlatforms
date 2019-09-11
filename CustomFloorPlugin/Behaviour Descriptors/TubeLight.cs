@@ -39,7 +39,16 @@ namespace CustomFloorPlugin
         public float center = 0.5f;
         public Color color = Color.white;
         public LightsID lightsID = LightsID.Static;
-        public static LightWithIdManager lightManager;
+        private static LightWithIdManager _lightManager;
+        public static LightWithIdManager lightManager
+        {
+            get
+            {
+                if (!_lightManager)
+                    _lightManager = new GameObject("CustomPlatformsLightManager").AddComponent<LightWithIdManager>();
+                return _lightManager;
+            }
+        }
         
         private void OnDrawGizmos()
         {
@@ -93,8 +102,7 @@ namespace CustomFloorPlugin
                 runtimeFields.First(f => f.Name == "_ID").SetValue(lightWithId, (int)tl.lightsID);
                 //var lightManagers = Resources.FindObjectsOfTypeAll<LightWithIdManager>();
                 //lightManager = lightManagers.FirstOrDefault();
-                
-                lightManager = new GameObject("CustomPlatformsLightManager").AddComponent<LightWithIdManager>();
+
                 runtimeFields.First(f => f.Name == "_lighManager").SetValue(lightWithId, lightManager);
 
             }

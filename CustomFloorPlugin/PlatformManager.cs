@@ -99,7 +99,6 @@ namespace CustomFloorPlugin
 
             EnvironmentArranger.RearrangeEnvironment();
             TubeLightManager.CreateAdditionalLightSwitchControllers();
-            TubeLightManager.UpdateEventTubeLightList();
         }
 
         private void HandleMenuSceneLoadedFresh()
