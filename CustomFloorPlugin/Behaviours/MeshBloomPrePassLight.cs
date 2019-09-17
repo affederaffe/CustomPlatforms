@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using Harmony;
+using UnityEngine;
 
 // Token: 0x02000048 RID: 72
 [RequireComponent(typeof(MeshFilter))]
@@ -18,24 +19,24 @@ public class MeshBloomPrePassLight : TubeBloomPrePassLight
         base.OnEnable();
         _parametricBoxController.enabled = false;
     }
-    
-    public override Color color
-    {
-        get
-        {
-            return this._color;
-        }
-        set
-        {
-            base.color = value;
-            if(renderer.material!=null) renderer.material.color = value;
-        }
-    }
 
     public override void Refresh()
     {
         base.Refresh();
         renderer.material.color = color;
+
         _parametricBoxController.enabled = false;
+    }
+}
+
+public class MeshBloomPrePassLightPatch
+{
+    [HarmonyPatch(typeof(MeshBloomPrePassLight))]
+    [HarmonyPatch("color", MethodType.Setter)]
+    public static bool Prefix(MeshBloomPrePassLight __instance, Color _color)
+    {
+        __instance.color = _color;
+        if (__instance.renderer.material != null) __instance.renderer.material.color = _color;
+        return false;
     }
 }

@@ -3,6 +3,8 @@ using IPA;
 using UnityEngine.SceneManagement;
 using CustomFloorPlugin.Util;
 using CustomUI.Utilities;
+using Harmony;
+
 namespace CustomFloorPlugin
 {
     public class Plugin : IBeatSaberPlugin
@@ -21,6 +23,10 @@ namespace CustomFloorPlugin
             //Instance = this;
             BSEvents.OnLoad();
             BSEvents.menuSceneLoadedFresh += OnMenuSceneLoadedFresh;
+
+            HarmonyInstance hi = HarmonyInstance.Create("com.rolopogo.customplatforms");
+            hi.PatchAll();
+
         }
 
         private void OnMenuSceneLoadedFresh()

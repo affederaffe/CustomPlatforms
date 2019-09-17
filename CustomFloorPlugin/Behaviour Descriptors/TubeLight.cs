@@ -39,6 +39,16 @@ namespace CustomFloorPlugin
         public float center = 0.5f;
         public Color color = Color.white;
         public LightsID lightsID = LightsID.Static;
+        private static LightWithIdManager _lightManager;
+        public static LightWithIdManager lightManager
+        {
+            get
+            {
+                if (!_lightManager)
+                    _lightManager = new GameObject("CustomPlatformsLightManager").AddComponent<LightWithIdManager>();
+                return _lightManager;
+            }
+        }
         
         private void OnDrawGizmos()
         {
@@ -55,7 +65,7 @@ namespace CustomFloorPlugin
         private void Awake()
         {
             var prefab = Resources.FindObjectsOfTypeAll<TubeBloomPrePassLight>().First(x => x.name == "Neon");
-            
+
             TubeLight[] localDescriptors = GetComponentsInChildren<TubeLight>(true);
 
             if (localDescriptors == null) return;
@@ -79,44 +89,73 @@ namespace CustomFloorPlugin
                 MeshBloomPrePassLight meshbloom = ReflectionUtil.CopyComponent(tubeBloomLight, typeof(TubeBloomPrePassLight), typeof(MeshBloomPrePassLight), tubeBloomLight.gameObject) as MeshBloomPrePassLight;
                 meshbloom.Init(tl.GetComponent<Renderer>());
                 tubeBloomLight.gameObject.SetActive(true);
-                Destroy(tubeBloomLight);
+                DestroyImmediate(tubeBloomLight);
                 tubeBloomLight = meshbloom;
+            }
+            tubeBloomLight.gameObject.SetActive(false);
+
+            var lightWithId = tubeBloomLight.GetComponent<LightWithId>();
+            if(lightWithId)
+            {
+                lightWithId.SetPrivateField("_tubeBloomPrePassLight", tubeBloomLight);
+                var runtimeFields = typeof(LightWithId).GetTypeInfo().GetRuntimeFields();
+                runtimeFields.First(f => f.Name == "_ID").SetValue(lightWithId, (int)tl.lightsID);
+                //var lightManagers = Resources.FindObjectsOfTypeAll<LightWithIdManager>();
+                //lightManager = lightManagers.FirstOrDefault();
+
+                runtimeFields.First(f => f.Name == "_lighManager").SetValue(lightWithId, lightManager);
+
             }
 
             tubeBloomLight.SetPrivateField("_width", tl.width * 2);
             tubeBloomLight.SetPrivateField("_length", tl.length);
             tubeBloomLight.SetPrivateField("_center", tl.center);
             tubeBloomLight.SetPrivateField("_transform", tubeBloomLight.transform);
+            tubeBloomLight.SetPrivateField("_maxAlpha", 0.1f);
             var parabox = tubeBloomLight.GetComponentInChildren<ParametricBoxController>();
             tubeBloomLight.SetPrivateField("_parametricBoxController", parabox);
             var parasprite = tubeBloomLight.GetComponentInChildren<Parametric3SliceSpriteController>();
             tubeBloomLight.SetPrivateField("_dynamic3SliceSprite", parasprite);
             parasprite.Init();
             parasprite.GetComponent<MeshRenderer>().enabled = false;
+            tubeBloomLight.color = color * 0.9f;
 
-            tubeBloomLight.color = tl.color * 0.9f;
-
-            var prop = typeof(BSLight).GetField("_ID", BindingFlags.NonPublic | BindingFlags.Instance);
-            prop.SetValue(tubeBloomLight, (int)tl.lightsID);
-
-            //tubeBloomLight.InvokePrivateMethod("OnDisable", new object[0]);
+            tubeBloomLight.gameObject.SetActive(true);
             tubeBloomLight.Refresh();
-            TubeLightManager.UpdateEventTubeLightList();
+            //TubeLightManager.UpdateEventTubeLightList();
         }
 
+        private void GameSceneLoaded()
+        {
+            tubeBloomLight.color = Color.black.ColorWithAlpha(0);
+            tubeBloomLight.Refresh();
+        }
+
+        private void OnBeatmapEvent(BeatmapEventData obj)
+        {
+            int type = (int)obj.type+1;
+            if (type == (int)lightsID)
+            {
+                tubeBloomLight.color = lightManager.GetColorForId(type) * 0.9f;
+                tubeBloomLight.Refresh();
+            }
+        }
 
         private void OnEnable()
         {
             BSEvents.menuSceneLoaded += SetColorToDefault;
             BSEvents.menuSceneLoadedFresh += SetColorToDefault;
+            BSEvents.beatmapEvent += OnBeatmapEvent;
+            BSEvents.gameSceneLoaded += GameSceneLoaded;
             SetColorToDefault();
-            tubeBloomLight.Refresh();
         }
 
         private void OnDisable()
         {
             BSEvents.menuSceneLoaded -= SetColorToDefault;
             BSEvents.menuSceneLoadedFresh -= SetColorToDefault;
+            BSEvents.beatmapEvent -= OnBeatmapEvent;
+            BSEvents.gameSceneLoaded -= GameSceneLoaded;
         }
 
         private void SetColorToDefault()
