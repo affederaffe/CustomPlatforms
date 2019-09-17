@@ -25,7 +25,7 @@ namespace CustomFloorPlugin
             BSEvents.menuSceneLoadedFresh += OnMenuSceneLoadedFresh;
 
             HarmonyInstance hi = HarmonyInstance.Create("com.rolopogo.customplatforms");
-            hi.PatchAll();
+            hi.PatchAll(System.Reflection.Assembly.GetExecutingAssembly());
 
         }
 

@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Linq;
 using CustomUI.Utilities;
-
+using Harmony;
 namespace CustomFloorPlugin
 {
     public class PlatformManager : MonoBehaviour
@@ -102,7 +102,8 @@ namespace CustomFloorPlugin
         }
 
         private void HandleMenuSceneLoadedFresh()
-        {   
+        {
+            ChangeToPlatform(platformIndex);
             menuEnvHider.FindEnvironment();
             HandleMenuSceneLoaded();
         }
@@ -150,11 +151,11 @@ namespace CustomFloorPlugin
 
             // Increment index
             platformIndex = index % platforms.Length;
-            
+
             // Save path into ModPrefs
             if (save)
                 Plugin.config.SetString("Data", "CustomPlatformPath", currentPlatform.platName + currentPlatform.platAuthor);
-            
+
             // Show new platform
             currentPlatform.gameObject.SetActive(true);
 
@@ -165,5 +166,26 @@ namespace CustomFloorPlugin
             // Update lightSwitchEvent TubeLight references
             TubeLightManager.UpdateEventTubeLightList();
         }
+
+        internal void TempChangeToPlatform(int index)
+        {
+            // Hide current Platform
+            currentPlatform.gameObject.SetActive(false);
+            int oldIndex = platformIndex;
+            // Increment index
+            platformIndex = index % platforms.Length;
+
+            // Show new platform
+            currentPlatform.gameObject.SetActive(true);
+
+            // Hide environment for new platform
+            menuEnvHider.HideObjectsForPlatform(currentPlatform);
+            gameEnvHider.HideObjectsForPlatform(currentPlatform);
+
+            // Update lightSwitchEvent TubeLight references
+            TubeLightManager.UpdateEventTubeLightList();
+            platformIndex = oldIndex;
+        }
     }
+
 }
