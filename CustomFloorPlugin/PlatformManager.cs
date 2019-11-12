@@ -33,9 +33,13 @@ namespace CustomFloorPlugin
         private void Start()
         {
             EnvironmentArranger.arrangement = (EnvironmentArranger.Arrangement)Plugin.config.GetInt("Settings", "EnvironmentArrangement", 0, true);
+
             EnvironmentSceneOverrider.overrideMode = (EnvironmentSceneOverrider.EnvOverrideMode)Plugin.config.GetInt("Settings", "EnvironmentOverrideMode", 0, true);
+
             EnvironmentSceneOverrider.GetSceneInfos();
+
             EnvironmentSceneOverrider.OverrideEnvironmentScene();
+
 
             menuEnvHider = new EnvironmentHider();
             gameEnvHider = new EnvironmentHider();
@@ -44,11 +48,10 @@ namespace CustomFloorPlugin
             BSEvents.gameSceneLoaded += HandleGameSceneLoaded;
             BSEvents.menuSceneLoadedFresh += HandleMenuSceneLoadedFresh;
             BSEvents.menuSceneLoaded += HandleMenuSceneLoaded;
-            
             RefreshPlatforms();
 
             HandleMenuSceneLoadedFresh();
-            
+
             PlatformUI.OnLoad();
         }
 
@@ -66,6 +69,7 @@ namespace CustomFloorPlugin
 
         public void RefreshPlatforms()
         {
+
             if (platforms != null)
             {
                 foreach (CustomPlatform platform in platforms)
@@ -74,7 +78,6 @@ namespace CustomFloorPlugin
                 }
             }
             platforms = platformLoader.CreateAllPlatforms(transform);
-
             // Retrieve saved path from player prefs if it exists
             if (Plugin.config.HasKey("Data", "CustomPlatformPath"))
             {
@@ -89,7 +92,9 @@ namespace CustomFloorPlugin
                     }
                 }
             }
+
             ChangeToPlatform(platformIndex);
+
         }
 
         private void HandleGameSceneLoaded()

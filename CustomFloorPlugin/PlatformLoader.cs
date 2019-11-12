@@ -21,7 +21,8 @@ namespace CustomFloorPlugin
         /// Loads AssetBundles and populates the platforms array with CustomPlatform objects
         /// </summary>
         public CustomPlatform[] CreateAllPlatforms(Transform parent)
-        {   
+        {
+
             string customPlatformsFolderPath = Path.Combine(Environment.CurrentDirectory, customFolder);
 
             // Create the CustomPlatforms folder if it doesn't already exist
@@ -44,10 +45,10 @@ namespace CustomFloorPlugin
             defaultPlatform.icon = Resources.FindObjectsOfTypeAll<Sprite>().Where(x => x.name == "LvlInsaneCover").FirstOrDefault();
             platforms.Add(defaultPlatform);
             bundlePaths.Add("");
-
             // Populate the platforms array
             for (int i = 0; i < allBundlePaths.Length; i++)
             {
+
                 CustomPlatform newPlatform = LoadPlatformBundle(allBundlePaths[i],parent);
             }
 
@@ -56,9 +57,11 @@ namespace CustomFloorPlugin
 
         public CustomPlatform LoadPlatformBundle(string bundlePath, Transform parent)
         {
+
             AssetBundle bundle = AssetBundle.LoadFromFile(bundlePath);
+
             if (bundle == null) return null;
-            
+
             CustomPlatform newPlatform = LoadPlatform(bundle, parent);
             if (newPlatform != null)
             {
@@ -89,20 +92,30 @@ namespace CustomFloorPlugin
         /// <returns></returns>
         private CustomPlatform LoadPlatform(AssetBundle bundle, Transform parent)
         {
+
             GameObject platformPrefab = bundle.LoadAsset<GameObject>("_CustomPlatform");
+
             if (platformPrefab == null)
             {
                 Plugin.logger.Info("Assetbundle didnt contain a Custom Platform");
                 return null;
             }
 
-            GameObject newPlatform = GameObject.Instantiate(platformPrefab.gameObject);
+            GameObject newPlatform =  GameObject.Instantiate(platformPrefab.gameObject);
+
             newPlatform.transform.parent = parent;
 
+            LightWithId[] lights = Resources.FindObjectsOfTypeAll<LightWithId>();
+            foreach (LightWithId light in lights)
+            {
+                if(Plugin.LightsWithId_Patch.CorrectlySpelledManagerName != null)
+                    Plugin.LightsWithId_Patch.CorrectlySpelledManagerName.RegisterLight(light);
+            }
             bundle.Unload(false);
-
+            
             // Collect author and name
             CustomPlatform customPlatform = newPlatform.GetComponent<CustomPlatform>();
+
             if (customPlatform == null)
             {
                 // Check for old platform 
@@ -128,9 +141,9 @@ namespace CustomFloorPlugin
             }
 
             newPlatform.name = customPlatform.platName + " by " + customPlatform.platAuthor;
-            
+
             if (customPlatform.icon == null) customPlatform.icon = Resources.FindObjectsOfTypeAll<Sprite>().Where(x => x.name == "FeetIcon").FirstOrDefault();
-            
+
             AddManagers(newPlatform);
 
             newPlatform.SetActive(false);

@@ -31,7 +31,8 @@ namespace CustomFloorPlugin
             LightSwitchEventEffect[] lightSwitchEvents = Resources.FindObjectsOfTypeAll<LightSwitchEventEffect>();
             foreach (LightSwitchEventEffect switchEffect in lightSwitchEvents)
             {
-                switchEffect.SetPrivateField("_lightManager", TubeLight.lightManager);
+
+                //switchEffect.SetPrivateField("_lightManager", TubeLight.lightManager);
             }
 
         }

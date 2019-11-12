@@ -45,7 +45,8 @@ namespace CustomFloorPlugin
             get
             {
                 if (!_lightManager)
-                    _lightManager = new GameObject("CustomPlatformsLightManager").AddComponent<LightWithIdManager>();
+                    //_lightManager = new GameObject("CustomPlatformsLightManager").AddComponent<LightWithIdManager>();
+                    _lightManager = Plugin.LightsWithId_Patch.CorrectlySpelledManagerName;
                 return _lightManager;
             }
         }
@@ -77,6 +78,7 @@ namespace CustomFloorPlugin
             tubeBloomLight.transform.localRotation = Quaternion.identity;
             tubeBloomLight.transform.localPosition = Vector3.zero;
             tubeBloomLight.transform.localScale = new Vector3(1 / tl.transform.lossyScale.x, 1 / tl.transform.lossyScale.y, 1 / tl.transform.lossyScale.z);
+            
 
             if (tl.GetComponent<MeshFilter>().mesh.vertexCount == 0)
             {
@@ -97,13 +99,13 @@ namespace CustomFloorPlugin
             var lightWithId = tubeBloomLight.GetComponent<LightWithId>();
             if(lightWithId)
             {
-                lightWithId.SetPrivateField("_tubeBloomPrePassLight", tubeBloomLight);
-                var runtimeFields = typeof(LightWithId).GetTypeInfo().GetRuntimeFields();
-                runtimeFields.First(f => f.Name == "_ID").SetValue(lightWithId, (int)tl.lightsID);
-                //var lightManagers = Resources.FindObjectsOfTypeAll<LightWithIdManager>();
-                //lightManager = lightManagers.FirstOrDefault();
+                //lightWithId.SetPrivateField("_tubeBloomPrePassLight", tubeBloomLight);
+                //var runtimeFields = typeof(LightWithId).GetTypeInfo().GetRuntimeFields();
+                //runtimeFields.First(f => f.Name == "_ID").SetValue(lightWithId, (int)tl.lightsID);
+                ////var lightManagers = Resources.FindObjectsOfTypeAll<LightWithIdManager>();
+                ////lightManager = lightManagers.FirstOrDefault();
 
-                runtimeFields.First(f => f.Name == "_lighManager").SetValue(lightWithId, lightManager);
+                //runtimeFields.First(f => f.Name == "_lighManager").SetValue(lightWithId, lightManager);
 
             }
 
@@ -129,6 +131,7 @@ namespace CustomFloorPlugin
         {
             tubeBloomLight.color = Color.black.ColorWithAlpha(0);
             tubeBloomLight.Refresh();
+
         }
 
         private void OnBeatmapEvent(BeatmapEventData obj)
