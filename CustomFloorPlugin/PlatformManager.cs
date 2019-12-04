@@ -2,6 +2,8 @@
 using System.Linq;
 using CustomUI.Utilities;
 using Harmony;
+using UnityEngine.SceneManagement;
+
 namespace CustomFloorPlugin
 {
     public class PlatformManager : MonoBehaviour
@@ -27,7 +29,8 @@ namespace CustomFloorPlugin
         {
             if (Instance != null) return;
             Instance = this;
-            DontDestroyOnLoad(gameObject);
+            SceneManager.MoveGameObjectToScene(gameObject, SceneManager.CreateScene("PlatformManagerDump"));
+            GameScenesManagerSO.MarkSceneAsPersistent("PlatformManagerDump");
         }
 
         private void Start()

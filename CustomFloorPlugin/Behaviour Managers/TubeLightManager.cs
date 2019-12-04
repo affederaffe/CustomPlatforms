@@ -18,8 +18,8 @@ namespace CustomFloorPlugin
             for (int i = 6; i < 16; i++)
             {
                 LightSwitchEventEffect newSwitchEffect = ReflectionUtil.CopyComponent(templateSwitchEffect, typeof(LightSwitchEventEffect), typeof(LightSwitchEventEffect), templateSwitchEffect.gameObject) as LightSwitchEventEffect;
-                //var lightManager = Resources.FindObjectsOfTypeAll<LightWithIdManager>().FirstOrDefault();
-                //newSwitchEffect.SetPrivateField("_lightManager", lightManager);
+                var lightManager = Resources.FindObjectsOfTypeAll<LightWithIdManager>().FirstOrDefault();
+                newSwitchEffect.SetPrivateField("_lightManager", lightManager);
                 newSwitchEffect.SetPrivateField("_lightsID", i);
                 newSwitchEffect.SetPrivateField("_event", (BeatmapEventType)(i-1));
             }

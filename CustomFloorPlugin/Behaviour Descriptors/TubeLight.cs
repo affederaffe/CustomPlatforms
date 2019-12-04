@@ -99,13 +99,13 @@ namespace CustomFloorPlugin
             var lightWithId = tubeBloomLight.GetComponent<LightWithId>();
             if(lightWithId)
             {
-                //lightWithId.SetPrivateField("_tubeBloomPrePassLight", tubeBloomLight);
-                //var runtimeFields = typeof(LightWithId).GetTypeInfo().GetRuntimeFields();
-                //runtimeFields.First(f => f.Name == "_ID").SetValue(lightWithId, (int)tl.lightsID);
-                ////var lightManagers = Resources.FindObjectsOfTypeAll<LightWithIdManager>();
-                ////lightManager = lightManagers.FirstOrDefault();
+                lightWithId.SetPrivateField("_tubeBloomPrePassLight", tubeBloomLight);
+                var runtimeFields = typeof(LightWithId).GetTypeInfo().GetRuntimeFields();
+                runtimeFields.First(f => f.Name == "_ID").SetValue(lightWithId, (int)tl.lightsID);
+                //var lightManagers = Resources.FindObjectsOfTypeAll<LightWithIdManager>();
+                //lightManager = lightManagers.FirstOrDefault();
 
-                //runtimeFields.First(f => f.Name == "_lighManager").SetValue(lightWithId, lightManager);
+                runtimeFields.First(f => f.Name == "_lighManager").SetValue(lightWithId, lightManager);
 
             }
 
