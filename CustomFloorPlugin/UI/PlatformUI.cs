@@ -5,6 +5,8 @@ using CustomUI.Settings;
 using CustomUI.BeatSaber;
 using CustomFloorPlugin.Util;
 using CustomUI.Utilities;
+using UnityEngine.SceneManagement;
+
 namespace CustomFloorPlugin
 {
     class PlatformUI : MonoBehaviour
@@ -25,7 +27,9 @@ namespace CustomFloorPlugin
         private void Awake()
         {
             _instance = this;
-            DontDestroyOnLoad(gameObject);
+            SceneManager.MoveGameObjectToScene(gameObject, SceneManager.CreateScene("PlatformUIDump"));
+            GameScenesManagerSO.MarkSceneAsPersistent("PlatformUIDump");
+
 
             BSEvents.menuSceneLoadedFresh += HandleMenuSceneLoadedFresh;
             HandleMenuSceneLoadedFresh();
