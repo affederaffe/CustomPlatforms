@@ -21,20 +21,27 @@ namespace CustomFloorPlugin
                 var lightManager = Resources.FindObjectsOfTypeAll<LightWithIdManager>().FirstOrDefault();
                 newSwitchEffect.SetPrivateField("_lightManager", lightManager);
                 newSwitchEffect.SetPrivateField("_lightsID", i);
-                newSwitchEffect.SetPrivateField("_event", (BeatmapEventType)(i-1));
+                newSwitchEffect.SetPrivateField("_event", (BeatmapEventType)(i - 1));
             }
             UpdateEventTubeLightList();
         }
-        
+
         public static void UpdateEventTubeLightList()
         {
+
+            LightWithId[] lights = GameObject.FindObjectsOfType<LightWithId>();
+
+            foreach (LightWithId light in lights)
+            {
+                Plugin.LightsWithId_Patch.GameLightManager.RegisterLight(light);
+            }
+
+
             LightSwitchEventEffect[] lightSwitchEvents = Resources.FindObjectsOfTypeAll<LightSwitchEventEffect>();
             foreach (LightSwitchEventEffect switchEffect in lightSwitchEvents)
             {
-
-                //switchEffect.SetPrivateField("_lightManager", TubeLight.lightManager);
+                switchEffect.SetPrivateField("_lightManager", Plugin.LightsWithId_Patch.GameLightManager);
             }
-
         }
     }
 }

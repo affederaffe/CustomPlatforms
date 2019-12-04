@@ -108,8 +108,8 @@ namespace CustomFloorPlugin
             LightWithId[] lights = Resources.FindObjectsOfTypeAll<LightWithId>();
             foreach (LightWithId light in lights)
             {
-                if(Plugin.LightsWithId_Patch.CorrectlySpelledManagerName != null)
-                    Plugin.LightsWithId_Patch.CorrectlySpelledManagerName.RegisterLight(light);
+                if(Plugin.LightsWithId_Patch.GameLightManager != null)
+                    Plugin.LightsWithId_Patch.GameLightManager.RegisterLight(light);
             }
             bundle.Unload(false);
             
