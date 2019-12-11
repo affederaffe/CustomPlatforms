@@ -19,7 +19,7 @@ namespace CustomFloorPlugin
             {
                 LightSwitchEventEffect newSwitchEffect = ReflectionUtil.CopyComponent(templateSwitchEffect, typeof(LightSwitchEventEffect), typeof(LightSwitchEventEffect), templateSwitchEffect.gameObject) as LightSwitchEventEffect;
                 
-                newSwitchEffect.SetPrivateField("_lightManager", Plugin.LightWithId_Start_Patch.GameLightManager);
+                newSwitchEffect.SetPrivateField("_lightManager", PlatformManager.LightManager);
                 newSwitchEffect.SetPrivateField("_lightsID", i);
                 newSwitchEffect.SetPrivateField("_event", (BeatmapEventType)(i - 1));
             }
@@ -34,7 +34,7 @@ namespace CustomFloorPlugin
             LightSwitchEventEffect[] lightSwitchEvents = Resources.FindObjectsOfTypeAll<LightSwitchEventEffect>();
             foreach (LightSwitchEventEffect switchEffect in lightSwitchEvents)
             {
-                switchEffect.SetPrivateField("_lightManager", Plugin.LightWithId_Start_Patch.GameLightManager);
+                switchEffect.SetPrivateField("_lightManager", PlatformManager.LightManager);
             }
         }
     }

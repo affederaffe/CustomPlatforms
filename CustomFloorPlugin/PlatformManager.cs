@@ -7,15 +7,16 @@ using System.Collections;
 using System.Collections.Generic;
 using System;
 using System.Reflection;
+using System.Text;
 
 namespace CustomFloorPlugin {
     public static class Extentions {
-        public static void InvokePrivateMethod<T>(this object obj, string methodName, object[] methodParams) {
+        public static void InvokePrivateMethod<T>(this object obj, string methodName, params object[] methodParams) {
             var method = typeof(T).GetMethod(methodName, BindingFlags.Instance | BindingFlags.NonPublic);
             method.Invoke(obj, methodParams);
         }
     }
-    
+
     public class PlatformManager:MonoBehaviour {
         public static PlatformManager Instance;
 
@@ -26,15 +27,13 @@ namespace CustomFloorPlugin {
 
         private CustomPlatform[] platforms;
         private int platformIndex = 0;
+        
+        static void OnSpawnStart(){Debug.Log("Spawning Lights");}
+        internal delegate void SpawnQueueType();
+        internal static SpawnQueueType SpawnQueue = new SpawnQueueType(OnSpawnStart);
+        
+        internal static LightWithIdManager LightManager = null;
 
-
-        public delegate void SpawnQueueType();
-
-
-        public static SpawnQueueType SpawnQueue = new SpawnQueueType(OnSpawnStart);
-        static void OnSpawnStart() {
-            Debug.Log("Spawning Lights");
-        }
         public static void OnLoad() {
             if(Instance != null) return;
             GameObject go = new GameObject("Platform Manager");
@@ -47,61 +46,18 @@ namespace CustomFloorPlugin {
             SceneManager.MoveGameObjectToScene(gameObject, SceneManager.CreateScene("PlatformManagerDump"));
             GameScenesManagerSO.MarkSceneAsPersistent("PlatformManagerDump");
             GameScenesManagerSO.beforeDismissingScenesSignal.Subscribe(TransitionPrep);
+            GameScenesManagerSO.transitionDidFinishSignal.Subscribe(HandleGameSceneLoaded);
             GameScenesManagerSO.transitionDidFinishSignal.Subscribe(TransitionFinalize);
         }
 
         void TransitionPrep() {
-            Debug.Log("Destroying:");
-            int i = 0;
-            while(TubeLight.SpawnedObjects.Count != 0) {
-                GameObject gameObject = TubeLight.SpawnedObjects[0];
-                TubeLight.SpawnedObjects.Remove(gameObject);
-                GameObject.DestroyImmediate(gameObject);
-                Debug.Log("..." + ++i + "...");
-            }
-            Debug.Log("GameObjects");
+            DestroyCustomLights();
             foreach(BloomPrePassLightTypeSO type in Traverse.Create(typeof(BloomPrePassLight)).Field<Dictionary<BloomPrePassLightTypeSO, HashSet<BloomPrePassLight>>>("_bloomLightsDict").Value.Keys) {
                 Debug.Log("Name: " + type.name);
             }
             foreach(BloomPrePassLight.LightsDataItem type in Traverse.Create(typeof(BloomPrePassLight)).Field<List<BloomPrePassLight.LightsDataItem>>("_lightsDataItems").Value) {
                 Debug.Log("Type: " + type.lightType.name + ", Count:" + type.lights.Count);
             }
-
-            Debug.Log("Clearing Lists");
-            Debug.Log("Length of List: " + Traverse.Create(typeof(BloomPrePassLight)).Field<List<BloomPrePassLight.LightsDataItem>>("_lightsDataItems").Value.Count);
-            Traverse.Create(typeof(BloomPrePassLight)).Field<List<BloomPrePassLight.LightsDataItem>>("_lightsDataItems").Value = new List<BloomPrePassLight.LightsDataItem>();
-            Traverse.Create(typeof(BloomPrePassLight)).Field<Dictionary<BloomPrePassLightTypeSO, HashSet<BloomPrePassLight>>>("_bloomLightsDict").Value = new Dictionary<BloomPrePassLightTypeSO, HashSet<BloomPrePassLight>>();
-
-            Debug.Log("Length of List: " + Traverse.Create(typeof(BloomPrePassLight)).Field<List<BloomPrePassLight.LightsDataItem>>("_lightsDataItems").Value.Count);
-            Debug.Log("Attempting to restore List");
-            i = 0;
-            for(int j = 0; j < SceneManager.sceneCount; j++) {
-                Scene scene = SceneManager.GetSceneAt(i);
-                if(!scene.name.StartsWith("Menu") && scene.name.EndsWith("Environment")) {
-                    foreach(BloomPrePassLight bloomLight in GetAllBlooms()) {
-                        Type type = bloomLight.GetType();
-                        Debug.Log("Type: " + type.FullName);
-                        if(bloomLight is MeshBloomPrePassLight meshLight) {
-                            Debug.Log("_isRegistered: " + Traverse.Create(meshLight).Field<bool>("_isRegistered").Value);
-                            Traverse.Create(meshLight).Field<bool>("_isRegistered").Value = false;
-                            Debug.Log("_isRegistered: " + Traverse.Create(meshLight).Field<bool>("_isRegistered").Value);
-                            meshLight.InvokePrivateMethod<BloomPrePassLight>("RegisterLight", new object[0]);
-                            Debug.Log("_isRegistered: " + Traverse.Create(meshLight).Field<bool>("_isRegistered").Value);
-                        } else if(bloomLight is TubeBloomPrePassLight tubeLight) {
-                            Debug.Log("_isRegistered: " + Traverse.Create(tubeLight).Field<bool>("_isRegistered").Value);
-                            Traverse.Create(tubeLight).Field<bool>("_isRegistered").Value = false;
-                            Debug.Log("_isRegistered: " + Traverse.Create(tubeLight).Field<bool>("_isRegistered").Value);
-                            tubeLight.InvokePrivateMethod<BloomPrePassLight>("RegisterLight", new object[0]);
-                            Debug.Log("_isRegistered: " + Traverse.Create(tubeLight).Field<bool>("_isRegistered").Value);
-                        }
-
-                        Debug.Log("Blooms \"Re-Registered\": " + ++i);
-                        Debug.Log("Length of List: " + Traverse.Create(typeof(BloomPrePassLight)).Field<List<BloomPrePassLight.LightsDataItem>>("_lightsDataItems").Value.Count);
-                    }
-                }
-            }
-            Debug.Log("Toggling Blooms");
-            Plugin.ToggleBlooms();
         }
         List<BloomPrePassLight> GetAllBlooms() {
             List<BloomPrePassLight> lights = new List<BloomPrePassLight>();
@@ -115,48 +71,36 @@ namespace CustomFloorPlugin {
             Debug.Log("returned an Array of " + lights.Count + " BloomLights");
             return lights;
         }
-        //Traverse.Create(instanceObject).Method("PrivateInstanceMethod");
-        static bool IsCoActive = false;
         void TransitionFinalize() {
             Debug.Log("This is called in BeatSabersHandle");
-            for(int i = 0; i < SceneManager.sceneCount; i++) {
-                Scene scene = SceneManager.GetSceneAt(i);
-                if(!scene.name.StartsWith("Menu") && scene.name.EndsWith("Environment")) {
-                    Debug.Log("Finding Manager");
-                    Plugin.FindManager(scene);
-                    Debug.Log("Trying to launch Awakes");
-                    Debug.Log("Spawnqueue has: " + SpawnQueue.GetInvocationList().Length + " entries.");
-                    PlatformManager.SpawnQueue();
-                    //try {
-                    //    Debug.Log("Trying to reregister all lights");
-                    //    Plugin.Instance.ReregisterLights();
-                    //} catch {
-                    //    Debug.Log("Failed miserably you dumbass!");
-                    //}
-                }
+            Scene currentScene = GetCurrentEnvironment();
+            bool DidMenuload = currentScene.name.StartsWith("Menu") ? true : false;
+            Debug.Log("The loaded scene type has been determined");
+            EmptyLightRegisters();
+            if(!DidMenuload) {
+                FindManager();
+                SpawnCustomLights();
+                Debug.Log("Attempting to restore List");
+                RegisterLights();
             }
+            Debug.Log("Toggling Blooms");
+            Plugin.ToggleBlooms();
         }
         private void Start() {
             EnvironmentArranger.arrangement = (EnvironmentArranger.Arrangement)Plugin.config.GetInt("Settings", "EnvironmentArrangement", 0, true);
-
             EnvironmentSceneOverrider.overrideMode = (EnvironmentSceneOverrider.EnvOverrideMode)Plugin.config.GetInt("Settings", "EnvironmentOverrideMode", 0, true);
-
             EnvironmentSceneOverrider.GetSceneInfos();
-
             EnvironmentSceneOverrider.OverrideEnvironmentScene();
-
 
             menuEnvHider = new EnvironmentHider();
             gameEnvHider = new EnvironmentHider();
             platformLoader = new PlatformLoader();
 
-            BSEvents.gameSceneLoaded += HandleGameSceneLoaded;
             BSEvents.menuSceneLoadedFresh += HandleMenuSceneLoadedFresh;
             BSEvents.menuSceneLoaded += HandleMenuSceneLoaded;
+
             RefreshPlatforms();
-
             HandleMenuSceneLoadedFresh();
-
             PlatformUI.OnLoad();
         }
 
@@ -195,34 +139,15 @@ namespace CustomFloorPlugin {
 
         }
 
-        //public IEnumerator<WaitForSeconds> loadAfterDelay() {
-        //    if(IsCoActive) {
-        //        Debug.Log("Co is active, exiting!");
-        //        yield break;
-        //    }
-        //    IsCoActive = true;
-        //    for(int i = 10; i > 0; i--) {
-        //        Debug.Log("Waiting: " + i + "...");
-        //        yield return new WaitForSeconds(1);
-        //    }
-        //    Debug.Log("Trying to launch Awakes");
-        //    PlatformManager.loadAfterDelayActionDelegate();
-        //    try{
-        //        Debug.Log("Trying to reregister all lights");
-        //        Plugin.Instance.ReregisterLights();
-        //    } catch {
-        //        Debug.Log("Failed miserably you dumbass!");
-        //    }
-        //    Debug.Log("Setting Co inactive");
-        //    IsCoActive = false;
-        //}
-        private void HandleGameSceneLoaded() {
-            Debug.Log("This is called in HandleGameSceneLoaded");
-            gameEnvHider.FindEnvironment();
-            gameEnvHider.HideObjectsForPlatform(currentPlatform);
 
-            EnvironmentArranger.RearrangeEnvironment();
-            TubeLightManager.CreateAdditionalLightSwitchControllers();
+        private void HandleGameSceneLoaded() {
+            if(!GetCurrentEnvironment().name.StartsWith("Menu")) {
+                Debug.Log("This is called in HandleGameSceneLoaded");
+                gameEnvHider.FindEnvironment();
+                gameEnvHider.HideObjectsForPlatform(currentPlatform);
+                EnvironmentArranger.RearrangeEnvironment();
+                TubeLightManager.CreateAdditionalLightSwitchControllers();
+            }
         }
 
         private void HandleMenuSceneLoadedFresh() {
@@ -243,8 +168,125 @@ namespace CustomFloorPlugin {
             if(Input.GetKeyDown(KeyCode.P)) {
                 NextPlatform();
             }
+            if(Input.GetKeyDown(KeyCode.Keypad0)) {
+                EmptyLightRegisters();
+            }
+            if(Input.GetKeyDown(KeyCode.Keypad1)) {
+                Plugin.ToggleBlooms();
+            }
+            if(Input.GetKeyDown(KeyCode.Keypad2)) {
+                RegisterLights();
+            }
+            if(Input.GetKeyDown(KeyCode.Keypad3)) {
+                UnregisterLights();
+            }
+            if(Input.GetKeyDown(KeyCode.Keypad4)) {
+                SpawnCustomLights();
+            }
+            if(Input.GetKeyDown(KeyCode.Keypad5)) {
+                DestroyCustomLights();
+            }
+            if(Input.GetKeyDown(KeyCode.Keypad6)) {
+                FindManager();
+            }
+            
         }
+        internal static void FindManager() {
+            Scene scene = GetCurrentEnvironment();
+            Debug.Log("Finding Manager");
+            LightWithIdManager manager = null;
+            void FindManager(GameObject directParent) {
+                for(int i = 0; i < directParent.transform.childCount; i++) {
+                    GameObject child = directParent.transform.GetChild(i).gameObject;
+                    if(child.GetComponent<LightWithIdManager>() != null) {
+                        manager = child.GetComponent<LightWithIdManager>();
+                    }
+                    if(child.transform.childCount != 0) {
+                        FindManager(child);
+                    }
+                }
+            }
+            GameObject[] roots = scene.GetRootGameObjects();
+            foreach(GameObject root in roots) {
+                FindManager(root);
+            }
+            LightManager = manager;
+        }
+        void DestroyCustomLights() {
+            Debug.Log("Destroying:");
+            int i = 0;
+            while(TubeLight.SpawnedObjects.Count != 0) {
+                GameObject gameObject = TubeLight.SpawnedObjects[0];
+                TubeLight.SpawnedObjects.Remove(gameObject);
+                GameObject.DestroyImmediate(gameObject);
+                Debug.Log("..." + ++i + "...");
+            }
+            Debug.Log("GameObjects");
+        }
+        void SpawnCustomLights(){
+            Debug.Log("Trying to launch Awakes");
+            Debug.Log("Spawnqueue has: " + SpawnQueue.GetInvocationList().Length + " entries.");
+            PlatformManager.SpawnQueue();
+        }
+        void EmptyLightRegisters() {
+            Debug.Log("Clearing Lists");
+            Debug.Log("Length of List: " + Traverse.Create(typeof(BloomPrePassLight)).Field<List<BloomPrePassLight.LightsDataItem>>("_lightsDataItems").Value.Count);
+            Traverse.Create(typeof(BloomPrePassLight)).Field<List<BloomPrePassLight.LightsDataItem>>("_lightsDataItems").Value = new List<BloomPrePassLight.LightsDataItem>();
+            Traverse.Create(typeof(BloomPrePassLight)).Field<Dictionary<BloomPrePassLightTypeSO, HashSet<BloomPrePassLight>>>("_bloomLightsDict").Value = new Dictionary<BloomPrePassLightTypeSO, HashSet<BloomPrePassLight>>();
+            Debug.Log("Length of List: " + Traverse.Create(typeof(BloomPrePassLight)).Field<List<BloomPrePassLight.LightsDataItem>>("_lightsDataItems").Value.Count);
+        }
+        void UnregisterLights() {
+            int i = 0;
+            Debug.Log("Trying to unregister all lights:");
+            foreach(BloomPrePassLight bloomLight in GetAllBlooms()) {
+                Debug.Log("Type: " + bloomLight.GetType().FullName + ", Path: " + GetFullPath(bloomLight.gameObject) + ", LightType: " + Traverse.Create(bloomLight).Field<BloomPrePassLightTypeSO>("_registeredWithLightType").Value.name);
 
+                bloomLight.InvokePrivateMethod<BloomPrePassLight>("UnregisterLight");
+                Debug.Log("Registered: " + Traverse.Create(bloomLight).Field<bool>("_isRegistered").Value);
+
+                Debug.Log("Loop: " + ++i);
+            }
+        }
+        void RegisterLights() {
+            int i = 0;
+            Debug.Log("Trying to register all lights:");
+            foreach(BloomPrePassLight bloomLight in GetAllBlooms()) {
+                Debug.Log("Type: " + bloomLight.GetType().FullName + ", Path: " + GetFullPath(bloomLight.gameObject) + ", LightType: " + Traverse.Create(bloomLight).Field<BloomPrePassLightTypeSO>("_registeredWithLightType").Value.name);
+
+                bloomLight.InvokePrivateMethod<BloomPrePassLight>("RegisterLight");
+                Debug.Log("Registered: " + Traverse.Create(bloomLight).Field<bool>("_isRegistered").Value);
+
+                Debug.Log("Loop: " + ++i);
+            }
+        }
+        string GetFullPath(GameObject gameObject) {
+            StringBuilder path = new StringBuilder();
+            while(true) {
+                path.Append("/" + gameObject.name, 0, gameObject.name.Length + 1);
+                if(gameObject.transform.parent == null) {
+                    path.Append(gameObject.scene.name, 0, gameObject.scene.name.Length);
+                    break;
+                }
+                gameObject = gameObject.transform.parent.gameObject;
+            }
+            return path.ToString();
+        }
+        internal static Scene GetCurrentEnvironment() {
+            Scene scene = new Scene();
+            for(int i = 0; i < SceneManager.sceneCount; i++) {
+                scene = SceneManager.GetSceneAt(i);
+                if(scene.name.EndsWith("Environment")) {
+                    return scene;
+                }
+            }
+            throw new EnvironmentSceneNotFoundException();
+        }
+        class EnvironmentSceneNotFoundException:Exception {
+            internal EnvironmentSceneNotFoundException() :
+                base("No Environment Scene could be found!") {
+
+            }
+        }
         public int currentPlatformIndex { get { return platformIndex; } }
 
         public CustomPlatform currentPlatform { get { return platforms[platformIndex]; } }
@@ -305,5 +347,4 @@ namespace CustomFloorPlugin {
             platformIndex = oldIndex;
         }
     }
-
 }
