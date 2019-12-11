@@ -65,7 +65,7 @@ namespace CustomFloorPlugin {
             }
         }
         
-        private void GameAwake(GameObject parent) {
+        private void GameAwake() {
             int i = 0;
             //if(tblwidpf == null) {
             //    tblwidpf = GameObject.Find("Wrapper/NearBuildingLeft/Neon");
@@ -109,13 +109,11 @@ namespace CustomFloorPlugin {
             tubeBloomLight.transform.SetParent(tl.transform);
             
             SpawnedObjects.Add(tubeBloomLight.gameObject);
-            
-            tubeBloomLight.transform.rotation = transform.rotation;
-            
-            tubeBloomLight.transform.localPosition = transform.position;
-            
-            tubeBloomLight.transform.localScale = this.transform.lossyScale;
-            
+
+            tubeBloomLight.transform.localRotation = Quaternion.identity;
+            tubeBloomLight.transform.localPosition = Vector3.zero;
+            tubeBloomLight.transform.localScale = new Vector3(1 / tl.transform.lossyScale.x, 1 / tl.transform.lossyScale.y, 1 / tl.transform.lossyScale.z);
+
 
             if(tl.GetComponent<MeshFilter>().mesh.vertexCount == 0) {
                 tl.GetComponent<MeshRenderer>().enabled = false;
@@ -290,13 +288,13 @@ namespace CustomFloorPlugin {
             BSEvents.gameSceneLoaded += GameSceneLoaded;
             
             StartCoroutine(ToggleBlooms(gameObject));
-            PlatformManager.loadAfterDelayActionDelegate += GameAwake;
+            PlatformManager.SpawnQueue += GameAwake;
         }
         
 
         private void OnDisable() {
             BSEvents.gameSceneLoaded -= GameSceneLoaded;
-            PlatformManager.loadAfterDelayActionDelegate -= GameAwake;
+            PlatformManager.SpawnQueue -= GameAwake;
         }
 
         private void SetColorToDefault() {

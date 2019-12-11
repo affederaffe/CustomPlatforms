@@ -15,6 +15,7 @@ namespace CustomFloorPlugin {
             method.Invoke(obj, methodParams);
         }
     }
+    
     public class PlatformManager:MonoBehaviour {
         public static PlatformManager Instance;
 
@@ -27,11 +28,13 @@ namespace CustomFloorPlugin {
         private int platformIndex = 0;
 
 
+        public delegate void SpawnQueueType();
 
 
-
-        public static Action<GameObject> loadAfterDelayActionDelegate;
-
+        public static SpawnQueueType SpawnQueue = new SpawnQueueType(OnSpawnStart);
+        static void OnSpawnStart() {
+            Debug.Log("Spawning Lights");
+        }
         public static void OnLoad() {
             if(Instance != null) return;
             GameObject go = new GameObject("Platform Manager");
@@ -97,6 +100,7 @@ namespace CustomFloorPlugin {
                     }
                 }
             }
+            Debug.Log("Toggling Blooms");
             Plugin.ToggleBlooms();
         }
         List<BloomPrePassLight> GetAllBlooms() {
@@ -114,15 +118,15 @@ namespace CustomFloorPlugin {
         //Traverse.Create(instanceObject).Method("PrivateInstanceMethod");
         static bool IsCoActive = false;
         void TransitionFinalize() {
+            Debug.Log("This is called in BeatSabersHandle");
             for(int i = 0; i < SceneManager.sceneCount; i++) {
                 Scene scene = SceneManager.GetSceneAt(i);
                 if(!scene.name.StartsWith("Menu") && scene.name.EndsWith("Environment")) {
-                    GameObject customLightsHolder = new GameObject("CustomLights");
-                    SceneManager.MoveGameObjectToScene(customLightsHolder, scene);
                     Debug.Log("Finding Manager");
                     Plugin.FindManager(scene);
                     Debug.Log("Trying to launch Awakes");
-                    PlatformManager.loadAfterDelayActionDelegate(customLightsHolder);
+                    Debug.Log("Spawnqueue has: " + SpawnQueue.GetInvocationList().Length + " entries.");
+                    PlatformManager.SpawnQueue();
                     //try {
                     //    Debug.Log("Trying to reregister all lights");
                     //    Plugin.Instance.ReregisterLights();
@@ -213,6 +217,7 @@ namespace CustomFloorPlugin {
         //    IsCoActive = false;
         //}
         private void HandleGameSceneLoaded() {
+            Debug.Log("This is called in HandleGameSceneLoaded");
             gameEnvHider.FindEnvironment();
             gameEnvHider.HideObjectsForPlatform(currentPlatform);
 
