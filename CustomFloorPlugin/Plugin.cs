@@ -52,30 +52,7 @@ namespace CustomFloorPlugin {
         //}
 
         ////////////////////////////////////////////////////////////////////////////////////////////////
-        public static void ToggleBlooms(string sceneName = "MenuEnvironment") {
-            GameObject[] roots = SceneManager.GetSceneByName(sceneName).GetRootGameObjects();
-            foreach(GameObject root in roots) {
-                RecursiveToggleBloomPrePass(root);
-            }
-        }
-        internal static IEnumerator<WaitForEndOfFrame> ToggleBlooms(GameObject gameObject) {
-            yield return new WaitForEndOfFrame();
-            RecursiveToggleBloomPrePass(gameObject);
-        }
-        private static void RecursiveToggleBloomPrePass(GameObject directParent) {
-            for(int i = 0; i < directParent.transform.childCount; i++) {
-                GameObject child = directParent.transform.GetChild(i).gameObject;
-                if(child.GetComponent<BloomPrePassLight>() != null) {
-                    child.transform.parent = null;
-                    child.SetActive(!child.activeSelf);
-                    child.SetActive(!child.activeSelf);
-                    child.transform.parent = directParent.transform;
-                }
-                if(child.transform.childCount != 0) {
-                    RecursiveToggleBloomPrePass(child);
-                }
-            }
-        }
+        
         /// <summary>
         /// Baustelle 1
         /// </summary>
