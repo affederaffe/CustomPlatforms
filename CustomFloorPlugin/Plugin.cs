@@ -52,20 +52,7 @@ namespace CustomFloorPlugin {
         //}
 
         ////////////////////////////////////////////////////////////////////////////////////////////////
-        
-        /// <summary>
-        /// Baustelle 1
-        /// </summary>
-        public void ReregisterLights() {
-            Debug.Log("Reregister at:" + PlatformManager.LightManager.name);
-            Traverse.Create(PlatformManager.LightManager).Field<List<LightWithId>[]>("_lights").Value = new List<LightWithId>[21];
-            foreach(LightWithId light in GameObject.FindObjectsOfType<LightWithId>()) {
-                Traverse.Create(light).Field<LightWithIdManager>("_lighManager").Value = PlatformManager.LightManager;
-                PlatformManager.LightManager.RegisterLight(light);
-            }
-            TubeLightManager.UpdateEventTubeLightList();
-        }
-        ////////////////////////////////////////////////////////////////////////////////////////////////
+
         public void OnSceneLoaded(Scene scene, LoadSceneMode sceneMode) { }
         public void OnSceneUnloaded(Scene scene) { }
         public void OnActiveSceneChanged(Scene prevScene, Scene nextScene) { }

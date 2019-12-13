@@ -49,6 +49,23 @@ namespace CustomFloorPlugin {
             GameScenesManagerSO.transitionDidFinishSignal.Subscribe(TransitionFinalize);
         }
 
+        [HarmonyPatch(typeof(EnvironmentOverrideSettingsPanelController))]
+        [HarmonyPatch("HandleOverrideEnvironmentsToggleValueChanged")]
+        public class EnviromentOverideSettings_Patch
+        {
+            static public void Postfix(OverrideEnvironmentSettings ____overrideEnvironmentSettings)
+            {
+                if (____overrideEnvironmentSettings.overrideEnvironments == true) {
+                    Debug.Log("Enviroment Override On");
+                }
+
+                if (____overrideEnvironmentSettings.overrideEnvironments == false)
+                {
+                    Debug.Log("Enviroment Override Off");
+                }
+            }
+        }
+
         void TransitionPrep() {
             DestroyCustomLights();
             if(GetCurrentEnvironment().name.StartsWith("Menu")) {
