@@ -39,32 +39,6 @@ namespace CustomFloorPlugin {
             }
         }
 
-        //public void OnGameSceneLoaded() {
-        //    Scene gameScene = PlatformManager.GetCurrentEnvironment();
-        //    bool DidMenuload = gameScene.name.StartsWith("Menu") ? true : false;
-        //    if(!DidMenuload) {
-        //        ToggleBlooms();
-        //        Debug.Log("The following game scene has been loaded:" + gameScene.name);
-        //        PlatformManager.FindManager();
-        //        ReregisterLights();
-        //        TubeLightManager.UpdateEventTubeLightList();
-        //    }
-        //}
-
-        ////////////////////////////////////////////////////////////////////////////////////////////////
-        
-        /// <summary>
-        /// Baustelle 1
-        /// </summary>
-        public void ReregisterLights() {
-            Debug.Log("Reregister at:" + PlatformManager.LightManager.name);
-            Traverse.Create(PlatformManager.LightManager).Field<List<LightWithId>[]>("_lights").Value = new List<LightWithId>[21];
-            foreach(LightWithId light in GameObject.FindObjectsOfType<LightWithId>()) {
-                Traverse.Create(light).Field<LightWithIdManager>("_lighManager").Value = PlatformManager.LightManager;
-                PlatformManager.LightManager.RegisterLight(light);
-            }
-            TubeLightManager.UpdateEventTubeLightList();
-        }
         ////////////////////////////////////////////////////////////////////////////////////////////////
         public void OnSceneLoaded(Scene scene, LoadSceneMode sceneMode) { }
         public void OnSceneUnloaded(Scene scene) { }

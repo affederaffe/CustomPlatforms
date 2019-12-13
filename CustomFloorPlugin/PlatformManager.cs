@@ -70,6 +70,7 @@ namespace CustomFloorPlugin {
                 Debug.Log("Menu load detected");
                 menuEnvHider.HideObjectsForPlatform(GetPlatform(0));
                 TempChangeToPlatform(0);
+                RegisterLights();
             }
         }
         /// <summary>
