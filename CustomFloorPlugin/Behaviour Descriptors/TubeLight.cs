@@ -58,7 +58,25 @@ namespace CustomFloorPlugin {
             get {
                 if(_prefab == null) {
                     Debug.Log("Setting Prefab!");
-                    _prefab = GameObject.Find("Wrapper/NearBuildingLeft/Neon").GetComponent<TubeBloomPrePassLight>();
+                    try {
+                        _prefab =
+                            SceneManager
+                            .GetSceneByName("MenuEnvironment")
+                            .GetRootGameObjects()
+                            .First<GameObject>(x => x.name == "Wrapper")
+                            .transform
+                            .Find("NearBuildingLeft/Neon")
+                            .GetComponent<TubeBloomPrePassLight>();
+                    } catch(InvalidOperationException) {
+                        _prefab =
+                            SceneManager
+                            .GetSceneByName("MenuEnvironment")
+                            .GetRootGameObjects()
+                            .First<GameObject>(x => x.name == "RootContainer")
+                            .transform
+                            .Find("Wrapper/NearBuildingLeft/Neon")
+                            .GetComponent<TubeBloomPrePassLight>();
+                    }
                 }
                 return _prefab;
             }
@@ -67,12 +85,9 @@ namespace CustomFloorPlugin {
         private TubeBloomPrePassLight tubeBloomLight;
 
         private void Awake() {
-            //if(prefab == null) {
-            //    Debug.Log("Setting Prefab!");
-            //    prefab = GameObject.Find("Wrapper/NearBuildingLeft/Neon").GetComponent<TubeBloomPrePassLight>();
-            //}
+
         }
-        
+
         private void GameAwake() {
             tubeBloomLight = Instantiate(prefab);
             tubeBloomLight.transform.SetParent(transform);
@@ -97,7 +112,7 @@ namespace CustomFloorPlugin {
                 tubeBloomLight.gameObject.SetActive(true);
             }
             tubeBloomLight.gameObject.SetActive(false);
-            
+
             var lightWithId = tubeBloomLight.GetComponent<LightWithId>();
             if(lightWithId) {
 
@@ -105,30 +120,24 @@ namespace CustomFloorPlugin {
                 Traverse.Create(lightWithId).Field<int>("_ID").Value = (int)lightsID;
                 Traverse.Create(lightWithId).Field<LightWithIdManager>("_lighManager").Value = PlatformManager.LightManager;
             }
-            
+
             tubeBloomLight.SetPrivateField("_width", width * 2);
             tubeBloomLight.SetPrivateField("_length", length);
             tubeBloomLight.SetPrivateField("_center", center);
             tubeBloomLight.SetPrivateField("_transform", tubeBloomLight.transform);
             tubeBloomLight.SetPrivateField("_maxAlpha", 0.1f);
-            
+
             var parabox = tubeBloomLight.GetComponentInChildren<ParametricBoxController>();
             tubeBloomLight.SetPrivateField("_parametricBoxController", parabox);
-            
+
             var parasprite = tubeBloomLight.GetComponentInChildren<Parametric3SliceSpriteController>();
             tubeBloomLight.SetPrivateField("_dynamic3SliceSprite", parasprite);
             parasprite.Init();
             parasprite.GetComponent<MeshRenderer>().enabled = false;
-            
-            tubeBloomLight.color = color * 0.9f;
-            tubeBloomLight.Refresh();
+
+            SetColorToDefault();
             tubeBloomLight.gameObject.SetActive(true);
         }
-        //private void GameSceneLoaded() {
-
-        //    //tubeBloomLight.Refresh();
-        //    //StartCoroutine(KerFuffel(tubeBloomLight));
-        //}
         IEnumerator<WaitForEndOfFrame> KerFuffel(TubeBloomPrePassLight tubeBloomLight) {
             yield return new WaitForEndOfFrame();
             tubeBloomLight.color = Color.black.ColorWithAlpha(0);
@@ -136,16 +145,11 @@ namespace CustomFloorPlugin {
         }
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////
-        
-
 
         private void OnEnable() {
-            //BSEvents.gameSceneLoaded += GameSceneLoaded;
-            StartCoroutine(Plugin.ToggleBlooms(gameObject));
             PlatformManager.SpawnQueue += GameAwake;
         }
         private void OnDisable() {
-            //BSEvents.gameSceneLoaded -= GameSceneLoaded;
             PlatformManager.SpawnQueue -= GameAwake;
         }
         private void SetColorToDefault() {
