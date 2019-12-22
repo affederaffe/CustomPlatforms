@@ -41,7 +41,7 @@ namespace CustomFloorPlugin {
         public Color color = Color.white;
         public LightsID lightsID = LightsID.Static;
         private static LightWithIdManager _lightManager;
-        public static List<GameObject> SpawnedObjects = new List<GameObject>();
+        
 
         private void OnDrawGizmos() {
             Gizmos.color = color;
@@ -91,7 +91,7 @@ namespace CustomFloorPlugin {
         private void GameAwake() {
             tubeBloomLight = Instantiate(prefab);
             tubeBloomLight.transform.SetParent(transform);
-            SpawnedObjects.Add(tubeBloomLight.gameObject);
+            PlatformManager.SpawnedObjects.Add(tubeBloomLight.gameObject);
 
             tubeBloomLight.transform.localRotation = Quaternion.identity;
             tubeBloomLight.transform.localPosition = Vector3.zero;

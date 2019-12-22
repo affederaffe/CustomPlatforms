@@ -34,7 +34,7 @@ namespace CustomFloorPlugin
             public EnvSceneInfo(string displayName, SceneInfo sceneInfo)
             {
                 this.displayName = displayName;
-                this.sceneName = sceneInfo.sceneName;
+                sceneName = sceneInfo.sceneName;
                 this.sceneInfo = sceneInfo;
             }
 

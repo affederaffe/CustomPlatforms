@@ -5,38 +5,31 @@ using UnityEngine;
 [RequireComponent(typeof(MeshFilter))]
 [ExecuteInEditMode]
 [RequireComponent(typeof(MeshRenderer))]
-public class MeshBloomPrePassLight : TubeBloomPrePassLight
-{
+public class MeshBloomPrePassLight:TubeBloomPrePassLight {
     public Renderer renderer;
 
-    public void Init(Renderer renderer)
-    {
+    public void Init(Renderer renderer) {
         this.renderer = renderer;
     }
 
-    protected override void OnEnable()
-    {
+    protected override void OnEnable() {
         base.OnEnable();
         _parametricBoxController.enabled = false;
     }
 
-    public override void Refresh()
-    {
+    public override void Refresh() {
         base.Refresh();
         renderer.material.color = color;
-
         _parametricBoxController.enabled = false;
     }
 }
 
-public class MeshBloomPrePassLightPatch
-{
-    [HarmonyPatch(typeof(MeshBloomPrePassLight))]
-    [HarmonyPatch("color", MethodType.Setter)]
-    public static bool Prefix(MeshBloomPrePassLight __instance, Color _color)
-    {
+[HarmonyPatch(typeof(MeshBloomPrePassLight))]
+[HarmonyPatch("color", MethodType.Setter)]
+public class MeshBloomPrePassLightPatch {
+    public static bool Prefix(MeshBloomPrePassLight __instance, Color _color) {
         __instance.color = _color;
-        if (__instance.renderer.material != null) __instance.renderer.material.color = _color;
+        if(__instance.renderer.material != null) __instance.renderer.material.color = _color;
         return false;
     }
 }

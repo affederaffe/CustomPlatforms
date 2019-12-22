@@ -1,4 +1,4 @@
-﻿using CustomFloorPlugin.Util;
+using CustomFloorPlugin.Util;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -33,6 +33,7 @@ namespace CustomFloorPlugin
             {
 
                 SpectrogramColumns specCol = spec.gameObject.AddComponent<SpectrogramColumns>();
+                //PlatformManager.SpawnedComponents.Add(specCol);
                 ReflectionUtil.SetPrivateField(specCol, "_columnPrefab", spec.columnPrefab);
                 ReflectionUtil.SetPrivateField(specCol, "_separator", spec.separator);
                 ReflectionUtil.SetPrivateField(specCol, "_minHeight", spec.minHeight);

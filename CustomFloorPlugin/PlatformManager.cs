@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Linq;
 using CustomUI.Utilities;
 using Harmony;
@@ -19,7 +19,8 @@ namespace CustomFloorPlugin {
 
     public class PlatformManager:MonoBehaviour {
         public static PlatformManager Instance;
-
+        public static List<GameObject> SpawnedObjects = new List<GameObject>();
+        public static List<Component> SpawnedComponents = new List<Component>();
         private EnvironmentHider menuEnvHider;
         private EnvironmentHider gameEnvHider;
 
@@ -227,13 +228,22 @@ namespace CustomFloorPlugin {
         void DestroyCustomLights() {
             Debug.Log("Destroying:");
             int i = 0;
-            while(TubeLight.SpawnedObjects.Count != 0) {
-                GameObject gameObject = TubeLight.SpawnedObjects[0];
-                TubeLight.SpawnedObjects.Remove(gameObject);
-                GameObject.DestroyImmediate(gameObject);
-                Debug.Log("..." + ++i + "...");
+            while(SpawnedObjects.Count != 0) {
+                GameObject gameObject = SpawnedObjects[0];
+                SpawnedObjects.Remove(gameObject);
+                Destroy(gameObject);
+                i++;
             }
-            Debug.Log("GameObjects");
+            Debug.Log(i.ToString() + " GameObjects");
+            Debug.Log("And");
+            i = 0;
+            while(SpawnedComponents.Count != 0) {
+                Component component = SpawnedComponents[0];
+                SpawnedComponents.Remove(component);
+                Destroy(component);
+                i++;
+            }
+            Debug.Log(i.ToString() + " Components");
         }
         void SpawnCustomLights(){
             Debug.Log("Trying to launch Awakes");
