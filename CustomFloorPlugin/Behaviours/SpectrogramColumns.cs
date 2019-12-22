@@ -50,7 +50,7 @@ public class SpectrogramColumns : MonoBehaviour
     private Transform CreateColumn(Vector3 pos)
     {
         GameObject gameObject = Instantiate<GameObject>(_columnPrefab, base.transform);
-        PlatformManager.SpawnedObjects.Add(gameObject);
+        CustomFloorPlugin.PlatformManager.SpawnedObjects.Add(gameObject);
         gameObject.transform.localPosition = pos;
         gameObject.transform.localScale = new Vector3(_columnWidth, _minHeight, _columnDepth);
         return gameObject.transform;
