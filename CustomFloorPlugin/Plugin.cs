@@ -2,13 +2,14 @@
 using IPA;
 using UnityEngine.SceneManagement;
 using CustomFloorPlugin.Util;
-using CustomUI.Utilities;
 using Harmony;
 using System.Collections.Generic;
 using System.Reflection.Emit;
 using System;
 using System.Linq;
 using System.Reflection;
+using BS_Utils.Utilities;
+
 
 namespace CustomFloorPlugin {
     public class Plugin:IBeatSaberPlugin {
@@ -39,20 +40,7 @@ namespace CustomFloorPlugin {
             }
         }
 
-        //public void OnGameSceneLoaded() {
-        //    Scene gameScene = PlatformManager.GetCurrentEnvironment();
-        //    bool DidMenuload = gameScene.name.StartsWith("Menu") ? true : false;
-        //    if(!DidMenuload) {
-        //        ToggleBlooms();
-        //        Debug.Log("The following game scene has been loaded:" + gameScene.name);
-        //        PlatformManager.FindManager();
-        //        ReregisterLights();
-        //        TubeLightManager.UpdateEventTubeLightList();
-        //    }
-        //}
-
         ////////////////////////////////////////////////////////////////////////////////////////////////
-
         public void OnSceneLoaded(Scene scene, LoadSceneMode sceneMode) { }
         public void OnSceneUnloaded(Scene scene) { }
         public void OnActiveSceneChanged(Scene prevScene, Scene nextScene) { }

@@ -19,9 +19,9 @@ namespace CustomFloorPlugin
             // Grab materials from Menu Scene objects
             var materials = Resources.FindObjectsOfTypeAll<Material>();
 
-            dark = new Material(materials.First(x => x.name == "DarkEnvironment1"));
+            dark = new Material(materials.First(x => x.name == "DarkEnvironmentSimple"));
             //opaqueGlow = new Material(materials.First(x => x.name == "EnvLightOpaque"));
-            opaqueGlow = new Material(materials.First(x => x.name == "DarkEnvironment1"));
+            opaqueGlow = new Material(materials.First(x => x.name == "DarkEnvironmentSimple"));
             glow = new Material(materials.First(x => x.name == "EnvLight"));
         }
 

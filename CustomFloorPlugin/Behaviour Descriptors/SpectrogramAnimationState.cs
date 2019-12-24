@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -34,6 +34,7 @@ namespace CustomFloorPlugin
                     if (animation == null)
                     {
                         animation = gameObject.AddComponent<Animation>();
+                        //PlatformManager.SpawnedComponents.Add(animation);
                         animation.AddClip(animationClip, "clip");
                         animation.Play("clip");
                         animation["clip"].speed = 0;

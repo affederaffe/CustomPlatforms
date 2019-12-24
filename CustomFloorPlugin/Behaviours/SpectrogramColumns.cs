@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using UnityEngine;
 
 // Token: 0x0200035C RID: 860
@@ -26,32 +26,33 @@ public class SpectrogramColumns : MonoBehaviour
         
         for (int i = 0; i < processedSamples.Length; i++)
         {
-            float num = processedSamples[i] * (5f + (float)i * 0.07f);
+            float num = processedSamples[i] * (5f + i * 0.07f);
             if (num > 1f)
             {
                 num = 1f;
             }
             num = Mathf.Pow(num, 2f);
-            this._columnTransforms[i].localScale = new Vector3(this._columnWidth, Mathf.Lerp(this._minHeight, this._maxHeight, num) + (float)i * 0.1f, this._columnDepth);
-            this._columnTransforms[i + 64].localScale = new Vector3(this._columnWidth, Mathf.Lerp(this._minHeight, this._maxHeight, num), this._columnDepth);
+            _columnTransforms[i].localScale = new Vector3(_columnWidth, Mathf.Lerp(_minHeight, _maxHeight, num) + i * 0.1f, _columnDepth);
+            _columnTransforms[i + 64].localScale = new Vector3(_columnWidth, Mathf.Lerp(_minHeight, _maxHeight, num), _columnDepth);
         }
     }
     
     private void CreateColums()
     {
-        this._columnTransforms = new Transform[128];
+        _columnTransforms = new Transform[128];
         for (int i = 0; i < 64; i++)
         {
-            this._columnTransforms[i] = this.CreateColumn(this._separator * (float)i);
-            this._columnTransforms[i + 64] = this.CreateColumn(-this._separator * (float)(i + 1));
+            _columnTransforms[i] = CreateColumn(_separator * i);
+            _columnTransforms[i + 64] = CreateColumn(-_separator * (i + 1));
         }
     }
     
     private Transform CreateColumn(Vector3 pos)
     {
-        GameObject gameObject = UnityEngine.Object.Instantiate<GameObject>(this._columnPrefab, base.transform);
+        GameObject gameObject = Instantiate<GameObject>(_columnPrefab, base.transform);
+        CustomFloorPlugin.PlatformManager.SpawnedObjects.Add(gameObject);
         gameObject.transform.localPosition = pos;
-        gameObject.transform.localScale = new Vector3(this._columnWidth, this._minHeight, this._columnDepth);
+        gameObject.transform.localScale = new Vector3(_columnWidth, _minHeight, _columnDepth);
         return gameObject.transform;
     }
     

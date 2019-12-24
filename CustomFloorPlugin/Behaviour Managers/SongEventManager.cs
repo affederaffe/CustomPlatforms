@@ -6,7 +6,8 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.Events;
 using CustomFloorPlugin.Util;
-using CustomUI.Utilities;
+using BS_Utils.Utilities;
+
 namespace CustomFloorPlugin
 {
     class SongEventManager : MonoBehaviour
