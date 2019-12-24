@@ -2,13 +2,14 @@
 using IPA;
 using UnityEngine.SceneManagement;
 using CustomFloorPlugin.Util;
-using CustomUI.Utilities;
 using Harmony;
 using System.Collections.Generic;
 using System.Reflection.Emit;
 using System;
 using System.Linq;
 using System.Reflection;
+using BS_Utils.Utilities;
+
 
 namespace CustomFloorPlugin {
     public class Plugin:IBeatSaberPlugin {

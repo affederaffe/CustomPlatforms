@@ -7,12 +7,12 @@ using Harmony;
 using UnityEngine;
 namespace CustomFloorPlugin.Harmony_Patches
 {
-    [HarmonyPatch(typeof(MenuTransitionsHelperSO))]
+    [HarmonyPatch(typeof(MenuTransitionsHelper))]
     [HarmonyPatch("RestartGame", MethodType.Normal)]
     public class SettingsRefreshPatch
     {
 
-        public static void Prefix(bool skipHealthWarning)
+        public static void Prefix()
         {
             System.Console.WriteLine("Restart of Game");
             PlatformManager.Instance.TempChangeToPlatform(0);

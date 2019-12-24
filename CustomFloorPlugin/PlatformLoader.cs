@@ -42,7 +42,8 @@ namespace CustomFloorPlugin
             defaultPlatform.transform.parent = parent;
             defaultPlatform.platName = "Default Environment";
             defaultPlatform.platAuthor = "Beat Saber";
-            defaultPlatform.icon = Resources.FindObjectsOfTypeAll<Sprite>().Where(x => x.name == "LvlInsaneCover").FirstOrDefault();
+            Texture2D texture = Resources.FindObjectsOfTypeAll<Texture2D>().First(x => x.name == "LvlInsaneCover");
+            defaultPlatform.icon = Sprite.Create(texture, new Rect(0f, 0f, texture.width, texture.height), new Vector2(0.5f, 0.5f));
             platforms.Add(defaultPlatform);
             bundlePaths.Add("");
             // Populate the platforms array

@@ -4,8 +4,9 @@ using System.Linq;
 using UnityEngine;
 using System.Reflection;
 using CustomFloorPlugin.Util;
-using CustomUI.Utilities;
 using Harmony;
+using BS_Utils.Utilities;
+
 
 namespace CustomFloorPlugin
 {

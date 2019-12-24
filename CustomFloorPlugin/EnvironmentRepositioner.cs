@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 
 namespace CustomFloorPlugin
 {
@@ -65,12 +66,12 @@ namespace CustomFloorPlugin
             }
         }
 
-        public static float[] RepositionModes()
+        public static List<object> RepositionModes()
         {
-            return new float[]
+            return new List<object>
             {
-                (float)Arrangement.Default,
-                (float)Arrangement.Classic
+                Arrangement.Default,
+                Arrangement.Classic
             };
         }
     }

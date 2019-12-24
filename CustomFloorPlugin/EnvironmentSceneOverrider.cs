@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using CustomUI.Utilities;
+using BS_Utils.Utilities;
 
 namespace CustomFloorPlugin
 {
@@ -64,12 +64,17 @@ namespace CustomFloorPlugin
             }
         }
 
-        public static float[] OverrideModes()
+        public static List<object> OverrideModes()
         {
-            List<float> floats = new List<float>();
-            floats.Add((float)EnvOverrideMode.Off);
-            floats.AddRange(envInfos.Keys.Select(x => (float)x));
-            return floats.ToArray();
+            List<object> ovs = new List<object>();
+            ovs.Add(EnvOverrideMode.Off);
+            ovs.Add(EnvOverrideMode.Default);
+            ovs.Add(EnvOverrideMode.Nice);
+            ovs.Add(EnvOverrideMode.BigMirror);
+            ovs.Add(EnvOverrideMode.Triangle);
+            ovs.Add(EnvOverrideMode.KDA);
+            ovs.Add(EnvOverrideMode.Monstercat);
+            return ovs;
         }
 
         public static string Name(EnvOverrideMode mode)

@@ -1,6 +1,5 @@
 using UnityEngine;
 using System.Linq;
-using CustomUI.Utilities;
 using Harmony;
 using UnityEngine.SceneManagement;
 using System.Collections;
@@ -8,6 +7,8 @@ using System.Collections.Generic;
 using System;
 using System.Reflection;
 using System.Text;
+using BS_Utils.Utilities;
+using Zenject;
 
 namespace CustomFloorPlugin {
     public static class Extentions {
@@ -45,9 +46,18 @@ namespace CustomFloorPlugin {
             if(Instance != null) return;
             Instance = this;
             SceneManager.MoveGameObjectToScene(gameObject, SceneManager.CreateScene("PlatformManagerDump"));
-            GameScenesManagerSO.MarkSceneAsPersistent("PlatformManagerDump");
-            GameScenesManagerSO.beforeDismissingScenesSignal.Subscribe(TransitionPrep);
-            GameScenesManagerSO.transitionDidFinishSignal.Subscribe(TransitionFinalize);
+            
+            GameScenesManager gsm =
+                SceneManager
+                .GetSceneByName("PCInit")
+                .GetRootGameObjects()
+                .First<GameObject>(x => x.name == "AppCoreSceneContext")
+                .GetComponent<MarkSceneAsPersistent>()
+                .GetPrivateField<GameScenesManager>("_gameScenesManager");
+
+            gsm.MarkSceneAsPersistent("PlatformManagerDump");
+            gsm.beforeDismissingScenesEvent += TransitionPrep;
+            gsm.transitionDidFinishEvent += TransitionFinalize;
         }
 
         void TransitionPrep() {
@@ -58,7 +68,7 @@ namespace CustomFloorPlugin {
             UnregisterLights();
             EmptyLightRegisters();
         }
-        void TransitionFinalize() {
+        void TransitionFinalize(ScenesTransitionSetupDataSO ignored1, DiContainer ignored2) {
             FindManager();
             if(!GetCurrentEnvironment().name.StartsWith("Menu")) {
                 Debug.Log("Game load detected");
