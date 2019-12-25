@@ -55,8 +55,5 @@ namespace CustomFloorPlugin
                 }
             }
         }
-
-        
     }
-
 }

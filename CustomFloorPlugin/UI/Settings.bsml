@@ -1,0 +1,5 @@
+﻿<settings-container>
+  <bool-setting text='Always show feet' value='always-show-feet' hover-hint='Always display the feet icon on the floor, regardless of chosen platform'></bool-setting>
+  <dropdown-list-setting text='Environment Override' value='env-ov' options='env-ovs'></dropdown-list-setting>
+  <dropdown-list-setting text='Environment Arrangement' value='env-arr' options='env-arrs'></dropdown-list-setting>
+</settings-container>

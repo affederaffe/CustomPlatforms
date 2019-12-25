@@ -2,7 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using CustomUI.Utilities;
+using BS_Utils.Utilities;
+
 namespace CustomFloorPlugin
 {
     public class SpectrogramAnimationStateManager : MonoBehaviour

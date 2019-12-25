@@ -1,6 +1,7 @@
 ﻿using CustomFloorPlugin.Util;
 using UnityEngine;
-using CustomUI.Utilities;
+using BS_Utils.Utilities;
+
 namespace CustomFloorPlugin
 {
     class PlatformEventManager : MonoBehaviour

@@ -1,6 +1,5 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Linq;
-using CustomUI.Utilities;
 using Harmony;
 using UnityEngine.SceneManagement;
 using System.Collections;
@@ -8,6 +7,8 @@ using System.Collections.Generic;
 using System;
 using System.Reflection;
 using System.Text;
+using BS_Utils.Utilities;
+using Zenject;
 
 namespace CustomFloorPlugin {
     public static class Extentions {
@@ -19,7 +20,8 @@ namespace CustomFloorPlugin {
 
     public class PlatformManager:MonoBehaviour {
         public static PlatformManager Instance;
-
+        public static List<GameObject> SpawnedObjects = new List<GameObject>();
+        public static List<Component> SpawnedComponents = new List<Component>();
         private EnvironmentHider menuEnvHider;
         private EnvironmentHider gameEnvHider;
 
@@ -44,9 +46,35 @@ namespace CustomFloorPlugin {
             if(Instance != null) return;
             Instance = this;
             SceneManager.MoveGameObjectToScene(gameObject, SceneManager.CreateScene("PlatformManagerDump"));
-            GameScenesManagerSO.MarkSceneAsPersistent("PlatformManagerDump");
-            GameScenesManagerSO.beforeDismissingScenesSignal.Subscribe(TransitionPrep);
-            GameScenesManagerSO.transitionDidFinishSignal.Subscribe(TransitionFinalize);
+            
+            GameScenesManager gsm =
+                SceneManager
+                .GetSceneByName("PCInit")
+                .GetRootGameObjects()
+                .First<GameObject>(x => x.name == "AppCoreSceneContext")
+                .GetComponent<MarkSceneAsPersistent>()
+                .GetPrivateField<GameScenesManager>("_gameScenesManager");
+
+            gsm.MarkSceneAsPersistent("PlatformManagerDump");
+            gsm.beforeDismissingScenesEvent += TransitionPrep;
+            gsm.transitionDidFinishEvent += TransitionFinalize;
+        }
+
+        [HarmonyPatch(typeof(EnvironmentOverrideSettingsPanelController))]
+        [HarmonyPatch("HandleOverrideEnvironmentsToggleValueChanged")]
+        public class EnviromentOverideSettings_Patch
+        {
+            static public void Postfix(OverrideEnvironmentSettings ____overrideEnvironmentSettings)
+            {
+                if (____overrideEnvironmentSettings.overrideEnvironments == true) {
+                    Debug.Log("Enviroment Override On");
+                }
+
+                if (____overrideEnvironmentSettings.overrideEnvironments == false)
+                {
+                    Debug.Log("Enviroment Override Off");
+                }
+            }
         }
 
         void TransitionPrep() {
@@ -57,7 +85,7 @@ namespace CustomFloorPlugin {
             UnregisterLights();
             EmptyLightRegisters();
         }
-        void TransitionFinalize() {
+        void TransitionFinalize(ScenesTransitionSetupDataSO ignored1, DiContainer ignored2) {
             FindManager();
             if(!GetCurrentEnvironment().name.StartsWith("Menu")) {
                 Debug.Log("Game load detected");
@@ -70,6 +98,7 @@ namespace CustomFloorPlugin {
                 Debug.Log("Menu load detected");
                 menuEnvHider.HideObjectsForPlatform(GetPlatform(0));
                 TempChangeToPlatform(0);
+                RegisterLights();
             }
         }
         /// <summary>
@@ -226,13 +255,22 @@ namespace CustomFloorPlugin {
         void DestroyCustomLights() {
             Debug.Log("Destroying:");
             int i = 0;
-            while(TubeLight.SpawnedObjects.Count != 0) {
-                GameObject gameObject = TubeLight.SpawnedObjects[0];
-                TubeLight.SpawnedObjects.Remove(gameObject);
-                GameObject.DestroyImmediate(gameObject);
-                Debug.Log("..." + ++i + "...");
+            while(SpawnedObjects.Count != 0) {
+                GameObject gameObject = SpawnedObjects[0];
+                SpawnedObjects.Remove(gameObject);
+                Destroy(gameObject);
+                i++;
             }
-            Debug.Log("GameObjects");
+            Debug.Log(i.ToString() + " GameObjects");
+            Debug.Log("And");
+            i = 0;
+            while(SpawnedComponents.Count != 0) {
+                Component component = SpawnedComponents[0];
+                SpawnedComponents.Remove(component);
+                Destroy(component);
+                i++;
+            }
+            Debug.Log(i.ToString() + " Components");
         }
         void SpawnCustomLights(){
             Debug.Log("Trying to launch Awakes");
