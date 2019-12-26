@@ -21,17 +21,21 @@ namespace CustomFloorPlugin.UI {
             PlatformManager.Instance.ChangeToPlatform(idx);
         }
         protected override void DidDeactivate(DeactivationType deactivationType) {
+            PlatformManager.Instance.TempChangeToPlatform(0);
             base.DidDeactivate(deactivationType);
         }
+        protected override void DidActivate(bool firstActivation, ActivationType type) {
+            PlatformManager.Instance.TempChangeToPlatform(PlatformManager.Instance.currentPlatformIndex);
+            base.DidActivate(firstActivation, type);
+        }
+
         [UIAction("#post-parse")]
         internal void SetupPlatformsList() {
-            int i = 0;
             Debug.Log("Creating Settings UI");
             customListTableData.data.Clear();
             foreach(CustomPlatform platform in PlatformManager.Instance.GetPlatforms()) {
                 customListTableData.data.Add(new CustomListTableData.CustomCellInfo(platform.platName, platform.platAuthor, platform.icon.texture));
             }
-            i = 3;
             customListTableData.tableView.ReloadData();
             int selectedPlatform = PlatformManager.Instance.currentPlatformIndex;
             customListTableData.tableView.ScrollToCellWithIdx(selectedPlatform, HMUI.TableViewScroller.ScrollPositionType.Beginning, false);

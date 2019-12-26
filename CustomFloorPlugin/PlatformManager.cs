@@ -56,7 +56,7 @@ namespace CustomFloorPlugin {
                 .GetPrivateField<GameScenesManager>("_gameScenesManager");
 
             gsm.MarkSceneAsPersistent("PlatformManagerDump");
-            gsm.beforeDismissingScenesEvent += TransitionPrep;
+            gsm.transitionDidStartEvent += TransitionPrep;
             gsm.transitionDidFinishEvent += TransitionFinalize;
         }
 
@@ -77,7 +77,12 @@ namespace CustomFloorPlugin {
             }
         }
 
-        void TransitionPrep() {
+        void TransitionPrep(float ignored1) {
+            Debug.Log("TransitionPrep has been triggered, here is a handy list of all curently loaded scenes :)");
+            for(int i = 0; i < SceneManager.sceneCount; i++) {
+                Scene scene = SceneManager.GetSceneAt(i);
+                Debug.Log(scene.name);
+            }
             DestroyCustomLights();
             if(GetCurrentEnvironment().name.StartsWith("Menu")) {
                 TempChangeToPlatform(currentPlatformIndex);

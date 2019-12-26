@@ -146,7 +146,6 @@ namespace CustomFloorPlugin
             return customPlatform;
         }
         internal void AddManagers(GameObject go) {
-            Debug.Log("Adding Managers to:" + go.name);
             AddManagers(go, go);
         }
         private void AddManagers(GameObject go, GameObject root) {
