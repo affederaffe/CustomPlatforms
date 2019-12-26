@@ -159,9 +159,9 @@ namespace CustomFloorPlugin
                 if(rotManager == null) {
                     rotManager = root.AddComponent<RotationEventEffectManager>();
                     //PlatformManager.SpawnedComponents.Add(rotManager);
-                    Debug.Log("Added RotationEventEffectManager");
                 }
                 rotManager.CreateEffects(go);
+                Debug.Log("Added RotationEventEffectManagers");
             }
 
             // Add a trackRing controller if there are track ring descriptors
@@ -177,9 +177,9 @@ namespace CustomFloorPlugin
                 if(trms == null) {
                     trms = root.AddComponent<TrackRingsManagerSpawner>();
                     //PlatformManager.SpawnedComponents.Add(trms);
-                    Debug.Log("Added TrackRingsManagerSpawner");
                 }
                 trms.CreateTrackRings(go);
+                Debug.Log("Added TrackRingsManagerSpawners");
             }
 
             // Add spectrogram manager
@@ -193,9 +193,9 @@ namespace CustomFloorPlugin
                 if(specManager == null) {
                     specManager = go.AddComponent<SpectrogramColumnManager>();
                     //PlatformManager.SpawnedComponents.Add(specManager);
-                    Debug.Log("Added SpectrogramColumnManager");
                 }
                 specManager.CreateColumns(go);
+                Debug.Log("Added SpectrogramColumnManagers");
             }
 
             if(go.GetComponentInChildren<SpectrogramMaterial>(true) != null) {
@@ -204,9 +204,9 @@ namespace CustomFloorPlugin
                 if(specMatManager == null) {
                     specMatManager = go.AddComponent<SpectrogramMaterialManager>();
                     //PlatformManager.SpawnedComponents.Add(specMatManager);
-                    Debug.Log("Added SpectrogramMaterialManager");
                 }
                 specMatManager.UpdateMaterials();
+                Debug.Log("Added SpectrogramMaterialManagers");
             }
 
 
@@ -216,9 +216,9 @@ namespace CustomFloorPlugin
                 if(specAnimManager == null) {
                     specAnimManager = go.AddComponent<SpectrogramAnimationStateManager>();
                     //PlatformManager.SpawnedComponents.Add(specAnimManager);
-                    Debug.Log("Added SpectrogramAnimationStateManager");
                 }
                 specAnimManager.UpdateAnimationStates();
+                Debug.Log("Added SpectrogramAnimationStateManagers");
             }
 
             // Add Song event manager
@@ -226,9 +226,9 @@ namespace CustomFloorPlugin
                 foreach(SongEventHandler handler in go.GetComponentsInChildren<SongEventHandler>()) {
                     SongEventManager manager = handler.gameObject.AddComponent<SongEventManager>();
                     //PlatformManager.SpawnedComponents.Add(manager);
-                    Debug.Log("Added SongEventManager");
                     manager._songEventHandler = handler;
                 }
+                Debug.Log("Added SongEventManagers");
             }
 
             // Add EventManager 
@@ -236,9 +236,9 @@ namespace CustomFloorPlugin
                 foreach(EventManager em in go.GetComponentsInChildren<EventManager>()) {
                     PlatformEventManager pem = em.gameObject.AddComponent<PlatformEventManager>();
                     //PlatformManager.SpawnedComponents.Add(pem);
-                    Debug.Log("Added PlatformEventManager");
                     pem._EventManager = em;
                 }
+                Debug.Log("Added PlatformEventManagers");
             }
         }
     }
