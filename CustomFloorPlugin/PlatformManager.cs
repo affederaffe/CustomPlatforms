@@ -56,7 +56,7 @@ namespace CustomFloorPlugin {
                 .GetPrivateField<GameScenesManager>("_gameScenesManager");
 
             gsm.MarkSceneAsPersistent("PlatformManagerDump");
-            gsm.beforeDismissingScenesEvent += TransitionPrep;
+            gsm.transitionDidStartEvent += TransitionPrep;
             gsm.transitionDidFinishEvent += TransitionFinalize;
         }
 
@@ -77,10 +77,15 @@ namespace CustomFloorPlugin {
             }
         }
 
-        void TransitionPrep() {
+        void TransitionPrep(float ignored1) {
+            Debug.Log("TransitionPrep has been triggered, here is a handy list of all curently loaded scenes :)");
+            for(int i = 0; i < SceneManager.sceneCount; i++) {
+                Scene scene = SceneManager.GetSceneAt(i);
+                Debug.Log(scene.name);
+            }
             DestroyCustomLights();
             if(GetCurrentEnvironment().name.StartsWith("Menu")) {
-                ChangeToPlatform(currentPlatformIndex);
+                TempChangeToPlatform(currentPlatformIndex);
             }
             UnregisterLights();
             EmptyLightRegisters();
@@ -288,28 +293,19 @@ namespace CustomFloorPlugin {
             int i = 0;
             Debug.Log("Trying to unregister all lights:");
             foreach(BloomPrePassLight bloomLight in GetAllBlooms(true)) {
-                Debug.Log("Before Loop");
-                Debug.Log("Type: " + bloomLight.GetType().FullName);
-                Debug.Log("Path: " + GetFullPath(bloomLight.gameObject));
-                Debug.Log("LightType: " + Traverse.Create(bloomLight).Field<BloomPrePassLightTypeSO>("_lightType").Value.name);
                 Traverse.Create(bloomLight).Field<bool>("visible").Value = false;
                 bloomLight.InvokePrivateMethod<BloomPrePassLight>("UnregisterLight");
-                Debug.Log("Registered: " + Traverse.Create(bloomLight).Field<bool>("_isRegistered").Value);
-
-                Debug.Log("Loops finished: " + ++i);
             }
+            Debug.Log("Loops finished, tally total: " + ++i);
         }
         void RegisterLights() {
             int i = 0;
             Debug.Log("Trying to register all lights:");
             foreach(BloomPrePassLight bloomLight in GetAllBlooms()) {
-                Debug.Log("Type: " + bloomLight.GetType().FullName + ", Path: " + GetFullPath(bloomLight.gameObject) + ", LightType: " + Traverse.Create(bloomLight).Field<BloomPrePassLightTypeSO>("_registeredWithLightType").Value.name);
                 Traverse.Create(bloomLight).Field<bool>("visible").Value = true;
                 bloomLight.InvokePrivateMethod<BloomPrePassLight>("RegisterLight");
-                Debug.Log("Registered: " + Traverse.Create(bloomLight).Field<bool>("_isRegistered").Value);
-
-                Debug.Log("Loop: " + ++i);
             }
+            Debug.Log("Loops finished, tally total: " + ++i);
         }
         string GetFullPath(GameObject gameObject) {
             StringBuilder path = new StringBuilder();

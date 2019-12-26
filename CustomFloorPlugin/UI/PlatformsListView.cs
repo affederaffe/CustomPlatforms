@@ -21,34 +21,26 @@ namespace CustomFloorPlugin.UI {
             PlatformManager.Instance.ChangeToPlatform(idx);
         }
         protected override void DidDeactivate(DeactivationType deactivationType) {
+            PlatformManager.Instance.TempChangeToPlatform(0);
             base.DidDeactivate(deactivationType);
         }
+        protected override void DidActivate(bool firstActivation, ActivationType type) {
+            PlatformManager.Instance.TempChangeToPlatform(PlatformManager.Instance.currentPlatformIndex);
+            base.DidActivate(firstActivation, type);
+        }
+
         [UIAction("#post-parse")]
         internal void SetupPlatformsList() {
-            int i = 0;
-            Debug.Log("" + ++i);
+            Debug.Log("Creating Settings UI");
             customListTableData.data.Clear();
-            Debug.Log("" + ++i);
             foreach(CustomPlatform platform in PlatformManager.Instance.GetPlatforms()) {
-                Debug.Log("before " + ++i);
-                Debug.Log("PlatName: " + platform.platName ?? "null");
-                if(platform.icon == null) {
-                    Debug.Log("Texture is null");
-                }
-
                 customListTableData.data.Add(new CustomListTableData.CustomCellInfo(platform.platName, platform.platAuthor, platform.icon.texture));
-                Debug.Log("after " + i);
             }
-            i = 3;
-            Debug.Log("" + ++i);
             customListTableData.tableView.ReloadData();
-            Debug.Log("" + ++i);
             int selectedPlatform = PlatformManager.Instance.currentPlatformIndex;
-            Debug.Log("" + ++i);
             customListTableData.tableView.ScrollToCellWithIdx(selectedPlatform, HMUI.TableViewScroller.ScrollPositionType.Beginning, false);
-            Debug.Log("" + ++i);
             customListTableData.tableView.SelectCellWithIdx(selectedPlatform);
-            Debug.Log("" + ++i);
+            Debug.Log("Done Creating Settings UI");
         }
     }
 }
