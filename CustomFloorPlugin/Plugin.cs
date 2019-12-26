@@ -16,7 +16,8 @@ namespace CustomFloorPlugin {
         public static BS_Utils.Utilities.Config config;
         public static IPA.Logging.Logger logger;
         private bool init = false;
-
+        internal static GameScenesManager gsm = null;
+        
         public static Plugin Instance = null;
         
         public void Init(object thisWillBeNull, IPA.Logging.Logger logger) {
@@ -26,16 +27,24 @@ namespace CustomFloorPlugin {
         public void OnApplicationStart() {
             BSEvents.OnLoad();
             BSEvents.menuSceneLoadedFresh += OnMenuSceneLoadedFresh;
-            
+
             HarmonyInstance hi = HarmonyInstance.Create("com.rolopogo.customplatforms");
             hi.PatchAll(Assembly.GetExecutingAssembly());
-
+            StuffThatDoesntBelongHereButHasToBeHereBecauseBsmlIsntHalfAsStableYetAsCustomUIWasButCustomUiHasBeenKilledAlready();
         }
+        /// <summary>
+        /// Holds any clutter that's not supposed to be here, but has to.
+        /// </summary>
+        private void StuffThatDoesntBelongHereButHasToBeHereBecauseBsmlIsntHalfAsStableYetAsCustomUIWasButCustomUiHasBeenKilledAlready() {
+            PlatformUI.SetupMenuButtons();
+        }
+
         private void OnMenuSceneLoadedFresh() {
-            if(!init) {
+            if(!init){
+                gsm = SceneManager.GetSceneByName("PCInit").GetRootGameObjects().First<GameObject>(x => x.name == "AppCoreSceneContext")?.GetComponent<MarkSceneAsPersistent>().GetPrivateField<GameScenesManager>("_gameScenesManager");
                 init = true;
                 Instance = this;
-                config = new BS_Utils.Utilities.Config("Custom Platforms");
+                config = new Config("Custom Platforms");
                 PlatformManager.OnLoad();
             }
         }

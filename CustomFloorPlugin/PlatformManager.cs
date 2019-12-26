@@ -47,17 +47,9 @@ namespace CustomFloorPlugin {
             Instance = this;
             SceneManager.MoveGameObjectToScene(gameObject, SceneManager.CreateScene("PlatformManagerDump"));
             
-            GameScenesManager gsm =
-                SceneManager
-                .GetSceneByName("PCInit")
-                .GetRootGameObjects()
-                .First<GameObject>(x => x.name == "AppCoreSceneContext")
-                .GetComponent<MarkSceneAsPersistent>()
-                .GetPrivateField<GameScenesManager>("_gameScenesManager");
-
-            gsm.MarkSceneAsPersistent("PlatformManagerDump");
-            gsm.transitionDidStartEvent += TransitionPrep;
-            gsm.transitionDidFinishEvent += TransitionFinalize;
+            Plugin.gsm.MarkSceneAsPersistent("PlatformManagerDump");
+            Plugin.gsm.transitionDidStartEvent += TransitionPrep;
+            Plugin.gsm.transitionDidFinishEvent += TransitionFinalize;
         }
 
         [HarmonyPatch(typeof(EnvironmentOverrideSettingsPanelController))]
@@ -77,33 +69,43 @@ namespace CustomFloorPlugin {
             }
         }
 
-        void TransitionPrep(float ignored1) {
+        void TransitionPrep(float ignored) {
             Debug.Log("TransitionPrep has been triggered, here is a handy list of all curently loaded scenes :)");
             for(int i = 0; i < SceneManager.sceneCount; i++) {
                 Scene scene = SceneManager.GetSceneAt(i);
                 Debug.Log(scene.name);
             }
             DestroyCustomLights();
-            if(GetCurrentEnvironment().name.StartsWith("Menu")) {
-                TempChangeToPlatform(currentPlatformIndex);
+            try {
+                if(GetCurrentEnvironment().name.StartsWith("Menu")) {
+                    TempChangeToPlatform(currentPlatformIndex);
+                }
+            } catch(EnvironmentSceneNotFoundException) {
+
             }
             UnregisterLights();
             EmptyLightRegisters();
         }
         void TransitionFinalize(ScenesTransitionSetupDataSO ignored1, DiContainer ignored2) {
-            FindManager();
-            if(!GetCurrentEnvironment().name.StartsWith("Menu")) {
-                Debug.Log("Game load detected");
-                gameEnvHider.FindEnvironment();
-                gameEnvHider.HideObjectsForPlatform(currentPlatform);
-                EnvironmentArranger.RearrangeEnvironment();
-                TubeLightManager.CreateAdditionalLightSwitchControllers();
-                SpawnCustomLights();
-            } else {
-                Debug.Log("Menu load detected");
-                menuEnvHider.HideObjectsForPlatform(GetPlatform(0));
-                TempChangeToPlatform(0);
-                RegisterLights();
+            try {
+                FindManager();
+                if(!GetCurrentEnvironment().name.StartsWith("Menu")) {
+                    Debug.Log("Game load detected");
+                    gameEnvHider.FindEnvironment();
+                    gameEnvHider.HideObjectsForPlatform(currentPlatform);
+                    EnvironmentArranger.RearrangeEnvironment();
+                    TubeLightManager.CreateAdditionalLightSwitchControllers();
+                    SpawnCustomLights();
+                } else {
+                    Debug.Log("Menu load detected");
+                    menuEnvHider.HideObjectsForPlatform(GetPlatform(0));
+                    TempChangeToPlatform(0);
+                    RegisterLights();
+                }
+            } catch(EnvironmentSceneNotFoundException) {
+
+            } catch(NullReferenceException) {
+
             }
         }
         /// <summary>
@@ -199,13 +201,16 @@ namespace CustomFloorPlugin {
                 DestroyCustomLights();
             }
             if(Input.GetKeyDown(KeyCode.Keypad6)) {
-                FindManager();
+                try {
+                    FindManager();
+                } catch(EnvironmentSceneNotFoundException) {
+
+                }
             }
             if(Input.GetKeyDown(KeyCode.Keypad7)) {
                 gameEnvHider.FindEnvironment();
                 gameEnvHider.HideObjectsForPlatform(currentPlatform);
             }
-
         }
         internal static IEnumerator<WaitForEndOfFrame> ToggleBlooms(string sceneName = "MenuEnvironment") {
             yield return new WaitForEndOfFrame();

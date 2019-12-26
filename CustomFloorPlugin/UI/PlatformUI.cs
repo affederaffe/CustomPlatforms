@@ -7,6 +7,7 @@ using System.Linq;
 using BeatSaberMarkupLanguage;
 using BeatSaberMarkupLanguage.MenuButtons;
 using BeatSaberMarkupLanguage.Settings;
+using Zenject;
 
 namespace CustomFloorPlugin
 {
@@ -14,7 +15,7 @@ namespace CustomFloorPlugin
     {   
         public static PlatformUI _instance;
                 
-        public UI.PlatformListFlowCoordinator _platformMenuFlowCoordinator;
+        public static UI.PlatformListFlowCoordinator _platformMenuFlowCoordinator;
 
         internal static void OnLoad()
         {
@@ -30,22 +31,19 @@ namespace CustomFloorPlugin
             _instance = this;
             SceneManager.MoveGameObjectToScene(gameObject, SceneManager.CreateScene("PlatformUIDump"));
 
-            SceneManager
-                .GetSceneByName("PCInit")
-                .GetRootGameObjects()
-                .First<GameObject>(x => x.name == "AppCoreSceneContext")
-                .GetComponent<MarkSceneAsPersistent>()
-                .GetPrivateField<GameScenesManager>("_gameScenesManager")
-                .MarkSceneAsPersistent("PlatformUIDump");
+            Plugin.gsm.MarkSceneAsPersistent("PlatformUIDump");
             //God I hate the new cheese -.-
             //Yeah... no kiddin'
             //AAAAAAAAAAAAAAAAAAAAAAAAAAAAARRRGH
+        }
+        
+
+        public static void SetupMenuButtons(ScenesTransitionSetupDataSO ignored1 = null, DiContainer ignored2 = null) {
             MenuButtons.instance.RegisterButton(new MenuButton("Custom Platforms", "Change Custom Plaforms Here!", CustomPlatformsMenuButtonPressed, true));
             BSMLSettings.instance.AddSettingsMenu("Custom Platforms", "CustomFloorPlugin.UI.Settings.bsml", UI.Settings.instance);
             Debug.Log("Settings should exist now");
         }
-
-        private void CustomPlatformsMenuButtonPressed()
+        private static void CustomPlatformsMenuButtonPressed()
         {
             if (_platformMenuFlowCoordinator == null)
             {
