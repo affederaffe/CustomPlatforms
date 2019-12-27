@@ -30,7 +30,7 @@ namespace CustomFloorPlugin {
         /// </summary>
         /// <param name="platform">A platform that defines which objects are to be hidden</param>
         public void HideObjectsForPlatform(CustomPlatform platform) {
-            Debug.Log("Hiding Environment");
+            Plugin.Log("Hiding Environment");
             if(feet != null) SetCollectionHidden(feet, (platform.hideDefaultPlatform && !showFeetOverride));
             if(originalPlatform != null) SetCollectionHidden(originalPlatform, platform.hideDefaultPlatform);
             if(smallRings != null) SetCollectionHidden(smallRings, platform.hideSmallRings);
@@ -44,7 +44,7 @@ namespace CustomFloorPlugin {
             if(rotatingLasers != null) SetCollectionHidden(rotatingLasers, platform.hideRotatingLasers);
             if(trackLights != null) SetCollectionHidden(trackLights, platform.hideTrackLights);
             //SetCollectionHidden(menuFog, true);
-            Debug.Log("Done Hiding Environment");
+            Plugin.Log("Done Hiding Environment");
         }
 
         /// <summary>
@@ -104,28 +104,28 @@ namespace CustomFloorPlugin {
 
         private void FindOriginalPlatform() {
             originalPlatform = new ArrayList();
-            FindAddGameObject("Environment/Static/PlayersPlace", originalPlatform);
+            FindAddGameObject("Environment/PlayersPlace", originalPlatform);
             FindAddGameObject("Wrapper/MenuPlayersPlace", originalPlatform);
         }
 
         private void FindSmallRings() {
             smallRings = new ArrayList();
-            FindAddGameObject("Environment/Dynamic/SmallTrackLaneRings", smallRings);
+            FindAddGameObject("Environment/SmallTrackLaneRings", smallRings);
             foreach(TrackLaneRing trackLaneRing in Resources.FindObjectsOfTypeAll<TrackLaneRing>().Where(x => x.name == "TrackLaneRing(Clone)")) {
                 smallRings.Add(trackLaneRing.gameObject);
             }
-            FindAddGameObject("Environment/Dynamic/TriangleTrackLaneRings", smallRings); // Triangle Rings from TriangleEnvironment
+            FindAddGameObject("Environment/TriangleTrackLaneRings", smallRings); // Triangle Rings from TriangleEnvironment
             foreach(TrackLaneRing trackLaneRing in Resources.FindObjectsOfTypeAll<TrackLaneRing>().Where(x => x.name == "TriangleTrackLaneRing(Clone)")) {
                 smallRings.Add(trackLaneRing.gameObject);
             }
             // KDA
-            FindAddGameObject("Environment/Static/TentacleLeft", smallRings);
-            FindAddGameObject("Environment/Static/TentacleRight", smallRings);
+            FindAddGameObject("Environment/TentacleLeft", smallRings);
+            FindAddGameObject("Environment/TentacleRight", smallRings);
         }
 
         private void FindBigRings() {
             bigRings = new ArrayList();
-            FindAddGameObject("Environment/Dynamic/BigTrackLaneRings", bigRings);
+            FindAddGameObject("Environment/BigTrackLaneRings", bigRings);
             foreach(var trackLaneRing in Resources.FindObjectsOfTypeAll<TrackLaneRing>().Where(x => x.name == "TrackLaneRingBig(Clone)")) {
                 bigRings.Add(trackLaneRing.gameObject);
             }
@@ -133,17 +133,17 @@ namespace CustomFloorPlugin {
 
         private void FindVisualizers() {
             visualizer = new ArrayList();
-            FindAddGameObject("Environment/Dynamic/Spectrograms", visualizer);
+            FindAddGameObject("Environment/Spectrograms", visualizer);
         }
 
         private void FindTowers() {
             towers = new ArrayList();
             // Song Environments
-            FindAddGameObject("Environment/Static/Buildings", towers);
-            FindAddGameObject("Environment/Static/NearBuildingRight (1)", towers);
-            FindAddGameObject("Environment/Static/NearBuildingLeft (1)", towers);
-            FindAddGameObject("Environment/Static/NearBuildingLeft", towers);
-            FindAddGameObject("Environment/Static/NearBuildingRight", towers);
+            FindAddGameObject("Environment/Buildings", towers);
+            FindAddGameObject("Environment/NearBuildingRight (1)", towers);
+            FindAddGameObject("Environment/NearBuildingLeft (1)", towers);
+            FindAddGameObject("Environment/NearBuildingLeft", towers);
+            FindAddGameObject("Environment/NearBuildingRight", towers);
 
             // Menu
             FindAddGameObject("Wrapper/NearBuildingRight (1)", towers);
@@ -152,30 +152,30 @@ namespace CustomFloorPlugin {
             FindAddGameObject("Wrapper/NearBuildingRight", towers);
 
             // Monstercat
-            FindAddGameObject("Environment/Static/MonstercatLogoL", towers);
-            FindAddGameObject("Environment/Static/MonstercatLogoR", towers);
+            FindAddGameObject("Environment/MonstercatLogoL", towers);
+            FindAddGameObject("Environment/MonstercatLogoR", towers);
 
             // KDA
-            FindAddGameObject("Environment/Static/FloorL", towers);
-            FindAddGameObject("Environment/Static/FloorR", towers);
-            if(FindAddGameObject($"Environment/Dynamic/GlowLine", towers)) {
+            FindAddGameObject("Environment/FloorL", towers);
+            FindAddGameObject("Environment/FloorR", towers);
+            if(FindAddGameObject($"Environment/GlowLine", towers)) {
                 for(int i = 0; i < 100; i++) {
-                    FindAddGameObject($"Environment/Dynamic/GlowLine ({i})", towers);
+                    FindAddGameObject($"Environment/GlowLine ({i})", towers);
                 }
             }
         }
 
         private void FindHighway() {
             highway = new ArrayList();
-            FindAddGameObject("Environment/Static/Floor", highway);
-            FindAddGameObject("Environment/Static/FloorConstruction", highway);
-            FindAddGameObject("Environment/Static/Construction", highway);
-            FindAddGameObject("Environment/Static/TrackConstruction", highway);
-            FindAddGameObject("Environment/Static/TrackMirror", highway);
+            FindAddGameObject("Environment/Floor", highway);
+            FindAddGameObject("Environment/FloorConstruction", highway);
+            FindAddGameObject("Environment/Construction", highway);
+            FindAddGameObject("Environment/TrackConstruction", highway);
+            FindAddGameObject("Environment/TrackMirror", highway);
 
-            FindAddGameObject($"Environment/Static/Cube", highway);
+            FindAddGameObject($"Environment/Cube", highway);
             for(int i = 1; i <= 10; i++) {
-                FindAddGameObject($"Environment/Static/Cube ({i})", highway);
+                FindAddGameObject($"Environment/Cube ({i})", highway);
             }
 
             //Menu
@@ -185,8 +185,8 @@ namespace CustomFloorPlugin {
 
         private void FindBackColumns() {
             backColumns = new ArrayList();
-            FindAddGameObject("Environment/Static/BackColumns", backColumns);
-            FindAddGameObject("Environment/Static/BackColumns (1)", backColumns);
+            FindAddGameObject("Environment/BackColumns", backColumns);
+            FindAddGameObject("Environment/BackColumns (1)", backColumns);
 
             FindAddGameObject("Wrapper/BackColumns", backColumns);
             FindAddGameObject("Wrapper/CeilingLamp", backColumns);
@@ -195,73 +195,73 @@ namespace CustomFloorPlugin {
         private void FindRotatingLasers() {
             rotatingLasers = new ArrayList();
             // Default, BigMirror, Triangle
-            FindAddGameObject("Environment/Dynamic/RotatingLasersPair (6)", rotatingLasers);
-            FindAddGameObject("Environment/Dynamic/RotatingLasersPair (5)", rotatingLasers);
-            FindAddGameObject("Environment/Dynamic/RotatingLasersPair (4)", rotatingLasers);
-            FindAddGameObject("Environment/Dynamic/RotatingLasersPair (3)", rotatingLasers);
-            FindAddGameObject("Environment/Dynamic/RotatingLasersPair (2)", rotatingLasers);
-            FindAddGameObject("Environment/Dynamic/RotatingLasersPair (1)", rotatingLasers);
-            FindAddGameObject("Environment/Dynamic/RotatingLasersPair", rotatingLasers);
+            FindAddGameObject("Environment/RotatingLasersPair (6)", rotatingLasers);
+            FindAddGameObject("Environment/RotatingLasersPair (5)", rotatingLasers);
+            FindAddGameObject("Environment/RotatingLasersPair (4)", rotatingLasers);
+            FindAddGameObject("Environment/RotatingLasersPair (3)", rotatingLasers);
+            FindAddGameObject("Environment/RotatingLasersPair (2)", rotatingLasers);
+            FindAddGameObject("Environment/RotatingLasersPair (1)", rotatingLasers);
+            FindAddGameObject("Environment/RotatingLasersPair", rotatingLasers);
 
             // Nice Env
-            FindAddGameObject("Environment/Dynamic/RotatingLasersLeft0", rotatingLasers);
-            FindAddGameObject("Environment/Dynamic/RotatingLasersLeft1", rotatingLasers);
-            FindAddGameObject("Environment/Dynamic/RotatingLasersLeft2", rotatingLasers);
-            FindAddGameObject("Environment/Dynamic/RotatingLasersLeft3", rotatingLasers);
-            FindAddGameObject("Environment/Dynamic/RotatingLasersRight0", rotatingLasers);
-            FindAddGameObject("Environment/Dynamic/RotatingLasersRight1", rotatingLasers);
-            FindAddGameObject("Environment/Dynamic/RotatingLasersRight2", rotatingLasers);
-            FindAddGameObject("Environment/Dynamic/RotatingLasersRight3", rotatingLasers);
+            FindAddGameObject("Environment/RotatingLasersLeft0", rotatingLasers);
+            FindAddGameObject("Environment/RotatingLasersLeft1", rotatingLasers);
+            FindAddGameObject("Environment/RotatingLasersLeft2", rotatingLasers);
+            FindAddGameObject("Environment/RotatingLasersLeft3", rotatingLasers);
+            FindAddGameObject("Environment/RotatingLasersRight0", rotatingLasers);
+            FindAddGameObject("Environment/RotatingLasersRight1", rotatingLasers);
+            FindAddGameObject("Environment/RotatingLasersRight2", rotatingLasers);
+            FindAddGameObject("Environment/RotatingLasersRight3", rotatingLasers);
         }
 
         private void FindDoubleColorLasers() {
             doubleColorLasers = new ArrayList();
 
             // Default, BigMirror, Nice, 
-            FindAddGameObject("Environment/Dynamic/DoubleColorLaser", doubleColorLasers);
-            FindAddGameObject("Environment/Dynamic/DoubleColorLaser (1)", doubleColorLasers);
-            FindAddGameObject("Environment/Dynamic/DoubleColorLaser (2)", doubleColorLasers);
-            FindAddGameObject("Environment/Dynamic/DoubleColorLaser (3)", doubleColorLasers);
-            FindAddGameObject("Environment/Dynamic/DoubleColorLaser (4)", doubleColorLasers);
-            FindAddGameObject("Environment/Dynamic/DoubleColorLaser (5)", doubleColorLasers);
-            FindAddGameObject("Environment/Dynamic/DoubleColorLaser (6)", doubleColorLasers);
-            FindAddGameObject("Environment/Dynamic/DoubleColorLaser (7)", doubleColorLasers);
-            FindAddGameObject("Environment/Dynamic/DoubleColorLaser (8)", doubleColorLasers);
-            FindAddGameObject("Environment/Dynamic/DoubleColorLaser (9)", doubleColorLasers);
+            FindAddGameObject("Environment/DoubleColorLaser", doubleColorLasers);
+            FindAddGameObject("Environment/DoubleColorLaser (1)", doubleColorLasers);
+            FindAddGameObject("Environment/DoubleColorLaser (2)", doubleColorLasers);
+            FindAddGameObject("Environment/DoubleColorLaser (3)", doubleColorLasers);
+            FindAddGameObject("Environment/DoubleColorLaser (4)", doubleColorLasers);
+            FindAddGameObject("Environment/DoubleColorLaser (5)", doubleColorLasers);
+            FindAddGameObject("Environment/DoubleColorLaser (6)", doubleColorLasers);
+            FindAddGameObject("Environment/DoubleColorLaser (7)", doubleColorLasers);
+            FindAddGameObject("Environment/DoubleColorLaser (8)", doubleColorLasers);
+            FindAddGameObject("Environment/DoubleColorLaser (9)", doubleColorLasers);
         }
 
         private void FindBackLasers() {
             backLasers = new ArrayList();
-            FindAddGameObject("Environment/Dynamic/FrontLights", backLasers);
+            FindAddGameObject("Environment/FrontLights", backLasers);
 
         }
 
         private void FindTrackLights() {
             trackLights = new ArrayList();
-            FindAddGameObject("Environment/Dynamic/GlowLineR", trackLights);
-            FindAddGameObject("Environment/Dynamic/GlowLineL", trackLights);
-            FindAddGameObject("Environment/Dynamic/GlowLineR2", trackLights);
-            FindAddGameObject("Environment/Dynamic/GlowLineL2", trackLights);
-            FindAddGameObject("Environment/Dynamic/GlowLineFarL", trackLights);
-            FindAddGameObject("Environment/Dynamic/GlowLineFarR", trackLights);
+            FindAddGameObject("Environment/GlowLineR", trackLights);
+            FindAddGameObject("Environment/GlowLineL", trackLights);
+            FindAddGameObject("Environment/GlowLineR2", trackLights);
+            FindAddGameObject("Environment/GlowLineL2", trackLights);
+            FindAddGameObject("Environment/GlowLineFarL", trackLights);
+            FindAddGameObject("Environment/GlowLineFarR", trackLights);
 
             //KDA
-            FindAddGameObject("Environment/Dynamic/GlowLineLVisible", trackLights);
-            FindAddGameObject("Environment/Dynamic/GlowLineRVisible", trackLights);
+            FindAddGameObject("Environment/GlowLineLVisible", trackLights);
+            FindAddGameObject("Environment/GlowLineRVisible", trackLights);
 
             //KDA, Monstercat
-            FindAddGameObject("Environment/Dynamic/Laser", trackLights);
+            FindAddGameObject("Environment/Laser", trackLights);
             for(int i = 0; i < 15; i++) {
-                FindAddGameObject($"Environment/Dynamic/Laser ({i})", trackLights);
+                FindAddGameObject($"Environment/Laser ({i})", trackLights);
             }
-            FindAddGameObject("Environment/Dynamic/GlowTopLine", trackLights);
+            FindAddGameObject("Environment/GlowTopLine", trackLights);
             for(int i = 0; i < 10; i++) {
-                FindAddGameObject($"Environment/Dynamic/GlowTopLine ({i})", trackLights);
+                FindAddGameObject($"Environment/GlowTopLine ({i})", trackLights);
             }
 
             // Monstercat
-            FindAddGameObject("Environment/Dynamic/GlowLineLHidden", trackLights);
-            FindAddGameObject("Environment/Dynamic/GlowLineRHidden", trackLights);
+            FindAddGameObject("Environment/GlowLineLHidden", trackLights);
+            FindAddGameObject("Environment/GlowLineRHidden", trackLights);
         }
         private void FindMenuFog() {
             menuFog = new ArrayList();

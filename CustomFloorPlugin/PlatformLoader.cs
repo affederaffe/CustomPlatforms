@@ -160,7 +160,7 @@ namespace CustomFloorPlugin
                     //PlatformManager.SpawnedComponents.Add(rotManager);
                 }
                 rotManager.CreateEffects(go);
-                Debug.Log("Added RotationEventEffectManagers");
+                Plugin.Log("Added RotationEventEffectManagers");
             }
 
             // Add a trackRing controller if there are track ring descriptors
@@ -178,7 +178,7 @@ namespace CustomFloorPlugin
                     //PlatformManager.SpawnedComponents.Add(trms);
                 }
                 trms.CreateTrackRings(go);
-                Debug.Log("Added TrackRingsManagerSpawners");
+                Plugin.Log("Added TrackRingsManagerSpawners");
             }
 
             // Add spectrogram manager
@@ -194,7 +194,7 @@ namespace CustomFloorPlugin
                     //PlatformManager.SpawnedComponents.Add(specManager);
                 }
                 specManager.CreateColumns(go);
-                Debug.Log("Added SpectrogramColumnManagers");
+                Plugin.Log("Added SpectrogramColumnManagers");
             }
 
             if(go.GetComponentInChildren<SpectrogramMaterial>(true) != null) {
@@ -205,7 +205,7 @@ namespace CustomFloorPlugin
                     //PlatformManager.SpawnedComponents.Add(specMatManager);
                 }
                 specMatManager.UpdateMaterials();
-                Debug.Log("Added SpectrogramMaterialManagers");
+                Plugin.Log("Added SpectrogramMaterialManagers");
             }
 
 
@@ -217,7 +217,7 @@ namespace CustomFloorPlugin
                     //PlatformManager.SpawnedComponents.Add(specAnimManager);
                 }
                 specAnimManager.UpdateAnimationStates();
-                Debug.Log("Added SpectrogramAnimationStateManagers");
+                Plugin.Log("Added SpectrogramAnimationStateManagers");
             }
 
             // Add Song event manager
@@ -227,7 +227,7 @@ namespace CustomFloorPlugin
                     //PlatformManager.SpawnedComponents.Add(manager);
                     manager._songEventHandler = handler;
                 }
-                Debug.Log("Added SongEventManagers");
+                Plugin.Log("Added SongEventManagers");
             }
 
             // Add EventManager 
@@ -237,7 +237,7 @@ namespace CustomFloorPlugin
                     //PlatformManager.SpawnedComponents.Add(pem);
                     pem._EventManager = em;
                 }
-                Debug.Log("Added PlatformEventManagers");
+                Plugin.Log("Added PlatformEventManagers");
             }
         }
     }

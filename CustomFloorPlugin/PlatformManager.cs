@@ -29,11 +29,11 @@ namespace CustomFloorPlugin {
 
         private CustomPlatform[] platforms;
         private int platformIndex = 0;
-        
-        static void OnSpawnStart(){Debug.Log("Spawning Lights");}
+
+        static void OnSpawnStart() { Plugin.Log("Spawning Lights"); }
         internal delegate void SpawnQueueType();
         internal static SpawnQueueType SpawnQueue = new SpawnQueueType(OnSpawnStart);
-        
+
         internal static LightWithIdManager LightManager = null;
 
         public static void OnLoad() {
@@ -46,7 +46,7 @@ namespace CustomFloorPlugin {
             if(Instance != null) return;
             Instance = this;
             SceneManager.MoveGameObjectToScene(gameObject, SceneManager.CreateScene("PlatformManagerDump"));
-            
+
             Plugin.gsm.MarkSceneAsPersistent("PlatformManagerDump");
             Plugin.gsm.transitionDidStartEvent += TransitionPrep;
             Plugin.gsm.transitionDidFinishEvent += TransitionFinalize;
@@ -54,53 +54,50 @@ namespace CustomFloorPlugin {
 
         [HarmonyPatch(typeof(EnvironmentOverrideSettingsPanelController))]
         [HarmonyPatch("HandleOverrideEnvironmentsToggleValueChanged")]
-        public class EnviromentOverideSettings_Patch
-        {
-            static public void Postfix(OverrideEnvironmentSettings ____overrideEnvironmentSettings)
-            {
-                if (____overrideEnvironmentSettings.overrideEnvironments == true) {
-                    Debug.Log("Enviroment Override On");
+        public class EnviromentOverideSettings_Patch {
+            static public void Postfix(OverrideEnvironmentSettings ____overrideEnvironmentSettings) {
+                if(____overrideEnvironmentSettings.overrideEnvironments == true) {
+                    Plugin.Log("Enviroment Override On");
                 }
 
-                if (____overrideEnvironmentSettings.overrideEnvironments == false)
-                {
-                    Debug.Log("Enviroment Override Off");
+                if(____overrideEnvironmentSettings.overrideEnvironments == false) {
+                    Plugin.Log("Enviroment Override Off");
                 }
             }
         }
 
         void TransitionPrep(float ignored) {
-            Debug.Log("TransitionPrep has been triggered, here is a handy list of all curently loaded scenes :)");
+            Plugin.Log("TransitionPrep has been triggered, here is a handy list of all curently loaded scenes :)");
             for(int i = 0; i < SceneManager.sceneCount; i++) {
                 Scene scene = SceneManager.GetSceneAt(i);
-                Debug.Log(scene.name);
+                Plugin.Log(scene.name);
             }
-            DestroyCustomLights();
+            //DestroyCustomLights();
             try {
-                if(GetCurrentEnvironment().name.StartsWith("Menu")) {
-                    TempChangeToPlatform(currentPlatformIndex);
+                if(!GetCurrentEnvironment().name.StartsWith("Menu")) {
+                    DestroyCustomLights();
+                    TempChangeToPlatform(0);
                 }
             } catch(EnvironmentSceneNotFoundException) {
 
             }
-            UnregisterLights();
+            //UnregisterLights();
             EmptyLightRegisters();
         }
         void TransitionFinalize(ScenesTransitionSetupDataSO ignored1, DiContainer ignored2) {
             try {
                 FindManager();
                 if(!GetCurrentEnvironment().name.StartsWith("Menu")) {
-                    Debug.Log("Game load detected");
+                    Plugin.Log("Game load detected");
+                    TempChangeToPlatform(platformIndex);
                     gameEnvHider.FindEnvironment();
                     gameEnvHider.HideObjectsForPlatform(currentPlatform);
                     EnvironmentArranger.RearrangeEnvironment();
                     TubeLightManager.CreateAdditionalLightSwitchControllers();
                     SpawnCustomLights();
                 } else {
-                    Debug.Log("Menu load detected");
-                    menuEnvHider.HideObjectsForPlatform(GetPlatform(0));
-                    TempChangeToPlatform(0);
-                    RegisterLights();
+                    Plugin.Log("Menu load detected");
+                    //RegisterLights();
                 }
             } catch(EnvironmentSceneNotFoundException) {
 
@@ -124,10 +121,10 @@ namespace CustomFloorPlugin {
                     lights.AddRange(root.GetComponentsInChildren<BloomPrePassLight>(inactives));
                 }
             }
-            Debug.Log("returned an Array of " + lights.Count + " BloomLights");
+            Plugin.Log("returned an Array of " + lights.Count + " BloomLights");
             return lights;
         }
-        
+
         private void Start() {
             EnvironmentArranger.arrangement = (EnvironmentArranger.Arrangement)Plugin.config.GetInt("Settings", "EnvironmentArrangement", 0, true);
             EnvironmentSceneOverrider.overrideMode = (EnvironmentSceneOverrider.EnvOverrideMode)Plugin.config.GetInt("Settings", "EnvironmentOverrideMode", 0, true);
@@ -179,9 +176,6 @@ namespace CustomFloorPlugin {
         ////////////////////////////////////////////////////////////////////////////////////////////////////
 
         private void Update() {
-            if(Input.GetKeyDown(KeyCode.P)) {
-                NextPlatform();
-            }
             if(Input.GetKeyDown(KeyCode.Keypad0)) {
                 EmptyLightRegisters();
             }
@@ -208,20 +202,19 @@ namespace CustomFloorPlugin {
                 }
             }
             if(Input.GetKeyDown(KeyCode.Keypad7)) {
-                gameEnvHider.FindEnvironment();
                 gameEnvHider.HideObjectsForPlatform(currentPlatform);
             }
         }
         internal static IEnumerator<WaitForEndOfFrame> ToggleBlooms(string sceneName = "MenuEnvironment") {
             yield return new WaitForEndOfFrame();
-            Debug.Log("Toggling Blooms");
-            Debug.Log("Getting Root Objects");
+            Plugin.Log("Toggling Blooms");
+            Plugin.Log("Getting Root Objects");
             GameObject[] roots = SceneManager.GetSceneByName(sceneName).GetRootGameObjects();
             foreach(GameObject root in roots) {
-                Debug.Log("Starting Recursive Toggling");
+                Plugin.Log("Starting Recursive Toggling");
                 RecursiveToggleBloomPrePass(root);
             }
-            Debug.Log("Finished Toggling");
+            Plugin.Log("Finished Toggling");
         }
         internal static IEnumerator<WaitForEndOfFrame> ToggleBlooms(GameObject gameObject) {
             yield return new WaitForEndOfFrame();
@@ -243,7 +236,7 @@ namespace CustomFloorPlugin {
         }
         internal static void FindManager() {
             Scene scene = GetCurrentEnvironment();
-            Debug.Log("Finding Manager");
+            Plugin.Log("Finding Manager");
             LightWithIdManager manager = null;
             void FindManager(GameObject directParent) {
                 for(int i = 0; i < directParent.transform.childCount; i++) {
@@ -263,7 +256,7 @@ namespace CustomFloorPlugin {
             LightManager = manager;
         }
         void DestroyCustomLights() {
-            Debug.Log("Destroying:");
+            Plugin.Log("Destroying:");
             int i = 0;
             while(SpawnedObjects.Count != 0) {
                 GameObject gameObject = SpawnedObjects[0];
@@ -271,8 +264,8 @@ namespace CustomFloorPlugin {
                 Destroy(gameObject);
                 i++;
             }
-            Debug.Log(i.ToString() + " GameObjects");
-            Debug.Log("And");
+            Plugin.Log(i.ToString() + " GameObjects");
+            Plugin.Log("And");
             i = 0;
             while(SpawnedComponents.Count != 0) {
                 Component component = SpawnedComponents[0];
@@ -280,37 +273,39 @@ namespace CustomFloorPlugin {
                 Destroy(component);
                 i++;
             }
-            Debug.Log(i.ToString() + " Components");
+            Plugin.Log(i.ToString() + " Components");
         }
-        void SpawnCustomLights(){
-            Debug.Log("Trying to launch Awakes");
-            Debug.Log("Spawnqueue has: " + SpawnQueue.GetInvocationList().Length + " entries.");
+        void SpawnCustomLights() {
+            Plugin.Log("Trying to launch Awakes");
+            Plugin.Log("Spawnqueue has: " + SpawnQueue.GetInvocationList().Length + " entries.");
             PlatformManager.SpawnQueue();
         }
         void EmptyLightRegisters() {
-            Debug.Log("Clearing Lists");
-            Debug.Log("Length of List: " + Traverse.Create(typeof(BloomPrePassLight)).Field<List<BloomPrePassLight.LightsDataItem>>("_lightsDataItems").Value.Count);
+            Plugin.Log("Clearing Lists");
+            Plugin.Log("Length of List: " + Traverse.Create(typeof(BloomPrePassLight)).Field<List<BloomPrePassLight.LightsDataItem>>("_lightsDataItems").Value.Count);
             Traverse.Create(typeof(BloomPrePassLight)).Field<List<BloomPrePassLight.LightsDataItem>>("_lightsDataItems").Value = new List<BloomPrePassLight.LightsDataItem>();
             Traverse.Create(typeof(BloomPrePassLight)).Field<Dictionary<BloomPrePassLightTypeSO, HashSet<BloomPrePassLight>>>("_bloomLightsDict").Value = new Dictionary<BloomPrePassLightTypeSO, HashSet<BloomPrePassLight>>();
-            Debug.Log("Length of List: " + Traverse.Create(typeof(BloomPrePassLight)).Field<List<BloomPrePassLight.LightsDataItem>>("_lightsDataItems").Value.Count);
+            Plugin.Log("Length of List: " + Traverse.Create(typeof(BloomPrePassLight)).Field<List<BloomPrePassLight.LightsDataItem>>("_lightsDataItems").Value.Count);
         }
         void UnregisterLights() {
             int i = 0;
-            Debug.Log("Trying to unregister all lights:");
+            Plugin.Log("Trying to unregister all lights:");
             foreach(BloomPrePassLight bloomLight in GetAllBlooms(true)) {
                 Traverse.Create(bloomLight).Field<bool>("visible").Value = false;
                 bloomLight.InvokePrivateMethod<BloomPrePassLight>("UnregisterLight");
+                i++;
             }
-            Debug.Log("Loops finished, tally total: " + ++i);
+            Plugin.Log("Loops finished, tally total: " + ++i);
         }
         void RegisterLights() {
             int i = 0;
-            Debug.Log("Trying to register all lights:");
+            Plugin.Log("Trying to register all lights:");
             foreach(BloomPrePassLight bloomLight in GetAllBlooms()) {
                 Traverse.Create(bloomLight).Field<bool>("visible").Value = true;
                 bloomLight.InvokePrivateMethod<BloomPrePassLight>("RegisterLight");
+                i++;
             }
-            Debug.Log("Loops finished, tally total: " + ++i);
+            Plugin.Log("Loops finished, tally total: " + ++i);
         }
         string GetFullPath(GameObject gameObject) {
             StringBuilder path = new StringBuilder();
@@ -357,15 +352,15 @@ namespace CustomFloorPlugin {
             return platforms.ElementAt(i);
         }
         public void NextPlatform() {
-            ChangeToPlatform(platformIndex + 1);
+            throw new NotImplementedException();
         }
 
         public void PrevPlatform() {
-            ChangeToPlatform(platformIndex - 1);
+            throw new NotImplementedException();
         }
 
         public void ChangeToPlatform(int index, bool save = true) {
-            Debug.Log("This is a permanent change");
+            Plugin.Log("This is a permanent change");
             // Hide current Platform
             currentPlatform.gameObject.SetActive(false);
 
@@ -381,15 +376,14 @@ namespace CustomFloorPlugin {
 
             // Hide environment for new platform
             menuEnvHider.HideObjectsForPlatform(currentPlatform);
-            gameEnvHider.HideObjectsForPlatform(currentPlatform);
 
             // Update lightSwitchEvent TubeLight references
             TubeLightManager.UpdateEventTubeLightList();
         }
 
         internal void TempChangeToPlatform(int index) {
-            Debug.Log("This is a temporary change");
-            
+            Plugin.Log("This is a temporary change");
+
             // Hide current Platform
             currentPlatform.gameObject.SetActive(false);
             int oldIndex = platformIndex;

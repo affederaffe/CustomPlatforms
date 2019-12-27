@@ -3,6 +3,7 @@ using BS_Utils.Utilities;
 using BeatSaberMarkupLanguage;
 using System;
 using IPA.Utilities;
+using UnityEngine;
 
 namespace CustomFloorPlugin.UI {
     class PlatformListFlowCoordinator:FlowCoordinator {
@@ -24,11 +25,12 @@ namespace CustomFloorPlugin.UI {
 
                 }
             } catch(Exception ex) {
-                Logger.Log("CustomFloorPlugin", ex.Message);
+                Plugin.Log( ex.Message);
             }
         }
         protected override void BackButtonWasPressed(ViewController topViewController) {
             // dismiss ourselves
+            Plugin.Log("Selected Environment:" + PlatformManager.Instance.currentPlatform.platName);
             var mainFlow = BeatSaberMarkupLanguage.BeatSaberUI.MainFlowCoordinator;
             mainFlow.InvokePrivateMethod("DismissFlowCoordinator", this, null, false);
         }

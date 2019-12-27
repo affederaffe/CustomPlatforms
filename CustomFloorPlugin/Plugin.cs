@@ -13,10 +13,10 @@ using BS_Utils.Utilities;
 
 namespace CustomFloorPlugin {
     public class Plugin:IBeatSaberPlugin {
-        public static BS_Utils.Utilities.Config config;
-        public static IPA.Logging.Logger logger;
-        private bool init = false;
+        internal static Config config;
+        internal static IPA.Logging.Logger logger;
         internal static GameScenesManager gsm = null;
+        private bool init = false;
         
         public static Plugin Instance = null;
         
@@ -49,6 +49,9 @@ namespace CustomFloorPlugin {
             }
         }
 
+        internal static void Log(string message) {
+            BS_Utils.Utilities.Logger.Log("CustomFloorPlugin", message);
+        }
         ////////////////////////////////////////////////////////////////////////////////////////////////
         public void OnSceneLoaded(Scene scene, LoadSceneMode sceneMode) { }
         public void OnSceneUnloaded(Scene scene) { }
