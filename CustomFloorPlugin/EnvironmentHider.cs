@@ -3,25 +3,26 @@ using System.Linq;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using System.Collections.Generic;
 
 namespace CustomFloorPlugin {
     /// <summary> 
     /// Activates and deactivates world geometry in the active scene as required by CustomPlatforms
     /// </summary>
     public class EnvironmentHider {
-        private ArrayList feet;
-        private ArrayList originalPlatform;
-        private ArrayList smallRings;
-        private ArrayList bigRings;
-        private ArrayList visualizer;
-        private ArrayList towers;
-        private ArrayList highway;
-        private ArrayList backColumns;
-        private ArrayList doubleColorLasers;
-        private ArrayList backLasers;
-        private ArrayList rotatingLasers;
-        private ArrayList trackLights;
-        private ArrayList menuFog;
+        private List<GameObject> feet;
+        private List<GameObject> originalPlatform;
+        private List<GameObject> smallRings;
+        private List<GameObject> bigRings;
+        private List<GameObject> visualizer;
+        private List<GameObject> towers;
+        private List<GameObject> highway;
+        private List<GameObject> backColumns;
+        private List<GameObject> doubleColorLasers;
+        private List<GameObject> backLasers;
+        private List<GameObject> rotatingLasers;
+        private List<GameObject> trackLights;
+        private List<GameObject> menuFog;
 
         public static bool showFeetOverride = false;
 
@@ -70,31 +71,36 @@ namespace CustomFloorPlugin {
         /// <summary>
         /// Set the active state of a Collection of GameObjects
         /// </summary>
-        /// <param name="arlist">An ArrayList of GameObjects</param>
+        /// <param name="arlist">An List<GameObject> of GameObjects</param>
         /// <param name="hidden">A boolean describing the desired hidden state</param>
-        private void SetCollectionHidden(ArrayList arlist, bool hidden) {
-            if(arlist == null) return;
-            foreach(GameObject go in arlist) {
-                if(go != null) go.SetActive(!hidden);
+        private void SetCollectionHidden(List<GameObject> list, bool hidden) {
+            if(list == null) return;
+            foreach(GameObject go in list) {
+                try {
+                    if(go != null) go.SetActive(!hidden);
+                } catch(Exception e) {
+                    Debug.Log("Setting Object hidden failed at:" + e.StackTrace);
+                    Debug.Log("for:" + PlatformManager.GetFullPath(go));
+                }
             }
         }
 
         /// <summary>
-        /// Finds a GameObject by name and adds it to the provided ArrayList
+        /// Finds a GameObject by name and adds it to the provided List<GameObject>
         /// </summary>
         /// <param name="name">The name of the desired GameObject</param>
-        /// <param name="alist">The ArrayList to be added to</param>
-        private bool FindAddGameObject(string name, ArrayList alist) {
+        /// <param name="alist">The List<GameObject> to be added to</param>
+        private bool FindAddGameObject(string name, List<GameObject> list) {
             GameObject go = GameObject.Find(name);
             if(go != null) {
-                alist.Add(go);
+                list.Add(go);
                 return true;
             }
             return false;
         }
 
         private void FindFeetIcon() {
-            feet = new ArrayList();
+            feet = new List<GameObject>();
             GameObject feetgo = GameObject.Find("Feet");
             if(feetgo != null) {
                 feet.Add(feetgo);
@@ -103,13 +109,13 @@ namespace CustomFloorPlugin {
         }
 
         private void FindOriginalPlatform() {
-            originalPlatform = new ArrayList();
+            originalPlatform = new List<GameObject>();
             FindAddGameObject("Environment/PlayersPlace", originalPlatform);
             FindAddGameObject("Wrapper/MenuPlayersPlace", originalPlatform);
         }
 
         private void FindSmallRings() {
-            smallRings = new ArrayList();
+            smallRings = new List<GameObject>();
             FindAddGameObject("Environment/SmallTrackLaneRings", smallRings);
             foreach(TrackLaneRing trackLaneRing in Resources.FindObjectsOfTypeAll<TrackLaneRing>().Where(x => x.name == "TrackLaneRing(Clone)")) {
                 smallRings.Add(trackLaneRing.gameObject);
@@ -124,7 +130,7 @@ namespace CustomFloorPlugin {
         }
 
         private void FindBigRings() {
-            bigRings = new ArrayList();
+            bigRings = new List<GameObject>();
             FindAddGameObject("Environment/BigTrackLaneRings", bigRings);
             foreach(var trackLaneRing in Resources.FindObjectsOfTypeAll<TrackLaneRing>().Where(x => x.name == "TrackLaneRingBig(Clone)")) {
                 bigRings.Add(trackLaneRing.gameObject);
@@ -132,12 +138,12 @@ namespace CustomFloorPlugin {
         }
 
         private void FindVisualizers() {
-            visualizer = new ArrayList();
+            visualizer = new List<GameObject>();
             FindAddGameObject("Environment/Spectrograms", visualizer);
         }
 
         private void FindTowers() {
-            towers = new ArrayList();
+            towers = new List<GameObject>();
             // Song Environments
             FindAddGameObject("Environment/Buildings", towers);
             FindAddGameObject("Environment/NearBuildingRight (1)", towers);
@@ -166,7 +172,7 @@ namespace CustomFloorPlugin {
         }
 
         private void FindHighway() {
-            highway = new ArrayList();
+            highway = new List<GameObject>();
             FindAddGameObject("Environment/Floor", highway);
             FindAddGameObject("Environment/FloorConstruction", highway);
             FindAddGameObject("Environment/Construction", highway);
@@ -184,7 +190,7 @@ namespace CustomFloorPlugin {
         }
 
         private void FindBackColumns() {
-            backColumns = new ArrayList();
+            backColumns = new List<GameObject>();
             FindAddGameObject("Environment/BackColumns", backColumns);
             FindAddGameObject("Environment/BackColumns (1)", backColumns);
 
@@ -193,7 +199,7 @@ namespace CustomFloorPlugin {
         }
 
         private void FindRotatingLasers() {
-            rotatingLasers = new ArrayList();
+            rotatingLasers = new List<GameObject>();
             // Default, BigMirror, Triangle
             FindAddGameObject("Environment/RotatingLasersPair (6)", rotatingLasers);
             FindAddGameObject("Environment/RotatingLasersPair (5)", rotatingLasers);
@@ -215,7 +221,7 @@ namespace CustomFloorPlugin {
         }
 
         private void FindDoubleColorLasers() {
-            doubleColorLasers = new ArrayList();
+            doubleColorLasers = new List<GameObject>();
 
             // Default, BigMirror, Nice, 
             FindAddGameObject("Environment/DoubleColorLaser", doubleColorLasers);
@@ -231,13 +237,13 @@ namespace CustomFloorPlugin {
         }
 
         private void FindBackLasers() {
-            backLasers = new ArrayList();
+            backLasers = new List<GameObject>();
             FindAddGameObject("Environment/FrontLights", backLasers);
 
         }
 
         private void FindTrackLights() {
-            trackLights = new ArrayList();
+            trackLights = new List<GameObject>();
             FindAddGameObject("Environment/GlowLineR", trackLights);
             FindAddGameObject("Environment/GlowLineL", trackLights);
             FindAddGameObject("Environment/GlowLineR2", trackLights);
@@ -264,7 +270,7 @@ namespace CustomFloorPlugin {
             FindAddGameObject("Environment/GlowLineRHidden", trackLights);
         }
         private void FindMenuFog() {
-            menuFog = new ArrayList();
+            menuFog = new List<GameObject>();
             //Menu
             FindAddGameObject("Wrapper/NeonLight (15)", menuFog);
             FindAddGameObject("Wrapper/NeonLight (19)", menuFog);

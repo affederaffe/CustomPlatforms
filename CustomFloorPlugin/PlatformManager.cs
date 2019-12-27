@@ -238,22 +238,33 @@ namespace CustomFloorPlugin {
             Scene scene = GetCurrentEnvironment();
             Plugin.Log("Finding Manager");
             LightWithIdManager manager = null;
-            void FindManager(GameObject directParent) {
+            void RecursiveFindManager(GameObject directParent) {
                 for(int i = 0; i < directParent.transform.childCount; i++) {
                     GameObject child = directParent.transform.GetChild(i).gameObject;
                     if(child.GetComponent<LightWithIdManager>() != null) {
                         manager = child.GetComponent<LightWithIdManager>();
                     }
                     if(child.transform.childCount != 0) {
-                        FindManager(child);
+                        RecursiveFindManager(child);
                     }
                 }
             }
             GameObject[] roots = scene.GetRootGameObjects();
             foreach(GameObject root in roots) {
-                FindManager(root);
+                RecursiveFindManager(root);
             }
-            LightManager = manager;
+            if(!(manager == null)) {
+                LightManager = manager;
+                Debug.Log("Manager found at:" + GetFullPath(manager.gameObject));
+            } else {
+                throw new ManagerNotFoundException();
+            }
+        }
+        internal class ManagerNotFoundException:Exception {
+            internal ManagerNotFoundException():
+                base("No Manager could be found!") {
+
+            }
         }
         void DestroyCustomLights() {
             Plugin.Log("Destroying:");
@@ -307,7 +318,7 @@ namespace CustomFloorPlugin {
             }
             Plugin.Log("Loops finished, tally total: " + ++i);
         }
-        string GetFullPath(GameObject gameObject) {
+        internal static string GetFullPath(GameObject gameObject) {
             StringBuilder path = new StringBuilder();
             while(true) {
                 path.Insert(0, "/" + gameObject.name);
@@ -334,7 +345,7 @@ namespace CustomFloorPlugin {
             }
             throw new EnvironmentSceneNotFoundException();
         }
-        class EnvironmentSceneNotFoundException:Exception {
+        internal class EnvironmentSceneNotFoundException:Exception {
             internal EnvironmentSceneNotFoundException() :
                 base("No Environment Scene could be found!") {
 
