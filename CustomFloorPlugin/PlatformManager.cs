@@ -11,8 +11,8 @@ using BS_Utils.Utilities;
 using Zenject;
 
 namespace CustomFloorPlugin {
-    public static class Extentions {
-        public static void InvokePrivateMethod<T>(this object obj, string methodName, params object[] methodParams) {
+    internal static class Extentions {
+        internal static void InvokePrivateMethod<T>(this object obj, string methodName, params object[] methodParams) {
             var method = typeof(T).GetMethod(methodName, BindingFlags.Instance | BindingFlags.NonPublic);
             method.Invoke(obj, methodParams);
         }
@@ -20,14 +20,13 @@ namespace CustomFloorPlugin {
 
     public class PlatformManager:MonoBehaviour {
         public static PlatformManager Instance;
-        public static List<GameObject> SpawnedObjects = new List<GameObject>();
-        public static List<Component> SpawnedComponents = new List<Component>();
-        private EnvironmentHider menuEnvHider;
-        private EnvironmentHider gameEnvHider;
+        internal static List<GameObject> SpawnedObjects = new List<GameObject>();
+        internal static List<Component> SpawnedComponents = new List<Component>();
+        EnvironmentHider EnvHider;
 
-        private PlatformLoader platformLoader;
+        PlatformLoader platformLoader;
 
-        private CustomPlatform[] platforms;
+        CustomPlatform[] platforms;
         private int platformIndex = 0;
 
         static void OnSpawnStart() { Plugin.Log("Spawning Lights"); }
@@ -86,12 +85,10 @@ namespace CustomFloorPlugin {
         }
         void TransitionFinalize(ScenesTransitionSetupDataSO ignored1, DiContainer ignored2) {
             try {
-                FindManager();
                 if(!GetCurrentEnvironment().name.StartsWith("Menu")) {
+                FindManager();
                     Plugin.Log("Game load detected");
-                    TempChangeToPlatform(platformIndex);
-                    gameEnvHider.FindEnvironment();
-                    gameEnvHider.HideObjectsForPlatform(currentPlatform);
+                    TempChangeToPlatform(currentPlatformIndex);
                     EnvironmentArranger.RearrangeEnvironment();
                     TubeLightManager.CreateAdditionalLightSwitchControllers();
                     SpawnCustomLights();
@@ -131,13 +128,11 @@ namespace CustomFloorPlugin {
             EnvironmentSceneOverrider.GetSceneInfos();
             EnvironmentSceneOverrider.OverrideEnvironmentScene();
 
-            menuEnvHider = new EnvironmentHider();
-            gameEnvHider = new EnvironmentHider();
+            EnvHider = new EnvironmentHider();
             platformLoader = new PlatformLoader();
 
 
             RefreshPlatforms();
-            menuEnvHider.FindEnvironment();
             PlatformUI.OnLoad();
         }
 
@@ -202,8 +197,12 @@ namespace CustomFloorPlugin {
                 }
             }
             if(Input.GetKeyDown(KeyCode.Keypad7)) {
-                gameEnvHider.HideObjectsForPlatform(currentPlatform);
+                EnvHider.HideObjectsForPlatform(currentPlatform);
             }
+        }
+        internal static IEnumerator<WaitForEndOfFrame> HideForPlatformAfterOneFrame(CustomPlatform customPlatform) {
+            yield return new WaitForEndOfFrame();
+            Instance.EnvHider.HideObjectsForPlatform(Instance.currentPlatform);
         }
         internal static IEnumerator<WaitForEndOfFrame> ToggleBlooms(string sceneName = "MenuEnvironment") {
             yield return new WaitForEndOfFrame();
@@ -386,7 +385,7 @@ namespace CustomFloorPlugin {
             currentPlatform.gameObject.SetActive(true);
 
             // Hide environment for new platform
-            menuEnvHider.HideObjectsForPlatform(currentPlatform);
+            EnvHider.HideObjectsForPlatform(currentPlatform);
 
             // Update lightSwitchEvent TubeLight references
             TubeLightManager.UpdateEventTubeLightList();
@@ -405,12 +404,19 @@ namespace CustomFloorPlugin {
             currentPlatform.gameObject.SetActive(true);
 
             // Hide environment for new platform
-            menuEnvHider.HideObjectsForPlatform(currentPlatform);
-            gameEnvHider.HideObjectsForPlatform(currentPlatform);
+            StartCoroutine(HideForPlatformAfterOneFrame(currentPlatform));
 
             // Update lightSwitchEvent TubeLight references
             TubeLightManager.UpdateEventTubeLightList();
             platformIndex = oldIndex;
+
+
+
+
+            ///////////////////////////////////
+            foreach(TubeLight tubeLight in GameObject.FindObjectsOfType<TubeLight>()) {
+                tubeLight.LogSomething();
+            }
         }
     }
 }

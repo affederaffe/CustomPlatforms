@@ -31,6 +31,8 @@ namespace CustomFloorPlugin {
         /// </summary>
         /// <param name="platform">A platform that defines which objects are to be hidden</param>
         public void HideObjectsForPlatform(CustomPlatform platform) {
+            Plugin.Log("Finding Environment");
+            FindEnvironment();
             Plugin.Log("Hiding Environment");
             if(feet != null) SetCollectionHidden(feet, (platform.hideDefaultPlatform && !showFeetOverride));
             if(originalPlatform != null) SetCollectionHidden(originalPlatform, platform.hideDefaultPlatform);
@@ -52,7 +54,7 @@ namespace CustomFloorPlugin {
         /// Finds all GameObjects that make up the default environment
         /// and groups them into array lists
         /// </summary>
-        public void FindEnvironment() {
+        void FindEnvironment() {
             FindFeetIcon();
             FindOriginalPlatform();
             FindSmallRings();
