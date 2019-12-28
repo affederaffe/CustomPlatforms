@@ -108,10 +108,13 @@ namespace CustomFloorPlugin {
                     Plugin.Log("He ded, onto the next!");
                     i++;
                     return true;
+                } else if(root.name == name) {
+                    Plugin.Log("Thought you can hide?");
+                    list.Add(root);
+                    Plugin.Log("*Camera pans away* *Stabby noises*");
                 }
             }
             Plugin.Log("Anyone home?... Nobody? Really? :<  Aw, man. Creeper?");
-            
             return false;
         }
 
@@ -119,6 +122,7 @@ namespace CustomFloorPlugin {
             feet = new List<GameObject>();
             FindAddGameObject("MenuPlayersPlace/Feet", feet);
             FindAddGameObject("PlayersPlace/Feet", feet);
+            FindAddGameObject("Feet", feet);
             feet[0].transform.parent = null; // remove from original platform 
         }
 

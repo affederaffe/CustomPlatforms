@@ -217,7 +217,7 @@ namespace CustomFloorPlugin {
         }
         internal static IEnumerator<WaitForEndOfFrame> HideForPlatformAfterOneFrame(CustomPlatform customPlatform) {
             yield return new WaitForEndOfFrame();
-            Instance.EnvHider.HideObjectsForPlatform(Instance.currentPlatform);
+            Instance.EnvHider.HideObjectsForPlatform(customPlatform); 
         }
         internal static IEnumerator<WaitForEndOfFrame> ToggleBlooms(string sceneName = "MenuEnvironment") {
             yield return new WaitForEndOfFrame();
