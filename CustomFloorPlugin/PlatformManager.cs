@@ -212,7 +212,7 @@ namespace CustomFloorPlugin {
                 }
             }
             if(Input.GetKeyDown(KeyCode.Keypad7)) {
-                EnvHider.HideObjectsForPlatform(currentPlatform);
+                EnvHider.HideObjectsForPlatform(GetPlatform(0));
             }
         }
         internal static IEnumerator<WaitForEndOfFrame> HideForPlatformAfterOneFrame(CustomPlatform customPlatform) {
@@ -419,7 +419,7 @@ namespace CustomFloorPlugin {
             currentPlatform.gameObject.SetActive(true);
 
             // Hide environment for new platform
-            StartCoroutine(HideForPlatformAfterOneFrame(GetPlatform(index)));
+            StartCoroutine(HideForPlatformAfterOneFrame(currentPlatform));
 
             // Update lightSwitchEvent TubeLight references
             TubeLightManager.UpdateEventTubeLightList();
