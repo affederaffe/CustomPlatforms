@@ -9,7 +9,6 @@ using BeatSaberMarkupLanguage.Parser;
 
 namespace CustomFloorPlugin.UI {
     class Settings:PersistentSingleton<Settings> {
-        private Config config = Plugin.config;
         [UIParams]
         public BSMLParserParams parserParams;
 
@@ -20,7 +19,7 @@ namespace CustomFloorPlugin.UI {
             }
             set {
                 EnvironmentHider.showFeetOverride = value;
-                config.SetBool("Settings", "AlwaysShowFeet", EnvironmentHider.showFeetOverride);
+                Plugin.config.SetBool("Settings", "AlwaysShowFeet", EnvironmentHider.showFeetOverride);
             }
         }
         [UIValue("env-ovs")]
@@ -36,7 +35,7 @@ namespace CustomFloorPlugin.UI {
             set {
                 EnvironmentSceneOverrider.overrideMode = value;
                 EnvironmentSceneOverrider.OverrideEnvironmentScene();
-                config.SetInt("Settings", "EnvironmentOverrideMode", (int)EnvironmentSceneOverrider.overrideMode);
+                Plugin.config.SetInt("Settings", "EnvironmentOverrideMode", (int)EnvironmentSceneOverrider.overrideMode);
             }
         }
         [UIValue("env-arr")]
@@ -46,7 +45,7 @@ namespace CustomFloorPlugin.UI {
             }
             set {
                 EnvironmentArranger.arrangement = value;
-                config.SetInt("Settings", "EnvironmentArrangement", (int)EnvironmentArranger.arrangement);
+                Plugin.config.SetInt("Settings", "EnvironmentArrangement", (int)EnvironmentArranger.arrangement);
             }
         }
     }

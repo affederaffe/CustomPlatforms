@@ -31,7 +31,7 @@ namespace CustomFloorPlugin.UI {
 
         [UIAction("#post-parse")]
         internal void SetupPlatformsList() {
-            Debug.Log("Creating Settings UI");
+            Plugin.Log("Creating Settings UI");
             customListTableData.data.Clear();
             foreach(CustomPlatform platform in PlatformManager.Instance.GetPlatforms()) {
                 customListTableData.data.Add(new CustomListTableData.CustomCellInfo(platform.platName, platform.platAuthor, platform.icon.texture));
@@ -40,7 +40,7 @@ namespace CustomFloorPlugin.UI {
             int selectedPlatform = PlatformManager.Instance.currentPlatformIndex;
             customListTableData.tableView.ScrollToCellWithIdx(selectedPlatform, HMUI.TableViewScroller.ScrollPositionType.Beginning, false);
             customListTableData.tableView.SelectCellWithIdx(selectedPlatform);
-            Debug.Log("Done Creating Settings UI");
+            Plugin.Log("Done Creating Settings UI");
         }
     }
 }
