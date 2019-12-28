@@ -9,7 +9,6 @@ using BeatSaberMarkupLanguage.Parser;
 
 namespace CustomFloorPlugin.UI {
     class Settings:PersistentSingleton<Settings> {
-        private Config config = Plugin.config;
         [UIParams]
         public BSMLParserParams parserParams;
 
@@ -20,7 +19,7 @@ namespace CustomFloorPlugin.UI {
             }
             set {
                 EnvironmentHider.showFeetOverride = value;
-                config.SetBool("Settings", "AlwaysShowFeet", EnvironmentHider.showFeetOverride);
+                Plugin.config.SetBool("Settings", "AlwaysShowFeet", EnvironmentHider.showFeetOverride);
             }
         }
         [UIValue("env-ovs")]
