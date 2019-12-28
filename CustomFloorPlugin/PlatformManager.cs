@@ -89,9 +89,10 @@ namespace CustomFloorPlugin {
                 FindManager();
                     Plugin.Log("Game load detected");
                     TempChangeToPlatform(currentPlatformIndex);
+                    PlatformLoader.AddManagers(currentPlatform.gameObject);
+                    SpawnCustomLights();
                     EnvironmentArranger.RearrangeEnvironment();
                     TubeLightManager.CreateAdditionalLightSwitchControllers();
-                    SpawnCustomLights();
                 } else {
                     Plugin.Log("Menu load detected");
                     //RegisterLights();
@@ -147,6 +148,20 @@ namespace CustomFloorPlugin {
             return newPlatform;
         }
 
+        internal static BeatmapObjectCallbackController GetBeatmapObjectCallbackController() {
+            try {
+                return Plugin.FindFirst<BeatmapObjectCallbackController>();
+            } catch(Plugin.ComponentNotFoundException e) {
+                throw new BeatmapObjectCallbackControllerNotFoundException(e.TypeInfo);
+            }
+            
+        }
+        public sealed class BeatmapObjectCallbackControllerNotFoundException:Plugin.ComponentNotFoundException {
+            internal BeatmapObjectCallbackControllerNotFoundException(TypeInfo T) :
+                base(T) {
+
+            }
+        }
         public void RefreshPlatforms() {
 
             if(platforms != null) {
@@ -288,7 +303,7 @@ namespace CustomFloorPlugin {
         void SpawnCustomLights() {
             Plugin.Log("Trying to launch Awakes");
             Plugin.Log("Spawnqueue has: " + SpawnQueue.GetInvocationList().Length + " entries.");
-            PlatformManager.SpawnQueue();
+            SpawnQueue();
         }
         void EmptyLightRegisters() {
             Plugin.Log("Clearing Lists");
@@ -404,7 +419,7 @@ namespace CustomFloorPlugin {
             currentPlatform.gameObject.SetActive(true);
 
             // Hide environment for new platform
-            StartCoroutine(HideForPlatformAfterOneFrame(currentPlatform));
+            StartCoroutine(HideForPlatformAfterOneFrame(GetPlatform(index)));
 
             // Update lightSwitchEvent TubeLight references
             TubeLightManager.UpdateEventTubeLightList();

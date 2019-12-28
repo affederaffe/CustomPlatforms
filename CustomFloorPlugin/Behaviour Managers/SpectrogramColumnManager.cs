@@ -13,13 +13,7 @@ namespace CustomFloorPlugin
         
         private void OnEnable()
         {
-            BSEvents.gameSceneLoaded += UpdateSpectrogramDataProvider;
             UpdateSpectrogramDataProvider();
-        }
-
-        private void OnDisable()
-        {
-            BSEvents.gameSceneLoaded -= UpdateSpectrogramDataProvider;
         }
 
         public void CreateColumns(GameObject go)
@@ -33,7 +27,7 @@ namespace CustomFloorPlugin
             {
 
                 SpectrogramColumns specCol = spec.gameObject.AddComponent<SpectrogramColumns>();
-                //PlatformManager.SpawnedComponents.Add(specCol);
+                PlatformManager.SpawnedComponents.Add(specCol);
                 ReflectionUtil.SetPrivateField(specCol, "_columnPrefab", spec.columnPrefab);
                 ReflectionUtil.SetPrivateField(specCol, "_separator", spec.separator);
                 ReflectionUtil.SetPrivateField(specCol, "_minHeight", spec.minHeight);

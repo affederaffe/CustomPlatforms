@@ -11,7 +11,7 @@ namespace CustomFloorPlugin
         List<RotationEventEffect> effectDescriptors;
         List<LightRotationEventEffect> lightRotationEffects;
         
-        private void OnEnable()
+        internal void RegisterForEvents()
         {
             foreach (LightRotationEventEffect rotEffect in lightRotationEffects)
             {
@@ -53,7 +53,7 @@ namespace CustomFloorPlugin
             foreach (RotationEventEffect effectDescriptor in effectDescriptors)
             {
                 LightRotationEventEffect rotEvent = effectDescriptor.gameObject.AddComponent<LightRotationEventEffect>();
-                //PlatformManager.SpawnedComponents.Add(rotEvent);
+                PlatformManager.SpawnedComponents.Add(rotEvent);
 
                 ReflectionUtil.SetPrivateField(rotEvent, "_event", (BeatmapEventType)effectDescriptor.eventType);
                 ReflectionUtil.SetPrivateField(rotEvent, "_rotationVector", effectDescriptor.rotationVector);

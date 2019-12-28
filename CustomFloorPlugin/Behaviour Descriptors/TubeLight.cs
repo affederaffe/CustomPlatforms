@@ -84,7 +84,7 @@ namespace CustomFloorPlugin {
         private TubeBloomPrePassLight tubeBloomLight;
 
         internal void LogSomething() {
-            Plugin.Log(tubeBloomLight.GetComponent<LightWithId>().GetType().FullName);
+            //Plugin.Log(tubeBloomLight.GetComponent<LightWithId>().GetType().FullName);
         }
 
         private void GameAwake() {

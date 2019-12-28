@@ -139,16 +139,15 @@ namespace CustomFloorPlugin
 
             if (customPlatform.icon == null) customPlatform.icon = Resources.FindObjectsOfTypeAll<Sprite>().Where(x => x.name == "FeetIcon").FirstOrDefault();
 
-            AddManagers(newPlatform);
-
             newPlatform.SetActive(false);
 
             return customPlatform;
         }
-        internal void AddManagers(GameObject go) {
+        internal static void AddManagers(GameObject go) {
+            Plugin.Log("Adding Managers");
             AddManagers(go, go);
         }
-        private void AddManagers(GameObject go, GameObject root) {
+        private static void AddManagers(GameObject go, GameObject root) {
             // Replace materials for this object
             MaterialSwapper.ReplaceMaterialsForGameObject(go);
 
@@ -157,7 +156,8 @@ namespace CustomFloorPlugin
                 RotationEventEffectManager rotManager = root.GetComponent<RotationEventEffectManager>();
                 if(rotManager == null) {
                     rotManager = root.AddComponent<RotationEventEffectManager>();
-                    //PlatformManager.SpawnedComponents.Add(rotManager);
+                    rotManager.RegisterForEvents();
+                    PlatformManager.SpawnedComponents.Add(rotManager);
                 }
                 rotManager.CreateEffects(go);
                 Plugin.Log("Added RotationEventEffectManagers");
@@ -175,9 +175,10 @@ namespace CustomFloorPlugin
                 TrackRingsManagerSpawner trms = root.GetComponent<TrackRingsManagerSpawner>();
                 if(trms == null) {
                     trms = root.AddComponent<TrackRingsManagerSpawner>();
-                    //PlatformManager.SpawnedComponents.Add(trms);
+                    PlatformManager.SpawnedComponents.Add(trms);
                 }
                 trms.CreateTrackRings(go);
+                trms.RegisterForEvents();
                 Plugin.Log("Added TrackRingsManagerSpawners");
             }
 
@@ -191,7 +192,7 @@ namespace CustomFloorPlugin
                 SpectrogramColumnManager specManager = go.GetComponent<SpectrogramColumnManager>();
                 if(specManager == null) {
                     specManager = go.AddComponent<SpectrogramColumnManager>();
-                    //PlatformManager.SpawnedComponents.Add(specManager);
+                    PlatformManager.SpawnedComponents.Add(specManager);
                 }
                 specManager.CreateColumns(go);
                 Plugin.Log("Added SpectrogramColumnManagers");
@@ -202,7 +203,7 @@ namespace CustomFloorPlugin
                 SpectrogramMaterialManager specMatManager = go.GetComponent<SpectrogramMaterialManager>();
                 if(specMatManager == null) {
                     specMatManager = go.AddComponent<SpectrogramMaterialManager>();
-                    //PlatformManager.SpawnedComponents.Add(specMatManager);
+                    PlatformManager.SpawnedComponents.Add(specMatManager);
                 }
                 specMatManager.UpdateMaterials();
                 Plugin.Log("Added SpectrogramMaterialManagers");
@@ -214,7 +215,7 @@ namespace CustomFloorPlugin
                 SpectrogramAnimationStateManager specAnimManager = go.GetComponent<SpectrogramAnimationStateManager>();
                 if(specAnimManager == null) {
                     specAnimManager = go.AddComponent<SpectrogramAnimationStateManager>();
-                    //PlatformManager.SpawnedComponents.Add(specAnimManager);
+                    PlatformManager.SpawnedComponents.Add(specAnimManager);
                 }
                 specAnimManager.UpdateAnimationStates();
                 Plugin.Log("Added SpectrogramAnimationStateManagers");
@@ -224,7 +225,7 @@ namespace CustomFloorPlugin
             if(go.GetComponentInChildren<SongEventHandler>(true) != null) {
                 foreach(SongEventHandler handler in go.GetComponentsInChildren<SongEventHandler>()) {
                     SongEventManager manager = handler.gameObject.AddComponent<SongEventManager>();
-                    //PlatformManager.SpawnedComponents.Add(manager);
+                    PlatformManager.SpawnedComponents.Add(manager);
                     manager._songEventHandler = handler;
                 }
                 Plugin.Log("Added SongEventManagers");
@@ -234,7 +235,7 @@ namespace CustomFloorPlugin
             if(go.GetComponentInChildren<EventManager>(true) != null) {
                 foreach(EventManager em in go.GetComponentsInChildren<EventManager>()) {
                     PlatformEventManager pem = em.gameObject.AddComponent<PlatformEventManager>();
-                    //PlatformManager.SpawnedComponents.Add(pem);
+                    PlatformManager.SpawnedComponents.Add(pem);
                     pem._EventManager = em;
                 }
                 Plugin.Log("Added PlatformEventManagers");
