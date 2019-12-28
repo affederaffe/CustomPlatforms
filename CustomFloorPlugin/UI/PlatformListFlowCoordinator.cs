@@ -24,8 +24,8 @@ namespace CustomFloorPlugin.UI {
                 if(activationType == ActivationType.AddedToHierarchy) {
 
                 }
-            } catch(Exception ex) {
-                Plugin.Log( ex.Message);
+            } catch(Exception e) {
+                Plugin.Log(e);
             }
         }
         protected override void BackButtonWasPressed(ViewController topViewController) {

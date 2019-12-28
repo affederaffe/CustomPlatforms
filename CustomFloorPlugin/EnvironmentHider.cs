@@ -79,12 +79,7 @@ namespace CustomFloorPlugin {
         private void SetCollectionHidden(List<GameObject> list, bool hidden) {
             if(list == null) return;
             foreach(GameObject go in list) {
-                try {
-                    if(go != null) go.SetActive(!hidden);
-                } catch(Exception e) {
-                    Debug.Log("Setting Object hidden failed at:" + e.StackTrace);
-                    Debug.Log("for:" + PlatformManager.GetFullPath(go));
-                }
+                if(go != null) go.SetActive(!hidden);
             }
         }
 

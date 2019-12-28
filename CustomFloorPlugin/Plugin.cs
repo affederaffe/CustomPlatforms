@@ -32,6 +32,7 @@ namespace CustomFloorPlugin {
             hi.PatchAll(Assembly.GetExecutingAssembly());
             StuffThatDoesntBelongHereButHasToBeHereBecauseBsmlIsntHalfAsStableYetAsCustomUIWasButCustomUiHasBeenKilledAlready();
         }
+
         /// <summary>
         /// Holds any clutter that's not supposed to be here, but has to.
         /// </summary>
@@ -51,6 +52,9 @@ namespace CustomFloorPlugin {
 
         internal static void Log(string message) {
             BS_Utils.Utilities.Logger.Log("CustomFloorPlugin", message);
+        }
+        internal static void Log(Exception e) {
+            Log("An error has been caught:\n" + e.GetType().Name + "\n At:\n" + e.StackTrace + "\nWith message:\n" + e.Message);
         }
         /// <summary>
         /// Searches all currently loaded scenes to find the first Component of type T in the game, regardless if it's active and enabled or not.

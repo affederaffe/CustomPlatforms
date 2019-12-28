@@ -77,8 +77,8 @@ namespace CustomFloorPlugin {
                     DestroyCustomLights();
                     TempChangeToPlatform(0);
                 }
-            } catch(EnvironmentSceneNotFoundException) {
-
+            } catch(EnvironmentSceneNotFoundException e) {
+                Plugin.Log(e);
             }
             //UnregisterLights();
             EmptyLightRegisters();
@@ -97,10 +97,10 @@ namespace CustomFloorPlugin {
                     Plugin.Log("Menu load detected");
                     //RegisterLights();
                 }
-            } catch(EnvironmentSceneNotFoundException) {
-
-            } catch(NullReferenceException) {
-
+            } catch(EnvironmentSceneNotFoundException e) {
+                Plugin.Log(e);
+            } catch(NullReferenceException e) {
+                Plugin.Log(e);
             }
         }
         /// <summary>
@@ -207,8 +207,8 @@ namespace CustomFloorPlugin {
             if(Input.GetKeyDown(KeyCode.Keypad6)) {
                 try {
                     FindManager();
-                } catch(EnvironmentSceneNotFoundException) {
-
+                } catch(EnvironmentSceneNotFoundException e) {
+                    Plugin.Log(e);
                 }
             }
             if(Input.GetKeyDown(KeyCode.Keypad7)) {

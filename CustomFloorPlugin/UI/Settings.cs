@@ -9,9 +9,10 @@ using BeatSaberMarkupLanguage.Parser;
 
 namespace CustomFloorPlugin.UI {
     class Settings:PersistentSingleton<Settings> {
+#pragma warning disable CS0649
         [UIParams]
         public BSMLParserParams parserParams;
-
+#pragma warning restore CS0649
         [UIValue("always-show-feet")]
         public bool alwaysShowFeet {
             get {

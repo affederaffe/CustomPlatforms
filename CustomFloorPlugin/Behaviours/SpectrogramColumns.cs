@@ -55,10 +55,10 @@ public class SpectrogramColumns : MonoBehaviour
         gameObject.transform.localScale = new Vector3(_columnWidth, _minHeight, _columnDepth);
         return gameObject.transform;
     }
-    
+#pragma warning disable CS0649
     [SerializeField]
     private GameObject _columnPrefab;
-    
+#pragma warning restore CS0649
     [SerializeField]
     private Vector3 _separator = new Vector3(0f, 0f, 1f);
     
@@ -73,8 +73,8 @@ public class SpectrogramColumns : MonoBehaviour
     
     [SerializeField]
     private float _columnDepth = 1f;
-    
+#pragma warning disable CS0649
     private BasicSpectrogramData _spectrogramData;
-    
+#pragma warning restore CS0649
     private Transform[] _columnTransforms;
 }
