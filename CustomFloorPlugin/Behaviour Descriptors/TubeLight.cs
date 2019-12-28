@@ -41,7 +41,6 @@ namespace CustomFloorPlugin {
         public Color color = Color.white;
         public LightsID lightsID = LightsID.Static;
         private static LightWithIdManager _lightManager;
-        
 
         private void OnDrawGizmos() {
             Gizmos.color = color;
@@ -57,7 +56,7 @@ namespace CustomFloorPlugin {
         internal static TubeBloomPrePassLight prefab {
             get {
                 if(_prefab == null) {
-                    Debug.Log("Setting Prefab!");
+                    Plugin.Log("Setting Prefab!");
                     try {
                         _prefab =
                             SceneManager
@@ -84,8 +83,8 @@ namespace CustomFloorPlugin {
 
         private TubeBloomPrePassLight tubeBloomLight;
 
-        private void Awake() {
-
+        internal void LogSomething() {
+            //Plugin.Log(tubeBloomLight.GetComponent<LightWithId>().GetType().FullName);
         }
 
         private void GameAwake() {
