@@ -1,4 +1,3 @@
-﻿using Harmony;
 using UnityEngine;
 
 // Token: 0x02000048 RID: 72
@@ -23,7 +22,7 @@ public class MeshBloomPrePassLight:TubeBloomPrePassLight {
         _parametricBoxController.enabled = false;
     }
 }
-//Don't use this, it's broken
+//Don't use this, it's broken, it's here for reference
 //[HarmonyPatch(typeof(MeshBloomPrePassLight))]
 //[HarmonyPatch("color", MethodType.Setter)]
 //public class MeshBloomPrePassLightPatch {

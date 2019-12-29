@@ -1,13 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Harmony;
-using UnityEngine;
+﻿using Harmony;
+using System.Reflection;
 
-namespace CustomFloorPlugin.Harmony_Patches
+namespace CustomFloorPlugin.HarmonyPatches
 {
+    internal static class Patcher {
+        private static bool _runOnce = false;
+        internal static void Patch() {
+            if(_runOnce) {
+                return;
+            }
+            HarmonyInstance.Create("com.rolopogo.customplatforms").PatchAll(Assembly.GetExecutingAssembly());
+        }
+    }
     [HarmonyPatch(typeof(MenuTransitionsHelper))]
     [HarmonyPatch("RestartGame", MethodType.Normal)]
     public class SettingsRefreshPatch
@@ -19,4 +23,18 @@ namespace CustomFloorPlugin.Harmony_Patches
             PlatformManager.Instance.TempChangeToPlatform(0);
         }
     }
+    [HarmonyPatch(typeof(EnvironmentOverrideSettingsPanelController))]
+    [HarmonyPatch("HandleOverrideEnvironmentsToggleValueChanged")]
+    public class EnviromentOverideSettings_Patch {
+        static public void Postfix(OverrideEnvironmentSettings ____overrideEnvironmentSettings) {
+            if(____overrideEnvironmentSettings.overrideEnvironments == true) {
+                Plugin.Log("Enviroment Override On");
+            }
+
+            if(____overrideEnvironmentSettings.overrideEnvironments == false) {
+                Plugin.Log("Enviroment Override Off");
+            }
+        }
+    }
+
 }
