@@ -51,20 +51,6 @@ namespace CustomFloorPlugin {
             Plugin.gsm.transitionDidFinishEvent += TransitionFinalize;
         }
 
-        [HarmonyPatch(typeof(EnvironmentOverrideSettingsPanelController))]
-        [HarmonyPatch("HandleOverrideEnvironmentsToggleValueChanged")]
-        public class EnviromentOverideSettings_Patch {
-            static public void Postfix(OverrideEnvironmentSettings ____overrideEnvironmentSettings) {
-                if(____overrideEnvironmentSettings.overrideEnvironments == true) {
-                    Plugin.Log("Enviroment Override On");
-                }
-
-                if(____overrideEnvironmentSettings.overrideEnvironments == false) {
-                    Plugin.Log("Enviroment Override Off");
-                }
-            }
-        }
-
         void TransitionPrep(float ignored) {
             Plugin.Log("TransitionPrep has been triggered, here is a handy list of all curently loaded scenes :)");
             for(int i = 0; i < SceneManager.sceneCount; i++) {
