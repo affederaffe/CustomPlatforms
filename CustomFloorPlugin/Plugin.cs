@@ -28,13 +28,13 @@ namespace CustomFloorPlugin {
             BSEvents.OnLoad();
             BSEvents.menuSceneLoadedFresh += OnMenuSceneLoadedFresh;
             HarmonyPatches.Patcher.Patch();
-            StuffThatDoesntBelongHereButHasToBeHereBecauseBsmlIsntHalfAsStableYetAsCustomUIWasButCustomUiHasBeenKilledAlready();
+            Stuff_That_Doesnt_Belong_Here_But_Has_To_Be_Here_Because_Bsml_Isnt_Half_As_Stable_Yet_As_CustomUI_Was_But_CustomUI_Has_Been_Killed_Already();
         }
 
         /// <summary>
         /// Holds any clutter that's not supposed to be here, but has to.
         /// </summary>
-        private void StuffThatDoesntBelongHereButHasToBeHereBecauseBsmlIsntHalfAsStableYetAsCustomUIWasButCustomUiHasBeenKilledAlready() {
+        private void Stuff_That_Doesnt_Belong_Here_But_Has_To_Be_Here_Because_Bsml_Isnt_Half_As_Stable_Yet_As_CustomUI_Was_But_CustomUI_Has_Been_Killed_Already() {
             PlatformUI.SetupMenuButtons();
         }
 

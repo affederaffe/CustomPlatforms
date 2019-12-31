@@ -90,26 +90,17 @@ namespace CustomFloorPlugin {
         /// <param name="alist">The List<GameObject> to be added to</param>
         private bool FindAddGameObject(string name, List<GameObject> list) {
             GameObject[] roots = PlatformManager.GetCurrentEnvironment().GetRootGameObjects();
-            Plugin.Log("Hello?");
             GameObject go = null;
-            Plugin.Log("Eckstein, Eckstein, alles muss versteck' sein!");
             foreach(GameObject root in roots) {
-                Plugin.Log("Hm...");
                 go = root.transform.Find(name)?.gameObject;
-                Plugin.Log("Aha!");
                 if(go != null) {
-                    Plugin.Log("*Stabs victim with knife*");
                     list.Add(go);
-                    Plugin.Log("He ded, onto the next!");
                     i++;
                     return true;
                 } else if(root.name == name) {
-                    Plugin.Log("Thought you can hide?");
                     list.Add(root);
-                    Plugin.Log("*Camera pans away* *Stabby noises*");
                 }
             }
-            Plugin.Log("Anyone home?... Nobody? Really? :<  Aw, man. Creeper?");
             return false;
         }
 

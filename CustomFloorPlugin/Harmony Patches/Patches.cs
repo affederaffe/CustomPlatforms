@@ -14,8 +14,7 @@ namespace CustomFloorPlugin.HarmonyPatches
     }
     [HarmonyPatch(typeof(MenuTransitionsHelper))]
     [HarmonyPatch("RestartGame", MethodType.Normal)]
-    public class SettingsRefreshPatch
-    {
+    public class MenuTransitionsHelper_RestartGame_Patch {
 
         public static void Prefix()
         {
@@ -36,5 +35,26 @@ namespace CustomFloorPlugin.HarmonyPatches
             }
         }
     }
-
+    /// <summary>
+    /// After the settings have been applied for the first time, I see myself currently forced to move everthing into DontDestroyOnLoad.
+    /// This is not reversed after loading, but shouldn't matter.
+    /// Objects normally don't reside in there for transparency reasons
+    /// </summary>
+    [HarmonyPatch(typeof(GameScenesManager))]
+    [HarmonyPatch("ClearAndOpenScenes")]
+    public class GameScenesManager_ClearAndOpenScenes_Patch {
+        static System.Collections.Generic.List<UnityEngine.GameObject> PlatformManagerDumpGameObjects = null, PlatformUIDumpGameObjects = null;
+        public static void Prefix() {
+            PlatformManagerDumpGameObjects = new System.Collections.Generic.List<UnityEngine.GameObject>();
+            foreach(UnityEngine.GameObject gameObject in UnityEngine.SceneManagement.SceneManager.GetSceneByName("PlatformManagerDump").GetRootGameObjects()) {
+                PlatformManagerDumpGameObjects.Add(gameObject);
+                UnityEngine.Object.DontDestroyOnLoad(gameObject);
+            }
+            PlatformUIDumpGameObjects = new System.Collections.Generic.List<UnityEngine.GameObject>();
+            foreach(UnityEngine.GameObject gameObject in UnityEngine.SceneManagement.SceneManager.GetSceneByName("PlatformUIDump").GetRootGameObjects()) {
+                PlatformUIDumpGameObjects.Add(gameObject);
+                UnityEngine.Object.DontDestroyOnLoad(gameObject);
+            }
+        }
+    }
 }
