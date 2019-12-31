@@ -45,15 +45,19 @@ namespace CustomFloorPlugin.HarmonyPatches
     public class GameScenesManager_ClearAndOpenScenes_Patch {
         static System.Collections.Generic.List<UnityEngine.GameObject> PlatformManagerDumpGameObjects = null, PlatformUIDumpGameObjects = null;
         public static void Prefix() {
-            PlatformManagerDumpGameObjects = new System.Collections.Generic.List<UnityEngine.GameObject>();
-            foreach(UnityEngine.GameObject gameObject in UnityEngine.SceneManagement.SceneManager.GetSceneByName("PlatformManagerDump").GetRootGameObjects()) {
-                PlatformManagerDumpGameObjects.Add(gameObject);
-                UnityEngine.Object.DontDestroyOnLoad(gameObject);
-            }
-            PlatformUIDumpGameObjects = new System.Collections.Generic.List<UnityEngine.GameObject>();
-            foreach(UnityEngine.GameObject gameObject in UnityEngine.SceneManagement.SceneManager.GetSceneByName("PlatformUIDump").GetRootGameObjects()) {
-                PlatformUIDumpGameObjects.Add(gameObject);
-                UnityEngine.Object.DontDestroyOnLoad(gameObject);
+            try {
+                PlatformManagerDumpGameObjects = new System.Collections.Generic.List<UnityEngine.GameObject>();
+                foreach(UnityEngine.GameObject gameObject in UnityEngine.SceneManagement.SceneManager.GetSceneByName("PlatformManagerDump").GetRootGameObjects()) {
+                    PlatformManagerDumpGameObjects.Add(gameObject);
+                    UnityEngine.Object.DontDestroyOnLoad(gameObject);
+                }
+                PlatformUIDumpGameObjects = new System.Collections.Generic.List<UnityEngine.GameObject>();
+                foreach(UnityEngine.GameObject gameObject in UnityEngine.SceneManagement.SceneManager.GetSceneByName("PlatformUIDump").GetRootGameObjects()) {
+                    PlatformUIDumpGameObjects.Add(gameObject);
+                    UnityEngine.Object.DontDestroyOnLoad(gameObject);
+                }
+            } catch (System.ArgumentException e){
+                Plugin.Log(e);
             }
         }
     }

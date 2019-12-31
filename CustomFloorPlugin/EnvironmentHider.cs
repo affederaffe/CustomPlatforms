@@ -68,7 +68,7 @@ namespace CustomFloorPlugin {
             FindRotatingLasers();
             FindDoubleColorLasers();
             FindTrackLights();
-            Plugin.Log("Hunt concluded. " + i + "Victims found!");
+            Plugin.Log("Hunt concluded. " + i + " Victims found!");
         }
 
         /// <summary>

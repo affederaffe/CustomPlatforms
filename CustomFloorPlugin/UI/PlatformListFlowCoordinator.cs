@@ -17,7 +17,7 @@ namespace CustomFloorPlugin.UI {
             try {
                 if(firstActivation) {
 
-                    title = "Custom Notes";
+                    title = "Custom Platforms";
                     showBackButton = true;
                     ProvideInitialViewControllers(_platformsListView);
                 }
