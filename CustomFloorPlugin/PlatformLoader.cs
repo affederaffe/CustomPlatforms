@@ -47,12 +47,15 @@ namespace CustomFloorPlugin
             platforms.Add(defaultPlatform);
             bundlePaths.Add("");
             // Populate the platforms array
-            for (int i = 0; i < allBundlePaths.Length; i++)
+            Plugin.Log("[START OF PLATFORM LOADING SPAM]-------------------------------------");
+            int j = 0;
+            for(int i = 0; i < allBundlePaths.Length; i++)
             {
-
+                j++;
                 CustomPlatform newPlatform = LoadPlatformBundle(allBundlePaths[i],parent);
             }
-
+            Plugin.Log("[END OF PLATFORM LOADING SPAM]---------------------------------------");
+            Plugin.Log("Attempted to load " + j + " Platforms.");
             return platforms.ToArray();
         }
 
@@ -68,7 +71,7 @@ namespace CustomFloorPlugin
             {
                 bundlePaths.Add(bundlePath);
                 platforms.Add(newPlatform);
-                Plugin.logger.Info("Loaded: " + newPlatform.name);
+                //Plugin.logger.Info("Loaded: " + newPlatform.name);
             }
 
             using (var md5 = MD5.Create())
@@ -98,7 +101,7 @@ namespace CustomFloorPlugin
 
             if (platformPrefab == null)
             {
-                Plugin.logger.Info("Assetbundle didnt contain a Custom Platform");
+                //Plugin.logger.Info("Assetbundle didnt contain a Custom Platform");
                 return null;
             }
 
@@ -117,7 +120,7 @@ namespace CustomFloorPlugin
                 global::CustomPlatform legacyPlatform = newPlatform.GetComponent<global::CustomPlatform>();
                 if(legacyPlatform != null)
                 {
-                    Plugin.logger.Info("legacy version of customPlatform detected, updating");
+                    //Plugin.logger.Info("legacy version of customPlatform detected, updating");
                     // Replace legacyplatform component with up to date one
                     customPlatform = newPlatform.AddComponent<CustomPlatform>();
                     customPlatform.platName = legacyPlatform.platName;
@@ -129,7 +132,7 @@ namespace CustomFloorPlugin
                 else
                 {
                     // no customplatform component, abort
-                    Plugin.logger.Info("Loaded object had no customplatform attached, skipping");
+                    //Plugin.logger.Info("Loaded object had no customplatform attached, skipping");
                     GameObject.Destroy(newPlatform);
                     return null;
                 }
@@ -144,7 +147,7 @@ namespace CustomFloorPlugin
             return customPlatform;
         }
         internal static void AddManagers(GameObject go) {
-            Plugin.Log("Adding Managers");
+            //Plugin.Log("Adding Managers");
             AddManagers(go, go);
         }
         private static void AddManagers(GameObject go, GameObject root) {
@@ -160,7 +163,7 @@ namespace CustomFloorPlugin
                     PlatformManager.SpawnedComponents.Add(rotManager);
                 }
                 rotManager.CreateEffects(go);
-                Plugin.Log("Added RotationEventEffectManagers");
+                //Plugin.Log("Added RotationEventEffectManagers");
             }
 
             // Add a trackRing controller if there are track ring descriptors
@@ -179,7 +182,7 @@ namespace CustomFloorPlugin
                 }
                 trms.CreateTrackRings(go);
                 trms.RegisterForEvents();
-                Plugin.Log("Added TrackRingsManagerSpawners");
+                //Plugin.Log("Added TrackRingsManagerSpawners");
             }
 
             // Add spectrogram manager
@@ -195,7 +198,7 @@ namespace CustomFloorPlugin
                     PlatformManager.SpawnedComponents.Add(specManager);
                 }
                 specManager.CreateColumns(go);
-                Plugin.Log("Added SpectrogramColumnManagers");
+                //Plugin.Log("Added SpectrogramColumnManagers");
             }
 
             if(go.GetComponentInChildren<SpectrogramMaterial>(true) != null) {
@@ -206,9 +209,8 @@ namespace CustomFloorPlugin
                     PlatformManager.SpawnedComponents.Add(specMatManager);
                 }
                 specMatManager.UpdateMaterials();
-                Plugin.Log("Added SpectrogramMaterialManagers");
+                //Plugin.Log("Added SpectrogramMaterialManagers");
             }
-
 
             if(go.GetComponentInChildren<SpectrogramAnimationState>(true) != null) {
                 // Add spectrogram animation state manager
@@ -218,7 +220,7 @@ namespace CustomFloorPlugin
                     PlatformManager.SpawnedComponents.Add(specAnimManager);
                 }
                 specAnimManager.UpdateAnimationStates();
-                Plugin.Log("Added SpectrogramAnimationStateManagers");
+                //Plugin.Log("Added SpectrogramAnimationStateManagers");
             }
 
             // Add Song event manager
@@ -228,7 +230,7 @@ namespace CustomFloorPlugin
                     PlatformManager.SpawnedComponents.Add(manager);
                     manager._songEventHandler = handler;
                 }
-                Plugin.Log("Added SongEventManagers");
+                //Plugin.Log("Added SongEventManagers");
             }
 
             // Add EventManager 
@@ -238,7 +240,7 @@ namespace CustomFloorPlugin
                     PlatformManager.SpawnedComponents.Add(pem);
                     pem._EventManager = em;
                 }
-                Plugin.Log("Added PlatformEventManagers");
+                //Plugin.Log("Added PlatformEventManagers");
             }
         }
     }

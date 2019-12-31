@@ -44,7 +44,7 @@ namespace CustomFloorPlugin {
         private void Awake() {
             if(Instance != null) return;
             Instance = this;
-            SceneManager.MoveGameObjectToScene(gameObject, SceneManager.CreateScene("PlatformManagerDump"));
+            SceneManager.MoveGameObjectToScene(gameObject, SceneManager.CreateScene("PlatformManagerDump", new CreateSceneParameters(LocalPhysicsMode.None)));
 
             Plugin.gsm.MarkSceneAsPersistent("PlatformManagerDump");
             Plugin.gsm.transitionDidStartEvent += TransitionPrep;
@@ -63,8 +63,8 @@ namespace CustomFloorPlugin {
                     DestroyCustomLights();
                     TempChangeToPlatform(0);
                 }
-            } catch(EnvironmentSceneNotFoundException) {
-
+            } catch(EnvironmentSceneNotFoundException e) {
+                Plugin.Log(e);
             }
             //UnregisterLights();
             EmptyLightRegisters();
@@ -83,10 +83,10 @@ namespace CustomFloorPlugin {
                     Plugin.Log("Menu load detected");
                     //RegisterLights();
                 }
-            } catch(EnvironmentSceneNotFoundException) {
-
-            } catch(NullReferenceException) {
-
+            } catch(EnvironmentSceneNotFoundException e) {
+                Plugin.Log(e);
+            } catch(NullReferenceException e) {
+                Plugin.Log(e);
             }
         }
         /// <summary>
@@ -190,15 +190,40 @@ namespace CustomFloorPlugin {
             if(Input.GetKeyDown(KeyCode.Keypad5)) {
                 DestroyCustomLights();
             }
-            if(Input.GetKeyDown(KeyCode.Keypad6)) {
-                try {
-                    FindManager();
-                } catch(EnvironmentSceneNotFoundException) {
-
+            if(Input.GetKeyDown(KeyCode.Keypad7)) {
+                for(int i = 0; i < SceneManager.sceneCount; i++) {
+                    Scene scene = SceneManager.GetSceneAt(i);
+                    foreach(GameObject root in scene.GetRootGameObjects()) {
+                        root.SetActive(false);
+                    }
                 }
             }
-            if(Input.GetKeyDown(KeyCode.Keypad7)) {
-                EnvHider.HideObjectsForPlatform(GetPlatform(0));
+            //if(Input.GetKeyDown(KeyCode.Keypad8)) {
+            //    UnityEngine.GameObject instance = UnityEngine.Object.Instantiate(UnityEngine.Resources.Load("BasicSaberModel", typeof(UnityEngine.GameObject))) as UnityEngine.GameObject;
+            //    Scene scene = SceneManager.LoadScene("GameCore", new LoadSceneParameters(LoadSceneMode.Additive, LocalPhysicsMode.None));
+            //    Plugin.Log("Does this appear?" + scene.name);
+            //    Plugin.Log("Does this appear?" + scene.GetRootGameObjects()[0]);
+            //}
+            if(Input.GetKeyDown(KeyCode.Keypad8)) {
+                Plugin.Log("Here is some important information:");
+                Plugin.Log("BasicSaberModel(Clone)/BasicSaber/SaberGlowingEdges");
+                Plugin.Log(SceneManager.GetSceneByName("GameCore").GetRootGameObjects()[0].transform.Find("Origin/VRGameCore/LeftSaber/BasicSaberModel(Clone)/BasicSaber/SaberGlowingEdges").GetComponent<MeshRenderer>().material.shader.name);
+                Plugin.Log("BasicSaberModel(Clone)/BasicSaber/SaberBlade");
+                Plugin.Log(SceneManager.GetSceneByName("GameCore").GetRootGameObjects()[0].transform.Find("Origin/VRGameCore/LeftSaber/BasicSaberModel(Clone)/BasicSaber/SaberBlade").GetComponent<MeshRenderer>().material.shader.name);
+                Plugin.Log("BasicSaberModel(Clone)/BasicSaber/SaberHandle");
+                Plugin.Log(SceneManager.GetSceneByName("GameCore").GetRootGameObjects()[0].transform.Find("Origin/VRGameCore/LeftSaber/BasicSaberModel(Clone)/BasicSaber/SaberHandle").GetComponent<MeshRenderer>().material.shader.name);
+                Plugin.Log("BasicSaberModel(Clone)/FakeGlow0");
+                Plugin.Log(SceneManager.GetSceneByName("GameCore").GetRootGameObjects()[0].transform.Find("Origin/VRGameCore/LeftSaber/BasicSaberModel(Clone)/FakeGlow0").GetComponent<MeshRenderer>().material.shader.name);
+                Plugin.Log("BasicSaberModel(Clone)/FakeGlow1");
+                Plugin.Log(SceneManager.GetSceneByName("GameCore").GetRootGameObjects()[0].transform.Find("Origin/VRGameCore/LeftSaber/BasicSaberModel(Clone)/FakeGlow1").GetComponent<MeshRenderer>().material.shader.name);
+            }
+            if(Input.GetKeyDown(KeyCode.Keypad9)) {
+                UnityEngine.GameObject saber = UnityEngine.GameObject.Instantiate(UnityEngine.AssetBundle.LoadFromFile(@"C:\Program Files\Oculus\Software\Software\hyperbolic-magnetism-beat-saber\CustomPlatforms\TestFolder\BasicSaberModel").LoadAsset<UnityEngine.GameObject>("BasicSaberModel"));
+                saber.transform.Find("BasicSaber/SaberGlowingEdges").GetComponent<UnityEngine.MeshRenderer>().material.shader = UnityEngine.Shader.Find("Custom/GlowingInstancedHD");
+                saber.transform.Find("BasicSaber/SaberBlade").GetComponent<UnityEngine.MeshRenderer>().material.shader = UnityEngine.Shader.Find("Custom/SaberBladeLW");
+                saber.transform.Find("BasicSaber/SaberHandle").GetComponent<UnityEngine.MeshRenderer>().material.shader = UnityEngine.Shader.Find("Custom/ScreenDisplacementHD");
+                saber.transform.Find("BasicSaber/FakeGlow0").GetComponent<UnityEngine.MeshRenderer>().material.shader = UnityEngine.Shader.Find("Custom/Parametric3SliceSprite");
+                saber.transform.Find("BasicSaber/FakeGlow1").GetComponent<UnityEngine.MeshRenderer>().material.shader = UnityEngine.Shader.Find("Custom/Parametric3SliceSprite");
             }
         }
         internal static IEnumerator<WaitForEndOfFrame> HideForPlatformAfterOneFrame(CustomPlatform customPlatform) {

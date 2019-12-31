@@ -29,12 +29,9 @@ namespace CustomFloorPlugin
         private void Awake()
         {
             _instance = this;
-            SceneManager.MoveGameObjectToScene(gameObject, SceneManager.CreateScene("PlatformUIDump"));
+            SceneManager.MoveGameObjectToScene(gameObject, SceneManager.CreateScene("PlatformUIDump", new CreateSceneParameters(LocalPhysicsMode.None)));
 
             Plugin.gsm.MarkSceneAsPersistent("PlatformUIDump");
-            //God I hate the new cheese -.-
-            //Yeah... no kiddin'
-            //AAAAAAAAAAAAAAAAAAAAAAAAAAAAARRRGH
         }
         
 
