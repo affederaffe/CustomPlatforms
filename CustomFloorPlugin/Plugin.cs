@@ -16,6 +16,22 @@ namespace CustomFloorPlugin {
         internal static Config config;
         internal static IPA.Logging.Logger logger;
         internal static GameScenesManager gsm = null;
+        /// <summary>
+        /// Do not call this out of gamescene, or else.
+        /// </summary>
+        private static BeatmapObjectCallbackController _bocc;
+        internal static BeatmapObjectCallbackController bocc {
+            get{
+                if (_bocc == null) {
+                    _bocc = FindFirst<BeatmapObjectCallbackController>();
+                }
+                return _bocc;
+            }
+            private set {
+                _bocc = value;
+            }
+        }
+
         private bool init = false;
 
         public static Plugin Instance = null;

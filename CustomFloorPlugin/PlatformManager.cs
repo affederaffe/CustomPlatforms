@@ -123,7 +123,6 @@ namespace CustomFloorPlugin {
             PlatformUI.OnLoad();
         }
 
-
         public CustomPlatform AddPlatform(string path) {
             CustomPlatform newPlatform = platformLoader.LoadPlatformBundle(path, transform);
             if(newPlatform != null) {
@@ -280,7 +279,7 @@ namespace CustomFloorPlugin {
             }
             if(!(manager == null)) {
                 LightManager = manager;
-                Debug.Log("Manager found at:" + GetFullPath(manager.gameObject));
+                Plugin.Log("Manager found at:" + GetFullPath(manager.gameObject));
             } else {
                 throw new ManagerNotFoundException();
             }

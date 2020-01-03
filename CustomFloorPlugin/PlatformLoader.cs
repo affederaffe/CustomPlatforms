@@ -144,15 +144,23 @@ namespace CustomFloorPlugin
 
             newPlatform.SetActive(false);
 
+            // Replace materials for this object
+            MaterialSwapper.ReplaceMaterialsForGameObject(customPlatform.gameObject);
+
             return customPlatform;
         }
         internal static void AddManagers(GameObject go) {
+            bool active = go.activeSelf;
+            if(active) {
+                go.SetActive(false);
+            }
             //Plugin.Log("Adding Managers");
             AddManagers(go, go);
+            if(active) {
+                go.SetActive(true);
+            }
         }
         private static void AddManagers(GameObject go, GameObject root) {
-            // Replace materials for this object
-            MaterialSwapper.ReplaceMaterialsForGameObject(go);
 
             // Rotation effect manager
             if(go.GetComponentInChildren<RotationEventEffect>(true) != null) {
@@ -181,7 +189,6 @@ namespace CustomFloorPlugin
                     PlatformManager.SpawnedComponents.Add(trms);
                 }
                 trms.CreateTrackRings(go);
-                trms.RegisterForEvents();
                 //Plugin.Log("Added TrackRingsManagerSpawners");
             }
 

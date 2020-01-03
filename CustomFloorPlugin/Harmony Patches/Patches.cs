@@ -39,6 +39,8 @@ namespace CustomFloorPlugin.HarmonyPatches
     /// After the settings have been applied for the first time, I see myself currently forced to move everthing into DontDestroyOnLoad.
     /// This is not reversed after loading, but shouldn't matter.
     /// Objects normally don't reside in there for transparency reasons
+    /// 
+    /// Note to self: removing them from the list of persistent scenes *should* get them off beatsabers radar
     /// </summary>
     [HarmonyPatch(typeof(GameScenesManager))]
     [HarmonyPatch("ClearAndOpenScenes")]
