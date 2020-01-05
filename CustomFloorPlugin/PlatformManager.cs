@@ -10,6 +10,7 @@ using System.Text;
 using BS_Utils.Utilities;
 using Zenject;
 using CustomFloorPlugin.Exceptions;
+using System.IO;
 
 namespace CustomFloorPlugin {
     public static class Extentions {
@@ -17,7 +18,7 @@ namespace CustomFloorPlugin {
             var method = typeof(T).GetMethod(methodName, BindingFlags.Instance | BindingFlags.NonPublic);
             method.Invoke(obj, methodParams);
         }
-        internal static void SetPrivateField<T>(this T obj, string fieldName,  object value) {
+        internal static void SetPrivateField<T>(this T obj, string fieldName, object value) {
             try {
                 typeof(T).GetField(fieldName, BindingFlags.Instance | BindingFlags.NonPublic).SetValue(obj, value);
             } catch {
@@ -67,8 +68,10 @@ namespace CustomFloorPlugin {
         static void OnSpawnStart() { Plugin.Log("Spawning Lights"); }
         internal delegate void SpawnQueueType();
         internal static SpawnQueueType SpawnQueue = new SpawnQueueType(OnSpawnStart);
-
+        internal static Scene scene;
         internal static LightWithIdManager LightManager = null;
+        internal static GameObject Heart;
+        internal static GameObject Love;
 
         public static void OnLoad() {
             if(Instance != null) return;
@@ -79,13 +82,24 @@ namespace CustomFloorPlugin {
         private void Awake() {
             if(Instance != null) return;
             Instance = this;
-            SceneManager.MoveGameObjectToScene(gameObject, SceneManager.CreateScene("PlatformManagerDump", new CreateSceneParameters(LocalPhysicsMode.None)));
-
+            scene = SceneManager.CreateScene("PlatformManagerDump", new CreateSceneParameters(LocalPhysicsMode.None));
+            SceneManager.MoveGameObjectToScene(gameObject, scene);
             Plugin.gsm.MarkSceneAsPersistent("PlatformManagerDump");
             Plugin.gsm.transitionDidStartEvent += TransitionPrep;
             Plugin.gsm.transitionDidFinishEvent += TransitionFinalize;
-        }
 
+            Scene greenDay = SceneManager.LoadScene("GreenDayGrenadeEnvironment", new LoadSceneParameters(LoadSceneMode.Additive));
+            StartCoroutine(fuckUnity());
+            IEnumerator<WaitUntil> fuckUnity() {
+                yield return new WaitUntil(() => { return greenDay.isLoaded; });
+                GameObject gameObject = greenDay.GetRootGameObjects()[0];
+                Heart = gameObject.transform.Find("GreenDayCity/armHeartLighting").gameObject;
+                Heart.transform.parent = null;
+                Heart.name = "<3";
+                SceneManager.MoveGameObjectToScene(Heart, scene);
+                SceneManager.UnloadSceneAsync("GreenDayGrenadeEnvironment");
+            }
+        }
         void TransitionPrep(float ignored) {
             Plugin.Log("TransitionPrep has been triggered, here is a handy list of all curently loaded scenes :)");
             for(int i = 0; i < SceneManager.sceneCount; i++) {
@@ -261,11 +275,83 @@ namespace CustomFloorPlugin {
                 Plugin.Log("------------");
             }
             if(Input.GetKeyDown(KeyCode.Keypad2)) {
-                currentPlatform.gameObject.SetActive(false);
-            }
-            if(Input.GetKeyDown(KeyCode.Keypad3)) {
-                currentPlatform.gameObject.SetActive(true);
+                Love = scene.GetRootGameObjects()[0].transform.Find("Heart by AkaRaiden/Love").gameObject;
+                //scene.GetRootGameObjects()[0].transform.Find("Heart by AkaRaiden").gameObject.SetActive(true);
+                Heart.GetComponent<MeshFilter>().mesh = Love.GetComponent<MeshFilter>().mesh;
+                Heart.transform.localScale = Love.transform.localScale;
+                Heart.transform.position = Love.transform.position;
+                Heart.transform.rotation = Love.transform.rotation;
 
+                
+            }
+            if(Input.GetKeyDown(KeyCode.Keypad4)) {
+                Heart.SetActive(false);
+                Heart.GetComponent<LightWithId>().SetPrivateField("_lightManager", LightManager);
+                Heart.SetActive(true);
+            }
+            if(Input.GetKeyDown(KeyCode.Keypad5)) {
+                //Heart.GetComponent<LightWithId>().ColorWasSet(Love.GetComponent<TubeLight>().color);
+                //string path = Application.dataPath.Replace(@"Beat Saber_Data", @"CustomPlatforms/heart.mesh");
+                //using StreamWriter stream = new StreamWriter(path: path, append: false, encoding: Encoding.Unicode);
+                //for(int i = 0; i < Love.GetComponent<MeshFilter>().mesh.vertices.Length - 1; i++) {
+                //    stream.Write(Love.GetComponent<MeshFilter>().mesh.vertices[i].x);
+                //    stream.Write(",");
+                //    stream.Write(Love.GetComponent<MeshFilter>().mesh.vertices[i].y);
+                //    stream.Write(",");
+                //    stream.Write(Love.GetComponent<MeshFilter>().mesh.vertices[i].z);
+                //    stream.Write("/");
+                //}
+                //stream.Write(Love.GetComponent<MeshFilter>().mesh.vertices.Last().x);
+                //stream.Write(",");
+                //stream.Write(Love.GetComponent<MeshFilter>().mesh.vertices.Last().y);
+                //stream.Write(",");
+                //stream.Write(Love.GetComponent<MeshFilter>().mesh.vertices.Last().z);
+                //stream.Write("|");
+                //for(int i = 0; i < Love.GetComponent<MeshFilter>().mesh.triangles.Length - 1; i++) {
+                //    stream.Write(Love.GetComponent<MeshFilter>().mesh.triangles[i]);
+                //    stream.Write("/");
+                //}
+                //stream.Write(Love.GetComponent<MeshFilter>().mesh.triangles.Last());
+
+                ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+                using Stream manifestResourceStream = Assembly.GetAssembly(GetType()).GetManifestResourceStream("CustomFloorPlugin.heart.mesh");
+                using StreamReader streamReader = new StreamReader(manifestResourceStream);
+                
+                string meshfile = streamReader.ReadToEnd();
+                string[] dimension1 = meshfile.Split('|');
+
+                string[][] s_vector3s = new string[dimension1[0].Split('/').Length][];
+
+                int i = 0;
+                foreach(string s_vector3 in dimension1[0].Split('/')) {
+                    s_vector3s[i++] = s_vector3.Split(',');
+                }
+
+                List<Vector3> vertices = new List<Vector3>();
+                foreach(string[] s_vector3 in s_vector3s) {
+                    vertices.Add(new Vector3(float.Parse(s_vector3[0]), float.Parse(s_vector3[1]), float.Parse(s_vector3[2])));
+                }
+
+                List<int> triangles = new List<int>();
+                foreach(string s_int in dimension1[1].Split('/')) {
+                    triangles.Add(int.Parse(s_int));
+                }
+
+                Mesh mesh = new Mesh();
+                mesh.vertices = vertices.ToArray();
+                mesh.triangles = triangles.ToArray();
+
+                Vector3 position = new Vector3(-8f,25f,26f);
+                Quaternion rotation = Quaternion.Euler(-100f,90f,90f);
+                Vector3 scale = new Vector3(25f,25f,25f);
+
+                Heart.GetComponent<MeshFilter>().mesh = mesh;
+                Heart.transform.position = position;
+                Heart.transform.rotation = rotation;
+                Heart.transform.localScale = scale;
+
+                Heart.GetComponent<LightWithId>().ColorWasSet(Color.magenta);
             }
         }
         internal static IEnumerator<WaitForEndOfFrame> HideForPlatformAfterOneFrame(CustomPlatform customPlatform) {

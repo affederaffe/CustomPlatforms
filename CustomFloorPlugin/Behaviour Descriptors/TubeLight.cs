@@ -78,7 +78,6 @@ namespace CustomFloorPlugin {
                 return _prefab;
             }
         }
-
         private TubeBloomPrePassLight tubeBloomLight;
 
         private void GameAwake() {
@@ -90,30 +89,19 @@ namespace CustomFloorPlugin {
             tubeBloomLight.transform.localPosition = Vector3.zero;
             tubeBloomLight.transform.localScale = new Vector3(1 / transform.lossyScale.x, 1 / transform.lossyScale.y, 1 / transform.lossyScale.z);
 
-            //TubeLight exist more than once, tubeBloomLight is not a gameobject
-            Plugin.Log("test1");
             if(GetComponent<MeshFilter>().mesh.vertexCount == 0) {
 
-                Plugin.Log("test3");
                 GetComponent<MeshRenderer>().enabled = false;
                 Traverse.Create(tubeBloomLight).Field("_registeredWithLightType");
             } else {
 
-                Plugin.Log("test2");
                 // swap for MeshBloomPrePassLight
-                Plugin.Log("test");
                 tubeBloomLight.gameObject.SetActive(false);
-                Plugin.Log("test");
                 MeshBloomPrePassLight meshbloom = ReflectionUtil.CopyComponent(tubeBloomLight, typeof(TubeBloomPrePassLight), typeof(MeshBloomPrePassLight), tubeBloomLight.gameObject) as MeshBloomPrePassLight;
-                Plugin.Log("test");
                 meshbloom.Init(GetComponent<Renderer>());
-                Plugin.Log("test");
                 DestroyImmediate(tubeBloomLight);
-                Plugin.Log("test");
                 tubeBloomLight = meshbloom;
-                Plugin.Log("test");
                 tubeBloomLight.gameObject.SetActive(true);
-                Plugin.Log("test");
             }
             tubeBloomLight.gameObject.SetActive(false);
 

@@ -70,7 +70,7 @@ namespace CustomFloorPlugin {
             logger.Log(level, message);
         }
         internal static void Log(Exception e, Level level = Level.Notice) {
-            Log("An error has been caught:\n" + e.GetType().Name + "\n At:\n" + e.StackTrace + "\nWith message:\n" + e.Message, level);
+            Log("An error has been caught:\n" + e.GetType().Name + "\nAt:\n" + e.StackTrace + "\nWith message:\n" + e.Message, level);
             if(e.InnerException != null) {
                 Log("---Inner Exception:---", level);
                 Log(e, level);
@@ -119,14 +119,6 @@ namespace CustomFloorPlugin {
                 } catch(Exception e) {
                     Log(e, Level.Error);
                 }
-            }
-        }
-        internal static void Log(StringBuilder message, Level level = Level.Info) {
-            try {
-                Log(message.ToString(), level);
-
-            } catch(Exception e) {
-                Log(e, Level.Error);
             }
         }
         internal static void Log(Component message, Level level = Level.Info) {
