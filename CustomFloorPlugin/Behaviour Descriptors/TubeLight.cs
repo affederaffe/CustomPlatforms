@@ -8,7 +8,7 @@ using UnityEngine;
 using Harmony;
 using UnityEngine.SceneManagement;
 using BS_Utils.Utilities;
-
+using CustomFloorPlugin;
 namespace CustomFloorPlugin {
     [RequireComponent(typeof(MeshFilter))]
     [RequireComponent(typeof(MeshRenderer))]
@@ -40,7 +40,6 @@ namespace CustomFloorPlugin {
         public float center = 0.5f;
         public Color color = Color.white;
         public LightsID lightsID = LightsID.Static;
-        private static LightWithIdManager _lightManager;
 
         private void OnDrawGizmos() {
             Gizmos.color = color;
@@ -50,7 +49,6 @@ namespace CustomFloorPlugin {
         }
 
         // ----------------
-        private bool IsMesh = false;
 
         private static TubeBloomPrePassLight _prefab;
         internal static TubeBloomPrePassLight prefab {
@@ -83,10 +81,6 @@ namespace CustomFloorPlugin {
 
         private TubeBloomPrePassLight tubeBloomLight;
 
-        internal void LogSomething() {
-            //Plugin.Log(tubeBloomLight.GetComponent<LightWithId>().GetType().FullName);
-        }
-
         private void GameAwake() {
             tubeBloomLight = Instantiate(prefab);
             tubeBloomLight.transform.SetParent(transform);
@@ -96,28 +90,38 @@ namespace CustomFloorPlugin {
             tubeBloomLight.transform.localPosition = Vector3.zero;
             tubeBloomLight.transform.localScale = new Vector3(1 / transform.lossyScale.x, 1 / transform.lossyScale.y, 1 / transform.lossyScale.z);
 
-
+            //TubeLight exist more than once, tubeBloomLight is not a gameobject
+            Plugin.Log("test1");
             if(GetComponent<MeshFilter>().mesh.vertexCount == 0) {
+
+                Plugin.Log("test3");
                 GetComponent<MeshRenderer>().enabled = false;
-                //Traverse.Create(tubeBloomLight).Field("_registeredWithLightType")
+                Traverse.Create(tubeBloomLight).Field("_registeredWithLightType");
             } else {
+
+                Plugin.Log("test2");
                 // swap for MeshBloomPrePassLight
-                IsMesh = true;
+                Plugin.Log("test");
                 tubeBloomLight.gameObject.SetActive(false);
+                Plugin.Log("test");
                 MeshBloomPrePassLight meshbloom = ReflectionUtil.CopyComponent(tubeBloomLight, typeof(TubeBloomPrePassLight), typeof(MeshBloomPrePassLight), tubeBloomLight.gameObject) as MeshBloomPrePassLight;
+                Plugin.Log("test");
                 meshbloom.Init(GetComponent<Renderer>());
+                Plugin.Log("test");
                 DestroyImmediate(tubeBloomLight);
+                Plugin.Log("test");
                 tubeBloomLight = meshbloom;
+                Plugin.Log("test");
                 tubeBloomLight.gameObject.SetActive(true);
+                Plugin.Log("test");
             }
             tubeBloomLight.gameObject.SetActive(false);
 
             var lightWithId = tubeBloomLight.GetComponent<LightWithId>();
             if(lightWithId) {
-
                 lightWithId.SetPrivateField("_tubeBloomPrePassLight", tubeBloomLight);
-                Traverse.Create(lightWithId).Field<int>("_ID").Value = (int)lightsID;
-                Traverse.Create(lightWithId).Field<LightWithIdManager>("_lighManager").Value = PlatformManager.LightManager;
+                lightWithId.SetPrivateField("_ID", (int)lightsID);
+                lightWithId.SetPrivateField("_lightManager", PlatformManager.LightManager);
             }
 
             tubeBloomLight.SetPrivateField("_width", width * 2);
