@@ -62,17 +62,16 @@ namespace CustomFloorPlugin.HarmonyPatches {
             }
         }
     }
-    //[HarmonyPatch(typeof(InstancedMaterialLightWithId))]
-    //[HarmonyPatch("ColorWasSet")]
-    //public class InstancedMaterialLightWithId_ColorWasSet_Patch {
-    //    static Color half_magenta = new Color(Color.magenta.r, Color.magenta.g,Color.magenta.b, 0.5f);
-    //    public static bool Prefix(InstancedMaterialLightWithId __instance, MaterialPropertyBlockColorSetter ____materialPropertyBlockColorSetter) {
-            
-    //        if(__instance.gameObject.name == "<3") {
-    //            ____materialPropertyBlockColorSetter.SetColor(half_magenta);
-    //            return false;
-    //        }
-    //        return true;
-    //    }
-    //}
+    [HarmonyPatch(typeof(InstancedMaterialLightWithId))]
+    [HarmonyPatch("ColorWasSet")]
+    public class InstancedMaterialLightWithId_ColorWasSet_Patch {
+        static Color half_magenta = new Color(Color.magenta.r, Color.magenta.g, Color.magenta.b, 0.5f);
+        public static bool Prefix(InstancedMaterialLightWithId __instance, MaterialPropertyBlockColorSetter ____materialPropertyBlockColorSetter, ref Color color) {
+            if(__instance.gameObject.name == "<3(Clone)") {
+                color = new Color(color.r * color.a, color.g * color.a, color.b * color.a, color.a);
+                return true;
+            }
+            return true;
+        }
+    }
 }

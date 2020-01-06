@@ -56,6 +56,10 @@ namespace CustomFloorPlugin
             }
             Plugin.Log("[END OF PLATFORM LOADING SPAM]---------------------------------------");
             Plugin.Log("Attempted to load " + j + " Platforms.");
+            // Replace materials for all renderers
+            MaterialSwapper.ReplaceAllMaterials();
+            Plugin.Log("Replaced Materials");
+
             return platforms.ToArray();
         }
 
@@ -143,9 +147,6 @@ namespace CustomFloorPlugin
             if (customPlatform.icon == null) customPlatform.icon = Resources.FindObjectsOfTypeAll<Sprite>().Where(x => x.name == "FeetIcon").FirstOrDefault();
 
             newPlatform.SetActive(false);
-
-            // Replace materials for this object
-            MaterialSwapper.ReplaceMaterialsForGameObject(customPlatform.gameObject);
 
             return customPlatform;
         }

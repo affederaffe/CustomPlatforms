@@ -66,7 +66,7 @@ namespace CustomFloorPlugin {
                 PlatformManager.OnLoad();
             }
         }
-        internal static void Log(string message, Level level = Level.Info) {
+        internal static void Log(string message = "<3", Level level = Level.Info) {
             logger.Log(level, message);
         }
         internal static void Log(Exception e, Level level = Level.Notice) {

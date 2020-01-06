@@ -1,10 +1,8 @@
 ﻿using System.Linq;
 using UnityEngine;
 
-namespace CustomFloorPlugin
-{
-    static class MaterialSwapper
-    {
+namespace CustomFloorPlugin {
+    static class MaterialSwapper {
         public static Material dark { get; private set; }
         public static Material glow { get; private set; }
         public static Material opaqueGlow { get; private set; }
@@ -13,51 +11,37 @@ namespace CustomFloorPlugin
         const string glowReplaceMatName = "_transparent_glow_replace (Instance)";
         const string opaqueGlowReplaceMatName = "_glow_replace (Instance)";
 
-        public static void GetMaterials()
-        {
+        public static void GetMaterials() {
             // This object should be created in the Menu Scene
             // Grab materials from Menu Scene objects
             var materials = Resources.FindObjectsOfTypeAll<Material>();
 
             dark = new Material(materials.First(x => x.name == "DarkEnvironmentSimple"));
-            //opaqueGlow = new Material(materials.First(x => x.name == "EnvLightOpaque"));
-            opaqueGlow = new Material(materials.First(x => x.name == "DarkEnvironmentSimple"));
+            opaqueGlow = new Material(materials.First(x => x.name == "EnvLightOpaque"));
             glow = new Material(materials.First(x => x.name == "EnvLight"));
         }
-
-        public static void ReplaceMaterialsForGameObject(GameObject go)
-        {
-            if (dark == null || glow == null) GetMaterials();
-            ReplaceAllMaterialsForGameObjectChildren(go, dark, darkReplaceMatName);
-            ReplaceAllMaterialsForGameObjectChildren(go, glow, glowReplaceMatName);
-            ReplaceAllMaterialsForGameObjectChildren(go, opaqueGlow, opaqueGlowReplaceMatName);
-        }
-
-        public static void ReplaceAllMaterialsForGameObjectChildren(GameObject go, Material mat, string matToReplaceName = "")
-        {
-            foreach (Renderer r in go.GetComponentsInChildren<Renderer>(true))
-            {
-                ReplaceAllMaterialsForGameObject(r.gameObject, mat, matToReplaceName);
+        public static void ReplaceAllMaterials() {
+            if(dark == null || glow == null || opaqueGlow == null) {
+                GetMaterials();
             }
-        }
-
-        public static void ReplaceAllMaterialsForGameObject(GameObject go, Material mat, string matToReplaceName = "")
-        {
-            Renderer r = go.GetComponent<Renderer>();
-            Material[] materialsCopy = r.materials;
-            bool materialsDidChange = false;
-
-            for (int i = 0; i < r.materials.Length; i++)
-            {
-                if (materialsCopy[i].name.Equals(matToReplaceName) || matToReplaceName == "")
-                {
-                    materialsCopy[i] = mat;
-                    materialsDidChange = true;
+            foreach(Renderer r in Plugin.FindAll<Renderer>()) {
+                Material[] materialsCopy = r.materials;
+                bool materialsDidChange = false;
+                for(int i = 0; i < materialsCopy.Length; i++) {
+                    if(materialsCopy[i].name.Equals(darkReplaceMatName)) {
+                        materialsCopy[i] = dark;
+                        materialsDidChange = true;
+                    } else if(materialsCopy[i].name.Equals(glowReplaceMatName)) {
+                        materialsCopy[i] = glow;
+                        materialsDidChange = true;
+                    } else if(materialsCopy[i].name.Equals(opaqueGlowReplaceMatName)) {
+                        materialsCopy[i] = opaqueGlow;
+                        materialsDidChange = true;
+                    }
                 }
-            }
-            if (materialsDidChange)
-            {
-                r.materials = materialsCopy;
+                if(materialsDidChange) {
+                    r.materials = materialsCopy;
+                }
             }
         }
     }

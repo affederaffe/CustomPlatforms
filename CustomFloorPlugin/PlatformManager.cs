@@ -149,6 +149,8 @@ namespace CustomFloorPlugin {
                 if(!GetCurrentEnvironment().name.StartsWith("Menu")) {
                     DestroyCustomLights();
                     TempChangeToPlatform(0);
+
+                } else {
                     Heart.SetActive(false);
                 }
             } catch(EnvironmentSceneNotFoundException e) {
@@ -165,6 +167,7 @@ namespace CustomFloorPlugin {
                     TempChangeToPlatform(currentPlatformIndex);
                     PlatformLoader.AddManagers(currentPlatform.gameObject);
                     SpawnCustomLights();
+                    StartCoroutine(ReplaceAllMaterialsAfterOneFrame());
                     EnvironmentArranger.RearrangeEnvironment();
                     TubeLightManager.CreateAdditionalLightSwitchControllers();
                     //RegisterLights();
@@ -320,10 +323,18 @@ namespace CustomFloorPlugin {
                 Heart.GetComponent<LightWithId>().SetPrivateField("_lightManager", LightManager);
                 Heart.SetActive(true);
             }
+            if(Input.GetKeyDown(KeyCode.Keypad3)) {
+
+            }
         }
         internal static IEnumerator<WaitForEndOfFrame> HideForPlatformAfterOneFrame(CustomPlatform customPlatform) {
             yield return new WaitForEndOfFrame();
             Instance.EnvHider.HideObjectsForPlatform(customPlatform);
+        }
+        internal static IEnumerator<WaitForEndOfFrame> ReplaceAllMaterialsAfterOneFrame() {
+            yield return new WaitForEndOfFrame();
+            MaterialSwapper.ReplaceAllMaterials();
+
         }
         internal static IEnumerator<WaitForEndOfFrame> ToggleBlooms(string sceneName = "MenuEnvironment") {
             yield return new WaitForEndOfFrame();
