@@ -1,8 +1,8 @@
 ﻿using Harmony;
 using System.Reflection;
+using UnityEngine;
 
-namespace CustomFloorPlugin.HarmonyPatches
-{
+namespace CustomFloorPlugin.HarmonyPatches {
     internal static class Patcher {
         private static bool _runOnce = false;
         internal static void Patch() {
@@ -16,8 +16,7 @@ namespace CustomFloorPlugin.HarmonyPatches
     [HarmonyPatch("RestartGame", MethodType.Normal)]
     public class MenuTransitionsHelper_RestartGame_Patch {
 
-        public static void Prefix()
-        {
+        public static void Prefix() {
             System.Console.WriteLine("Restart of Game");
             PlatformManager.Instance.TempChangeToPlatform(0);
         }
@@ -58,9 +57,22 @@ namespace CustomFloorPlugin.HarmonyPatches
                     PlatformUIDumpGameObjects.Add(gameObject);
                     UnityEngine.Object.DontDestroyOnLoad(gameObject);
                 }
-            } catch (System.ArgumentException e){
+            } catch(System.ArgumentException e) {
                 Plugin.Log(e);
             }
         }
     }
+    //[HarmonyPatch(typeof(InstancedMaterialLightWithId))]
+    //[HarmonyPatch("ColorWasSet")]
+    //public class InstancedMaterialLightWithId_ColorWasSet_Patch {
+    //    static Color half_magenta = new Color(Color.magenta.r, Color.magenta.g,Color.magenta.b, 0.5f);
+    //    public static bool Prefix(InstancedMaterialLightWithId __instance, MaterialPropertyBlockColorSetter ____materialPropertyBlockColorSetter) {
+            
+    //        if(__instance.gameObject.name == "<3") {
+    //            ____materialPropertyBlockColorSetter.SetColor(half_magenta);
+    //            return false;
+    //        }
+    //        return true;
+    //    }
+    //}
 }

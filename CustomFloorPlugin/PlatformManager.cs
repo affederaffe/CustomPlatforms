@@ -71,7 +71,6 @@ namespace CustomFloorPlugin {
         internal static Scene scene;
         internal static LightWithIdManager LightManager = null;
         internal static GameObject Heart;
-        internal static GameObject Love;
 
         public static void OnLoad() {
             if(Instance != null) return;
@@ -87,7 +86,6 @@ namespace CustomFloorPlugin {
             Plugin.gsm.MarkSceneAsPersistent("PlatformManagerDump");
             Plugin.gsm.transitionDidStartEvent += TransitionPrep;
             Plugin.gsm.transitionDidFinishEvent += TransitionFinalize;
-
             Scene greenDay = SceneManager.LoadScene("GreenDayGrenadeEnvironment", new LoadSceneParameters(LoadSceneMode.Additive));
             StartCoroutine(fuckUnity());
             IEnumerator<WaitUntil> fuckUnity() {
@@ -98,6 +96,46 @@ namespace CustomFloorPlugin {
                 Heart.name = "<3";
                 SceneManager.MoveGameObjectToScene(Heart, scene);
                 SceneManager.UnloadSceneAsync("GreenDayGrenadeEnvironment");
+
+                //<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//
+                using Stream manifestResourceStream = Assembly.GetAssembly(GetType()).GetManifestResourceStream("CustomFloorPlugin.heart.mesh");
+                using StreamReader streamReader = new StreamReader(manifestResourceStream);
+
+                string meshfile = streamReader.ReadToEnd();
+                string[] dimension1 = meshfile.Split('|');
+
+                string[][] s_vector3s = new string[dimension1[0].Split('/').Length][];
+
+                int i = 0;
+                foreach(string s_vector3 in dimension1[0].Split('/')) {
+                    s_vector3s[i++] = s_vector3.Split(',');
+                }
+
+                List<Vector3> vertices = new List<Vector3>();
+                foreach(string[] s_vector3 in s_vector3s) {
+                    vertices.Add(new Vector3(float.Parse(s_vector3[0]), float.Parse(s_vector3[1]), float.Parse(s_vector3[2])));
+                }
+
+                List<int> triangles = new List<int>();
+                foreach(string s_int in dimension1[1].Split('/')) {
+                    triangles.Add(int.Parse(s_int));
+                }
+
+                Mesh mesh = new Mesh();
+                mesh.vertices = vertices.ToArray();
+                mesh.triangles = triangles.ToArray();
+
+                Vector3 position = new Vector3(-8f, 25f, 26f);
+                Quaternion rotation = Quaternion.Euler(-100f, 90f, 90f);
+                Vector3 scale = new Vector3(25f, 25f, 25f);
+
+                Heart.GetComponent<MeshFilter>().mesh = mesh;
+                Heart.transform.position = position;
+                Heart.transform.rotation = rotation;
+                Heart.transform.localScale = scale;
+
+                Heart.GetComponent<LightWithId>().ColorWasSet(Color.magenta);
+                //<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//
             }
         }
         void TransitionPrep(float ignored) {
@@ -111,6 +149,7 @@ namespace CustomFloorPlugin {
                 if(!GetCurrentEnvironment().name.StartsWith("Menu")) {
                     DestroyCustomLights();
                     TempChangeToPlatform(0);
+                    Heart.SetActive(false);
                 }
             } catch(EnvironmentSceneNotFoundException e) {
                 Plugin.Log(e);
@@ -134,6 +173,8 @@ namespace CustomFloorPlugin {
                 }
             } else {
                 Plugin.Log("Menu load detected");
+                Heart.SetActive(true);
+                Heart.GetComponent<LightWithId>().ColorWasSet(Color.magenta);
             }
         }
         /// <summary>
@@ -275,83 +316,9 @@ namespace CustomFloorPlugin {
                 Plugin.Log("------------");
             }
             if(Input.GetKeyDown(KeyCode.Keypad2)) {
-                Love = scene.GetRootGameObjects()[0].transform.Find("Heart by AkaRaiden/Love").gameObject;
-                //scene.GetRootGameObjects()[0].transform.Find("Heart by AkaRaiden").gameObject.SetActive(true);
-                Heart.GetComponent<MeshFilter>().mesh = Love.GetComponent<MeshFilter>().mesh;
-                Heart.transform.localScale = Love.transform.localScale;
-                Heart.transform.position = Love.transform.position;
-                Heart.transform.rotation = Love.transform.rotation;
-
-                
-            }
-            if(Input.GetKeyDown(KeyCode.Keypad4)) {
                 Heart.SetActive(false);
                 Heart.GetComponent<LightWithId>().SetPrivateField("_lightManager", LightManager);
                 Heart.SetActive(true);
-            }
-            if(Input.GetKeyDown(KeyCode.Keypad5)) {
-                //Heart.GetComponent<LightWithId>().ColorWasSet(Love.GetComponent<TubeLight>().color);
-                //string path = Application.dataPath.Replace(@"Beat Saber_Data", @"CustomPlatforms/heart.mesh");
-                //using StreamWriter stream = new StreamWriter(path: path, append: false, encoding: Encoding.Unicode);
-                //for(int i = 0; i < Love.GetComponent<MeshFilter>().mesh.vertices.Length - 1; i++) {
-                //    stream.Write(Love.GetComponent<MeshFilter>().mesh.vertices[i].x);
-                //    stream.Write(",");
-                //    stream.Write(Love.GetComponent<MeshFilter>().mesh.vertices[i].y);
-                //    stream.Write(",");
-                //    stream.Write(Love.GetComponent<MeshFilter>().mesh.vertices[i].z);
-                //    stream.Write("/");
-                //}
-                //stream.Write(Love.GetComponent<MeshFilter>().mesh.vertices.Last().x);
-                //stream.Write(",");
-                //stream.Write(Love.GetComponent<MeshFilter>().mesh.vertices.Last().y);
-                //stream.Write(",");
-                //stream.Write(Love.GetComponent<MeshFilter>().mesh.vertices.Last().z);
-                //stream.Write("|");
-                //for(int i = 0; i < Love.GetComponent<MeshFilter>().mesh.triangles.Length - 1; i++) {
-                //    stream.Write(Love.GetComponent<MeshFilter>().mesh.triangles[i]);
-                //    stream.Write("/");
-                //}
-                //stream.Write(Love.GetComponent<MeshFilter>().mesh.triangles.Last());
-
-                ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-                using Stream manifestResourceStream = Assembly.GetAssembly(GetType()).GetManifestResourceStream("CustomFloorPlugin.heart.mesh");
-                using StreamReader streamReader = new StreamReader(manifestResourceStream);
-                
-                string meshfile = streamReader.ReadToEnd();
-                string[] dimension1 = meshfile.Split('|');
-
-                string[][] s_vector3s = new string[dimension1[0].Split('/').Length][];
-
-                int i = 0;
-                foreach(string s_vector3 in dimension1[0].Split('/')) {
-                    s_vector3s[i++] = s_vector3.Split(',');
-                }
-
-                List<Vector3> vertices = new List<Vector3>();
-                foreach(string[] s_vector3 in s_vector3s) {
-                    vertices.Add(new Vector3(float.Parse(s_vector3[0]), float.Parse(s_vector3[1]), float.Parse(s_vector3[2])));
-                }
-
-                List<int> triangles = new List<int>();
-                foreach(string s_int in dimension1[1].Split('/')) {
-                    triangles.Add(int.Parse(s_int));
-                }
-
-                Mesh mesh = new Mesh();
-                mesh.vertices = vertices.ToArray();
-                mesh.triangles = triangles.ToArray();
-
-                Vector3 position = new Vector3(-8f,25f,26f);
-                Quaternion rotation = Quaternion.Euler(-100f,90f,90f);
-                Vector3 scale = new Vector3(25f,25f,25f);
-
-                Heart.GetComponent<MeshFilter>().mesh = mesh;
-                Heart.transform.position = position;
-                Heart.transform.rotation = rotation;
-                Heart.transform.localScale = scale;
-
-                Heart.GetComponent<LightWithId>().ColorWasSet(Color.magenta);
             }
         }
         internal static IEnumerator<WaitForEndOfFrame> HideForPlatformAfterOneFrame(CustomPlatform customPlatform) {
