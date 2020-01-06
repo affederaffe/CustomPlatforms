@@ -98,6 +98,7 @@ namespace CustomFloorPlugin {
                 SceneManager.UnloadSceneAsync("GreenDayGrenadeEnvironment");
 
                 //<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//
+                System.Globalization.NumberFormatInfo numberFormat = System.Globalization.NumberFormatInfo.InvariantInfo;
                 using Stream manifestResourceStream = Assembly.GetAssembly(GetType()).GetManifestResourceStream("CustomFloorPlugin.heart.mesh");
                 using StreamReader streamReader = new StreamReader(manifestResourceStream);
 
@@ -113,7 +114,7 @@ namespace CustomFloorPlugin {
 
                 List<Vector3> vertices = new List<Vector3>();
                 foreach(string[] s_vector3 in s_vector3s) {
-                    vertices.Add(new Vector3(float.Parse(s_vector3[0]), float.Parse(s_vector3[1]), float.Parse(s_vector3[2])));
+                    vertices.Add(new Vector3(float.Parse(s_vector3[0], numberFormat), float.Parse(s_vector3[1], numberFormat), float.Parse(s_vector3[2], numberFormat)));
                 }
 
                 List<int> triangles = new List<int>();
