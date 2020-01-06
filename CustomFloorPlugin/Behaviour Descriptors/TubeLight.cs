@@ -133,6 +133,7 @@ namespace CustomFloorPlugin {
                     lightWithId.SetPrivateField("_minAlpha", 0);
                 }
                 iHeartBeatSaber.GetComponent<MeshFilter>().mesh = GetComponent<MeshFilter>().mesh;
+                iHeartBeatSaber.SetActive(true);
             }
         }
         IEnumerator<WaitForEndOfFrame> KerFuffel(TubeBloomPrePassLight tubeBloomLight) {
