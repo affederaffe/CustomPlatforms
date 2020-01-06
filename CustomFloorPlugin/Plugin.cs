@@ -8,19 +8,38 @@ using System.Reflection.Emit;
 using System;
 using System.Linq;
 using System.Reflection;
+using IPA.Logging;
 using BS_Utils.Utilities;
-
+using System.Text;
+using Level = IPA.Logging.Logger.Level;
+using CustomFloorPlugin.Exceptions;
 
 namespace CustomFloorPlugin {
-    public class Plugin:IBeatSaberPlugin {
+    internal class Plugin:IBeatSaberPlugin {
         internal static Config config;
-        internal static IPA.Logging.Logger logger;
         internal static GameScenesManager gsm = null;
+        private static IPA.Logging.Logger logger;
+        /// <summary>
+        /// Do not call this out of gamescene, or else.
+        /// </summary>
+        private static BeatmapObjectCallbackController _bocc;
+        internal static BeatmapObjectCallbackController bocc {
+            get {
+                if(_bocc == null) {
+                    _bocc = FindFirst<BeatmapObjectCallbackController>();
+                }
+                return _bocc;
+            }
+            private set {
+                _bocc = value;
+            }
+        }
+
         private bool init = false;
 
         public static Plugin Instance = null;
 
-        public void Init(object thisWillBeNull, IPA.Logging.Logger logger) {
+        public void Init(IPA.Logging.Logger logger) {
             Plugin.logger = logger;
         }
 
@@ -47,37 +66,94 @@ namespace CustomFloorPlugin {
                 PlatformManager.OnLoad();
             }
         }
-
-        internal static void Log(string message) {
-            BS_Utils.Utilities.Logger.Log("CustomFloorPlugin", message);
+        internal static void Log(string message = "<3", Level level = Level.Info) {
+            logger.Log(level, message);
         }
-        internal static void Log(Exception e) {
-            Log("An error has been caught:\n" + e.GetType().Name + "\n At:\n" + e.StackTrace + "\nWith message:\n" + e.Message);
+        internal static void Log(Exception e, Level level = Level.Notice) {
+            Log("An error has been caught:\n" + e.GetType().Name + "\nAt:\n" + e.StackTrace + "\nWith message:\n" + e.Message, level);
+            if(e.InnerException != null) {
+                Log("---Inner Exception:---", level);
+                Log(e, level);
+            }
+        }
+        internal static void Log<T>(List<T> messages, Level level = Level.Info) {
+            foreach(T message in messages) {
+                try {
+                    if(message is GameObject) {
+                        Log(message as GameObject, level);
+                    } else if(message is Component) {
+                        Log(message as Component, level);
+                    } else {
+                        Log(message, level);
+                    }
+                } catch(Exception e) {
+                    Log(e, Level.Error);
+                }
+            }
+        }
+        internal static void Log<T>(T[] messages, Level level = Level.Info) {
+            foreach(T message in messages) {
+                try {
+                    if(message is GameObject) {
+                        Log(message as GameObject, level);
+                    } else if(message is Component) {
+                        Log(message as Component, level);
+                    } else {
+                        Log(message, level);
+                    }
+                } catch(Exception e) {
+                    Log(e, Level.Error);
+                }
+            }
+        }
+        internal static void Log<T>(HashSet<T> messages, Level level = Level.Info) {
+            foreach(T message in messages) {
+                try {
+                    if(message is GameObject) {
+                        Log(message as GameObject, level);
+                    } else if(message is Component) {
+                        Log(message as Component, level);
+                    } else {
+                        Log(message, level);
+                    }
+                } catch(Exception e) {
+                    Log(e, Level.Error);
+                }
+            }
+        }
+        internal static void Log(Component message, Level level = Level.Info) {
+            try {
+                Log(message.GetFullPath(), level);
+            } catch(Exception e) {
+                Log(e, Level.Error);
+            }
+        }
+        internal static void Log(GameObject message, Level level = Level.Info) {
+            try {
+                Log(message.GetFullPath(), level);
+            } catch(Exception e) {
+                Log(e, Level.Error);
+            }
+        }
+        internal static void Log(object message, Level level = Level.Info) {
+            try {
+                Log(message.ToString(), level);
+            } catch(Exception e) {
+                Log(e, Level.Error);
+            }
         }
         /// <summary>
-        /// Searches all currently loaded scenes to find the first Component of type T in the game, regardless if it's active and enabled or not.
+        /// Searches all currently loaded <see cref="Scene"/>s to find the first <see cref="Component"/> of type <typeparamref name="T"/> in the game, regardless if it's active or not.
         /// </summary>
-        /// <typeparam name="T">What Type to look for</typeparam>
+        /// <typeparam name="T">What to look for</typeparam>
+        /// <exception cref="ComponentNotFoundException"></exception>
         /// <returns></returns>
         public static T FindFirst<T>() {
             object component;
-            bool FindFirst(GameObject gameObject) {
-                component = gameObject.GetComponent<T>();
-                if(component != null) {
-                    return true;
-                } else if(gameObject.transform.childCount != 0) {
-                    for(int i = 0; i < gameObject.transform.childCount; i++) {
-                        if(FindFirst(gameObject.transform.GetChild(i).gameObject)) {
-                            return true;
-                        }
-                    }
-                }
-                return false;
-            }
             for(int i = 0; i < SceneManager.sceneCount; i++) {
                 Scene scene = SceneManager.GetSceneAt(i);
                 foreach(GameObject root in scene.GetRootGameObjects()) {
-                    if(FindFirst(root)) {
+                    if(RecursiveFindFirst<T>(root.transform, out component)) {
                         return (T)component;
                     }
                 }
@@ -85,13 +161,106 @@ namespace CustomFloorPlugin {
             throw new ComponentNotFoundException(typeof(T).GetTypeInfo());
         }
         /// <summary>
-        /// Provides the TypeInfo of the Component that wasn't found under ComponentNotFoundException.TypeInfo
+        /// Searches the given <see cref="Scene"/> for the first <see cref="Component"/> of type <typeparamref name="T"/>, regardless if it's active or not.
         /// </summary>
-        public class ComponentNotFoundException:Exception {
-            public TypeInfo TypeInfo;
-            internal ComponentNotFoundException(TypeInfo T):
-                base("No such Component currently present on any GameObject in any scene: " + T.AssemblyQualifiedName) {
-                TypeInfo = T;
+        /// <typeparam name="T">What to look for</typeparam>
+        /// <param name="scene"> Where to look</param>
+        /// <exception cref="ComponentNotFoundException"></exception>
+        /// <returns></returns>
+        public static T FindFirst<T>(Scene scene) {
+            object component;
+            foreach(GameObject root in scene.GetRootGameObjects()) {
+                if(RecursiveFindFirst<T>(root.transform, out component)) {
+                    return (T)component;
+                }
+
+            }
+            throw new ComponentNotFoundException(typeof(T).GetTypeInfo());
+        }
+        /// <summary>
+        /// Searches under the given <see cref="GameObject"/> for the first <see cref="Component"/> of type <typeparamref name="T"/>, regardless if it's active or not.
+        /// </summary>
+        /// <typeparam name="T">What to look for</typeparam>
+        /// <param name="gameObject"> Where to look</param>
+        /// <exception cref="ComponentNotFoundException"></exception>
+        /// <returns></returns>
+        public static T FindFirst<T>(GameObject gameObject) {
+            object component;
+            if(RecursiveFindFirst<T>(gameObject.transform, out component)) {
+                return (T)component;
+            }
+            throw new ComponentNotFoundException(typeof(T).GetTypeInfo());
+        }
+        private static bool RecursiveFindFirst<T>(Transform transform, out object component) {
+            component = transform.GetComponent<T>();
+            if(component != null) {
+                return true;
+            } else if(transform.childCount != 0) {
+                for(int i = 0; i < transform.childCount; i++) {
+                    if(RecursiveFindFirst<T>(transform.GetChild(i), out component)) {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+        /// <summary>
+        /// Finds all <see cref="Component"/>s of Type <typeparamref name="T"/>, regardless if active or not.
+        /// </summary>
+        /// <typeparam name="T">What to look for</typeparam>
+        /// <exception cref="ComponentNotFoundException"></exception>
+        /// <returns></returns>
+        public static List<T> FindAll<T>() {
+            List<T> components = new List<T>();
+            for(int i = 0; i < SceneManager.sceneCount; i++) {
+                Scene scene = SceneManager.GetSceneAt(i);
+                foreach(GameObject root in scene.GetRootGameObjects()) {
+                    RecursiveFindAll<T>(root.transform, ref components);
+                }
+            }
+            if(components.Count == 0) {
+                throw new ComponentNotFoundException(typeof(T).GetTypeInfo());
+            }
+            return components;
+        }
+        /// <summary>
+        /// Finds all <see cref="Component"/>s of Type <typeparamref name="T"/> inside the specified <see cref="Scene"/>, regardless if active or not.
+        /// </summary>
+        /// <typeparam name="T">What to look for</typeparam>
+        /// <param name="scene">Where to look</param>
+        /// <exception cref="ComponentNotFoundException"></exception>
+        /// <returns></returns>
+        public static List<T> FindAll<T>(Scene scene) {
+            List<T> components = new List<T>();
+            foreach(GameObject root in scene.GetRootGameObjects()) {
+                RecursiveFindAll<T>(root.transform, ref components);
+            }
+            if(components.Count == 0) {
+                throw new ComponentNotFoundException(typeof(T).GetTypeInfo());
+            }
+            return components;
+        }
+        /// <summary>
+        /// Finds all <see cref="Component"/>s of Type <typeparamref name="T"/> under the specified <see cref="GameObject"/>, regardless if active or not.
+        /// </summary>
+        /// <typeparam name="T">What Type to look for</typeparam>
+        /// <param name="gameObject">Where to look</param>
+        /// <exception cref="ComponentNotFoundException"></exception>
+        /// <returns></returns>
+        public static List<T> FindAll<T>(GameObject gameObject) {
+            List<T> components = new List<T>();
+            RecursiveFindAll<T>(gameObject.transform, ref components);
+            if(components.Count == 0) {
+                throw new ComponentNotFoundException(typeof(T).GetTypeInfo());
+            }
+            return components;
+        }
+        private static void RecursiveFindAll<T>(Transform transform, ref List<T> components) {
+            components.AddRange(transform.GetComponents<T>());
+            if(transform.childCount != 0) {
+                for(int i = 0; i < transform.childCount; i++) {
+                    RecursiveFindAll<T>(transform.GetChild(i), ref components);
+                }
             }
         }
         ////////////////////////////////////////////////////////////////////////////////////////////////

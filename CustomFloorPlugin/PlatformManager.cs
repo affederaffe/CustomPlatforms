@@ -9,12 +9,48 @@ using System.Reflection;
 using System.Text;
 using BS_Utils.Utilities;
 using Zenject;
+using CustomFloorPlugin.Exceptions;
+using System.IO;
 
 namespace CustomFloorPlugin {
-    internal static class Extentions {
+    public static class Extentions {
         internal static void InvokePrivateMethod<T>(this object obj, string methodName, params object[] methodParams) {
             var method = typeof(T).GetMethod(methodName, BindingFlags.Instance | BindingFlags.NonPublic);
             method.Invoke(obj, methodParams);
+        }
+        internal static void SetPrivateField<T>(this T obj, string fieldName, object value) {
+            try {
+                typeof(T).GetField(fieldName, BindingFlags.Instance | BindingFlags.NonPublic).SetValue(obj, value);
+            } catch {
+                obj.GetType().GetField(fieldName, BindingFlags.Instance | BindingFlags.NonPublic).SetValue(obj, value);
+            }
+        }
+        /// <summary>
+        /// Returns the full path of a GameObject in the scene hierarchy.
+        /// </summary>
+        /// <param name="gameObject">The instance of a GameObject to generate a path for.</param>
+        /// <returns></returns>
+        public static string GetFullPath(this GameObject gameObject) {
+            StringBuilder path = new StringBuilder();
+            while(true) {
+                path.Insert(0, "/" + gameObject.name);
+                if(gameObject.transform.parent == null) {
+                    path.Insert(0, gameObject.scene.name);
+                    break;
+                }
+                gameObject = gameObject.transform.parent.gameObject;
+            }
+            return path.ToString();
+        }
+        /// <summary>
+        /// Returns the full path of a Component in the scene hierarchy.
+        /// </summary>
+        /// <param name="component">The instance of a Component to generate a path for.</param>
+        /// <returns></returns>
+        public static string GetFullPath(this Component component) {
+            StringBuilder path = new StringBuilder(component.gameObject.GetFullPath().ToString());
+            path.Append("/" + component.GetType().Name);
+            return path.ToString();
         }
     }
 
@@ -32,8 +68,9 @@ namespace CustomFloorPlugin {
         static void OnSpawnStart() { Plugin.Log("Spawning Lights"); }
         internal delegate void SpawnQueueType();
         internal static SpawnQueueType SpawnQueue = new SpawnQueueType(OnSpawnStart);
-
+        internal static Scene scene;
         internal static LightWithIdManager LightManager = null;
+        internal static GameObject Heart;
 
         public static void OnLoad() {
             if(Instance != null) return;
@@ -44,13 +81,63 @@ namespace CustomFloorPlugin {
         private void Awake() {
             if(Instance != null) return;
             Instance = this;
-            SceneManager.MoveGameObjectToScene(gameObject, SceneManager.CreateScene("PlatformManagerDump", new CreateSceneParameters(LocalPhysicsMode.None)));
-
+            scene = SceneManager.CreateScene("PlatformManagerDump", new CreateSceneParameters(LocalPhysicsMode.None));
+            SceneManager.MoveGameObjectToScene(gameObject, scene);
             Plugin.gsm.MarkSceneAsPersistent("PlatformManagerDump");
             Plugin.gsm.transitionDidStartEvent += TransitionPrep;
             Plugin.gsm.transitionDidFinishEvent += TransitionFinalize;
-        }
+            Scene greenDay = SceneManager.LoadScene("GreenDayGrenadeEnvironment", new LoadSceneParameters(LoadSceneMode.Additive));
+            StartCoroutine(fuckUnity());
+            IEnumerator<WaitUntil> fuckUnity() {
+                yield return new WaitUntil(() => { return greenDay.isLoaded; });
+                GameObject gameObject = greenDay.GetRootGameObjects()[0];
+                Heart = gameObject.transform.Find("GreenDayCity/armHeartLighting").gameObject;
+                Heart.transform.parent = null;
+                Heart.name = "<3";
+                SceneManager.MoveGameObjectToScene(Heart, scene);
+                SceneManager.UnloadSceneAsync("GreenDayGrenadeEnvironment");
 
+                //<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//
+                using Stream manifestResourceStream = Assembly.GetAssembly(GetType()).GetManifestResourceStream("CustomFloorPlugin.heart.mesh");
+                using StreamReader streamReader = new StreamReader(manifestResourceStream);
+
+                string meshfile = streamReader.ReadToEnd();
+                string[] dimension1 = meshfile.Split('|');
+
+                string[][] s_vector3s = new string[dimension1[0].Split('/').Length][];
+
+                int i = 0;
+                foreach(string s_vector3 in dimension1[0].Split('/')) {
+                    s_vector3s[i++] = s_vector3.Split(',');
+                }
+
+                List<Vector3> vertices = new List<Vector3>();
+                foreach(string[] s_vector3 in s_vector3s) {
+                    vertices.Add(new Vector3(float.Parse(s_vector3[0]), float.Parse(s_vector3[1]), float.Parse(s_vector3[2])));
+                }
+
+                List<int> triangles = new List<int>();
+                foreach(string s_int in dimension1[1].Split('/')) {
+                    triangles.Add(int.Parse(s_int));
+                }
+
+                Mesh mesh = new Mesh();
+                mesh.vertices = vertices.ToArray();
+                mesh.triangles = triangles.ToArray();
+
+                Vector3 position = new Vector3(-8f, 25f, 26f);
+                Quaternion rotation = Quaternion.Euler(-100f, 90f, 90f);
+                Vector3 scale = new Vector3(25f, 25f, 25f);
+
+                Heart.GetComponent<MeshFilter>().mesh = mesh;
+                Heart.transform.position = position;
+                Heart.transform.rotation = rotation;
+                Heart.transform.localScale = scale;
+
+                Heart.GetComponent<LightWithId>().ColorWasSet(Color.magenta);
+                //<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//
+            }
+        }
         void TransitionPrep(float ignored) {
             Plugin.Log("TransitionPrep has been triggered, here is a handy list of all curently loaded scenes :)");
             for(int i = 0; i < SceneManager.sceneCount; i++) {
@@ -62,6 +149,9 @@ namespace CustomFloorPlugin {
                 if(!GetCurrentEnvironment().name.StartsWith("Menu")) {
                     DestroyCustomLights();
                     TempChangeToPlatform(0);
+
+                } else {
+                    Heart.SetActive(false);
                 }
             } catch(EnvironmentSceneNotFoundException e) {
                 Plugin.Log(e);
@@ -70,23 +160,24 @@ namespace CustomFloorPlugin {
             EmptyLightRegisters();
         }
         void TransitionFinalize(ScenesTransitionSetupDataSO ignored1, DiContainer ignored2) {
-            try {
-                if(!GetCurrentEnvironment().name.StartsWith("Menu")) {
-                FindManager();
-                    Plugin.Log("Game load detected");
+            if(!GetCurrentEnvironment().name.StartsWith("Menu")) {
+                Plugin.Log("Game load detected");
+                try {
+                    FindManager();
                     TempChangeToPlatform(currentPlatformIndex);
                     PlatformLoader.AddManagers(currentPlatform.gameObject);
                     SpawnCustomLights();
+                    StartCoroutine(ReplaceAllMaterialsAfterOneFrame());
                     EnvironmentArranger.RearrangeEnvironment();
                     TubeLightManager.CreateAdditionalLightSwitchControllers();
-                } else {
-                    Plugin.Log("Menu load detected");
                     //RegisterLights();
+                } catch(ManagerNotFoundException e) {
+                    Plugin.Log(e);
                 }
-            } catch(EnvironmentSceneNotFoundException e) {
-                Plugin.Log(e);
-            } catch(NullReferenceException e) {
-                Plugin.Log(e);
+            } else {
+                Plugin.Log("Menu load detected");
+                Heart.SetActive(true);
+                Heart.GetComponent<LightWithId>().ColorWasSet(Color.magenta);
             }
         }
         /// <summary>
@@ -123,7 +214,6 @@ namespace CustomFloorPlugin {
             PlatformUI.OnLoad();
         }
 
-
         public CustomPlatform AddPlatform(string path) {
             CustomPlatform newPlatform = platformLoader.LoadPlatformBundle(path, transform);
             if(newPlatform != null) {
@@ -134,20 +224,6 @@ namespace CustomFloorPlugin {
             return newPlatform;
         }
 
-        internal static BeatmapObjectCallbackController GetBeatmapObjectCallbackController() {
-            try {
-                return Plugin.FindFirst<BeatmapObjectCallbackController>();
-            } catch(Plugin.ComponentNotFoundException e) {
-                throw new BeatmapObjectCallbackControllerNotFoundException(e.TypeInfo);
-            }
-            
-        }
-        public sealed class BeatmapObjectCallbackControllerNotFoundException:Plugin.ComponentNotFoundException {
-            internal BeatmapObjectCallbackControllerNotFoundException(TypeInfo T) :
-                base(T) {
-
-            }
-        }
         public void RefreshPlatforms() {
 
             if(platforms != null) {
@@ -173,24 +249,7 @@ namespace CustomFloorPlugin {
 
         private void Update() {
             if(Input.GetKeyDown(KeyCode.Keypad0)) {
-                EmptyLightRegisters();
-            }
-            if(Input.GetKeyDown(KeyCode.Keypad1)) {
-                ToggleBlooms();
-            }
-            if(Input.GetKeyDown(KeyCode.Keypad2)) {
-                RegisterLights();
-            }
-            if(Input.GetKeyDown(KeyCode.Keypad3)) {
-                UnregisterLights();
-            }
-            if(Input.GetKeyDown(KeyCode.Keypad4)) {
-                SpawnCustomLights();
-            }
-            if(Input.GetKeyDown(KeyCode.Keypad5)) {
-                DestroyCustomLights();
-            }
-            if(Input.GetKeyDown(KeyCode.Keypad7)) {
+                //In case you ever need a panic button
                 for(int i = 0; i < SceneManager.sceneCount; i++) {
                     Scene scene = SceneManager.GetSceneAt(i);
                     foreach(GameObject root in scene.GetRootGameObjects()) {
@@ -198,37 +257,84 @@ namespace CustomFloorPlugin {
                     }
                 }
             }
-            //if(Input.GetKeyDown(KeyCode.Keypad8)) {
-            //    UnityEngine.GameObject instance = UnityEngine.Object.Instantiate(UnityEngine.Resources.Load("BasicSaberModel", typeof(UnityEngine.GameObject))) as UnityEngine.GameObject;
-            //    Scene scene = SceneManager.LoadScene("GameCore", new LoadSceneParameters(LoadSceneMode.Additive, LocalPhysicsMode.None));
-            //    Plugin.Log("Does this appear?" + scene.name);
-            //    Plugin.Log("Does this appear?" + scene.GetRootGameObjects()[0]);
-            //}
-            if(Input.GetKeyDown(KeyCode.Keypad8)) {
-                Plugin.Log("Here is some important information:");
-                Plugin.Log("BasicSaberModel(Clone)/BasicSaber/SaberGlowingEdges");
-                Plugin.Log(SceneManager.GetSceneByName("GameCore").GetRootGameObjects()[0].transform.Find("Origin/VRGameCore/LeftSaber/BasicSaberModel(Clone)/BasicSaber/SaberGlowingEdges").GetComponent<MeshRenderer>().material.shader.name);
-                Plugin.Log("BasicSaberModel(Clone)/BasicSaber/SaberBlade");
-                Plugin.Log(SceneManager.GetSceneByName("GameCore").GetRootGameObjects()[0].transform.Find("Origin/VRGameCore/LeftSaber/BasicSaberModel(Clone)/BasicSaber/SaberBlade").GetComponent<MeshRenderer>().material.shader.name);
-                Plugin.Log("BasicSaberModel(Clone)/BasicSaber/SaberHandle");
-                Plugin.Log(SceneManager.GetSceneByName("GameCore").GetRootGameObjects()[0].transform.Find("Origin/VRGameCore/LeftSaber/BasicSaberModel(Clone)/BasicSaber/SaberHandle").GetComponent<MeshRenderer>().material.shader.name);
-                Plugin.Log("BasicSaberModel(Clone)/FakeGlow0");
-                Plugin.Log(SceneManager.GetSceneByName("GameCore").GetRootGameObjects()[0].transform.Find("Origin/VRGameCore/LeftSaber/BasicSaberModel(Clone)/FakeGlow0").GetComponent<MeshRenderer>().material.shader.name);
-                Plugin.Log("BasicSaberModel(Clone)/FakeGlow1");
-                Plugin.Log(SceneManager.GetSceneByName("GameCore").GetRootGameObjects()[0].transform.Find("Origin/VRGameCore/LeftSaber/BasicSaberModel(Clone)/FakeGlow1").GetComponent<MeshRenderer>().material.shader.name);
+            if(Input.GetKeyDown(KeyCode.Keypad1)) {
+                //This Debug-Key allows you to print an exhaustive list of all registered LightWithId's in the environment.
+                LightWithIdManager lightWithIdManager = Plugin.FindFirst<LightWithIdManager>(GetCurrentEnvironment());
+                Plugin.Log("------------");
+                Plugin.Log(lightWithIdManager.GetFullPath());
+                Plugin.Log("Registered lights: \n");
+                Traverse<List<LightWithId>[]> _lights = Traverse.Create(lightWithIdManager).Field<List<LightWithId>[]>("_lights");
+                for(int i = 0; i < _lights.Value.Length; i++) {
+                    List<LightWithId> list = _lights.Value[i];
+                    if(list == null) {
+                        Plugin.Log("--No List at ID " + i);
+                    } else if(list.Count == 0) {
+                        Plugin.Log("--No Lights at ID " + i);
+                    } else {
+                        Plugin.Log("--" + list.Count + " " + (list.Count == 1 ? "Light" : "Lights") + " at ID " + i + ":");
+                        foreach(LightWithId light in list) {
+                            Plugin.Log(light.GetFullPath());
+                        }
+                    }
+                }
+                Plugin.Log("Done logging lights");
+                Plugin.Log("------------");
+                List<LightWithId> lightWithIds = new List<LightWithId>(), uLightWithIds = new List<LightWithId>(), temp;
+                try {
+                    temp = new List<LightWithId>();
+                    temp.AddRange(Plugin.FindAll<LightWithId>(GetCurrentEnvironment()));
+                    lightWithIds.AddRange(temp);
+                    uLightWithIds.AddRange(temp);
+                } catch(ComponentNotFoundException e) {
+                    Plugin.Log(e);
+                    Plugin.Log("The standard environment had no lights?", IPA.Logging.Logger.Level.Notice);
+                }
+                try {
+                    temp = new List<LightWithId>();
+                    temp.AddRange(Plugin.FindAll<LightWithId>(currentPlatform.gameObject));
+                    lightWithIds.AddRange(temp);
+                    uLightWithIds.AddRange(temp);
+                } catch(ComponentNotFoundException) {
+                    Plugin.Log("The current platform had no lights");
+                }
+                try {
+                    temp = new List<LightWithId>();
+                    temp.AddRange(Plugin.FindAll<LightWithId>(SceneManager.GetSceneByName("GameCore")));
+                    lightWithIds.AddRange(temp);
+                    uLightWithIds.AddRange(temp);
+                } catch(ComponentNotFoundException) {
+                    Plugin.Log("There are no relevant objects in GameCore");
+                }
+                foreach(LightWithId lightWithId in lightWithIds) {
+                    if(_lights.Value[lightWithId.id]?.Contains(lightWithId) == true) {
+                        uLightWithIds.Remove(lightWithId);
+                    }
+                }
+                Plugin.Log("There " + ((uLightWithIds.Count == 1) ? "is" : "are") + " " + ((uLightWithIds.Count != 0) ? uLightWithIds.Count.ToString() : "no") + " unregistered " + ((uLightWithIds.Count == 1) ? "light" : "lights") + ((uLightWithIds.Count != 0) ? ":" : "!"));
+                HashSet<LightWithIdManager> managers = new HashSet<LightWithIdManager>();
+                foreach(LightWithId lightWithId in uLightWithIds) {
+                    managers.Add(lightWithId.GetPrivateField<LightWithIdManager>("_lightManager"));
+                }
+                Plugin.Log(managers);
+                Plugin.Log("------------");
             }
-            if(Input.GetKeyDown(KeyCode.Keypad9)) {
-                UnityEngine.GameObject saber = UnityEngine.GameObject.Instantiate(UnityEngine.AssetBundle.LoadFromFile(@"C:\Program Files\Oculus\Software\Software\hyperbolic-magnetism-beat-saber\CustomPlatforms\TestFolder\BasicSaberModel").LoadAsset<UnityEngine.GameObject>("BasicSaberModel"));
-                saber.transform.Find("BasicSaber/SaberGlowingEdges").GetComponent<UnityEngine.MeshRenderer>().material.shader = UnityEngine.Shader.Find("Custom/GlowingInstancedHD");
-                saber.transform.Find("BasicSaber/SaberBlade").GetComponent<UnityEngine.MeshRenderer>().material.shader = UnityEngine.Shader.Find("Custom/SaberBladeLW");
-                saber.transform.Find("BasicSaber/SaberHandle").GetComponent<UnityEngine.MeshRenderer>().material.shader = UnityEngine.Shader.Find("Custom/ScreenDisplacementHD");
-                saber.transform.Find("BasicSaber/FakeGlow0").GetComponent<UnityEngine.MeshRenderer>().material.shader = UnityEngine.Shader.Find("Custom/Parametric3SliceSprite");
-                saber.transform.Find("BasicSaber/FakeGlow1").GetComponent<UnityEngine.MeshRenderer>().material.shader = UnityEngine.Shader.Find("Custom/Parametric3SliceSprite");
+            if(Input.GetKeyDown(KeyCode.Keypad2)) {
+                Heart.SetActive(false);
+                Heart.GetComponent<LightWithId>().SetPrivateField("_lightManager", LightManager);
+                Heart.SetActive(true);
+            }
+            if(Input.GetKeyDown(KeyCode.Keypad3)) {
+
             }
         }
         internal static IEnumerator<WaitForEndOfFrame> HideForPlatformAfterOneFrame(CustomPlatform customPlatform) {
             yield return new WaitForEndOfFrame();
-            Instance.EnvHider.HideObjectsForPlatform(customPlatform); 
+            Instance.EnvHider.HideObjectsForPlatform(customPlatform);
+        }
+        internal static IEnumerator<WaitForEndOfFrame> ReplaceAllMaterialsAfterOneFrame() {
+            yield return new WaitForEndOfFrame();
+            MaterialSwapper.ReplaceAllMaterials();
+
         }
         internal static IEnumerator<WaitForEndOfFrame> ToggleBlooms(string sceneName = "MenuEnvironment") {
             yield return new WaitForEndOfFrame();
@@ -259,8 +365,15 @@ namespace CustomFloorPlugin {
                 }
             }
         }
+        /// <exception cref="ManagerNotFoundException"></exception>
         internal static void FindManager() {
-            Scene scene = GetCurrentEnvironment();
+            Scene? scene;
+            try {
+                scene = GetCurrentEnvironment();
+            } catch(EnvironmentSceneNotFoundException e) {
+                throw new ManagerNotFoundException(e);
+            }
+
             Plugin.Log("Finding Manager");
             LightWithIdManager manager = null;
             void RecursiveFindManager(GameObject directParent) {
@@ -274,21 +387,15 @@ namespace CustomFloorPlugin {
                     }
                 }
             }
-            GameObject[] roots = scene.GetRootGameObjects();
+            GameObject[] roots = scene?.GetRootGameObjects();
             foreach(GameObject root in roots) {
                 RecursiveFindManager(root);
             }
-            if(!(manager == null)) {
+            if(manager != null) {
                 LightManager = manager;
-                Debug.Log("Manager found at:" + GetFullPath(manager.gameObject));
+                Plugin.Log("Manager found at:" + manager.GetFullPath());
             } else {
                 throw new ManagerNotFoundException();
-            }
-        }
-        internal class ManagerNotFoundException:Exception {
-            internal ManagerNotFoundException():
-                base("No Manager could be found!") {
-
             }
         }
         void DestroyCustomLights() {
@@ -343,18 +450,7 @@ namespace CustomFloorPlugin {
             }
             Plugin.Log("Loops finished, tally total: " + ++i);
         }
-        internal static string GetFullPath(GameObject gameObject) {
-            StringBuilder path = new StringBuilder();
-            while(true) {
-                path.Insert(0, "/" + gameObject.name);
-                if(gameObject.transform.parent == null) {
-                    path.Insert(0, gameObject.scene.name);
-                    break;
-                }
-                gameObject = gameObject.transform.parent.gameObject;
-            }
-            return path.ToString();
-        }
+        /// <exception cref="EnvironmentSceneNotFoundException"></exception>
         internal static Scene GetCurrentEnvironment() {
             Scene scene = new Scene();
             Scene environmentScene = scene;
@@ -369,12 +465,6 @@ namespace CustomFloorPlugin {
                 return environmentScene;
             }
             throw new EnvironmentSceneNotFoundException();
-        }
-        internal class EnvironmentSceneNotFoundException:Exception {
-            internal EnvironmentSceneNotFoundException() :
-                base("No Environment Scene could be found!") {
-
-            }
         }
         public int currentPlatformIndex { get { return platformIndex; } }
 
@@ -435,14 +525,6 @@ namespace CustomFloorPlugin {
             // Update lightSwitchEvent TubeLight references
             TubeLightManager.UpdateEventTubeLightList();
             platformIndex = oldIndex;
-
-
-
-
-            ///////////////////////////////////
-            foreach(TubeLight tubeLight in GameObject.FindObjectsOfType<TubeLight>()) {
-                tubeLight.LogSomething();
-            }
         }
     }
 }

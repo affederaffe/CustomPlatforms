@@ -3,68 +3,33 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
 using BS_Utils.Utilities;
+using Harmony;
 
-
-namespace CustomFloorPlugin
-{
-    class TrackRingsManagerSpawner : MonoBehaviour
-    {
+namespace CustomFloorPlugin {
+    class TrackRingsManagerSpawner:MonoBehaviour {
         List<TrackRings> trackRingsDescriptors = new List<TrackRings>();
         public List<TrackLaneRingsManager> trackLaneRingsManagers = new List<TrackLaneRingsManager>();
         List<TrackLaneRingsRotationEffectSpawner> rotationSpawners = new List<TrackLaneRingsRotationEffectSpawner>();
         List<TrackLaneRingsPositionStepEffectSpawner> stepSpawners = new List<TrackLaneRingsPositionStepEffectSpawner>();
 
-        internal void RegisterForEvents()
-        {
-            foreach (TrackLaneRingsRotationEffectSpawner spawner in rotationSpawners)
-            {
-                BSEvents.beatmapEvent += spawner.HandleBeatmapObjectCallbackControllerBeatmapEventDidTrigger;
-            }
-            foreach (TrackLaneRingsPositionStepEffectSpawner spawner in stepSpawners)
-            {
-                BSEvents.beatmapEvent += spawner.HandleBeatmapObjectCallbackControllerBeatmapEventDidTrigger;
-            }
-        }
-
-        private void Start()
-        {
+        private void Start() {
             // make sure the rings are parented to this transform
-            foreach (TrackLaneRingsManager trackLaneRingsManager in trackLaneRingsManagers)
-            {
+            foreach(TrackLaneRingsManager trackLaneRingsManager in trackLaneRingsManagers) {
                 TrackLaneRing[] rings = ReflectionUtil.GetPrivateField<TrackLaneRing[]>(trackLaneRingsManager, "_rings");
-                foreach (TrackLaneRing ring in rings)
-                {
+                foreach(TrackLaneRing ring in rings) {
                     ring.transform.parent = transform;
+                    PlatformManager.SpawnedObjects.Add(ring.gameObject);
                 }
             }
         }
-
-        private void OnDisable()
-        {
-            foreach (TrackLaneRingsRotationEffectSpawner spawner in rotationSpawners)
-            {
-                BSEvents.beatmapEvent -= spawner.HandleBeatmapObjectCallbackControllerBeatmapEventDidTrigger;
-            }
-            foreach (TrackLaneRingsPositionStepEffectSpawner spawner in stepSpawners)
-            {
-                BSEvents.beatmapEvent -= spawner.HandleBeatmapObjectCallbackControllerBeatmapEventDidTrigger;
-            }
-        }
-
-        public void CreateTrackRings(GameObject go)
-        {
-            bool active = go.activeSelf;
-            if(active) {
-                go.SetActive(false);
-            }
+        public void CreateTrackRings(GameObject go) {
             rotationSpawners = new List<TrackLaneRingsRotationEffectSpawner>();
             stepSpawners = new List<TrackLaneRingsPositionStepEffectSpawner>();
             trackLaneRingsManagers = new List<TrackLaneRingsManager>();
             trackRingsDescriptors = new List<TrackRings>();
-            
+
             TrackRings[] ringsDescriptors = go.GetComponentsInChildren<TrackRings>();
-            foreach (TrackRings trackRingDesc in ringsDescriptors)
-            {
+            foreach(TrackRings trackRingDesc in ringsDescriptors) {
                 trackRingsDescriptors.Add(trackRingDesc);
 
                 TrackLaneRingsManager ringsManager =
@@ -77,8 +42,7 @@ namespace CustomFloorPlugin
                 ReflectionUtil.SetPrivateField(ringsManager, "_trackLaneRingPrefab", ring);
                 ReflectionUtil.SetPrivateField(ringsManager, "_ringCount", trackRingDesc.ringCount);
                 ReflectionUtil.SetPrivateField(ringsManager, "_ringPositionStep", trackRingDesc.ringPositionStep);
-                if (trackRingDesc.useRotationEffect)
-                {
+                if(trackRingDesc.useRotationEffect) {
                     TrackLaneRingsRotationEffect rotationEffect =
                         trackRingDesc.gameObject.AddComponent<TrackLaneRingsRotationEffect>();
                     PlatformManager.SpawnedComponents.Add(rotationEffect);
@@ -93,29 +57,25 @@ namespace CustomFloorPlugin
                         trackRingDesc.gameObject.AddComponent<TrackLaneRingsRotationEffectSpawner>();
                     rotationSpawners.Add(rotationEffectSpawner);
                     PlatformManager.SpawnedComponents.Add(rotationEffectSpawner);
-
+                    ReflectionUtil.SetPrivateField(rotationEffectSpawner, "_beatmapObjectCallbackController", Plugin.bocc);
                     ReflectionUtil.SetPrivateField(rotationEffectSpawner, "_beatmapEventType", (BeatmapEventType)trackRingDesc.rotationSongEventType);
                     ReflectionUtil.SetPrivateField(rotationEffectSpawner, "_rotationStep", trackRingDesc.rotationStep);
                     ReflectionUtil.SetPrivateField(rotationEffectSpawner, "_rotationPropagationSpeed", trackRingDesc.rotationPropagationSpeed);
                     ReflectionUtil.SetPrivateField(rotationEffectSpawner, "_rotationFlexySpeed", trackRingDesc.rotationFlexySpeed);
                     ReflectionUtil.SetPrivateField(rotationEffectSpawner, "_trackLaneRingsRotationEffect", rotationEffect);
                 }
-                if (trackRingDesc.useStepEffect)
-                {
+                if(trackRingDesc.useStepEffect) {
                     TrackLaneRingsPositionStepEffectSpawner stepEffectSpawner =
                         trackRingDesc.gameObject.AddComponent<TrackLaneRingsPositionStepEffectSpawner>();
                     stepSpawners.Add(stepEffectSpawner);
                     PlatformManager.SpawnedComponents.Add(stepEffectSpawner);
-
+                    ReflectionUtil.SetPrivateField(stepEffectSpawner, "_beatmapObjectCallbackController", Plugin.bocc);
                     ReflectionUtil.SetPrivateField(stepEffectSpawner, "_trackLaneRingsManager", ringsManager);
                     ReflectionUtil.SetPrivateField(stepEffectSpawner, "_beatmapEventType", (BeatmapEventType)trackRingDesc.stepSongEventType);
                     ReflectionUtil.SetPrivateField(stepEffectSpawner, "_minPositionStep", trackRingDesc.minPositionStep);
                     ReflectionUtil.SetPrivateField(stepEffectSpawner, "_maxPositionStep", trackRingDesc.maxPositionStep);
                     ReflectionUtil.SetPrivateField(stepEffectSpawner, "_moveSpeed", trackRingDesc.moveSpeed);
                 }
-            }
-            if(active) {
-                go.SetActive(true);
             }
         }
     }

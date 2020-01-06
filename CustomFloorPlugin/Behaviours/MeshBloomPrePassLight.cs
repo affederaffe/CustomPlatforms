@@ -1,3 +1,4 @@
+using Harmony;
 using UnityEngine;
 
 // Token: 0x02000048 RID: 72
@@ -21,6 +22,7 @@ public class MeshBloomPrePassLight:TubeBloomPrePassLight {
         renderer.material.color = color;
         _parametricBoxController.enabled = false;
     }
+
 }
 //Don't use this, it's broken, it's here for reference
 //[HarmonyPatch(typeof(MeshBloomPrePassLight))]
@@ -32,3 +34,14 @@ public class MeshBloomPrePassLight:TubeBloomPrePassLight {
 //        return false;
 //    }
 //}
+[HarmonyPatch(typeof(MeshBloomPrePassLight))]
+[HarmonyPatch("color", MethodType.Setter)]
+public class MeshBloomPrePassLightPatch {
+    public static bool Prefix(MeshBloomPrePassLight __instance, Color value) {
+        if(__instance.GetType() == typeof(MeshBloomPrePassLight)) {
+            if(__instance.renderer.material != null) __instance.renderer.material.color = value;
+            return false;
+        }
+        return true;
+    }
+}

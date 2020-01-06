@@ -56,6 +56,10 @@ namespace CustomFloorPlugin
             }
             Plugin.Log("[END OF PLATFORM LOADING SPAM]---------------------------------------");
             Plugin.Log("Attempted to load " + j + " Platforms.");
+            // Replace materials for all renderers
+            MaterialSwapper.ReplaceAllMaterials();
+            Plugin.Log("Replaced Materials");
+
             return platforms.ToArray();
         }
 
@@ -147,12 +151,17 @@ namespace CustomFloorPlugin
             return customPlatform;
         }
         internal static void AddManagers(GameObject go) {
+            bool active = go.activeSelf;
+            if(active) {
+                go.SetActive(false);
+            }
             //Plugin.Log("Adding Managers");
             AddManagers(go, go);
+            if(active) {
+                go.SetActive(true);
+            }
         }
         private static void AddManagers(GameObject go, GameObject root) {
-            // Replace materials for this object
-            MaterialSwapper.ReplaceMaterialsForGameObject(go);
 
             // Rotation effect manager
             if(go.GetComponentInChildren<RotationEventEffect>(true) != null) {
@@ -181,7 +190,6 @@ namespace CustomFloorPlugin
                     PlatformManager.SpawnedComponents.Add(trms);
                 }
                 trms.CreateTrackRings(go);
-                trms.RegisterForEvents();
                 //Plugin.Log("Added TrackRingsManagerSpawners");
             }
 

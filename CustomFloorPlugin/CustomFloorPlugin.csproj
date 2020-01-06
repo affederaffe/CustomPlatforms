@@ -22,6 +22,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
+    <LangVersion>8.0</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -31,6 +32,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
+    <LangVersion>8.0</LangVersion>
   </PropertyGroup>
   <PropertyGroup>
     <RunPostBuildEvent>Always</RunPostBuildEvent>
@@ -116,6 +118,7 @@
     <EmbeddedResource Include="manifest.json" />
     <Compile Include="EnvironmentRepositioner.cs" />
     <Compile Include="EnvironmentSceneOverrider.cs" />
+    <Compile Include="Exceptions.cs" />
     <Compile Include="Harmony Patches\Patches.cs" />
     <Compile Include="Legacy Behaviours\CustomPlatformLegacy.cs" />
     <Compile Include="EnvironmentHider.cs" />
@@ -154,6 +157,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
+    <EmbeddedResource Include="heart.mesh" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>

@@ -8,7 +8,7 @@ using UnityEngine;
 using Harmony;
 using UnityEngine.SceneManagement;
 using BS_Utils.Utilities;
-
+using CustomFloorPlugin;
 namespace CustomFloorPlugin {
     [RequireComponent(typeof(MeshFilter))]
     [RequireComponent(typeof(MeshRenderer))]
@@ -40,7 +40,6 @@ namespace CustomFloorPlugin {
         public float center = 0.5f;
         public Color color = Color.white;
         public LightsID lightsID = LightsID.Static;
-        private static LightWithIdManager _lightManager;
 
         private void OnDrawGizmos() {
             Gizmos.color = color;
@@ -50,7 +49,6 @@ namespace CustomFloorPlugin {
         }
 
         // ----------------
-        private bool IsMesh = false;
 
         private static TubeBloomPrePassLight _prefab;
         internal static TubeBloomPrePassLight prefab {
@@ -80,62 +78,62 @@ namespace CustomFloorPlugin {
                 return _prefab;
             }
         }
-
         private TubeBloomPrePassLight tubeBloomLight;
+        private GameObject iHeartBeatSaber;
+        internal void GameAwake() {
 
-        internal void LogSomething() {
-            //Plugin.Log(tubeBloomLight.GetComponent<LightWithId>().GetType().FullName);
-        }
-
-        private void GameAwake() {
-            tubeBloomLight = Instantiate(prefab);
-            tubeBloomLight.transform.SetParent(transform);
-            PlatformManager.SpawnedObjects.Add(tubeBloomLight.gameObject);
-
-            tubeBloomLight.transform.localRotation = Quaternion.identity;
-            tubeBloomLight.transform.localPosition = Vector3.zero;
-            tubeBloomLight.transform.localScale = new Vector3(1 / transform.lossyScale.x, 1 / transform.lossyScale.y, 1 / transform.lossyScale.z);
-
-
+            GetComponent<MeshRenderer>().enabled = false;
             if(GetComponent<MeshFilter>().mesh.vertexCount == 0) {
-                GetComponent<MeshRenderer>().enabled = false;
-                //Traverse.Create(tubeBloomLight).Field("_registeredWithLightType")
-            } else {
-                // swap for MeshBloomPrePassLight
-                IsMesh = true;
+                tubeBloomLight = Instantiate(prefab);
+                tubeBloomLight.transform.parent = transform;
+                PlatformManager.SpawnedObjects.Add(tubeBloomLight.gameObject);
+
+                tubeBloomLight.transform.localRotation = Quaternion.identity;
+                tubeBloomLight.transform.localPosition = Vector3.zero;
+                tubeBloomLight.transform.localScale = new Vector3(1 / transform.lossyScale.x, 1 / transform.lossyScale.y, 1 / transform.lossyScale.z);
+
                 tubeBloomLight.gameObject.SetActive(false);
-                MeshBloomPrePassLight meshbloom = ReflectionUtil.CopyComponent(tubeBloomLight, typeof(TubeBloomPrePassLight), typeof(MeshBloomPrePassLight), tubeBloomLight.gameObject) as MeshBloomPrePassLight;
-                meshbloom.Init(GetComponent<Renderer>());
-                DestroyImmediate(tubeBloomLight);
-                tubeBloomLight = meshbloom;
+
+                var lightWithId = tubeBloomLight.GetComponent<LightWithId>();
+                if(lightWithId) {
+                    lightWithId.SetPrivateField("_tubeBloomPrePassLight", tubeBloomLight);
+                    lightWithId.SetPrivateField("_ID", (int)lightsID);
+                    lightWithId.SetPrivateField("_lightManager", PlatformManager.LightManager);
+                }
+                // i broke it -.-
+                //try to fix it, if you can't: roll back
+                tubeBloomLight.SetPrivateField("_width", width * 2);
+                tubeBloomLight.SetPrivateField("_length", length);
+                tubeBloomLight.SetPrivateField("_center", center);
+                tubeBloomLight.SetPrivateField("_transform", tubeBloomLight.transform);
+                tubeBloomLight.SetPrivateField("_maxAlpha", 0.1f);
+
+                var parabox = tubeBloomLight.GetComponentInChildren<ParametricBoxController>();
+                tubeBloomLight.SetPrivateField("_parametricBoxController", parabox);
+
+                var parasprite = tubeBloomLight.GetComponentInChildren<Parametric3SliceSpriteController>();
+                tubeBloomLight.SetPrivateField("_dynamic3SliceSprite", parasprite);
+                parasprite.Init();
+                parasprite.GetComponent<MeshRenderer>().enabled = false;
+
+                SetColorToDefault();
                 tubeBloomLight.gameObject.SetActive(true);
+            } else {
+                // swap for <3
+                iHeartBeatSaber = Instantiate(PlatformManager.Heart);
+                PlatformManager.SpawnedObjects.Add(iHeartBeatSaber);
+                iHeartBeatSaber.transform.parent = transform;
+                iHeartBeatSaber.transform.position = transform.position;
+                iHeartBeatSaber.transform.localScale = Vector3.one;
+                iHeartBeatSaber.transform.rotation = transform.rotation;
+                var lightWithId = iHeartBeatSaber.GetComponent<LightWithId>();
+                if(lightWithId) {
+                    lightWithId.SetPrivateField("_ID", (int)lightsID);
+                    lightWithId.SetPrivateField("_lightManager", PlatformManager.LightManager);
+                    lightWithId.SetPrivateField("_minAlpha", 0);
+                }
+                iHeartBeatSaber.GetComponent<MeshFilter>().mesh = GetComponent<MeshFilter>().mesh;
             }
-            tubeBloomLight.gameObject.SetActive(false);
-
-            var lightWithId = tubeBloomLight.GetComponent<LightWithId>();
-            if(lightWithId) {
-
-                lightWithId.SetPrivateField("_tubeBloomPrePassLight", tubeBloomLight);
-                Traverse.Create(lightWithId).Field<int>("_ID").Value = (int)lightsID;
-                Traverse.Create(lightWithId).Field<LightWithIdManager>("_lighManager").Value = PlatformManager.LightManager;
-            }
-
-            tubeBloomLight.SetPrivateField("_width", width * 2);
-            tubeBloomLight.SetPrivateField("_length", length);
-            tubeBloomLight.SetPrivateField("_center", center);
-            tubeBloomLight.SetPrivateField("_transform", tubeBloomLight.transform);
-            tubeBloomLight.SetPrivateField("_maxAlpha", 0.1f);
-
-            var parabox = tubeBloomLight.GetComponentInChildren<ParametricBoxController>();
-            tubeBloomLight.SetPrivateField("_parametricBoxController", parabox);
-
-            var parasprite = tubeBloomLight.GetComponentInChildren<Parametric3SliceSpriteController>();
-            tubeBloomLight.SetPrivateField("_dynamic3SliceSprite", parasprite);
-            parasprite.Init();
-            parasprite.GetComponent<MeshRenderer>().enabled = false;
-
-            SetColorToDefault();
-            tubeBloomLight.gameObject.SetActive(true);
         }
         IEnumerator<WaitForEndOfFrame> KerFuffel(TubeBloomPrePassLight tubeBloomLight) {
             yield return new WaitForEndOfFrame();
