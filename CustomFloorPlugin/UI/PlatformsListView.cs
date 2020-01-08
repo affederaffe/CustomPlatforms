@@ -19,6 +19,7 @@ namespace CustomFloorPlugin.UI {
         [UIAction("PlatformSelect")]
         private void PlatformSelect(TableView ignored1, int idx) {
             PlatformManager.Instance.SetPlatform(idx);
+            Plugin.FindFirst<EnvironmentOverrideSettingsPanelController>().GetPrivateField<OverrideEnvironmentSettings>("_overrideEnvironmentSettings").overrideEnvironments = false;
         }
         protected override void DidDeactivate(DeactivationType deactivationType) {
             PlatformManager.InternalTempChangeToPlatform(0);
@@ -31,7 +32,6 @@ namespace CustomFloorPlugin.UI {
 
         [UIAction("#post-parse")]
         internal void SetupPlatformsList() {
-            Plugin.Log("Creating Settings UI");
             customListTableData.data.Clear();
             foreach(CustomPlatform platform in PlatformManager.Instance.GetPlatforms()) {
                 customListTableData.data.Add(new CustomListTableData.CustomCellInfo(platform.platName, platform.platAuthor, platform.icon.texture));
@@ -40,7 +40,6 @@ namespace CustomFloorPlugin.UI {
             int selectedPlatform = PlatformManager.Instance.currentPlatformIndex;
             customListTableData.tableView.ScrollToCellWithIdx(selectedPlatform, HMUI.TableViewScroller.ScrollPositionType.Beginning, false);
             customListTableData.tableView.SelectCellWithIdx(selectedPlatform);
-            Plugin.Log("Done Creating Settings UI");
         }
     }
 }

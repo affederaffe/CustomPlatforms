@@ -38,7 +38,6 @@ namespace CustomFloorPlugin
         public static void SetupMenuButtons(ScenesTransitionSetupDataSO ignored1 = null, DiContainer ignored2 = null) {
             MenuButtons.instance.RegisterButton(new MenuButton("Custom Platforms", "Change Custom Plaforms Here!", CustomPlatformsMenuButtonPressed, true));
             BSMLSettings.instance.AddSettingsMenu("Custom Platforms", "CustomFloorPlugin.UI.Settings.bsml", UI.Settings.instance);
-            Plugin.Log("Settings should exist now");
         }
         private static void CustomPlatformsMenuButtonPressed()
         {

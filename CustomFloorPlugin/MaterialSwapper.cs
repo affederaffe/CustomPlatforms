@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using UnityEngine;
 
 namespace CustomFloorPlugin {
@@ -25,22 +26,28 @@ namespace CustomFloorPlugin {
                 GetMaterials();
             }
             foreach(Renderer r in Plugin.FindAll<Renderer>()) {
-                Material[] materialsCopy = r.sharedMaterials;
-                bool materialsDidChange = false;
-                for(int i = 0; i < materialsCopy.Length; i++) {
-                    if(materialsCopy[i].name.Equals(darkReplaceMatName)) {
-                        materialsCopy[i] = dark;
-                        materialsDidChange = true;
-                    } else if(materialsCopy[i].name.Equals(glowReplaceMatName)) {
-                        materialsCopy[i] = glow;
-                        materialsDidChange = true;
-                    } else if(materialsCopy[i].name.Equals(opaqueGlowReplaceMatName)) {
-                        materialsCopy[i] = opaqueGlow;
-                        materialsDidChange = true;
+
+                if(r.gameObject.scene.name == "PlatformManagerDump") {
+
+                    Material[] materialsCopy = r.sharedMaterials;
+                    bool materialsDidChange = false;
+                    for(int i = 0; i < materialsCopy.Length; i++) {
+                        if(materialsCopy[i] != null) {
+                            if(materialsCopy[i].name.Equals(darkReplaceMatName)) {
+                                materialsCopy[i] = dark;
+                                materialsDidChange = true;
+                            } else if(materialsCopy[i].name.Equals(glowReplaceMatName)) {
+                                materialsCopy[i] = glow;
+                                materialsDidChange = true;
+                            } else if(materialsCopy[i].name.Equals(opaqueGlowReplaceMatName)) {
+                                materialsCopy[i] = opaqueGlow;
+                                materialsDidChange = true;
+                            }
+                        }
                     }
-                }
-                if(materialsDidChange) {
-                    r.sharedMaterials = materialsCopy;
+                    if(materialsDidChange) {
+                        r.sharedMaterials = materialsCopy;
+                    }
                 }
             }
         }

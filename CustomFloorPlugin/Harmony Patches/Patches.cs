@@ -22,19 +22,6 @@ namespace CustomFloorPlugin.HarmonyPatches {
             PlatformManager.InternalTempChangeToPlatform();
         }
     }
-    [HarmonyPatch(typeof(EnvironmentOverrideSettingsPanelController))]
-    [HarmonyPatch("HandleOverrideEnvironmentsToggleValueChanged")]
-    public class EnviromentOverideSettings_Patch {
-        static public void Postfix(OverrideEnvironmentSettings ____overrideEnvironmentSettings) {
-            if(____overrideEnvironmentSettings.overrideEnvironments == true) {
-                Plugin.Log("Enviroment Override On");
-            }
-
-            if(____overrideEnvironmentSettings.overrideEnvironments == false) {
-                Plugin.Log("Enviroment Override Off");
-            }
-        }
-    }
     /// <summary>
     /// After the settings have been applied for the first time, I see myself currently forced to move everthing into DontDestroyOnLoad.
     /// This is not reversed after loading, but shouldn't matter.
