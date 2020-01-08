@@ -25,7 +25,7 @@ namespace CustomFloorPlugin {
                 GetMaterials();
             }
             foreach(Renderer r in Plugin.FindAll<Renderer>()) {
-                Material[] materialsCopy = r.materials;
+                Material[] materialsCopy = r.sharedMaterials;
                 bool materialsDidChange = false;
                 for(int i = 0; i < materialsCopy.Length; i++) {
                     if(materialsCopy[i].name.Equals(darkReplaceMatName)) {
@@ -40,7 +40,7 @@ namespace CustomFloorPlugin {
                     }
                 }
                 if(materialsDidChange) {
-                    r.materials = materialsCopy;
+                    r.sharedMaterials = materialsCopy;
                 }
             }
         }
