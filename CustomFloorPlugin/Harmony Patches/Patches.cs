@@ -1,4 +1,5 @@
 ﻿using Harmony;
+using IPA.Utilities;
 using System.Reflection;
 using UnityEngine;
 
@@ -18,20 +19,7 @@ namespace CustomFloorPlugin.HarmonyPatches {
 
         public static void Prefix() {
             System.Console.WriteLine("Restart of Game");
-            PlatformManager.Instance.TempChangeToPlatform(0);
-        }
-    }
-    [HarmonyPatch(typeof(EnvironmentOverrideSettingsPanelController))]
-    [HarmonyPatch("HandleOverrideEnvironmentsToggleValueChanged")]
-    public class EnviromentOverideSettings_Patch {
-        static public void Postfix(OverrideEnvironmentSettings ____overrideEnvironmentSettings) {
-            if(____overrideEnvironmentSettings.overrideEnvironments == true) {
-                Plugin.Log("Enviroment Override On");
-            }
-
-            if(____overrideEnvironmentSettings.overrideEnvironments == false) {
-                Plugin.Log("Enviroment Override Off");
-            }
+            PlatformManager.InternalTempChangeToPlatform();
         }
     }
     /// <summary>
@@ -66,12 +54,12 @@ namespace CustomFloorPlugin.HarmonyPatches {
     [HarmonyPatch("ColorWasSet")]
     public class InstancedMaterialLightWithId_ColorWasSet_Patch {
         static Color half_magenta = new Color(Color.magenta.r, Color.magenta.g, Color.magenta.b, 0.5f);
-        public static bool Prefix(InstancedMaterialLightWithId __instance, MaterialPropertyBlockColorSetter ____materialPropertyBlockColorSetter, ref Color color) {
+        public static void Prefix(InstancedMaterialLightWithId __instance, MaterialPropertyBlockColorSetter ____materialPropertyBlockColorSetter, ref Color color) {
             if(__instance.gameObject.name == "<3(Clone)") {
-                color = new Color(color.r * color.a, color.g * color.a, color.b * color.a, color.a);
-                return true;
+                color.r *= color.a;
+                color.g *= color.a;
+                color.b *= color.a;
             }
-            return true;
         }
     }
 }

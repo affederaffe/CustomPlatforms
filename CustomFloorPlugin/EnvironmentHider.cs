@@ -30,9 +30,7 @@ namespace CustomFloorPlugin {
         /// </summary>
         /// <param name="platform">A platform that defines which objects are to be hidden</param>
         public void HideObjectsForPlatform(CustomPlatform platform) {
-            Plugin.Log("Finding Environment");
             FindEnvironment();
-            Plugin.Log("Hiding Environment");
             if(feet != null) SetCollectionHidden(feet, (platform.hideDefaultPlatform && !showFeetOverride));
             if(originalPlatform != null) SetCollectionHidden(originalPlatform, platform.hideDefaultPlatform);
             if(smallRings != null) SetCollectionHidden(smallRings, platform.hideSmallRings);
@@ -45,17 +43,13 @@ namespace CustomFloorPlugin {
             if(doubleColorLasers != null) SetCollectionHidden(doubleColorLasers, platform.hideDoubleColorLasers);
             if(rotatingLasers != null) SetCollectionHidden(rotatingLasers, platform.hideRotatingLasers);
             if(trackLights != null) SetCollectionHidden(trackLights, platform.hideTrackLights);
-            Plugin.Log("Done Hiding Environment");
         }
 
         /// <summary>
         /// Finds all GameObjects that make up the default environment
         /// and groups them into array lists
         /// </summary>
-        int i;
         void FindEnvironment() {
-            Plugin.Log("Starting Operation Hide and Seek");
-            i = 0;
             FindFeetIcon();
             FindOriginalPlatform();
             FindSmallRings();
@@ -68,7 +62,6 @@ namespace CustomFloorPlugin {
             FindRotatingLasers();
             FindDoubleColorLasers();
             FindTrackLights();
-            Plugin.Log("Hunt concluded. " + i + " Victims found!");
         }
 
         /// <summary>
@@ -95,7 +88,6 @@ namespace CustomFloorPlugin {
                 go = root.transform.Find(name)?.gameObject;
                 if(go != null) {
                     list.Add(go);
-                    i++;
                     return true;
                 } else if(root.name == name) {
                     list.Add(root);

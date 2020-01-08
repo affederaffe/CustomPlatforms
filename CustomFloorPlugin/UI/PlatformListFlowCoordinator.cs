@@ -1,13 +1,11 @@
 ﻿using HMUI;
-using BS_Utils.Utilities;
 using BeatSaberMarkupLanguage;
 using System;
 using IPA.Utilities;
-using UnityEngine;
 
 namespace CustomFloorPlugin.UI {
     class PlatformListFlowCoordinator:FlowCoordinator {
-        private UI.PlatformsListView _platformsListView;
+        private PlatformsListView _platformsListView;
         public void Awake() {
             if(_platformsListView == null) {
                 _platformsListView = BeatSaberUI.CreateViewController<UI.PlatformsListView>();
@@ -30,8 +28,8 @@ namespace CustomFloorPlugin.UI {
         }
         protected override void BackButtonWasPressed(ViewController topViewController) {
             // dismiss ourselves
-            Plugin.Log("Selected Environment:" + PlatformManager.Instance.currentPlatform.platName);
-            var mainFlow = BeatSaberMarkupLanguage.BeatSaberUI.MainFlowCoordinator;
+            Plugin.Log("Selected Environment:" + PlatformManager.currentPlatform.platName);
+            var mainFlow = BeatSaberUI.MainFlowCoordinator;
             mainFlow.InvokePrivateMethod("DismissFlowCoordinator", this, null, false);
         }
     }

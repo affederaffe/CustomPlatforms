@@ -54,7 +54,6 @@ namespace CustomFloorPlugin {
         internal static TubeBloomPrePassLight prefab {
             get {
                 if(_prefab == null) {
-                    Plugin.Log("Setting Prefab!");
                     try {
                         _prefab =
                             SceneManager

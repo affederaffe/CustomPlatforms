@@ -9,7 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>CustomFloorPlugin</RootNamespace>
     <AssemblyName>CustomFloorPlugin</AssemblyName>
-    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
   </PropertyGroup>
@@ -124,7 +124,6 @@
     <Compile Include="EnvironmentHider.cs" />
     <Compile Include="Plugin.cs" />
     <Compile Include="MaterialSwapper.cs" />
-    <Compile Include="Behaviours\MeshBloomPrePassLight.cs" />
     <Compile Include="Behaviour Managers\PlatformEventManager.cs" />
     <Compile Include="PlatformManager.cs" />
     <Compile Include="PlatformLoader.cs" />
