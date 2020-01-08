@@ -158,7 +158,7 @@ namespace CustomFloorPlugin {
             if(!GetCurrentEnvironment().name.StartsWith("Menu")) {
                 try {
                     FindManager();
-                    if(Plugin.FindFirst<EnvironmentOverrideSettingsPanelController>().GetPrivateField<OverrideEnvironmentSettings>("_overrideEnvironmentSettings").overrideEnvironments) {
+                    if(!Plugin.FindFirst<EnvironmentOverrideSettingsPanelController>().GetPrivateField<OverrideEnvironmentSettings>("_overrideEnvironmentSettings").overrideEnvironments) {
                         InternalTempChangeToPlatform();
                         PlatformLoader.AddManagers(currentPlatform.gameObject);
                         SpawnCustomLights();
