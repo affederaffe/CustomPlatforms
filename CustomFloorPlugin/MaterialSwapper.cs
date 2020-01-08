@@ -17,9 +17,9 @@ namespace CustomFloorPlugin {
             // Grab materials from Menu Scene objects
             var materials = Resources.FindObjectsOfTypeAll<Material>();
 
-            dark = new Material(materials.First(x => x.name == "DarkEnvironmentSimple"));
-            opaqueGlow = new Material(materials.First(x => x.name == "EnvLightOpaque"));
-            glow = new Material(materials.First(x => x.name == "EnvLight"));
+            dark = materials.First(x => x.name == "DarkEnvironmentSimple");
+            opaqueGlow = materials.First(x => x.name == "EnvLightOpaque");
+            glow = materials.First(x => x.name == "EnvLight");
         }
         public static void ReplaceAllMaterials() {
             if(dark == null || glow == null || opaqueGlow == null) {
@@ -29,7 +29,7 @@ namespace CustomFloorPlugin {
 
                 if(r.gameObject.scene.name == "PlatformManagerDump") {
 
-                    Material[] materialsCopy = r.sharedMaterials;
+                    Material[] materialsCopy = r.materials;
                     bool materialsDidChange = false;
                     for(int i = 0; i < materialsCopy.Length; i++) {
                         if(materialsCopy[i] != null) {
