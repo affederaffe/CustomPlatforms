@@ -18,14 +18,14 @@ namespace CustomFloorPlugin.UI {
 
         [UIAction("PlatformSelect")]
         private void PlatformSelect(TableView ignored1, int idx) {
-            PlatformManager.Instance.ChangeToPlatform(idx);
+            PlatformManager.Instance.SetPlatform(idx);
         }
         protected override void DidDeactivate(DeactivationType deactivationType) {
-            PlatformManager.Instance.TempChangeToPlatform(0);
+            PlatformManager.InternalTempChangeToPlatform(0);
             base.DidDeactivate(deactivationType);
         }
         protected override void DidActivate(bool firstActivation, ActivationType type) {
-            PlatformManager.Instance.TempChangeToPlatform(PlatformManager.Instance.currentPlatformIndex);
+            PlatformManager.InternalTempChangeToPlatform(PlatformManager.Instance.currentPlatformIndex);
             base.DidActivate(firstActivation, type);
         }
 

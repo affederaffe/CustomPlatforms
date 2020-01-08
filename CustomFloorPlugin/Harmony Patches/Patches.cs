@@ -19,7 +19,7 @@ namespace CustomFloorPlugin.HarmonyPatches {
 
         public static void Prefix() {
             System.Console.WriteLine("Restart of Game");
-            PlatformManager.Instance.TempChangeToPlatform(0);
+            PlatformManager.InternalTempChangeToPlatform();
         }
     }
     [HarmonyPatch(typeof(EnvironmentOverrideSettingsPanelController))]

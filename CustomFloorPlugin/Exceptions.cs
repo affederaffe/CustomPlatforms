@@ -24,11 +24,35 @@ namespace CustomFloorPlugin.Exceptions {
 
         }
     }
-    public class ComponentNotFoundException:Exception {
+    internal class ComponentNotFoundException:Exception {
         public TypeInfo TypeInfo;
         internal ComponentNotFoundException(TypeInfo T) :
             base("No such Component currently present on any GameObject in any scene: " + T.AssemblyQualifiedName) {
             TypeInfo = T;
+        }
+    }
+    /// <summary>
+    /// A previous request has not yet been consumed, confirm with <see cref="OverridePreviousRequest"/> if the override was intentional
+    /// </summary>
+    internal class StackedRequestsException:Exception {
+        internal StackedRequestsException() :
+            base("A previous request has not yet been consumed, override with RequestsStackedException.OverridePreviousRequest() if the override was intentional") {
+
+        }
+        public void OverridePreviousRequest() {
+            PlatformManager.InternalOverridePreviousRequest();
+        }
+    }
+    /// <summary>
+    /// *babyrage*
+    /// </summary>
+    internal class Tantrum:Exception {
+        /// <summary>
+        /// *babyrage*
+        /// </summary>
+        internal Tantrum() :
+            base("*babyrage*") {
+
         }
     }
 }
