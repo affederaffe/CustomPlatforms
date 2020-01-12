@@ -1,7 +1,7 @@
-﻿using HMUI;
-using BeatSaberMarkupLanguage;
-using System;
+﻿using BeatSaberMarkupLanguage;
+using HMUI;
 using IPA.Utilities;
+using System;
 
 namespace CustomFloorPlugin.UI {
     class PlatformListFlowCoordinator:FlowCoordinator {

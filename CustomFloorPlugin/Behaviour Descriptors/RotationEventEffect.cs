@@ -1,12 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using UnityEngine;
+﻿using UnityEngine;
 
-namespace CustomFloorPlugin
-{
-    class RotationEventEffect : MonoBehaviour {
+namespace CustomFloorPlugin {
+    class RotationEventEffect:MonoBehaviour {
 #pragma warning disable CS0649
         public SongEventType eventType;
         public Vector3 rotationVector;

@@ -1,16 +1,14 @@
-using UnityEngine;
-using System.Linq;
+using CustomFloorPlugin.Exceptions;
 using Harmony;
-using UnityEngine.SceneManagement;
-using System.Collections;
-using System.Collections.Generic;
 using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Text;
-using BS_Utils.Utilities;
+using UnityEngine;
+using UnityEngine.SceneManagement;
 using Zenject;
-using CustomFloorPlugin.Exceptions;
-using System.IO;
 
 namespace CustomFloorPlugin {
     public static class Extentions {
