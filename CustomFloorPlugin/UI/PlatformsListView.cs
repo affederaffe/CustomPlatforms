@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using BeatSaberMarkupLanguage.Attributes;
 using BeatSaberMarkupLanguage.Components;
 using BeatSaberMarkupLanguage.ViewControllers;
@@ -19,7 +19,12 @@ namespace CustomFloorPlugin.UI {
         [UIAction("PlatformSelect")]
         private void PlatformSelect(TableView ignored1, int idx) {
             PlatformManager.Instance.SetPlatform(idx);
-            Plugin.FindFirst<EnvironmentOverrideSettingsPanelController>().GetPrivateField<OverrideEnvironmentSettings>("_overrideEnvironmentSettings").overrideEnvironments = false;
+            try {
+                Resources.FindObjectsOfTypeAll<PlayerDataModelSO>()[0].playerData.overrideEnvironmentSettings.overrideEnvironments = false;
+            } catch(Exception e) {
+                Plugin.Log(e);
+            }
+
         }
         protected override void DidDeactivate(DeactivationType deactivationType) {
             PlatformManager.InternalTempChangeToPlatform(0);

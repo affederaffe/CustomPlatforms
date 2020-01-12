@@ -2,4 +2,5 @@
   <bool-setting text='Always show feet' value='always-show-feet' hover-hint='Always display the feet icon on the floor, regardless of chosen platform'></bool-setting>
   <dropdown-list-setting text='Environment Override' value='env-ov' options='env-ovs'></dropdown-list-setting>
   <dropdown-list-setting text='Environment Arrangement' value='env-arr' options='env-arrs'></dropdown-list-setting>
+  <bool-setting text='Show heart' value='show-heart' hover-hint='Makes the heart, that Custom Platforms uses to generate most lights, visible in the menu'></bool-setting>
 </settings-container>
