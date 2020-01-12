@@ -1,33 +1,29 @@
-using UnityEngine;
-using System.Linq;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Security.Cryptography;
+using UnityEngine;
 
-namespace CustomFloorPlugin
-{
+namespace CustomFloorPlugin {
     /// <summary>
     /// Loads AssetBundles containing CustomPlatforms and handles cycling between them
     /// </summary>
-    class PlatformLoader
-    {
+    class PlatformLoader {
         private const string customFolder = "CustomPlatforms";
-        
+
         private List<string> bundlePaths;
         private List<CustomPlatform> platforms;
 
         /// <summary>
         /// Loads AssetBundles and populates the platforms array with CustomPlatform objects
         /// </summary>
-        public CustomPlatform[] CreateAllPlatforms(Transform parent)
-        {
+        public CustomPlatform[] CreateAllPlatforms(Transform parent) {
 
             string customPlatformsFolderPath = Path.Combine(Environment.CurrentDirectory, customFolder);
 
             // Create the CustomPlatforms folder if it doesn't already exist
-            if (!Directory.Exists(customPlatformsFolderPath))
-            {
+            if(!Directory.Exists(customPlatformsFolderPath)) {
                 Directory.CreateDirectory(customPlatformsFolderPath);
             }
 
@@ -49,10 +45,9 @@ namespace CustomFloorPlugin
             // Populate the platforms array
             Plugin.Log("[START OF PLATFORM LOADING SPAM]-------------------------------------");
             int j = 0;
-            for(int i = 0; i < allBundlePaths.Length; i++)
-            {
+            for(int i = 0; i < allBundlePaths.Length; i++) {
                 j++;
-                CustomPlatform newPlatform = LoadPlatformBundle(allBundlePaths[i],parent);
+                CustomPlatform newPlatform = LoadPlatformBundle(allBundlePaths[i], parent);
             }
             Plugin.Log("[END OF PLATFORM LOADING SPAM]---------------------------------------");
             // Replace materials for all renderers
@@ -61,24 +56,20 @@ namespace CustomFloorPlugin
             return platforms.ToArray();
         }
 
-        public CustomPlatform LoadPlatformBundle(string bundlePath, Transform parent)
-        {
+        public CustomPlatform LoadPlatformBundle(string bundlePath, Transform parent) {
 
             AssetBundle bundle = AssetBundle.LoadFromFile(bundlePath);
 
-            if (bundle == null) return null;
+            if(bundle == null) return null;
 
             CustomPlatform newPlatform = LoadPlatform(bundle, parent);
-            if (newPlatform != null)
-            {
+            if(newPlatform != null) {
                 bundlePaths.Add(bundlePath);
                 platforms.Add(newPlatform);
             }
 
-            using (var md5 = MD5.Create())
-            {
-                using (var stream = File.OpenRead(bundlePath))
-                {
+            using(var md5 = MD5.Create()) {
+                using(var stream = File.OpenRead(bundlePath)) {
                     byte[] hash = md5.ComputeHash(stream);
                     newPlatform.platHash = BitConverter
                         .ToString(hash)
@@ -89,37 +80,33 @@ namespace CustomFloorPlugin
 
             return newPlatform;
         }
-        
+
         /// <summary>
         /// Instantiate a platform from an assetbundle.
         /// </summary>
         /// <param name="bundle">An AssetBundle containing a CustomPlatform</param>
         /// <returns></returns>
-        private CustomPlatform LoadPlatform(AssetBundle bundle, Transform parent)
-        {
+        private CustomPlatform LoadPlatform(AssetBundle bundle, Transform parent) {
 
             GameObject platformPrefab = bundle.LoadAsset<GameObject>("_CustomPlatform");
 
-            if (platformPrefab == null)
-            {
+            if(platformPrefab == null) {
                 return null;
             }
 
-            GameObject newPlatform =  GameObject.Instantiate(platformPrefab.gameObject);
+            GameObject newPlatform = GameObject.Instantiate(platformPrefab.gameObject);
 
             newPlatform.transform.parent = parent;
 
             bundle.Unload(false);
-            
+
             // Collect author and name
             CustomPlatform customPlatform = newPlatform.GetComponent<CustomPlatform>();
 
-            if (customPlatform == null)
-            {
+            if(customPlatform == null) {
                 // Check for old platform 
                 global::CustomPlatform legacyPlatform = newPlatform.GetComponent<global::CustomPlatform>();
-                if(legacyPlatform != null)
-                {
+                if(legacyPlatform != null) {
                     // Replace legacyplatform component with up to date one
                     customPlatform = newPlatform.AddComponent<CustomPlatform>();
                     customPlatform.platName = legacyPlatform.platName;
@@ -127,9 +114,7 @@ namespace CustomFloorPlugin
                     customPlatform.hideDefaultPlatform = true;
                     // Remove old platform data
                     GameObject.Destroy(legacyPlatform);
-                }
-                else
-                {
+                } else {
                     // no customplatform component, abort
                     GameObject.Destroy(newPlatform);
                     return null;
@@ -138,7 +123,7 @@ namespace CustomFloorPlugin
 
             newPlatform.name = customPlatform.platName + " by " + customPlatform.platAuthor;
 
-            if (customPlatform.icon == null) customPlatform.icon = Resources.FindObjectsOfTypeAll<Sprite>().Where(x => x.name == "FeetIcon").FirstOrDefault();
+            if(customPlatform.icon == null) customPlatform.icon = Resources.FindObjectsOfTypeAll<Sprite>().Where(x => x.name == "FeetIcon").FirstOrDefault();
 
             newPlatform.SetActive(false);
 

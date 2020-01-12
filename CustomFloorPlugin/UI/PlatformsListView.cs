@@ -1,12 +1,8 @@
-using System;
 using BeatSaberMarkupLanguage.Attributes;
 using BeatSaberMarkupLanguage.Components;
 using BeatSaberMarkupLanguage.ViewControllers;
-using TMPro;
-
 using HMUI;
-using IPA.Utilities;
-using System.Linq;
+using System;
 using UnityEngine;
 
 

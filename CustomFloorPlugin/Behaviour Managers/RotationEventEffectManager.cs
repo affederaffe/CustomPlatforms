@@ -1,57 +1,46 @@
-using CustomFloorPlugin.Util;
+using BS_Utils.Utilities;
 using System.Collections.Generic;
 using UnityEngine;
-using BS_Utils.Utilities;
 
 
-namespace CustomFloorPlugin
-{
-    public class RotationEventEffectManager : MonoBehaviour
-    {
+namespace CustomFloorPlugin {
+    public class RotationEventEffectManager:MonoBehaviour {
         List<RotationEventEffect> effectDescriptors;
         List<LightRotationEventEffect> lightRotationEffects;
-        
-        internal void RegisterForEvents()
-        {
-            foreach (LightRotationEventEffect rotEffect in lightRotationEffects)
-            {
+
+        internal void RegisterForEvents() {
+            foreach(LightRotationEventEffect rotEffect in lightRotationEffects) {
                 BSEvents.beatmapEvent += rotEffect.HandleBeatmapObjectCallbackControllerBeatmapEventDidTrigger;
             }
             BSEvents.menuSceneLoaded += HandleSceneChange;
             BSEvents.gameSceneLoaded += HandleSceneChange;
             HandleSceneChange();
         }
-        
-        private void OnDisable()
-        {
-            foreach (LightRotationEventEffect rotEffect in lightRotationEffects)
-            {
+
+        private void OnDisable() {
+            foreach(LightRotationEventEffect rotEffect in lightRotationEffects) {
                 BSEvents.beatmapEvent -= rotEffect.HandleBeatmapObjectCallbackControllerBeatmapEventDidTrigger;
             }
             BSEvents.menuSceneLoaded -= HandleSceneChange;
             BSEvents.gameSceneLoaded -= HandleSceneChange;
         }
-        
-        private void HandleSceneChange()
-        {
-            foreach (LightRotationEventEffect rotEffect in lightRotationEffects)
-            {
+
+        private void HandleSceneChange() {
+            foreach(LightRotationEventEffect rotEffect in lightRotationEffects) {
                 rotEffect.transform.localRotation = ReflectionUtil.GetPrivateField<Quaternion>(rotEffect, "_startRotation");
                 rotEffect.enabled = false;
             }
         }
 
-        public void CreateEffects(GameObject go)
-        {
+        public void CreateEffects(GameObject go) {
             if(lightRotationEffects == null) lightRotationEffects = new List<LightRotationEventEffect>();
-            if (effectDescriptors == null) effectDescriptors = new List<RotationEventEffect>();
+            if(effectDescriptors == null) effectDescriptors = new List<RotationEventEffect>();
 
             RotationEventEffect[] localDescriptors = go.GetComponentsInChildren<RotationEventEffect>(true);
 
-            if (localDescriptors == null) return;
+            if(localDescriptors == null) return;
 
-            foreach (RotationEventEffect effectDescriptor in effectDescriptors)
-            {
+            foreach(RotationEventEffect effectDescriptor in effectDescriptors) {
                 LightRotationEventEffect rotEvent = effectDescriptor.gameObject.AddComponent<LightRotationEventEffect>();
                 PlatformManager.SpawnedComponents.Add(rotEvent);
 

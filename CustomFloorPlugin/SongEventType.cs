@@ -1,12 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace CustomFloorPlugin
-{
-    public enum SongEventType
-    {
+﻿namespace CustomFloorPlugin {
+    public enum SongEventType {
         BackLights = 0,
         BigRingLights = 1,
         LeftLasers = 2,

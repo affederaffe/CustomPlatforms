@@ -1,18 +1,13 @@
-﻿using UnityEngine;
+﻿using BS_Utils.Utilities;
+using CustomFloorPlugin.Exceptions;
 using IPA;
-using UnityEngine.SceneManagement;
-using CustomFloorPlugin.Util;
-using Harmony;
-using System.Collections.Generic;
-using System.Reflection.Emit;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using IPA.Logging;
-using BS_Utils.Utilities;
-using System.Text;
+using UnityEngine;
+using UnityEngine.SceneManagement;
 using Level = IPA.Logging.Logger.Level;
-using CustomFloorPlugin.Exceptions;
 
 namespace CustomFloorPlugin {
     internal class Plugin:IBeatSaberPlugin {

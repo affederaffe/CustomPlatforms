@@ -1,11 +1,6 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using BS_Utils.Utilities;
 using BeatSaberMarkupLanguage.Attributes;
 using BeatSaberMarkupLanguage.Parser;
+using System.Collections.Generic;
 
 namespace CustomFloorPlugin.UI {
     class Settings:PersistentSingleton<Settings> {

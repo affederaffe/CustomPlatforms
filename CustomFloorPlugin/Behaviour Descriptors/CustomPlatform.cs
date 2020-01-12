@@ -1,9 +1,7 @@
 ﻿using UnityEngine;
 
-namespace CustomFloorPlugin
-{
-    public class CustomPlatform : MonoBehaviour
-    {
+namespace CustomFloorPlugin {
+    public class CustomPlatform:MonoBehaviour {
         public string platName = "MyCustomPlatform";
         public string platAuthor = "MyName";
         public string platHash = "";
@@ -22,8 +20,7 @@ namespace CustomFloorPlugin
         public bool hideRotatingLasers = false;
         public bool hideTrackLights = false;
 
-        public void Awake()
-        {
+        public void Awake() {
             gameObject.SetActive(false);
         }
     }

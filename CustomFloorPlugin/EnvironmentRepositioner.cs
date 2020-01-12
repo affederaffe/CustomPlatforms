@@ -1,16 +1,12 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
-namespace CustomFloorPlugin
-{
-    public class EnvironmentArranger
-    {
+namespace CustomFloorPlugin {
+    public class EnvironmentArranger {
         public static Arrangement arrangement;
 
-        public static void RearrangeEnvironment()
-        {
-            switch (arrangement)
-            {
+        public static void RearrangeEnvironment() {
+            switch(arrangement) {
                 case Arrangement.Default:
                     return;
                 case Arrangement.Classic:
@@ -19,8 +15,7 @@ namespace CustomFloorPlugin
             }
         }
 
-        private static void RearrangeClassic()
-        {
+        private static void RearrangeClassic() {
             TryMove("RotatingLaserLeft0", new Vector3(-8, 0, 45));
             TryMove("RotatingLaserLeft1", new Vector3(-8, 0, 40));
             TryMove("RotatingLaserLeft2", new Vector3(-8, 0, 35));
@@ -37,26 +32,22 @@ namespace CustomFloorPlugin
             TryHide("Light (6)");
         }
 
-        private static void TryMove(string name, Vector3 pos)
-        {
+        private static void TryMove(string name, Vector3 pos) {
             GameObject toMove = GameObject.Find(name);
-            if (toMove != null)
+            if(toMove != null)
                 toMove.transform.position = pos;
         }
 
-        private static void TryHide(string name)
-        {
+        private static void TryHide(string name) {
             GameObject toHide = GameObject.Find(name);
-            if (toHide != null)
+            if(toHide != null)
                 toHide.SetActive(false);
         }
 
         public enum Arrangement { Default, Classic };
-        
-        public static string Name(Arrangement mode)
-        {
-            switch (mode)
-            {
+
+        public static string Name(Arrangement mode) {
+            switch(mode) {
                 case Arrangement.Default:
                     return "Default";
                 case Arrangement.Classic:
@@ -66,8 +57,7 @@ namespace CustomFloorPlugin
             }
         }
 
-        public static List<object> RepositionModes()
-        {
+        public static List<object> RepositionModes() {
             return new List<object>
             {
                 Arrangement.Default,

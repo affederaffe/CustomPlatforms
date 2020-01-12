@@ -1,35 +1,26 @@
 using CustomFloorPlugin;
-using System;
 using UnityEngine;
 
 // Token: 0x0200035C RID: 860
-public class SpectrogramColumns : MonoBehaviour
-{
-    protected void Start()
-    {
+public class SpectrogramColumns:MonoBehaviour {
+    protected void Start() {
         this.CreateColums();
     }
-    
-    protected void Update()
-    {
+
+    protected void Update() {
         float[] processedSamples;
-        if (_spectrogramData == null) {
+        if(_spectrogramData == null) {
             processedSamples = new float[64];
-            for (int i = 0; i < processedSamples.Length; i++)
-            {
-                processedSamples[i] = (Mathf.Sin((float)i / 64 * 9 * Mathf.PI + 1.4f* Mathf.PI) + 1.2f)/25;
+            for(int i = 0; i < processedSamples.Length; i++) {
+                processedSamples[i] = (Mathf.Sin((float)i / 64 * 9 * Mathf.PI + 1.4f * Mathf.PI) + 1.2f) / 25;
             }
-        }
-        else
-        {
+        } else {
             processedSamples = this._spectrogramData.ProcessedSamples.ToArray();
         }
-        
-        for (int i = 0; i < processedSamples.Length; i++)
-        {
+
+        for(int i = 0; i < processedSamples.Length; i++) {
             float num = processedSamples[i] * (5f + i * 0.07f);
-            if (num > 1f)
-            {
+            if(num > 1f) {
                 num = 1f;
             }
             num = Mathf.Pow(num, 2f);
@@ -37,19 +28,16 @@ public class SpectrogramColumns : MonoBehaviour
             _columnTransforms[i + 64].localScale = new Vector3(_columnWidth, Mathf.Lerp(_minHeight, _maxHeight, num), _columnDepth);
         }
     }
-    
-    private void CreateColums()
-    {
+
+    private void CreateColums() {
         _columnTransforms = new Transform[128];
-        for (int i = 0; i < 64; i++)
-        {
+        for(int i = 0; i < 64; i++) {
             _columnTransforms[i] = CreateColumn(_separator * i);
             _columnTransforms[i + 64] = CreateColumn(-_separator * (i + 1));
         }
     }
-    
-    private Transform CreateColumn(Vector3 pos)
-    {
+
+    private Transform CreateColumn(Vector3 pos) {
         GameObject gameObject = Instantiate<GameObject>(_columnPrefab, base.transform);
         foreach(TubeLight tubeLight in gameObject.GetComponentsInChildren<TubeLight>()) {
             tubeLight.GameAwake();
@@ -65,16 +53,16 @@ public class SpectrogramColumns : MonoBehaviour
 #pragma warning restore CS0649
     [SerializeField]
     private Vector3 _separator = new Vector3(0f, 0f, 1f);
-    
+
     [SerializeField]
     private float _minHeight = 1f;
 
     [SerializeField]
     private float _maxHeight = 10f;
-    
+
     [SerializeField]
     private float _columnWidth = 1f;
-    
+
     [SerializeField]
     private float _columnDepth = 1f;
 #pragma warning disable CS0649
