@@ -3,7 +3,7 @@ using System.Linq;
 using UnityEngine;
 
 
-namespace CustomFloorPlugin {
+namespace CustomPlatforms {
     public class TubeLightManager:MonoBehaviour {
         public static void CreateAdditionalLightSwitchControllers() {
             LightSwitchEventEffect templateSwitchEffect = Resources.FindObjectsOfTypeAll<LightSwitchEventEffect>().FirstOrDefault();

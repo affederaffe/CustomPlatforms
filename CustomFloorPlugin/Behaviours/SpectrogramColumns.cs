@@ -1,4 +1,4 @@
-using CustomFloorPlugin;
+using CustomPlatforms;
 using UnityEngine;
 
 // Token: 0x0200035C RID: 860

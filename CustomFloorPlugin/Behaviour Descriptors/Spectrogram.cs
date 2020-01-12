@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace CustomFloorPlugin {
+namespace CustomPlatforms {
     public class Spectrogram:MonoBehaviour {
         public GameObject columnPrefab;
         public Vector3 separator = Vector3.forward;

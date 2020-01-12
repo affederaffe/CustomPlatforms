@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 
-namespace CustomFloorPlugin {
+namespace CustomPlatforms
+{ 
     public class CameraVisibility:MonoBehaviour {
         public enum VisibilityMode { Default, HeadsetOnly, ThirdPersonOnly };
         public VisibilityMode visibilityMode = VisibilityMode.Default;

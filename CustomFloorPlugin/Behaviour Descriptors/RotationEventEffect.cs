@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace CustomFloorPlugin {
+namespace CustomPlatforms {
     class RotationEventEffect:MonoBehaviour {
 #pragma warning disable CS0649
         public SongEventType eventType;

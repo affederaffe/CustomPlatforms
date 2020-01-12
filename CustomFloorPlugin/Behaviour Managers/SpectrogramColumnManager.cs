@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-namespace CustomFloorPlugin {
+namespace CustomPlatforms {
     public class SpectrogramColumnManager:MonoBehaviour {
         List<Spectrogram> columnDescriptors;
         List<SpectrogramColumns> spectrogramColumns;

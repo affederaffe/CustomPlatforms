@@ -6,7 +6,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using Zenject;
 
-namespace CustomFloorPlugin {
+namespace CustomPlatforms {
     class PlatformUI:MonoBehaviour {
         public static PlatformUI _instance;
 
@@ -29,7 +29,7 @@ namespace CustomFloorPlugin {
 
         public static void SetupMenuButtons(ScenesTransitionSetupDataSO ignored1 = null, DiContainer ignored2 = null) {
             MenuButtons.instance.RegisterButton(new MenuButton("Custom Platforms", "Change Custom Plaforms Here!", CustomPlatformsMenuButtonPressed, true));
-            BSMLSettings.instance.AddSettingsMenu("Custom Platforms", "CustomFloorPlugin.UI.Settings.bsml", UI.Settings.instance);
+            BSMLSettings.instance.AddSettingsMenu("Custom Platforms", "CustomPlatforms.UI.Settings.bsml", UI.Settings.instance);
         }
         private static void CustomPlatformsMenuButtonPressed() {
             if(_platformMenuFlowCoordinator == null) {

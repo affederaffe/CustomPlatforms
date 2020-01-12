@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace CustomFloorPlugin {
+namespace CustomPlatforms {
     public class TrackRings:MonoBehaviour {
         [Space]
         [Header("Rings")]

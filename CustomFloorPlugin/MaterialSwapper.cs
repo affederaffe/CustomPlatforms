@@ -1,7 +1,7 @@
 ﻿using System.Linq;
 using UnityEngine;
 
-namespace CustomFloorPlugin {
+namespace CustomPlatforms {
     static class MaterialSwapper {
         public static Material dark { get; private set; }
         public static Material glow { get; private set; }

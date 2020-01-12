@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-namespace CustomFloorPlugin {
+namespace CustomPlatforms {
     public class SpectrogramAnimationState:MonoBehaviour {
         public AnimationClip animationClip;
         [Header("0: Low Frequency, 63 High Frequency")]

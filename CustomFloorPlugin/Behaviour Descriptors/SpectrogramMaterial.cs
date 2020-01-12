@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-namespace CustomFloorPlugin {
+namespace CustomPlatforms {
     public class SpectrogramMaterial:MonoBehaviour {
         private Renderer renderer;
         private BasicSpectrogramData spectrogramData;

@@ -6,9 +6,9 @@ using System;
 using UnityEngine;
 
 
-namespace CustomFloorPlugin.UI {
+namespace CustomPlatforms.UI {
     public class PlatformsListView:BSMLResourceViewController {
-        public override string ResourceName => "CustomFloorPlugin.UI.PlatformList.bsml";
+        public override string ResourceName => "CustomPlatforms.UI.PlatformList.bsml";
         [UIComponent("PlatformsList")]
         public CustomListTableData customListTableData;
 

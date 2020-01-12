@@ -2,7 +2,7 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-namespace CustomFloorPlugin {
+namespace CustomPlatforms {
     public class PrefabLightmapData:MonoBehaviour {
 
         [SerializeField]

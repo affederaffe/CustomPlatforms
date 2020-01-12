@@ -1,7 +1,7 @@
 ﻿using BS_Utils.Utilities;
 using UnityEngine;
 
-namespace CustomFloorPlugin {
+namespace CustomPlatforms {
     class SongEventManager:MonoBehaviour {
         public SongEventHandler _songEventHandler;
 

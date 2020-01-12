@@ -2,7 +2,7 @@
 using System.Linq;
 using UnityEngine;
 
-namespace CustomFloorPlugin {
+namespace CustomPlatforms {
     /// <summary> 
     /// Activates and deactivates world geometry in the active scene as required by CustomPlatforms
     /// </summary>

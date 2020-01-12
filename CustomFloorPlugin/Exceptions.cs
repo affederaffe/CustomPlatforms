@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Reflection;
 
-namespace CustomFloorPlugin.Exceptions {
+namespace CustomPlatforms.Exceptions {
     internal sealed class BeatmapObjectCallbackControllerNotFoundException:ComponentNotFoundException {
         internal BeatmapObjectCallbackControllerNotFoundException(TypeInfo T) :
             base(T) {

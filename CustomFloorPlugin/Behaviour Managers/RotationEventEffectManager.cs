@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 
-namespace CustomFloorPlugin {
+namespace CustomPlatforms {
     public class RotationEventEffectManager:MonoBehaviour {
         List<RotationEventEffect> effectDescriptors;
         List<LightRotationEventEffect> lightRotationEffects;
