@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -47,6 +47,16 @@ namespace CustomFloorPlugin.UI {
             set {
                 EnvironmentArranger.arrangement = value;
                 Plugin.config.SetInt("Settings", "EnvironmentArrangement", (int)EnvironmentArranger.arrangement);
+            }
+        }
+        [UIValue("show-heart")]
+        public bool showHeart {
+            get {
+                return PlatformManager.showHeart;
+            }
+            set {
+                PlatformManager.showHeart = value;
+                Plugin.config.SetBool("Settings", "ShowHeart", PlatformManager.showHeart);
             }
         }
     }
