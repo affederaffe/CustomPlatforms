@@ -1,14 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.Events;
 
-namespace CustomFloorPlugin
-{
-    public class SongEventHandler : MonoBehaviour
-    {
+namespace CustomFloorPlugin {
+    public class SongEventHandler:MonoBehaviour {
         public SongEventType eventType;
         public int value; // enum?
         public bool anyValue;

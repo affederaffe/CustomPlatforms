@@ -1,20 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using BS_Utils.Utilities;
 
-namespace CustomFloorPlugin
-{
-    public class EnvironmentSceneOverrider
-    {
+namespace CustomFloorPlugin {
+    public class EnvironmentSceneOverrider {
         public enum EnvOverrideMode { Off, Default, Nice, BigMirror, Triangle, KDA, Monstercat };
 
         public static EnvOverrideMode overrideMode = EnvOverrideMode.Off;
         private static Dictionary<EnvOverrideMode, EnvSceneInfo> envInfos;
-        
-        public static void GetSceneInfos()
-        {
+
+        public static void GetSceneInfos() {
             var sceneInfos = Resources.FindObjectsOfTypeAll<SceneInfo>();
             envInfos = new Dictionary<EnvOverrideMode, EnvSceneInfo>();
             envInfos.Add(EnvOverrideMode.Default, new EnvSceneInfo("Default", sceneInfos.First(x => x.name == "DefaultEnvironmentSceneInfo")));
@@ -25,47 +20,37 @@ namespace CustomFloorPlugin
             envInfos.Add(EnvOverrideMode.Monstercat, new EnvSceneInfo("Monstercat", sceneInfos.First(x => x.name == "MonstercatEnvironmentSceneInfo")));
         }
 
-        public class EnvSceneInfo
-        {
+        public class EnvSceneInfo {
             public string sceneName { get; private set; }
             public string displayName { get; private set; }
             public SceneInfo sceneInfo { get; private set; }
 
-            public EnvSceneInfo(string displayName, SceneInfo sceneInfo)
-            {
+            public EnvSceneInfo(string displayName, SceneInfo sceneInfo) {
                 this.displayName = displayName;
                 sceneName = sceneInfo.sceneName;
                 this.sceneInfo = sceneInfo;
             }
 
-            public void OverrideScene(EnvSceneInfo info)
-            {
+            public void OverrideScene(EnvSceneInfo info) {
                 sceneInfo.SetPrivateField("_sceneName", info.sceneName);
             }
 
-            public void Revert()
-            {
+            public void Revert() {
                 sceneInfo.SetPrivateField("_sceneName", sceneName);
             }
         };
 
-        public static void OverrideEnvironmentScene()
-        {
-            foreach (EnvSceneInfo info in envInfos.Values)
-            {
-                if (overrideMode == EnvOverrideMode.Off)
-                {
+        public static void OverrideEnvironmentScene() {
+            foreach(EnvSceneInfo info in envInfos.Values) {
+                if(overrideMode == EnvOverrideMode.Off) {
                     info.Revert();
-                }
-                else
-                {
+                } else {
                     info.OverrideScene(envInfos[overrideMode]);
                 }
             }
         }
 
-        public static List<object> OverrideModes()
-        {
+        public static List<object> OverrideModes() {
             List<object> ovs = new List<object>();
             ovs.Add(EnvOverrideMode.Off);
             ovs.Add(EnvOverrideMode.Default);
@@ -77,9 +62,8 @@ namespace CustomFloorPlugin
             return ovs;
         }
 
-        public static string Name(EnvOverrideMode mode)
-        {
-            if (mode == EnvOverrideMode.Off) return "Off";
+        public static string Name(EnvOverrideMode mode) {
+            if(mode == EnvOverrideMode.Off) return "Off";
             return envInfos[mode].displayName;
         }
     }

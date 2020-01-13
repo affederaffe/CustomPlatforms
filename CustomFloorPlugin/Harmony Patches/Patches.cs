@@ -1,5 +1,4 @@
 ﻿using Harmony;
-using IPA.Utilities;
 using System.Reflection;
 using UnityEngine;
 
@@ -11,15 +10,6 @@ namespace CustomFloorPlugin.HarmonyPatches {
                 return;
             }
             HarmonyInstance.Create("com.rolopogo.customplatforms").PatchAll(Assembly.GetExecutingAssembly());
-        }
-    }
-    [HarmonyPatch(typeof(MenuTransitionsHelper))]
-    [HarmonyPatch("RestartGame", MethodType.Normal)]
-    public class MenuTransitionsHelper_RestartGame_Patch {
-
-        public static void Prefix() {
-            System.Console.WriteLine("Restart of Game");
-            PlatformManager.InternalTempChangeToPlatform();
         }
     }
     /// <summary>

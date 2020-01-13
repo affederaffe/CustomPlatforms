@@ -1,9 +1,6 @@
-using CustomFloorPlugin.Util;
+using BS_Utils.Utilities;
 using System.Collections.Generic;
 using UnityEngine;
-using System.Linq;
-using BS_Utils.Utilities;
-using Harmony;
 
 namespace CustomFloorPlugin {
     class TrackRingsManagerSpawner:MonoBehaviour {

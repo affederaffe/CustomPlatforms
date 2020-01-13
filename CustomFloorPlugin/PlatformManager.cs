@@ -1,16 +1,14 @@
-using UnityEngine;
-using System.Linq;
+using CustomFloorPlugin.Exceptions;
 using Harmony;
-using UnityEngine.SceneManagement;
-using System.Collections;
-using System.Collections.Generic;
 using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Text;
-using BS_Utils.Utilities;
+using UnityEngine;
+using UnityEngine.SceneManagement;
 using Zenject;
-using CustomFloorPlugin.Exceptions;
-using System.IO;
 
 namespace CustomFloorPlugin {
     public static class Extentions {
@@ -71,6 +69,7 @@ namespace CustomFloorPlugin {
         internal static Scene scene;
         internal static LightWithIdManager LightManager = null;
         internal static GameObject Heart;
+        internal static bool showHeart;
 
         internal static void OnLoad() {
             if(Instance != null) return;
@@ -88,7 +87,7 @@ namespace CustomFloorPlugin {
             Plugin.gsm.transitionDidFinishEvent += TransitionFinalize;
             Scene greenDay = SceneManager.LoadScene("GreenDayGrenadeEnvironment", new LoadSceneParameters(LoadSceneMode.Additive));
             StartCoroutine(fuckUnity());
-            IEnumerator<WaitUntil> fuckUnity() {
+            IEnumerator<WaitUntil> fuckUnity() {//did you know loaded scenes are loaded asynchronously, regarless if you use async or not?
                 yield return new WaitUntil(() => { return greenDay.isLoaded; });
                 GameObject gameObject = greenDay.GetRootGameObjects()[0];
                 Heart = gameObject.transform.Find("GreenDayCity/armHeartLighting").gameObject;
@@ -97,46 +96,7 @@ namespace CustomFloorPlugin {
                 SceneManager.MoveGameObjectToScene(Heart, scene);
                 SceneManager.UnloadSceneAsync("GreenDayGrenadeEnvironment");
 
-                //<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//
-                System.Globalization.NumberFormatInfo numberFormat = System.Globalization.NumberFormatInfo.InvariantInfo;
-                using Stream manifestResourceStream = Assembly.GetAssembly(GetType()).GetManifestResourceStream("CustomFloorPlugin.heart.mesh");
-                using StreamReader streamReader = new StreamReader(manifestResourceStream);
-
-                string meshfile = streamReader.ReadToEnd();
-                string[] dimension1 = meshfile.Split('|');
-
-                string[][] s_vector3s = new string[dimension1[0].Split('/').Length][];
-
-                int i = 0;
-                foreach(string s_vector3 in dimension1[0].Split('/')) {
-                    s_vector3s[i++] = s_vector3.Split(',');
-                }
-
-                List<Vector3> vertices = new List<Vector3>();
-                foreach(string[] s_vector3 in s_vector3s) {
-                    vertices.Add(new Vector3(float.Parse(s_vector3[0], numberFormat), float.Parse(s_vector3[1], numberFormat), float.Parse(s_vector3[2], numberFormat)));
-                }
-
-                List<int> triangles = new List<int>();
-                foreach(string s_int in dimension1[1].Split('/')) {
-                    triangles.Add(int.Parse(s_int));
-                }
-
-                Mesh mesh = new Mesh();
-                mesh.vertices = vertices.ToArray();
-                mesh.triangles = triangles.ToArray();
-
-                Vector3 position = new Vector3(-8f, 25f, 26f);
-                Quaternion rotation = Quaternion.Euler(-100f, 90f, 90f);
-                Vector3 scale = new Vector3(25f, 25f, 25f);
-
-                Heart.GetComponent<MeshFilter>().mesh = mesh;
-                Heart.transform.position = position;
-                Heart.transform.rotation = rotation;
-                Heart.transform.localScale = scale;
-
-                Heart.GetComponent<LightWithId>().ColorWasSet(Color.magenta);
-                //<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//<3//
+                SwapHeartMesh();
             }
         }
         void TransitionPrep(float ignored) {
@@ -155,28 +115,31 @@ namespace CustomFloorPlugin {
             EmptyLightRegisters();
         }
         void TransitionFinalize(ScenesTransitionSetupDataSO ignored1, DiContainer ignored2) {
-            if(!GetCurrentEnvironment().name.StartsWith("Menu")) {
-                try {
-                    FindManager();
-                    if(!Plugin.FindFirst<EnvironmentOverrideSettingsPanelController>().GetPrivateField<OverrideEnvironmentSettings>("_overrideEnvironmentSettings").overrideEnvironments) {
-                        InternalTempChangeToPlatform();
-                        PlatformLoader.AddManagers(currentPlatform.gameObject);
-                        SpawnCustomLights();
-                        StartCoroutine(ReplaceAllMaterialsAfterOneFrame());
-                        EnvironmentArranger.RearrangeEnvironment();
-                        TubeLightManager.CreateAdditionalLightSwitchControllers();
+            try {
+                if(!GetCurrentEnvironment().name.StartsWith("Menu")) {
+                    try {
+                        FindManager();
+                        if(!Resources.FindObjectsOfTypeAll<PlayerDataModelSO>()[0].playerData.overrideEnvironmentSettings.overrideEnvironments) {
+                            Plugin.Log("Blorp");
+                            InternalTempChangeToPlatform();
+                            PlatformLoader.AddManagers(currentPlatform.gameObject);
+                            SpawnCustomLights();
+                            StartCoroutine(ReplaceAllMaterialsAfterOneFrame());
+                            EnvironmentArranger.RearrangeEnvironment();
+                            TubeLightManager.CreateAdditionalLightSwitchControllers();
+                        }
+                    } catch(ManagerNotFoundException e) {
+                        Plugin.Log(e);
                     }
-                } catch(ManagerNotFoundException e) {
-                    Plugin.Log(e);
+                } else {
+                    Heart.SetActive(showHeart);
+                    Heart.GetComponent<LightWithId>().ColorWasSet(Color.magenta);
                 }
-            } else {
-                Heart.SetActive(true);
-                Heart.GetComponent<LightWithId>().ColorWasSet(Color.magenta);
+            } catch(EnvironmentSceneNotFoundException e) {
+                Plugin.Log(e);
             }
         }
         private void Start() {
-            EnvironmentArranger.arrangement = (EnvironmentArranger.Arrangement)Plugin.config.GetInt("Settings", "EnvironmentArrangement", 0, true);
-            EnvironmentSceneOverrider.overrideMode = (EnvironmentSceneOverrider.EnvOverrideMode)Plugin.config.GetInt("Settings", "EnvironmentOverrideMode", 0, true);
             EnvironmentSceneOverrider.GetSceneInfos();
             EnvironmentSceneOverrider.OverrideEnvironmentScene();
 
@@ -343,16 +306,16 @@ namespace CustomFloorPlugin {
         /// <summary>
         /// Please use <see cref="TempChangeToPlatform(int)"/> instead.
         /// </summary>
-        [Obsolete("Please use TempChangeToPlatform instead", false)]
-        public void ChangeToPlatform(int index, bool save = true) {
-            try {
-                TempChangeToPlatform(index);
-            } catch(StackedRequestsException e) {
-                e.OverridePreviousRequest();
-            } finally {
-                InternalTempChangeToPlatform();
-            }
-        }
+        //[Obsolete("Please use TempChangeToPlatform instead", false)]
+        //public void ChangeToPlatform(int index, bool ignored = true) {
+        //    try {
+        //        TempChangeToPlatform(index);
+        //    } catch(StackedRequestsException e) {
+        //        e.OverridePreviousRequest();
+        //    } finally {
+        //        InternalTempChangeToPlatform();
+        //    }
+        //}
         /// <summary>
         /// This function handles outside requests to temporarily change to a specific platform.<br/>
         /// It caches the request and will consume it when a level is played.<br/>
@@ -410,11 +373,53 @@ namespace CustomFloorPlugin {
                 if(!GetCurrentEnvironment().name.StartsWith("Menu")) {
                     InternalTempChangeToPlatform();
                 }
-            }catch(EnvironmentSceneNotFoundException e) {
+            } catch(EnvironmentSceneNotFoundException e) {
                 IPA.Logging.Logger.Level L = IPA.Logging.Logger.Level.Warning;
                 Plugin.Log("OverridePreviousRequest was called out of place. Please send me a bug report.", L);
                 Plugin.Log(e, L);
             }
+        }
+        void SwapHeartMesh() {
+            System.Globalization.NumberFormatInfo numberFormat = System.Globalization.NumberFormatInfo.InvariantInfo;
+            using Stream manifestResourceStream = Assembly.GetAssembly(GetType()).GetManifestResourceStream("CustomFloorPlugin.heart.mesh");
+            using StreamReader streamReader = new StreamReader(manifestResourceStream);
+
+            string meshfile = streamReader.ReadToEnd();
+            string[] dimension1 = meshfile.Split('|');
+
+            string[][] s_vector3s = new string[dimension1[0].Split('/').Length][];
+
+            int i = 0;
+            foreach(string s_vector3 in dimension1[0].Split('/')) {
+                s_vector3s[i++] = s_vector3.Split(',');
+            }
+
+            List<Vector3> vertices = new List<Vector3>();
+            foreach(string[] s_vector3 in s_vector3s) {
+                vertices.Add(new Vector3(float.Parse(s_vector3[0], numberFormat), float.Parse(s_vector3[1], numberFormat), float.Parse(s_vector3[2], numberFormat)));
+            }
+
+            List<int> triangles = new List<int>();
+            foreach(string s_int in dimension1[1].Split('/')) {
+                triangles.Add(int.Parse(s_int));
+            }
+
+            Mesh mesh = new Mesh();
+            mesh.vertices = vertices.ToArray();
+            mesh.triangles = triangles.ToArray();
+
+            Vector3 position = new Vector3(-8f, 25f, 26f);
+            Quaternion rotation = Quaternion.Euler(-100f, 90f, 90f);
+            Vector3 scale = new Vector3(25f, 25f, 25f);
+
+            Heart.GetComponent<MeshFilter>().mesh = mesh;
+            Heart.transform.position = position;
+            Heart.transform.rotation = rotation;
+            Heart.transform.localScale = scale;
+
+            Heart.GetComponent<LightWithId>().ColorWasSet(Color.magenta);
+
+            Heart.SetActive(showHeart);
         }
     }
 }

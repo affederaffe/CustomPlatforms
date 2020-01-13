@@ -1,14 +1,8 @@
-using CustomFloorPlugin.Util;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
-using System.Text;
 using UnityEngine;
-using Harmony;
 using UnityEngine.SceneManagement;
-using BS_Utils.Utilities;
-using CustomFloorPlugin;
 namespace CustomFloorPlugin {
     [RequireComponent(typeof(MeshFilter))]
     [RequireComponent(typeof(MeshRenderer))]

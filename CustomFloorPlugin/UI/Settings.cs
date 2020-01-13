@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using BS_Utils.Utilities;
 using BeatSaberMarkupLanguage.Attributes;
 using BeatSaberMarkupLanguage.Parser;
+using System.Collections.Generic;
 
 namespace CustomFloorPlugin.UI {
     class Settings:PersistentSingleton<Settings> {
@@ -16,7 +11,7 @@ namespace CustomFloorPlugin.UI {
         [UIValue("always-show-feet")]
         public bool alwaysShowFeet {
             get {
-                return EnvironmentHider.showFeetOverride;
+                return Plugin.config.GetBool("Settings", "AlwaysShowFeet", false, true);
             }
             set {
                 EnvironmentHider.showFeetOverride = value;
@@ -31,7 +26,7 @@ namespace CustomFloorPlugin.UI {
         [UIValue("env-ov")]
         public EnvironmentSceneOverrider.EnvOverrideMode envOr {
             get {
-                return EnvironmentSceneOverrider.overrideMode;
+                return (EnvironmentSceneOverrider.EnvOverrideMode)Plugin.config.GetInt("Settings", "EnvironmentOverrideMode", 0, true);
             }
             set {
                 EnvironmentSceneOverrider.overrideMode = value;
@@ -42,11 +37,22 @@ namespace CustomFloorPlugin.UI {
         [UIValue("env-arr")]
         public EnvironmentArranger.Arrangement envArr {
             get {
-                return EnvironmentArranger.arrangement;
+                return (EnvironmentArranger.Arrangement)Plugin.config.GetInt("Settings", "EnvironmentArrangement", 0, true);
             }
             set {
                 EnvironmentArranger.arrangement = value;
                 Plugin.config.SetInt("Settings", "EnvironmentArrangement", (int)EnvironmentArranger.arrangement);
+            }
+        }
+        [UIValue("show-heart")]
+        public bool showHeart {
+            get {
+                return Plugin.config.GetBool("Settings", "ShowHeart", true, true);
+            }
+            set {
+                PlatformManager.showHeart = value;
+                Plugin.config.SetBool("Settings", "ShowHeart", PlatformManager.showHeart);
+                PlatformManager.Heart.SetActive(value);
             }
         }
     }

@@ -2,10 +2,8 @@
 using UnityEngine;
 using UnityEngine.Events;
 
-namespace CustomFloorPlugin
-{
-    public class EventManager : MonoBehaviour
-    {
+namespace CustomFloorPlugin {
+    public class EventManager:MonoBehaviour {
         public UnityEvent OnSlice;
         public UnityEvent OnComboBreak;
         public UnityEvent MultiplierUp;
@@ -17,8 +15,7 @@ namespace CustomFloorPlugin
         public UnityEvent OnRedLightOn;
 
         [Serializable]
-        public class ComboChangedEvent : UnityEvent<int>
-        {
+        public class ComboChangedEvent:UnityEvent<int> {
         }
 
         public ComboChangedEvent OnComboChanged = new ComboChangedEvent();

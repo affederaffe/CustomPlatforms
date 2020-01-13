@@ -1,45 +1,36 @@
-﻿using CustomFloorPlugin.Util;
+﻿using BS_Utils.Utilities;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using BS_Utils.Utilities;
 
-namespace CustomFloorPlugin
-{
-    public class SpectrogramAnimationStateManager : MonoBehaviour
-    {
+namespace CustomFloorPlugin {
+    public class SpectrogramAnimationStateManager:MonoBehaviour {
         List<SpectrogramAnimationState> animationStates;
-        
-        private void OnEnable()
-        {
+
+        private void OnEnable() {
             BSEvents.gameSceneLoaded += UpdateSpectrogramDataProvider;
             UpdateSpectrogramDataProvider();
         }
 
-        private void OnDisable()
-        {
+        private void OnDisable() {
             BSEvents.gameSceneLoaded += UpdateSpectrogramDataProvider;
         }
 
-        public void UpdateAnimationStates()
-        {
+        public void UpdateAnimationStates() {
             animationStates = new List<SpectrogramAnimationState>();
 
-            foreach (SpectrogramAnimationState spec in Resources.FindObjectsOfTypeAll(typeof(SpectrogramAnimationState)))
-            {
+            foreach(SpectrogramAnimationState spec in Resources.FindObjectsOfTypeAll(typeof(SpectrogramAnimationState))) {
                 animationStates.Add(spec);
             }
         }
 
-        public void UpdateSpectrogramDataProvider()
-        {
+        public void UpdateSpectrogramDataProvider() {
             BasicSpectrogramData[] datas = Resources.FindObjectsOfTypeAll<BasicSpectrogramData>();
-            if (datas.Length == 0) return;
-            
+            if(datas.Length == 0) return;
+
             BasicSpectrogramData spectrogramData = datas.First();
 
-            foreach (SpectrogramAnimationState specAnim in animationStates)
-            {
+            foreach(SpectrogramAnimationState specAnim in animationStates) {
                 specAnim.setData(spectrogramData);
             }
         }

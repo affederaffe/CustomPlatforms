@@ -1,18 +1,13 @@
-﻿using UnityEngine;
+﻿using BS_Utils.Utilities;
+using CustomFloorPlugin.Exceptions;
 using IPA;
-using UnityEngine.SceneManagement;
-using CustomFloorPlugin.Util;
-using Harmony;
-using System.Collections.Generic;
-using System.Reflection.Emit;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using IPA.Logging;
-using BS_Utils.Utilities;
-using System.Text;
+using UnityEngine;
+using UnityEngine.SceneManagement;
 using Level = IPA.Logging.Logger.Level;
-using CustomFloorPlugin.Exceptions;
 
 namespace CustomFloorPlugin {
     internal class Plugin:IBeatSaberPlugin {
@@ -44,8 +39,10 @@ namespace CustomFloorPlugin {
         }
 
         public void OnApplicationStart() {
+            Instance = this;
             BSEvents.OnLoad();
             BSEvents.menuSceneLoadedFresh += OnMenuSceneLoadedFresh;
+            config = new Config("Custom Platforms");
             HarmonyPatches.Patcher.Patch();
             Stuff_That_Doesnt_Belong_Here_But_Has_To_Be_Here_Because_Bsml_Isnt_Half_As_Stable_Yet_As_CustomUI_Was_But_CustomUI_Has_Been_Killed_Already();
         }
@@ -56,14 +53,16 @@ namespace CustomFloorPlugin {
         private void Stuff_That_Doesnt_Belong_Here_But_Has_To_Be_Here_Because_Bsml_Isnt_Half_As_Stable_Yet_As_CustomUI_Was_But_CustomUI_Has_Been_Killed_Already() {
             PlatformUI.SetupMenuButtons();
         }
-
+        
         private void OnMenuSceneLoadedFresh() {
             if(!init) {
                 gsm = SceneManager.GetSceneByName("PCInit").GetRootGameObjects().First<GameObject>(x => x.name == "AppCoreSceneContext")?.GetComponent<MarkSceneAsPersistent>().GetPrivateField<GameScenesManager>("_gameScenesManager");
                 init = true;
-                Instance = this;
-                config = new Config("Custom Platforms");
                 PlatformManager.OnLoad();
+                EnvironmentHider.showFeetOverride = Plugin.config.GetBool("Settings", "AlwaysShowFeet", false, true);
+                EnvironmentArranger.arrangement = (EnvironmentArranger.Arrangement)Plugin.config.GetInt("Settings", "EnvironmentArrangement", 0, true);
+                EnvironmentSceneOverrider.overrideMode = (EnvironmentSceneOverrider.EnvOverrideMode)Plugin.config.GetInt("Settings", "EnvironmentOverrideMode", 0, true);
+                PlatformManager.showHeart = Plugin.config.GetBool("Settings", "ShowHeart", true, true);
             }
         }
         internal static void Log(string message = "<3", Level level = Level.Info) {
