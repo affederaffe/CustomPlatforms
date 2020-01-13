@@ -2,7 +2,7 @@
 using System.Reflection;
 using UnityEngine;
 
-namespace CustomPlatforms.HarmonyPatches {
+namespace CustomFloorPlugin.HarmonyPatches {
     internal static class Patcher {
         private static bool _runOnce = false;
         internal static void Patch() {

@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace CustomPlatforms {
+namespace CustomFloorPlugin {
     public class CameraVisibilityManager {
         public const int OnlyInThirdPerson = 3;
         public const int OnlyInHeadset = 4;

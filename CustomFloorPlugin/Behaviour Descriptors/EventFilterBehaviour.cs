@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace CustomPlatforms {
+namespace CustomFloorPlugin {
     [RequireComponent(typeof(EventManager))]
     public class EventFilterBehaviour:MonoBehaviour {
         protected EventManager EventManager {

@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.Events;
 
-namespace CustomPlatforms {
+namespace CustomFloorPlugin {
     public class SongEventHandler:MonoBehaviour {
         public SongEventType eventType;
         public int value; // enum?

@@ -103,7 +103,6 @@
     <Compile Include="Harmony Patches\Patches.cs" />
     <Compile Include="Legacy Behaviours\CustomPlatformLegacy.cs" />
     <Compile Include="EnvironmentHider.cs" />
-    <Compile Include="Legacy Behaviours\LegacyForwarding.cs" />
     <Compile Include="Plugin.cs" />
     <Compile Include="MaterialSwapper.cs" />
     <Compile Include="Behaviour Managers\PlatformEventManager.cs" />

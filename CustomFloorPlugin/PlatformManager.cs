@@ -1,4 +1,4 @@
-using CustomPlatforms.Exceptions;
+using CustomFloorPlugin.Exceptions;
 using Harmony;
 using System;
 using System.Collections.Generic;
@@ -10,7 +10,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using Zenject;
 
-namespace CustomPlatforms {
+namespace CustomFloorPlugin {
     public static class Extentions {
         internal static void InvokePrivateMethod<T>(this object obj, string methodName, params object[] methodParams) {
             var method = typeof(T).GetMethod(methodName, BindingFlags.Instance | BindingFlags.NonPublic);

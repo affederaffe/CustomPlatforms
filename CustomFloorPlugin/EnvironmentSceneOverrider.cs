@@ -2,7 +2,7 @@
 using System.Linq;
 using UnityEngine;
 
-namespace CustomPlatforms {
+namespace CustomFloorPlugin {
     public class EnvironmentSceneOverrider {
         public enum EnvOverrideMode { Off, Default, Nice, BigMirror, Triangle, KDA, Monstercat };
 

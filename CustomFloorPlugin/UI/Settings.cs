@@ -2,7 +2,7 @@ using BeatSaberMarkupLanguage.Attributes;
 using BeatSaberMarkupLanguage.Parser;
 using System.Collections.Generic;
 
-namespace CustomPlatforms.UI {
+namespace CustomFloorPlugin.UI {
     class Settings:PersistentSingleton<Settings> {
 #pragma warning disable CS0649
         [UIParams]

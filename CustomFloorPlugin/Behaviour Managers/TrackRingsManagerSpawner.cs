@@ -2,7 +2,7 @@ using BS_Utils.Utilities;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace CustomPlatforms {
+namespace CustomFloorPlugin {
     class TrackRingsManagerSpawner:MonoBehaviour {
         List<TrackRings> trackRingsDescriptors = new List<TrackRings>();
         public List<TrackLaneRingsManager> trackLaneRingsManagers = new List<TrackLaneRingsManager>();

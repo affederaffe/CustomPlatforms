@@ -1,4 +1,4 @@
-﻿namespace CustomPlatforms {
+﻿namespace CustomFloorPlugin {
     public enum SongEventType {
         BackLights = 0,
         BigRingLights = 1,

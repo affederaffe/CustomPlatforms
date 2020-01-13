@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace CustomPlatforms {
+namespace CustomFloorPlugin {
     public class CustomPlatform:MonoBehaviour {
         public string platName = "MyCustomPlatform";
         public string platAuthor = "MyName";

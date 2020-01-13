@@ -2,7 +2,7 @@
 using UnityEngine;
 using UnityEngine.Events;
 
-namespace CustomPlatforms {
+namespace CustomFloorPlugin {
     public class EventManager:MonoBehaviour {
         public UnityEvent OnSlice;
         public UnityEvent OnComboBreak;

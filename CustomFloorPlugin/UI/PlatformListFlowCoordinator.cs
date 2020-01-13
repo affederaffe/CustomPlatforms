@@ -3,7 +3,7 @@ using HMUI;
 using IPA.Utilities;
 using System;
 
-namespace CustomPlatforms.UI {
+namespace CustomFloorPlugin.UI {
     class PlatformListFlowCoordinator:FlowCoordinator {
         private PlatformsListView _platformsListView;
         public void Awake() {

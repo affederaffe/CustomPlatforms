@@ -5,7 +5,7 @@
 using UnityEngine;
 using StreamWriter = System.IO.StreamWriter;
 
-namespace CustomPlatforms.Util {
+namespace CustomFloorPlugin.Util {
     public static class SceneDumper {
         public static void DumpScene() {
             string filename = Application.dataPath + "/unity-scene.txt";

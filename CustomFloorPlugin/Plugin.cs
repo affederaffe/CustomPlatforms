@@ -1,5 +1,5 @@
 ﻿using BS_Utils.Utilities;
-using CustomPlatforms.Exceptions;
+using CustomFloorPlugin.Exceptions;
 using IPA;
 using System;
 using System.Collections.Generic;
@@ -9,7 +9,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using Level = IPA.Logging.Logger.Level;
 
-namespace CustomPlatforms {
+namespace CustomFloorPlugin {
     internal class Plugin:IBeatSaberPlugin {
         internal static Config config;
         internal static GameScenesManager gsm = null;

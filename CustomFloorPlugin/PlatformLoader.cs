@@ -5,7 +5,7 @@ using System.Linq;
 using System.Security.Cryptography;
 using UnityEngine;
 
-namespace CustomPlatforms {
+namespace CustomFloorPlugin {
     /// <summary>
     /// Loads AssetBundles containing CustomPlatforms and handles cycling between them
     /// </summary>
