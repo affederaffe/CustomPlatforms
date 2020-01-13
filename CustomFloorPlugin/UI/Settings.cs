@@ -11,7 +11,7 @@ namespace CustomFloorPlugin.UI {
         [UIValue("always-show-feet")]
         public bool alwaysShowFeet {
             get {
-                return EnvironmentHider.showFeetOverride;
+                return Plugin.config.GetBool("Settings", "AlwaysShowFeet", false, true);
             }
             set {
                 EnvironmentHider.showFeetOverride = value;
@@ -26,7 +26,7 @@ namespace CustomFloorPlugin.UI {
         [UIValue("env-ov")]
         public EnvironmentSceneOverrider.EnvOverrideMode envOr {
             get {
-                return EnvironmentSceneOverrider.overrideMode;
+                return (EnvironmentSceneOverrider.EnvOverrideMode)Plugin.config.GetInt("Settings", "EnvironmentOverrideMode", 0, true);
             }
             set {
                 EnvironmentSceneOverrider.overrideMode = value;
@@ -37,7 +37,7 @@ namespace CustomFloorPlugin.UI {
         [UIValue("env-arr")]
         public EnvironmentArranger.Arrangement envArr {
             get {
-                return EnvironmentArranger.arrangement;
+                return (EnvironmentArranger.Arrangement)Plugin.config.GetInt("Settings", "EnvironmentArrangement", 0, true);
             }
             set {
                 EnvironmentArranger.arrangement = value;
@@ -47,11 +47,12 @@ namespace CustomFloorPlugin.UI {
         [UIValue("show-heart")]
         public bool showHeart {
             get {
-                return PlatformManager.showHeart;
+                return Plugin.config.GetBool("Settings", "ShowHeart", true, true);
             }
             set {
                 PlatformManager.showHeart = value;
                 Plugin.config.SetBool("Settings", "ShowHeart", PlatformManager.showHeart);
+                PlatformManager.Heart.SetActive(value);
             }
         }
     }

@@ -115,29 +115,31 @@ namespace CustomFloorPlugin {
             EmptyLightRegisters();
         }
         void TransitionFinalize(ScenesTransitionSetupDataSO ignored1, DiContainer ignored2) {
-            if(!GetCurrentEnvironment().name.StartsWith("Menu")) {
-                try {
-                    FindManager();
-                    if(!Resources.FindObjectsOfTypeAll<PlayerDataModelSO>()[0].playerData.overrideEnvironmentSettings.overrideEnvironments) {
-                        InternalTempChangeToPlatform();
-                        PlatformLoader.AddManagers(currentPlatform.gameObject);
-                        SpawnCustomLights();
-                        StartCoroutine(ReplaceAllMaterialsAfterOneFrame());
-                        EnvironmentArranger.RearrangeEnvironment();
-                        TubeLightManager.CreateAdditionalLightSwitchControllers();
+            try {
+                if(!GetCurrentEnvironment().name.StartsWith("Menu")) {
+                    try {
+                        FindManager();
+                        if(!Resources.FindObjectsOfTypeAll<PlayerDataModelSO>()[0].playerData.overrideEnvironmentSettings.overrideEnvironments) {
+                            Plugin.Log("Blorp");
+                            InternalTempChangeToPlatform();
+                            PlatformLoader.AddManagers(currentPlatform.gameObject);
+                            SpawnCustomLights();
+                            StartCoroutine(ReplaceAllMaterialsAfterOneFrame());
+                            EnvironmentArranger.RearrangeEnvironment();
+                            TubeLightManager.CreateAdditionalLightSwitchControllers();
+                        }
+                    } catch(ManagerNotFoundException e) {
+                        Plugin.Log(e);
                     }
-                } catch(ManagerNotFoundException e) {
-                    Plugin.Log(e);
+                } else {
+                    Heart.SetActive(showHeart);
+                    Heart.GetComponent<LightWithId>().ColorWasSet(Color.magenta);
                 }
-            } else {
-                Heart.SetActive(true);
-                Heart.GetComponent<LightWithId>().ColorWasSet(Color.magenta);
+            } catch(EnvironmentSceneNotFoundException e) {
+                Plugin.Log(e);
             }
         }
         private void Start() {
-            showHeart = Plugin.config.GetBool("Settings", "ShowHeart", true, true);
-            EnvironmentArranger.arrangement = (EnvironmentArranger.Arrangement)Plugin.config.GetInt("Settings", "EnvironmentArrangement", 0, true);
-            EnvironmentSceneOverrider.overrideMode = (EnvironmentSceneOverrider.EnvOverrideMode)Plugin.config.GetInt("Settings", "EnvironmentOverrideMode", 0, true);
             EnvironmentSceneOverrider.GetSceneInfos();
             EnvironmentSceneOverrider.OverrideEnvironmentScene();
 
@@ -304,16 +306,16 @@ namespace CustomFloorPlugin {
         /// <summary>
         /// Please use <see cref="TempChangeToPlatform(int)"/> instead.
         /// </summary>
-        [Obsolete("Please use TempChangeToPlatform instead", false)]
-        public void ChangeToPlatform(int index, bool save = true) {
-            try {
-                TempChangeToPlatform(index);
-            } catch(StackedRequestsException e) {
-                e.OverridePreviousRequest();
-            } finally {
-                InternalTempChangeToPlatform();
-            }
-        }
+        //[Obsolete("Please use TempChangeToPlatform instead", false)]
+        //public void ChangeToPlatform(int index, bool ignored = true) {
+        //    try {
+        //        TempChangeToPlatform(index);
+        //    } catch(StackedRequestsException e) {
+        //        e.OverridePreviousRequest();
+        //    } finally {
+        //        InternalTempChangeToPlatform();
+        //    }
+        //}
         /// <summary>
         /// This function handles outside requests to temporarily change to a specific platform.<br/>
         /// It caches the request and will consume it when a level is played.<br/>
@@ -379,7 +381,7 @@ namespace CustomFloorPlugin {
         }
         void SwapHeartMesh() {
             System.Globalization.NumberFormatInfo numberFormat = System.Globalization.NumberFormatInfo.InvariantInfo;
-            using Stream manifestResourceStream = Assembly.GetAssembly(GetType()).GetManifestResourceStream("CustomPlatforms.heart.mesh");
+            using Stream manifestResourceStream = Assembly.GetAssembly(GetType()).GetManifestResourceStream("CustomFloorPlugin.heart.mesh");
             using StreamReader streamReader = new StreamReader(manifestResourceStream);
 
             string meshfile = streamReader.ReadToEnd();
@@ -416,6 +418,8 @@ namespace CustomFloorPlugin {
             Heart.transform.localScale = scale;
 
             Heart.GetComponent<LightWithId>().ColorWasSet(Color.magenta);
+
+            Heart.SetActive(showHeart);
         }
     }
 }

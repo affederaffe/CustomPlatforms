@@ -12,15 +12,6 @@ namespace CustomFloorPlugin.HarmonyPatches {
             HarmonyInstance.Create("com.rolopogo.customplatforms").PatchAll(Assembly.GetExecutingAssembly());
         }
     }
-    [HarmonyPatch(typeof(MenuTransitionsHelper))]
-    [HarmonyPatch("RestartGame", MethodType.Normal)]
-    public class MenuTransitionsHelper_RestartGame_Patch {
-
-        public static void Prefix() {
-            System.Console.WriteLine("Restart of Game");
-            PlatformManager.InternalTempChangeToPlatform();
-        }
-    }
     /// <summary>
     /// After the settings have been applied for the first time, I see myself currently forced to move everthing into DontDestroyOnLoad.
     /// This is not reversed after loading, but shouldn't matter.
