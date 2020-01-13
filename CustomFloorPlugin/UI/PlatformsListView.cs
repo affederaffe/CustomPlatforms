@@ -23,6 +23,7 @@ namespace CustomFloorPlugin.UI {
 
         }
         protected override void DidDeactivate(DeactivationType deactivationType) {
+            Plugin.Log("attempting to swap to platform 0");
             PlatformManager.InternalTempChangeToPlatform(0);
             base.DidDeactivate(deactivationType);
         }
