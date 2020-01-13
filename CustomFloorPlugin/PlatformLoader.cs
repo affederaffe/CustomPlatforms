@@ -129,7 +129,8 @@ namespace CustomFloorPlugin {
 
             return customPlatform;
         }
-        internal static void AddManagers(GameObject go) {
+        internal static void AddManagers() {
+            GameObject go = PlatformManager.activePlatform.gameObject;
             bool active = go.activeSelf;
             if(active) {
                 go.SetActive(false);

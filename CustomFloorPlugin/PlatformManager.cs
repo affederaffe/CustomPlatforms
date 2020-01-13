@@ -120,12 +120,7 @@ namespace CustomFloorPlugin {
                     try {
                         FindManager();
                         if(!Resources.FindObjectsOfTypeAll<PlayerDataModelSO>()[0].playerData.overrideEnvironmentSettings.overrideEnvironments) {
-                            Plugin.Log("Blorp");
                             InternalTempChangeToPlatform();
-                            PlatformLoader.AddManagers(currentPlatform.gameObject);
-                            SpawnCustomLights();
-                            StartCoroutine(ReplaceAllMaterialsAfterOneFrame());
-                            EnvironmentArranger.RearrangeEnvironment();
                             TubeLightManager.CreateAdditionalLightSwitchControllers();
                         }
                     } catch(ManagerNotFoundException e) {
@@ -145,7 +140,6 @@ namespace CustomFloorPlugin {
 
             EnvHider = new EnvironmentHider();
             platformLoader = new PlatformLoader();
-
 
             RefreshPlatforms();
             PlatformUI.OnLoad();
@@ -229,7 +223,7 @@ namespace CustomFloorPlugin {
                 throw new ManagerNotFoundException();
             }
         }
-        void DestroyCustomLights() {
+        static void DestroyCustomLights() {
             while(SpawnedObjects.Count != 0) {
                 GameObject gameObject = SpawnedObjects[0];
                 SpawnedObjects.Remove(gameObject);
@@ -241,7 +235,7 @@ namespace CustomFloorPlugin {
                 Destroy(component);
             }
         }
-        void SpawnCustomLights() {
+        static void SpawnCustomLights() {
             SpawnQueue();
         }
         void EmptyLightRegisters() {
@@ -267,6 +261,8 @@ namespace CustomFloorPlugin {
         public int currentPlatformIndex { get { return platformIndex; } }
 
         public static CustomPlatform currentPlatform { get { return platforms[platformIndex]; } }
+
+        internal static CustomPlatform activePlatform;
 
         public CustomPlatform[] GetPlatforms() {
             return platforms;
@@ -304,19 +300,6 @@ namespace CustomFloorPlugin {
         /// </summary>
         internal static int? errBuffer = null;
         /// <summary>
-        /// Please use <see cref="TempChangeToPlatform(int)"/> instead.
-        /// </summary>
-        //[Obsolete("Please use TempChangeToPlatform instead", false)]
-        //public void ChangeToPlatform(int index, bool ignored = true) {
-        //    try {
-        //        TempChangeToPlatform(index);
-        //    } catch(StackedRequestsException e) {
-        //        e.OverridePreviousRequest();
-        //    } finally {
-        //        InternalTempChangeToPlatform();
-        //    }
-        //}
-        /// <summary>
         /// This function handles outside requests to temporarily change to a specific platform.<br/>
         /// It caches the request and will consume it when a level is played.<br/>
         /// This can be called both before, and after loading.<br/>
@@ -333,7 +316,12 @@ namespace CustomFloorPlugin {
             }
             try {
                 if(!GetCurrentEnvironment().name.StartsWith("Menu")) {
+                    DestroyCustomLights();
                     InternalTempChangeToPlatform();
+                    PlatformLoader.AddManagers();
+                    SpawnCustomLights();
+                    Instance.StartCoroutine(ReplaceAllMaterialsAfterOneFrame());
+                    EnvironmentArranger.RearrangeEnvironment();
                 }
             } catch(EnvironmentSceneNotFoundException e) {
                 IPA.Logging.Logger.Level L = IPA.Logging.Logger.Level.Warning;
@@ -359,12 +347,16 @@ namespace CustomFloorPlugin {
             // Show new platform
             currentPlatform.gameObject.SetActive(true);
 
+            // Save active platform
+            activePlatform = currentPlatform;
+
             // Hide environment for new platform
             Instance.StartCoroutine(HideForPlatformAfterOneFrame(currentPlatform));
 
             // Update lightSwitchEvent TubeLight references
             TubeLightManager.UpdateEventTubeLightList();
             platformIndex = oldIndex;
+
         }
         internal static void InternalOverridePreviousRequest() {
             kyleBuffer = errBuffer;
