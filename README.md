@@ -30,7 +30,12 @@ Your Beat Saber folder should then look like this:
 
 ## Controls
 
-Press P to cycle through installed Platforms, or use the main menu option
+Visit the ModSettings page ingame to access important settings, like:
+* Always show feet, to mark the center of the room,
+* Hide the :heart: that CustomPlatforms uses as a cloneable light source
+* etc.
+
+You can press Numpad0 (while playing songs) to toggle the heart on and have it react to light events.
 
 ## Adding More Platforms
 
