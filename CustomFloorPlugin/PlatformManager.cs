@@ -175,11 +175,12 @@ namespace CustomFloorPlugin {
                 for(int i = 0; i < platforms.Length; i++) {
                     if(savedPath == platforms[i].platName + platforms[i].platAuthor) {
                         platformIndex = i;
-                        activePlatform = currentPlatform;
                         break;
                     }
                 }
+                Plugin.Log(platformIndex, IPA.Logging.Logger.Level.Notice);
             }
+            activePlatform = currentPlatform;
         }
         ////////////////////////////////////////////////////////////////////////////////////////////////////
         private void Update() {
