@@ -107,6 +107,7 @@ namespace CustomFloorPlugin {
                     InternalTempChangeToPlatform(0);
 
                 } else {
+                    platformSpawned = false;
                     Heart.SetActive(false);
                 }
             } catch(EnvironmentSceneNotFoundException e) {
@@ -120,11 +121,10 @@ namespace CustomFloorPlugin {
                     try {
                         FindManager();
                         if(!Resources.FindObjectsOfTypeAll<PlayerDataModelSO>()[0].playerData.overrideEnvironmentSettings.overrideEnvironments) {
-                            Plugin.Log("Blorp");
                             InternalTempChangeToPlatform();
-                            PlatformLoader.AddManagers(currentPlatform.gameObject);
+                            PlatformLoader.AddManagers();
                             SpawnCustomLights();
-                            StartCoroutine(ReplaceAllMaterialsAfterOneFrame());
+                            Instance.StartCoroutine(ReplaceAllMaterialsAfterOneFrame());
                             EnvironmentArranger.RearrangeEnvironment();
                             TubeLightManager.CreateAdditionalLightSwitchControllers();
                         }
@@ -145,7 +145,6 @@ namespace CustomFloorPlugin {
 
             EnvHider = new EnvironmentHider();
             platformLoader = new PlatformLoader();
-
 
             RefreshPlatforms();
             PlatformUI.OnLoad();
@@ -179,7 +178,9 @@ namespace CustomFloorPlugin {
                         break;
                     }
                 }
+                Plugin.Log(platformIndex, IPA.Logging.Logger.Level.Notice);
             }
+            activePlatform = currentPlatform;
         }
         ////////////////////////////////////////////////////////////////////////////////////////////////////
         private void Update() {
@@ -229,7 +230,7 @@ namespace CustomFloorPlugin {
                 throw new ManagerNotFoundException();
             }
         }
-        void DestroyCustomLights() {
+        static void DestroyCustomLights() {
             while(SpawnedObjects.Count != 0) {
                 GameObject gameObject = SpawnedObjects[0];
                 SpawnedObjects.Remove(gameObject);
@@ -241,7 +242,7 @@ namespace CustomFloorPlugin {
                 Destroy(component);
             }
         }
-        void SpawnCustomLights() {
+        static void SpawnCustomLights() {
             SpawnQueue();
         }
         void EmptyLightRegisters() {
@@ -268,6 +269,8 @@ namespace CustomFloorPlugin {
 
         public static CustomPlatform currentPlatform { get { return platforms[platformIndex]; } }
 
+        internal static CustomPlatform activePlatform;
+
         public CustomPlatform[] GetPlatforms() {
             return platforms;
         }
@@ -289,6 +292,8 @@ namespace CustomFloorPlugin {
             // Show new platform
             currentPlatform.gameObject.SetActive(true);
 
+            activePlatform = currentPlatform;
+
             // Hide environment for new platform
             EnvHider.HideObjectsForPlatform(currentPlatform);
 
@@ -304,36 +309,33 @@ namespace CustomFloorPlugin {
         /// </summary>
         internal static int? errBuffer = null;
         /// <summary>
-        /// Please use <see cref="TempChangeToPlatform(int)"/> instead.
-        /// </summary>
-        //[Obsolete("Please use TempChangeToPlatform instead", false)]
-        //public void ChangeToPlatform(int index, bool ignored = true) {
-        //    try {
-        //        TempChangeToPlatform(index);
-        //    } catch(StackedRequestsException e) {
-        //        e.OverridePreviousRequest();
-        //    } finally {
-        //        InternalTempChangeToPlatform();
-        //    }
-        //}
-        /// <summary>
         /// This function handles outside requests to temporarily change to a specific platform.<br/>
         /// It caches the request and will consume it when a level is played.<br/>
         /// This can be called both before, and after loading.<br/>
+        /// Has to be called BEFORE the level is loaded in order for the right vanilla environment to load.<br/>
         /// It does not require you to reset the platform back to the last known state after the level.
         /// </summary>
         /// <param name="index">Index of the desired platform</param>
         /// <exception cref="StackedRequestsException"></exception>
+        private static bool platformSpawned = false;
         public static void TempChangeToPlatform(int index) {
-            if(kyleBuffer.HasValue) {
+            Plugin.Log();
+            Plugin.Log(index);
+            
+            if(kyleBuffer != null) {
                 errBuffer = index;
                 throw new StackedRequestsException();
             } else {
                 kyleBuffer = index;
             }
             try {
-                if(!GetCurrentEnvironment().name.StartsWith("Menu")) {
+                if(!GetCurrentEnvironment().name.StartsWith("Menu") && platformSpawned) {
+                    DestroyCustomLights();
                     InternalTempChangeToPlatform();
+                    PlatformLoader.AddManagers();
+                    SpawnCustomLights();
+                    Instance.StartCoroutine(ReplaceAllMaterialsAfterOneFrame());
+                    EnvironmentArranger.RearrangeEnvironment();
                 }
             } catch(EnvironmentSceneNotFoundException e) {
                 IPA.Logging.Logger.Level L = IPA.Logging.Logger.Level.Warning;
@@ -350,21 +352,31 @@ namespace CustomFloorPlugin {
             }
         }
         internal static void InternalTempChangeToPlatform(int index) {
+
+            if(!GetCurrentEnvironment().name.StartsWith("Menu")) {
+                platformSpawned = true;
+            }
+            Plugin.Log("switching to " + Instance.GetPlatform(index));
             // Hide current Platform
-            currentPlatform.gameObject.SetActive(false);
+            activePlatform.gameObject.SetActive(false);
             int oldIndex = platformIndex;
             // Increment index
             platformIndex = index % platforms.Length;
 
+            // Save active platform
+            activePlatform = currentPlatform;
+
+            platformIndex = oldIndex;
+
             // Show new platform
-            currentPlatform.gameObject.SetActive(true);
+            activePlatform.gameObject.SetActive(true);
 
             // Hide environment for new platform
-            Instance.StartCoroutine(HideForPlatformAfterOneFrame(currentPlatform));
+            Instance.StartCoroutine(HideForPlatformAfterOneFrame(activePlatform));
 
             // Update lightSwitchEvent TubeLight references
             TubeLightManager.UpdateEventTubeLightList();
-            platformIndex = oldIndex;
+
         }
         internal static void InternalOverridePreviousRequest() {
             kyleBuffer = errBuffer;
