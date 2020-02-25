@@ -1,13 +1,15 @@
 ﻿using UnityEngine;
 
 namespace CustomFloorPlugin {
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1051:Do not declare visible instance fields", Justification = "Too old to change")]
     public class CameraVisibility:MonoBehaviour {
         public enum VisibilityMode { Default, HeadsetOnly, ThirdPersonOnly };
-        public VisibilityMode visibilityMode = VisibilityMode.Default;
-        public bool affectChildren = false;
+
+        public VisibilityMode visibilityMode;
+        public bool affectChildren;
 
         // --------------------------- 
-
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Code Quality", "IDE0051:Remove unused private members", Justification = "Called by Unity")]
         private void Awake() {
             int layer = gameObject.layer;
 

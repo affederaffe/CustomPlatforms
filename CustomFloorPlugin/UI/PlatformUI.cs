@@ -2,40 +2,54 @@
 using BeatSaberMarkupLanguage.MenuButtons;
 using BeatSaberMarkupLanguage.Settings;
 using BS_Utils.Utilities;
-using UnityEngine;
-using UnityEngine.SceneManagement;
-using Zenject;
 
-namespace CustomFloorPlugin {
-    class PlatformUI:MonoBehaviour {
-        public static PlatformUI _instance;
+namespace CustomFloorPlugin.UI {
 
-        public static UI.PlatformListFlowCoordinator _platformMenuFlowCoordinator;
 
-        internal static void OnLoad() {
-            if(_instance != null) {
-                return;
+    /// <summary>
+    /// Static, multifunctional, UI Class. Holds references to UI elements and provides UI relevant functions.
+    /// </summary>
+    internal static class PlatformUI {
+
+
+        /// <summary>
+        /// Static reference to the <see cref="PlatformListFlowCoordinator"/> singleton
+        /// </summary>
+        private static PlatformListFlowCoordinator platformMenuFlowCoordinator {
+            get {
+                if(_platformMenuFlowCoordinator == null) {
+                    _platformMenuFlowCoordinator = BeatSaberUI.CreateFlowCoordinator<PlatformListFlowCoordinator>();
+                }
+                return _platformMenuFlowCoordinator;
             }
-            new GameObject("PlatformUI").AddComponent<PlatformUI>();
+        }
+        private static PlatformListFlowCoordinator _platformMenuFlowCoordinator;
+
+
+        /// <summary>
+        /// Used to make sure setup is only performed once
+        /// </summary>
+        private static bool runOnce = false;
+
+
+        /// <summary>
+        /// Sets up the UI
+        /// </summary>
+        public static void SetupMenuButtons() {
+            if(!runOnce) {
+                runOnce = true;
+                MenuButtons.instance.RegisterButton(new MenuButton("Custom Platforms", "Change Custom Plaforms Here!", CustomPlatformsMenuButtonPressed, true));
+                BSMLSettings.instance.AddSettingsMenu("Custom Platforms", "CustomFloorPlugin.UI.Settings.bsml", Settings.instance);
+            }
         }
 
-        private void Awake() {
-            _instance = this;
-            SceneManager.MoveGameObjectToScene(gameObject, SceneManager.CreateScene("PlatformUIDump", new CreateSceneParameters(LocalPhysicsMode.None)));
 
-            Plugin.gsm.MarkSceneAsPersistent("PlatformUIDump");
-        }
-
-
-        public static void SetupMenuButtons(ScenesTransitionSetupDataSO ignored1 = null, DiContainer ignored2 = null) {
-            MenuButtons.instance.RegisterButton(new MenuButton("Custom Platforms", "Change Custom Plaforms Here!", CustomPlatformsMenuButtonPressed, true));
-            BSMLSettings.instance.AddSettingsMenu("Custom Platforms", "CustomFloorPlugin.UI.Settings.bsml", UI.Settings.instance);
-        }
+        /// <summary>
+        /// Transitions to the CustomPlatforms selection menu
+        /// </summary>
         private static void CustomPlatformsMenuButtonPressed() {
-            if(_platformMenuFlowCoordinator == null) {
-                _platformMenuFlowCoordinator = BeatSaberUI.CreateFlowCoordinator<UI.PlatformListFlowCoordinator>();
-            }
-            BeatSaberUI.MainFlowCoordinator.InvokeMethod("PresentFlowCoordinator", _platformMenuFlowCoordinator, null, false, false);
+            BeatSaberUI.MainFlowCoordinator.InvokeMethod("PresentFlowCoordinator", platformMenuFlowCoordinator, null, false, false);
         }
     }
+
 }

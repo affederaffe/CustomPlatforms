@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 
 namespace CustomFloorPlugin {
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1051:Do not declare visible instance fields", Justification = "Too old to change")]
     public class TrackRings:MonoBehaviour {
         [Space]
         [Header("Rings")]
@@ -29,10 +30,12 @@ namespace CustomFloorPlugin {
         public float maxPositionStep = 2f;
         public float moveSpeed = 1f;
 
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Code Quality", "IDE0051:Remove unused private members", Justification = "Called by Unity")]
         private void OnDrawGizmos() {
             Gizmos.matrix = transform.localToWorldMatrix;
             Gizmos.color = Color.blue;
-            Vector3 zOffset = Vector3.zero;
+            Vector3 zOffset;
             for(int i = 0; i < ringCount; i++) {
                 zOffset = i * ringPositionStep * Vector3.forward;
                 if(trackLaneRingPrefab != null) {

@@ -1,70 +1,58 @@
-﻿using System.Collections.Generic;
+﻿using CustomFloorPlugin.UI;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using static CustomFloorPlugin.Utilities.Logging;
 
 namespace CustomFloorPlugin {
-    public class EnvironmentSceneOverrider {
-        public enum EnvOverrideMode { Off, Default, Nice, BigMirror, Triangle, KDA, Monstercat };
+    internal static partial class EnvironmentSceneOverrider {
 
-        public static EnvOverrideMode overrideMode = EnvOverrideMode.Off;
-        private static Dictionary<EnvOverrideMode, EnvSceneInfo> envInfos;
-
-        public static void GetSceneInfos() {
-            var sceneInfos = Resources.FindObjectsOfTypeAll<SceneInfo>();
-            envInfos = new Dictionary<EnvOverrideMode, EnvSceneInfo>();
-            envInfos.Add(EnvOverrideMode.Default, new EnvSceneInfo("Default", sceneInfos.First(x => x.name == "DefaultEnvironmentSceneInfo")));
-            envInfos.Add(EnvOverrideMode.Nice, new EnvSceneInfo("Nice", sceneInfos.First(x => x.name == "NiceEnvironmentSceneInfo")));
-            envInfos.Add(EnvOverrideMode.BigMirror, new EnvSceneInfo("Big Mirror", sceneInfos.First(x => x.name == "BigMirrorEnvironmentSceneInfo")));
-            envInfos.Add(EnvOverrideMode.Triangle, new EnvSceneInfo("Triangle", sceneInfos.First(x => x.name == "TriangleEnvironmentSceneInfo")));
-            envInfos.Add(EnvOverrideMode.KDA, new EnvSceneInfo("KDA", sceneInfos.First(x => x.name == "KDAEnvironmentSceneInfo")));
-            envInfos.Add(EnvOverrideMode.Monstercat, new EnvSceneInfo("Monstercat", sceneInfos.First(x => x.name == "MonstercatEnvironmentSceneInfo")));
-        }
-
-        public class EnvSceneInfo {
-            public string sceneName { get; private set; }
-            public string displayName { get; private set; }
-            public SceneInfo sceneInfo { get; private set; }
-
-            public EnvSceneInfo(string displayName, SceneInfo sceneInfo) {
-                this.displayName = displayName;
-                sceneName = sceneInfo.sceneName;
-                this.sceneInfo = sceneInfo;
-            }
-
-            public void OverrideScene(EnvSceneInfo info) {
-                sceneInfo.SetPrivateField("_sceneName", info.sceneName);
-            }
-
-            public void Revert() {
-                sceneInfo.SetPrivateField("_sceneName", sceneName);
-            }
+        private static readonly List<SceneInfoWithBackup> allSceneInfos = SceneInfoWithBackup.GetAllEnvs();
+        private static readonly Dictionary<EnvOverrideMode, SceneInfoWithBackup> supportedSceneInfos = new Dictionary<EnvOverrideMode, SceneInfoWithBackup>() {
+            {EnvOverrideMode.Default, EnvWithName("Default")},
+            {EnvOverrideMode.Nice, EnvWithName("Nice")},
+            {EnvOverrideMode.BigMirror, EnvWithName("BigMirror")},
+            {EnvOverrideMode.Triangle, EnvWithName("Triangle")},
+            {EnvOverrideMode.KDA, EnvWithName("KDA")},
+            {EnvOverrideMode.Monstercat, EnvWithName("Monstercat")}
         };
-
-        public static void OverrideEnvironmentScene() {
-            foreach(EnvSceneInfo info in envInfos.Values) {
-                if(overrideMode == EnvOverrideMode.Off) {
-                    info.Revert();
-                } else {
-                    info.OverrideScene(envInfos[overrideMode]);
-                }
+        internal static void Load() {
+            Settings.EnvOrChanged -= OverrideEnvironmentScene;
+            Settings.EnvOrChanged += OverrideEnvironmentScene;
+            OverrideEnvironmentScene();
+        }
+        
+        internal static void OverrideEnvironmentScene() {
+            OverrideEnvironmentScene(Settings.EnvOr);
+        }
+        internal static void OverrideEnvironmentScene(EnvOverrideMode mode) {
+            Settings.EnvOr = mode;
+            if(Settings.PlayerData.overrideEnvironmentSettings.overrideEnvironments) {
+                Revert();
+            } else {
+                OverrideScenes(mode);
             }
         }
-
-        public static List<object> OverrideModes() {
-            List<object> ovs = new List<object>();
-            ovs.Add(EnvOverrideMode.Off);
-            ovs.Add(EnvOverrideMode.Default);
-            ovs.Add(EnvOverrideMode.Nice);
-            ovs.Add(EnvOverrideMode.BigMirror);
-            ovs.Add(EnvOverrideMode.Triangle);
-            ovs.Add(EnvOverrideMode.KDA);
-            ovs.Add(EnvOverrideMode.Monstercat);
-            return ovs;
+        private static void Revert() {
+            for(int i = 0; i < allSceneInfos.Count; i++) {
+                allSceneInfos[i].SceneName = allSceneInfos[i].BackupName;
+            }
+            Log("Logging names after revert");
+            foreach(SceneInfoWithBackup info in allSceneInfos) {
+                Log(info.SceneName);
+                Log(info.BackupName);
+            }
         }
-
-        public static string Name(EnvOverrideMode mode) {
-            if(mode == EnvOverrideMode.Off) return "Off";
-            return envInfos[mode].displayName;
+        private static void OverrideScenes(EnvOverrideMode mode) {
+            string sceneName = supportedSceneInfos[mode].SceneName;
+            for(int i = 0; i < allSceneInfos.Count; i++) {
+                allSceneInfos[i].SceneName = sceneName;
+            }
+            Log("Logging names after override");
+            foreach(SceneInfoWithBackup info in allSceneInfos) {
+                Log(info.SceneName);
+                Log(info.BackupName);
+            }
         }
     }
 }

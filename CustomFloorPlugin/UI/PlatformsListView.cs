@@ -2,46 +2,88 @@ using BeatSaberMarkupLanguage.Attributes;
 using BeatSaberMarkupLanguage.Components;
 using BeatSaberMarkupLanguage.ViewControllers;
 using HMUI;
-using System;
 using UnityEngine;
 
-
 namespace CustomFloorPlugin.UI {
-    public class PlatformsListView:BSMLResourceViewController {
+
+
+    /// <summary>
+    /// A <see cref="ViewController"/> generated and maintained by BSML at runtime.<br/>
+    /// BSML uses the <see cref="ResourceName"/> to determine the Layout of the <see cref="GameObject"/>s and their <see cref="Component"/>s<br/>
+    /// Tagged functions and variables from this class may be used/called by BSML if the .bsml file mentions them.<br/>
+    /// </summary>
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Build", "CA1812:Avoid unistantiated internal classes", Justification = "Instantiated by Unity")]
+    internal class PlatformsListView:BSMLResourceViewController {
+
+
+        /// <summary>
+        /// Path to the embedded resource
+        /// </summary>
         public override string ResourceName => "CustomFloorPlugin.UI.PlatformList.bsml";
+
+
+        /// <summary>
+        /// The table of currently loaded Platforms
+        /// </summary>
         [UIComponent("PlatformsList")]
-        public CustomListTableData customListTableData;
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1051:Do not declare visible instance fields", Justification = "BSML is not capable of finding private instance fields. lol")]
+        public CustomListTableData PlatformListTable = null;
 
+
+        /// <summary>
+        /// Called when a <see cref="CustomPlatform"/> is selected by the user<br/>
+        /// Passes the choice to the <see cref="PlatformManager"/> and deactivates Beat Sabers inbuilt Environment Override
+        /// </summary>
+        /// <param name="ignored1">I love how optimised BSML is</param>
+        /// <param name="idx">Cell index of the users selection</param>
         [UIAction("PlatformSelect")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Code Quality", "IDE0051:Remove unused private members", Justification = "Called by BSML")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Build", "CA1801:Review unused parameters", Justification = "BSML")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "BSML")]
         private void PlatformSelect(TableView ignored1, int idx) {
-            PlatformManager.Instance.SetPlatform(idx);
-            try {
-                Resources.FindObjectsOfTypeAll<PlayerDataModelSO>()[0].playerData.overrideEnvironmentSettings.overrideEnvironments = false;
-            } catch(Exception e) {
-                Plugin.Log(e);
-            }
-
+            PlatformManager.SetPlatformAndShow(idx);
+            Settings.PlayerData.overrideEnvironmentSettings.overrideEnvironments = false;
+            EnvironmentSceneOverrider.OverrideEnvironmentScene();
         }
+
+
+        /// <summary>
+        /// Swapping back to the standard menu environment when the menu is closed<br/>
+        /// [Called by Beat Saber]
+        /// </summary>
+        /// <param name="deactivationType">Type of deactivation</param>
         protected override void DidDeactivate(DeactivationType deactivationType) {
-            Plugin.Log("attempting to swap to platform 0");
-            PlatformManager.InternalTempChangeToPlatform(0);
+            PlatformManager.ChangeToPlatform(0);
             base.DidDeactivate(deactivationType);
         }
+
+
+        /// <summary>
+        /// Changing to the current platform when the menu is shown<br/>
+        /// [Called by Beat Saber]
+        /// </summary>
+        /// <param name="firstActivation">Was this the first activation?</param>
+        /// <param name="type">Type of activation</param>
         protected override void DidActivate(bool firstActivation, ActivationType type) {
-            PlatformManager.InternalTempChangeToPlatform(PlatformManager.Instance.currentPlatformIndex);
+            PlatformManager.ChangeToPlatform();
             base.DidActivate(firstActivation, type);
         }
 
+
+        /// <summary>
+        /// (Re-)Loading the table for the ListView of available platforms.<br/>
+        /// [Called by BSML]
+        /// </summary>
         [UIAction("#post-parse")]
         internal void SetupPlatformsList() {
-            customListTableData.data.Clear();
-            foreach(CustomPlatform platform in PlatformManager.Instance.GetPlatforms()) {
-                customListTableData.data.Add(new CustomListTableData.CustomCellInfo(platform.platName, platform.platAuthor, platform.icon.texture));
+            PlatformListTable.data.Clear();
+            foreach(CustomPlatform platform in PlatformManager.AllPlatforms) {
+                PlatformListTable.data.Add(new CustomListTableData.CustomCellInfo(platform.platName, platform.platAuthor, platform.icon.texture));
             }
-            customListTableData.tableView.ReloadData();
-            int selectedPlatform = PlatformManager.Instance.currentPlatformIndex;
-            customListTableData.tableView.ScrollToCellWithIdx(selectedPlatform, HMUI.TableViewScroller.ScrollPositionType.Beginning, false);
-            customListTableData.tableView.SelectCellWithIdx(selectedPlatform);
+            PlatformListTable.tableView.ReloadData();
+            int selectedPlatform = PlatformManager.CurrentPlatformIndex;
+            PlatformListTable.tableView.ScrollToCellWithIdx(selectedPlatform, HMUI.TableViewScroller.ScrollPositionType.Beginning, false);
+            PlatformListTable.tableView.SelectCellWithIdx(selectedPlatform);
         }
     }
 }

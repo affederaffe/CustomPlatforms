@@ -4,23 +4,21 @@ using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 using UnityEngine;
+using static CustomFloorPlugin.Utilities.Logging;
 
 namespace CustomFloorPlugin {
     /// <summary>
     /// Loads AssetBundles containing CustomPlatforms and handles cycling between them
     /// </summary>
-    class PlatformLoader {
-        private const string customFolder = "CustomPlatforms";
+    internal static class PlatformLoader {
 
-        private List<string> bundlePaths;
-        private List<CustomPlatform> platforms;
 
         /// <summary>
         /// Loads AssetBundles and populates the platforms array with CustomPlatform objects
         /// </summary>
-        public CustomPlatform[] CreateAllPlatforms(Transform parent) {
+        public static List<CustomPlatform> CreateAllPlatforms(Transform parent) {
 
-            string customPlatformsFolderPath = Path.Combine(Environment.CurrentDirectory, customFolder);
+            string customPlatformsFolderPath = Path.Combine(Environment.CurrentDirectory, Constants.customFolder);
 
             // Create the CustomPlatforms folder if it doesn't already exist
             if(!Directory.Exists(customPlatformsFolderPath)) {
@@ -30,8 +28,7 @@ namespace CustomFloorPlugin {
             // Find AssetBundles in our CustomPlatforms directory
             string[] allBundlePaths = Directory.GetFiles(customPlatformsFolderPath, "*.plat");
 
-            platforms = new List<CustomPlatform>();
-            bundlePaths = new List<string>();
+            List<CustomPlatform>  platforms = new List<CustomPlatform>();
 
             // Create a dummy CustomPlatform for the original platform
             CustomPlatform defaultPlatform = new GameObject("Default Platform").AddComponent<CustomPlatform>();
@@ -41,52 +38,52 @@ namespace CustomFloorPlugin {
             Texture2D texture = Resources.FindObjectsOfTypeAll<Texture2D>().First(x => x.name == "LvlInsaneCover");
             defaultPlatform.icon = Sprite.Create(texture, new Rect(0f, 0f, texture.width, texture.height), new Vector2(0.5f, 0.5f));
             platforms.Add(defaultPlatform);
-            bundlePaths.Add("");
             // Populate the platforms array
-            Plugin.Log("[START OF PLATFORM LOADING SPAM]-------------------------------------");
+            Log("[START OF PLATFORM LOADING SPAM]-------------------------------------");
             int j = 0;
             for(int i = 0; i < allBundlePaths.Length; i++) {
                 j++;
                 CustomPlatform newPlatform = LoadPlatformBundle(allBundlePaths[i], parent);
+                if(newPlatform != null) {
+                    platforms.Add(newPlatform);
+                }
             }
-            Plugin.Log("[END OF PLATFORM LOADING SPAM]---------------------------------------");
+            Log("[END OF PLATFORM LOADING SPAM]---------------------------------------");
             // Replace materials for all renderers
-            MaterialSwapper.ReplaceAllMaterials();
+            MaterialSwapper.ReplaceMaterials(PlatformManager.PlatformManagerScene);
 
-            return platforms.ToArray();
+            return platforms;
         }
 
-        public CustomPlatform LoadPlatformBundle(string bundlePath, Transform parent) {
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Security", "CA5351:Do Not Use Broken Cryptographic Algorithms", Justification = "MD5 Hash not used in security relevant context")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Globalization", "CA1308:Normalize strings to uppercase", Justification = "Too late now... that damage was done a year ago -.-")]
+        public static CustomPlatform LoadPlatformBundle(string bundlePath, Transform parent) {
 
             AssetBundle bundle = AssetBundle.LoadFromFile(bundlePath);
 
             if(bundle == null) return null;
 
             CustomPlatform newPlatform = LoadPlatform(bundle, parent);
-            if(newPlatform != null) {
-                bundlePaths.Add(bundlePath);
-                platforms.Add(newPlatform);
-            }
 
-            using(var md5 = MD5.Create()) {
-                using(var stream = File.OpenRead(bundlePath)) {
-                    byte[] hash = md5.ComputeHash(stream);
-                    newPlatform.platHash = BitConverter
-                        .ToString(hash)
-                        .Replace("-", string.Empty)
-                        .ToLower();
-                }
-            }
+            using var md5 = MD5.Create();
+            using var stream = File.OpenRead(bundlePath);
+
+            byte[] hash = md5.ComputeHash(stream);
+            newPlatform.platHash = BitConverter
+                .ToString(hash)
+                .Replace("-", string.Empty)
+                .ToLowerInvariant();
+
 
             return newPlatform;
         }
 
         /// <summary>
-        /// Instantiate a platform from an assetbundle.
+        /// Instantiates a platform from an assetbundle.
         /// </summary>
         /// <param name="bundle">An AssetBundle containing a CustomPlatform</param>
         /// <returns></returns>
-        private CustomPlatform LoadPlatform(AssetBundle bundle, Transform parent) {
+        private static CustomPlatform LoadPlatform(AssetBundle bundle, Transform parent) {
 
             GameObject platformPrefab = bundle.LoadAsset<GameObject>("_CustomPlatform");
 
@@ -94,7 +91,7 @@ namespace CustomFloorPlugin {
                 return null;
             }
 
-            GameObject newPlatform = GameObject.Instantiate(platformPrefab.gameObject);
+            GameObject newPlatform = UnityEngine.Object.Instantiate(platformPrefab.gameObject);
 
             newPlatform.transform.parent = parent;
 
@@ -129,8 +126,8 @@ namespace CustomFloorPlugin {
 
             return customPlatform;
         }
-        internal static void AddManagers() {
-            GameObject go = PlatformManager.activePlatform.gameObject;
+        internal static void AddManagers(CustomPlatform customPlatform) {
+            GameObject go = customPlatform.gameObject;
             bool active = go.activeSelf;
             if(active) {
                 go.SetActive(false);
@@ -147,10 +144,10 @@ namespace CustomFloorPlugin {
                 RotationEventEffectManager rotManager = root.GetComponent<RotationEventEffectManager>();
                 if(rotManager == null) {
                     rotManager = root.AddComponent<RotationEventEffectManager>();
-                    rotManager.RegisterForEvents();
                     PlatformManager.SpawnedComponents.Add(rotManager);
+                    rotManager.CreateEffects(go);
+                    rotManager.RegisterForEvents();
                 }
-                rotManager.CreateEffects(go);
             }
 
             // Add a trackRing controller if there are track ring descriptors
@@ -192,7 +189,7 @@ namespace CustomFloorPlugin {
                     specMatManager = go.AddComponent<SpectrogramMaterialManager>();
                     PlatformManager.SpawnedComponents.Add(specMatManager);
                 }
-                specMatManager.UpdateMaterials();
+                specMatManager.UpdateMaterials(go);
             }
 
             if(go.GetComponentInChildren<SpectrogramAnimationState>(true) != null) {

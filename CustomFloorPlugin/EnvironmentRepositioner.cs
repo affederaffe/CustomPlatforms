@@ -1,15 +1,20 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
+using CustomFloorPlugin.UI;
 
 namespace CustomFloorPlugin {
-    public class EnvironmentArranger {
-        public static Arrangement arrangement;
+    public static class EnvironmentArranger {
+        private static EnvArrangement Arrangement {
+            get {
+            return Settings.EnvArr;
+            }
+        }
 
         public static void RearrangeEnvironment() {
-            switch(arrangement) {
-                case Arrangement.Default:
+            switch(Arrangement) {
+                case EnvArrangement.Default:
                     return;
-                case Arrangement.Classic:
+                case EnvArrangement.Classic:
                     RearrangeClassic();
                     return;
             }
@@ -44,24 +49,22 @@ namespace CustomFloorPlugin {
                 toHide.SetActive(false);
         }
 
-        public enum Arrangement { Default, Classic };
+        public enum EnvArrangement { Default, Classic };
 
-        public static string Name(Arrangement mode) {
-            switch(mode) {
-                case Arrangement.Default:
-                    return "Default";
-                case Arrangement.Classic:
-                    return "Classic";
-                default:
-                    return "?";
-            }
+        public static string Name(EnvArrangement mode) {
+            return mode switch
+            {
+                EnvArrangement.Default => "Default",
+                EnvArrangement.Classic => "Classic",
+                _ => "?",
+            };
         }
 
         public static List<object> RepositionModes() {
             return new List<object>
             {
-                Arrangement.Default,
-                Arrangement.Classic
+                EnvArrangement.Default,
+                EnvArrangement.Classic
             };
         }
     }
