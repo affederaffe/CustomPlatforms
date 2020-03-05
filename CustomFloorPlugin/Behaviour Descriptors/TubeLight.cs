@@ -8,7 +8,7 @@ namespace CustomFloorPlugin {
     [RequireComponent(typeof(MeshFilter))]
     [RequireComponent(typeof(MeshRenderer))]
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1051:Do not declare visible instance fields", Justification = "Too old to change")]
-    public class TubeLight:MonoBehaviour {
+    public class TubeLight:MonoBehaviour, NotifyOnEnableOrDisable {
         public enum LightsID {
             Static = 0,
             BackLights = 1,
@@ -132,17 +132,17 @@ namespace CustomFloorPlugin {
             }
         }
         ////////////////////////////////////////////////////////////////////////////////////////////////////
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Code Quality", "IDE0051:Remove unused private members", Justification = "Called by Unity")]
-        private void OnEnable() {
+        private void SetColorToDefault() {
+            tubeBloomLight.color = color * 0.9f;
+            tubeBloomLight.Refresh();
+        }
+
+        void NotifyOnEnableOrDisable.PlatformEnabled() {
             PlatformManager.SpawnQueue += GameAwake;
         }
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Code Quality", "IDE0051:Remove unused private members", Justification = "Called by Unity")]
-        private void OnDisable() {
+
+        void NotifyOnEnableOrDisable.PlatformDisabled() {
             PlatformManager.SpawnQueue -= GameAwake;
-        }
-        private void SetColorToDefault() {
-            tubeBloomLight.color = color * 0.9f; //<-------//This, i need that!
-            tubeBloomLight.Refresh();
         }
     }
 }

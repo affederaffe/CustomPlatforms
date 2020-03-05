@@ -11,10 +11,10 @@ namespace CustomFloorPlugin {
         [Header("The global intensity (float valueName)")]
         public string AveragePropertyName;
 
-        public void setData(BasicSpectrogramData newData) {
+        public void SetData(BasicSpectrogramData newData) {
             spectrogramData = newData;
         }
-
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Code Quality", "IDE0051:Remove unused private members", Justification = "Called by Unity")]
         void Start() {
             renderer = gameObject.GetComponent<Renderer>();
         }
@@ -25,7 +25,7 @@ namespace CustomFloorPlugin {
                 for(int i = 0; i < 64; i++) {
                     average += spectrogramData.ProcessedSamples[i];
                 }
-                average = average / 64.0f;
+                average /= 64.0f;
 
                 foreach(Material mat in renderer.materials) {
                     mat.SetFloatArray(PropertyName, spectrogramData.ProcessedSamples);

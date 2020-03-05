@@ -6,7 +6,6 @@ namespace CustomFloorPlugin {
     /// <summary>
     /// Instatiable wrapper class for <see cref="LightRotationEventEffect"/>, to be used by mappers.
     /// </summary>
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Build", "CA1812:Avoid unistantiated internal classes", Justification = "Instantiated by Unity")]
     public class RotationEventEffect:MonoBehaviour {
 
 

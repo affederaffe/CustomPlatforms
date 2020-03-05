@@ -48,7 +48,7 @@ namespace CustomFloorPlugin {
                 BasicSpectrogramData spectrogramData = datas.FirstOrDefault();
                 if(spectrogramData != null) {
                     foreach(SpectrogramMaterial specMat in spectrogramMaterials) {
-                        specMat.setData(spectrogramData);
+                        specMat.SetData(spectrogramData);
                     }
                 }
             }

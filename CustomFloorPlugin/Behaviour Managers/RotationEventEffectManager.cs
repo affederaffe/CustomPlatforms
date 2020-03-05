@@ -13,20 +13,13 @@ namespace CustomFloorPlugin {
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Build", "CA1812:Avoid unistantiated internal classes", Justification = "Instantiated by Unity")]
     internal class RotationEventEffectManager:MonoBehaviour {
 
-
-        /// <summary>
-        /// To be filled with all <see cref="RotationEventEffect"/>s on the local <see cref="CustomPlatform"/>
-        /// </summary>
-        private RotationEventEffect[] effectDescriptors;
-
-
         /// <summary>
         /// To be filled with spawned <see cref="LightRotationEventEffect"/>s
         /// </summary>
         private List<LightRotationEventEffect> lightRotationEffects;
 
 
-        private MultiRotationEventEffect[] multiEffects;
+        private List<MultiRotationEventEffect.Actor> multiEffects;
 
         /// <summary>
         /// Registers all currently known <see cref="LightRotationEventEffect"/>s for Events.
@@ -35,7 +28,7 @@ namespace CustomFloorPlugin {
             foreach(LightRotationEventEffect rotEffect in lightRotationEffects) {
                 BSEvents.beatmapEvent += rotEffect.HandleBeatmapObjectCallbackControllerBeatmapEventDidTrigger;
             }
-            foreach(MultiRotationEventEffect effect in multiEffects) {
+            foreach(MultiRotationEventEffect.Actor effect in multiEffects) {
                 BSEvents.beatmapEvent += effect.EventCallback;
             }
         }
@@ -50,7 +43,7 @@ namespace CustomFloorPlugin {
             foreach(LightRotationEventEffect rotEffect in lightRotationEffects) {
                 BSEvents.beatmapEvent -= rotEffect.HandleBeatmapObjectCallbackControllerBeatmapEventDidTrigger;
             }
-            foreach(MultiRotationEventEffect effect in multiEffects) {
+            foreach(MultiRotationEventEffect.Actor effect in multiEffects) {
                 BSEvents.beatmapEvent -= effect.EventCallback;
             }
         }
@@ -63,8 +56,10 @@ namespace CustomFloorPlugin {
         /// <param name="currentPlatform">Current <see cref="CustomPlatform"/>s <see cref="GameObject"/></param>
         internal void CreateEffects(GameObject currentPlatform) {
             lightRotationEffects = new List<LightRotationEventEffect>();
+            multiEffects = new List<MultiRotationEventEffect.Actor>();
 
-            effectDescriptors = currentPlatform.GetComponentsInChildren<RotationEventEffect>(true);
+            var effectDescriptors = currentPlatform.GetComponentsInChildren<RotationEventEffect>(true);
+            
 
             foreach(RotationEventEffect effectDescriptor in effectDescriptors) {
                 LightRotationEventEffect rotEvent = effectDescriptor.gameObject.AddComponent<LightRotationEventEffect>();
@@ -75,8 +70,12 @@ namespace CustomFloorPlugin {
                 ReflectionUtil.SetPrivateField(rotEvent, "_startRotation", rotEvent.transform.rotation);
                 lightRotationEffects.Add(rotEvent);
             }
-
-            multiEffects = currentPlatform.GetComponentsInChildren<MultiRotationEventEffect>(true);
+            var effectDescriptors2 = currentPlatform.GetComponentsInChildren<MultiRotationEventEffect>(true);
+            foreach(MultiRotationEventEffect effectDescriptor in effectDescriptors2) {
+                MultiRotationEventEffect.Actor rotEvent = effectDescriptor.Create();
+                PlatformManager.SpawnedComponents.Add(rotEvent);
+                multiEffects.Add(rotEvent);
+            }
         }
     }
 }
