@@ -59,6 +59,7 @@
   <ItemGroup>
     <Compile Include="Behaviour Descriptors\CameraVisibility.cs" />
     <Compile Include="Behaviour Descriptors\ComboReachedEvent.cs" />
+    <Compile Include="Behaviour Descriptors\MultiRotationEventEffect.cs" />
     <Compile Include="Behaviour Descriptors\PrefabLightmapData.cs" />
     <Compile Include="Behaviour Descriptors\SpectrogramAnimationState.cs" />
     <Compile Include="Behaviour Descriptors\SpectrogramMaterial.cs" />
