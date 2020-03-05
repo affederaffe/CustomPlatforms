@@ -2,6 +2,7 @@
 using UnityEngine;
 using Zenject;
 using CustomFloorPlugin;
+using static CustomFloorPlugin.Utilities.Logging;
 
 [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0044:Add readonly modifier", Justification = "Unity can't deserialize data onto readonly fields")]
 public class MultiRotationEventEffect:MonoBehaviour {
@@ -31,6 +32,14 @@ public class MultiRotationEventEffect:MonoBehaviour {
             rotationVector = _rotationVectorsR
         };
         enabled = false;
+        if(_toggleGameObjects) {
+            for(int i = 0; i < _rotationVectorsL.Length; i++) {
+                _rotationDataL.transforms[i].gameObject.SetActive(false);
+            }
+            for(int i = 0; i < _rotationVectorsR.Length; i++) {
+                _rotationDataR.transforms[i].gameObject.SetActive(false);
+            }
+        }
     }
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Code Quality", "IDE0051:Remove unused private members", Justification = "Called by Unity")]
     private void Update() {
@@ -41,11 +50,12 @@ public class MultiRotationEventEffect:MonoBehaviour {
         }
         if(_rotationDataR.enabled) {
             for(int i = 0; i < _rotationVectorsR.Length; i++) {
-                _rotationDataL.transforms[i].Rotate(_rotationVectorsR[i], Time.deltaTime * _rotationDataL.rotationSpeed, Space.Self);
+                _rotationDataR.transforms[i].Rotate(_rotationVectorsR[i], Time.deltaTime * _rotationDataR.rotationSpeed, Space.Self);
             }
         }
     }
     internal void EventCallback(BeatmapEventData beatmapEventData) {
+
         if(beatmapEventData.type == (BeatmapEventType)_eventL || beatmapEventData.type == (BeatmapEventType)_eventR) {
             int frameCount = Time.frameCount;
             if(_randomGenerationFrameNum != frameCount) {
@@ -59,28 +69,44 @@ public class MultiRotationEventEffect:MonoBehaviour {
                 _randomGenerationFrameNum = Time.frameCount;
             }
             if(beatmapEventData.type == (BeatmapEventType)_eventL) {
-                UpdateRotationData(beatmapEventData.value, _rotationDataL, _randomStartRotation, _randomDirection);
+                UpdateRotationData(beatmapEventData.value, ref _rotationDataL, _randomStartRotation, _randomDirection);
             } else if(beatmapEventData.type == (BeatmapEventType)_eventR) {
-                UpdateRotationData(beatmapEventData.value, _rotationDataR, -_randomStartRotation, -_randomDirection);
+                UpdateRotationData(beatmapEventData.value, ref _rotationDataR, -_randomStartRotation, -_randomDirection);
             }
             enabled = (_rotationDataL.enabled || _rotationDataR.enabled);
         }
     }
-    private void UpdateRotationData(int beatmapEventDataValue, RotationData rotationData, float startRotationOffset, float direction) {
+    private void UpdateRotationData(int beatmapEventDataValue, ref RotationData rotationData, float startRotationOffset, float direction) {
         if(beatmapEventDataValue == 0) {
             rotationData.enabled = false;
             for(int i = 0; i < rotationData.transforms.Length; i++) {
                 rotationData.transforms[i].localRotation = rotationData.startRotations[i];
+                if(_toggleGameObjects) {
+                    rotationData.transforms[i].gameObject.SetActive(false);
+                }
             }
             return;
         }
         if(beatmapEventDataValue > 0) {
             rotationData.enabled = true;
             for(int i = 0; i < rotationData.transforms.Length; i++) {
+                if(_toggleGameObjects) {
+                    rotationData.transforms[i].gameObject.SetActive(true);
+                }
                 rotationData.transforms[i].localRotation = rotationData.startRotations[i];
-                rotationData.transforms[1].Rotate(rotationData.rotationVector[i], startRotationOffset, Space.Self);
+                rotationData.transforms[i].Rotate(rotationData.rotationVector[i], startRotationOffset, Space.Self);
             }
             rotationData.rotationSpeed = beatmapEventDataValue * 20f * direction;
+        }
+    }
+    private void Destroy() {
+        if(_toggleGameObjects) {
+            for(int i = 0; i < _rotationVectorsL.Length; i++) {
+                _rotationDataL.transforms[i].gameObject.SetActive(true);
+            }
+            for(int i = 0; i < _rotationVectorsR.Length; i++) {
+                _rotationDataR.transforms[i].gameObject.SetActive(true);
+            }
         }
     }
     [SerializeField]
@@ -112,6 +138,9 @@ public class MultiRotationEventEffect:MonoBehaviour {
 
     [SerializeField]
     private bool _useRandomValues;
+
+    [SerializeField]
+    private bool _toggleGameObjects;
     private float _randomDirection;
     private float _randomStartRotation;
 

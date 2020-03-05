@@ -2,6 +2,7 @@ using BS_Utils.Utilities;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using static CustomFloorPlugin.Utilities.Logging;
 
 namespace CustomFloorPlugin {
 
@@ -75,7 +76,7 @@ namespace CustomFloorPlugin {
                 lightRotationEffects.Add(rotEvent);
             }
 
-            multiEffects = currentPlatform.GetComponentsInChildren<MultiRotationEventEffect>();
+            multiEffects = currentPlatform.GetComponentsInChildren<MultiRotationEventEffect>(true);
         }
     }
 }

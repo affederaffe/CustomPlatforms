@@ -140,7 +140,7 @@ namespace CustomFloorPlugin {
         private static void AddManagers(GameObject go, GameObject root) {
 
             // Rotation effect manager
-            if(go.GetComponentInChildren<RotationEventEffect>(true) != null) {
+            if(go.GetComponentInChildren<RotationEventEffect>(true) != null || go.GetComponentInChildren<MultiRotationEventEffect>(true) != null) {
                 RotationEventEffectManager rotManager = root.GetComponent<RotationEventEffectManager>();
                 if(rotManager == null) {
                     rotManager = root.AddComponent<RotationEventEffectManager>();
