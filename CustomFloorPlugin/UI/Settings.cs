@@ -63,6 +63,7 @@ namespace CustomFloorPlugin.UI {
             set {
                 if(value != _EnvOr.Value) {
                     Plugin.config.SetInt("Settings", "EnvironmentOverrideMode", (int)value);
+                    _EnvOr = value;
                     EnvOrChanged(value);
                 }
             }
@@ -86,6 +87,7 @@ namespace CustomFloorPlugin.UI {
             set {
                 if(value != _EnvArr.Value) {
                     Plugin.config.SetInt("Settings", "EnvironmentArrangement", (int)value);
+                    _EnvArr = value;
                 }
             }
         }
@@ -105,6 +107,7 @@ namespace CustomFloorPlugin.UI {
             set {
                 if(value != _AlwaysShowFeet.Value) {
                     Plugin.config.SetBool("Settings", "AlwaysShowFeet", value);
+                    _AlwaysShowFeet = value;
                 }
             }
         }
@@ -124,6 +127,7 @@ namespace CustomFloorPlugin.UI {
             set {
                 if(value != _ShowHeart.Value) {
                     Plugin.config.SetBool("Settings", "ShowHeart", value);
+                    _ShowHeart = value;
                     ShowHeartChanged(value);
                 }
             }
