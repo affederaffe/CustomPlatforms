@@ -75,11 +75,10 @@ namespace CustomFloorPlugin {
 
             //Create platforms list
             AllPlatforms = PlatformLoader.CreateAllPlatforms(Instance.transform);
-
+            CurrentPlatform = AllPlatforms[0];
             // Retrieve saved path from player prefs if it exists
             if(Plugin.config.HasKey("Data", "CustomPlatformPath")) {
                 string savedPath = Plugin.config.GetString("Data", "CustomPlatformPath");
-                CurrentPlatform = AllPlatforms[0];
                 // Check if this path was loaded and update our platform index
                 for(int i = 0; i < AllPlatforms.Count; i++) {
                     if(savedPath == AllPlatforms[i].platName + AllPlatforms[i].platAuthor) {
