@@ -1,53 +1,99 @@
-﻿using System.Linq;
+﻿using CustomFloorPlugin.Exceptions;
+
+using System.Linq;
+
 using UnityEngine;
+using UnityEngine.SceneManagement;
+
+using static CustomFloorPlugin.GlobalCollection;
+using static CustomFloorPlugin.Utilities.UnityObjectSearching;
+using static CustomFloorPlugin.Utilities.Logging;
+
 
 namespace CustomFloorPlugin {
+
+
+    /// <summary>
+    /// The <see cref="MaterialSwapper"/>'s job is to swap the fake <see cref="Material"/>s on loaded resources after they are spawned against real ones<br/>
+    /// Primary reason for this is the absence of proper custom <see cref="Shader"/>s (or decompiled source <see cref="Shader"/>s) and a lack of knowledge about their inner workings...<br/>
+    /// Part of the documentation for this file is omited because it's a clusterfuck and under construction.
+    /// </summary>
     static class MaterialSwapper {
-        public static Material dark { get; private set; }
-        public static Material glow { get; private set; }
-        public static Material opaqueGlow { get; private set; }
+        private static readonly Material dark;
+        private static readonly Material glow;
+        private static readonly Material opaqueGlow;
 
-        const string darkReplaceMatName = "_dark_replace (Instance)";
-        const string glowReplaceMatName = "_transparent_glow_replace (Instance)";
-        const string opaqueGlowReplaceMatName = "_glow_replace (Instance)";
+        private const string fakeDarkMatName = "_dark_replace (Instance)";
+        private const string fakeGlowMatName = "_transparent_glow_replace (Instance)";
+        private const string fakeOpaqueGlowMatName = "_glow_replace (Instance)";
 
-        public static void GetMaterials() {
-            // This object should be created in the Menu Scene
-            // Grab materials from Menu Scene objects
-            var materials = Resources.FindObjectsOfTypeAll<Material>();
+        private const string realDarkMatName = "DarkEnvironmentSimple";
+        private const string realGlowMatName = "EnvLight";
+        private const string realOpaqueGlowMatName = "EnvLightOpaque";
 
-            dark = materials.First(x => x.name == "DarkEnvironmentSimple");
-            opaqueGlow = materials.First(x => x.name == "EnvLightOpaque");
-            glow = materials.First(x => x.name == "EnvLight");
+
+        /// <summary>
+        /// Automatically initializes needed variables
+        /// </summary>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1810:Initialize reference type static fields inline", Justification = "Just No")]
+        static MaterialSwapper() {
+            Material[] materials = Resources.FindObjectsOfTypeAll<Material>();
+
+            dark = materials.First(x => x.name == realDarkMatName);
+            opaqueGlow = materials.First(x => x.name == realOpaqueGlowMatName);
+            glow = materials.First(x => x.name == realGlowMatName);
         }
-        public static void ReplaceAllMaterials() {
-            if(dark == null || glow == null || opaqueGlow == null) {
-                GetMaterials();
+
+
+        /// <summary>
+        /// Replaces all fake <see cref="Material"/>s on all <see cref="Renderer"/>s in a given <see cref="Scene"/>
+        /// </summary>
+        /// <param name="scene"><see cref="Scene"/> to search for <see cref="Renderer"/>s</param>
+        internal static void ReplaceMaterials(Scene scene) {
+            try {
+                foreach(Renderer renderer in FindAll<Renderer>(scene)) {
+                    ReplaceForRenderer(renderer);
+                }
+            } catch(ComponentNotFoundException) {
+                Log("No Renderers present, skipping...");
             }
-            foreach(Renderer r in Plugin.FindAll<Renderer>()) {
+        }
 
-                if(r.gameObject.scene.name == "PlatformManagerDump") {
 
-                    Material[] materialsCopy = r.materials;
-                    bool materialsDidChange = false;
-                    for(int i = 0; i < materialsCopy.Length; i++) {
-                        if(materialsCopy[i] != null) {
-                            if(materialsCopy[i].name.Equals(darkReplaceMatName)) {
-                                materialsCopy[i] = dark;
-                                materialsDidChange = true;
-                            } else if(materialsCopy[i].name.Equals(glowReplaceMatName)) {
-                                materialsCopy[i] = glow;
-                                materialsDidChange = true;
-                            } else if(materialsCopy[i].name.Equals(opaqueGlowReplaceMatName)) {
-                                materialsCopy[i] = opaqueGlow;
-                                materialsDidChange = true;
-                            }
-                        }
-                    }
-                    if(materialsDidChange) {
-                        r.sharedMaterials = materialsCopy;
+        /// <summary>
+        /// Replaces all fake <see cref="Material"/>s on all <see cref="Renderer"/>s under a given <see cref="GameObject"/>
+        /// </summary>
+        /// <param name="gameObject"><see cref="GameObject"/> to search for <see cref="Renderer"/>s</param>
+        internal static void ReplaceMaterials(GameObject gameObject) {
+            foreach(Renderer renderer in FindAll<Renderer>(gameObject)) {
+                ReplaceForRenderer(renderer);
+            }
+        }
+
+
+        /// <summary>
+        /// Replaces all fake <see cref="Material"/>s on a given <see cref="Renderer"/>
+        /// </summary>
+        /// <param name="renderer">What <see cref="Renderer"/> to replace materials for</param>
+        private static void ReplaceForRenderer(Renderer renderer) {
+            Material[] materialsCopy = renderer.materials;
+            bool materialsDidChange = false;
+            for(int i = 0; i < materialsCopy.Length; i++) {
+                if(materialsCopy[i] != null) {
+                    if(materialsCopy[i].name.Equals(fakeDarkMatName, STR_INV)) {
+                        materialsCopy[i] = dark;
+                        materialsDidChange = true;
+                    } else if(materialsCopy[i].name.Equals(fakeGlowMatName, STR_INV)) {
+                        materialsCopy[i] = glow;
+                        materialsDidChange = true;
+                    } else if(materialsCopy[i].name.Equals(fakeOpaqueGlowMatName, STR_INV)) {
+                        materialsCopy[i] = opaqueGlow;
+                        materialsDidChange = true;
                     }
                 }
+            }
+            if(materialsDidChange) {
+                renderer.sharedMaterials = materialsCopy;
             }
         }
     }

@@ -1,34 +1,61 @@
-﻿using System.Collections.Generic;
+﻿using CustomFloorPlugin.UI;
+
+using System.Collections.Generic;
 using System.Linq;
+
 using UnityEngine;
 
-namespace CustomFloorPlugin {
-    /// <summary> 
-    /// Activates and deactivates world geometry in the active scene as required by CustomPlatforms
-    /// </summary>
-    public class EnvironmentHider {
-        private List<GameObject> feet;
-        private List<GameObject> originalPlatform;
-        private List<GameObject> smallRings;
-        private List<GameObject> bigRings;
-        private List<GameObject> visualizer;
-        private List<GameObject> towers;
-        private List<GameObject> highway;
-        private List<GameObject> backColumns;
-        private List<GameObject> doubleColorLasers;
-        private List<GameObject> backLasers;
-        private List<GameObject> rotatingLasers;
-        private List<GameObject> trackLights;
+using static CustomFloorPlugin.Utilities.BeatSaberSearching;
 
-        public static bool showFeetOverride = false;
+
+namespace CustomFloorPlugin {
+
+
+    /// <summary> 
+    /// Activates and deactivates world geometry in the active scene as required by the chosen custom platform<br/>
+    /// Most documentation on this file is omited because it is a giant clusterfuck and I hate it... with a passion.
+    /// </summary>
+    internal static class EnvironmentHider {
+
+        private static List<GameObject> feet;
+        private static List<GameObject> originalPlatform;
+        private static List<GameObject> smallRings;
+        private static List<GameObject> bigRings;
+        private static List<GameObject> visualizer;
+        private static List<GameObject> towers;
+        private static List<GameObject> highway;
+        private static List<GameObject> backColumns;
+        private static List<GameObject> doubleColorLasers;
+        private static List<GameObject> backLasers;
+        private static List<GameObject> rotatingLasers;
+        private static List<GameObject> trackLights;
+
+        private static bool ShowFeetOverride {
+            get {
+                return Settings.AlwaysShowFeet;
+            }
+        }
+
 
         /// <summary>
-        /// Hide and unhide world objects as required by a platform
+        /// Hide and unhide world objects as required by a platform<br/>
+        /// Delayed by a frame because of order of operations after scene loading
         /// </summary>
         /// <param name="platform">A platform that defines which objects are to be hidden</param>
-        public void HideObjectsForPlatform(CustomPlatform platform) {
+        internal static void HideObjectsForPlatform(CustomPlatform platform) {
+            SharedCoroutineStarter.instance.StartCoroutine(InternalHideObjectsForPlatform(platform));
+        }
+
+
+        /// <summary>
+        /// Hide and unhide world objects as required by a platform<br/>
+        /// It is not practical to call this directly
+        /// </summary>
+        /// <param name="platform">A platform that defines which objects are to be hidden</param>
+        private static IEnumerator<WaitForEndOfFrame> InternalHideObjectsForPlatform(CustomPlatform platform) {
+            yield return new WaitForEndOfFrame();
             FindEnvironment();
-            if(feet != null) SetCollectionHidden(feet, (platform.hideDefaultPlatform && !showFeetOverride));
+            if(feet != null) SetCollectionHidden(feet, (platform.hideDefaultPlatform && !ShowFeetOverride));
             if(originalPlatform != null) SetCollectionHidden(originalPlatform, platform.hideDefaultPlatform);
             if(smallRings != null) SetCollectionHidden(smallRings, platform.hideSmallRings);
             if(bigRings != null) SetCollectionHidden(bigRings, platform.hideBigRings);
@@ -42,11 +69,11 @@ namespace CustomFloorPlugin {
             if(trackLights != null) SetCollectionHidden(trackLights, platform.hideTrackLights);
         }
 
+
         /// <summary>
-        /// Finds all GameObjects that make up the default environment
-        /// and groups them into array lists
+        /// Finds all GameObjects that make up the default environment and groups them into lists
         /// </summary>
-        void FindEnvironment() {
+        private static void FindEnvironment() {
             FindFeetIcon();
             FindOriginalPlatform();
             FindSmallRings();
@@ -61,26 +88,28 @@ namespace CustomFloorPlugin {
             FindTrackLights();
         }
 
+
         /// <summary>
         /// Set the active state of a Collection of GameObjects
         /// </summary>
-        /// <param name="arlist">An List<GameObject> of GameObjects</param>
+        /// <param name="list">A <see cref="List{T}"/> of GameObjects</param>
         /// <param name="hidden">A boolean describing the desired hidden state</param>
-        private void SetCollectionHidden(List<GameObject> list, bool hidden) {
+        private static void SetCollectionHidden(List<GameObject> list, bool hidden) {
             if(list == null) return;
             foreach(GameObject go in list) {
                 if(go != null) go.SetActive(!hidden);
             }
         }
 
+
         /// <summary>
         /// Finds a GameObject by name and adds it to the provided List<GameObject>
         /// </summary>
         /// <param name="name">The name of the desired GameObject</param>
         /// <param name="alist">The List<GameObject> to be added to</param>
-        private bool FindAddGameObject(string name, List<GameObject> list) {
-            GameObject[] roots = PlatformManager.GetCurrentEnvironment().GetRootGameObjects();
-            GameObject go = null;
+        private static bool FindAddGameObject(string name, List<GameObject> list) {
+            GameObject[] roots = GetCurrentEnvironment().GetRootGameObjects();
+            GameObject go;
             foreach(GameObject root in roots) {
                 go = root.transform.Find(name)?.gameObject;
                 if(go != null) {
@@ -93,7 +122,7 @@ namespace CustomFloorPlugin {
             return false;
         }
 
-        private void FindFeetIcon() {
+        private static void FindFeetIcon() {
             feet = new List<GameObject>();
             FindAddGameObject("MenuPlayersPlace/Feet", feet);
             FindAddGameObject("PlayersPlace/Feet", feet);
@@ -101,13 +130,13 @@ namespace CustomFloorPlugin {
             feet[0].transform.parent = null; // remove from original platform 
         }
 
-        private void FindOriginalPlatform() {
+        private static void FindOriginalPlatform() {
             originalPlatform = new List<GameObject>();
             FindAddGameObject("PlayersPlace", originalPlatform);
             FindAddGameObject("MenuPlayersPlace", originalPlatform);
         }
 
-        private void FindSmallRings() {
+        private static void FindSmallRings() {
             smallRings = new List<GameObject>();
             FindAddGameObject("SmallTrackLaneRings", smallRings);
             foreach(TrackLaneRing trackLaneRing in Resources.FindObjectsOfTypeAll<TrackLaneRing>().Where(x => x.name == "TrackLaneRing(Clone)")) {
@@ -122,20 +151,20 @@ namespace CustomFloorPlugin {
             FindAddGameObject("TentacleRight", smallRings);
         }
 
-        private void FindBigRings() {
+        private static void FindBigRings() {
             bigRings = new List<GameObject>();
             FindAddGameObject("BigTrackLaneRings", bigRings);
-            foreach(var trackLaneRing in Resources.FindObjectsOfTypeAll<TrackLaneRing>().Where(x => x.name == "TrackLaneRingBig(Clone)")) {
+            foreach(var trackLaneRing in Resources.FindObjectsOfTypeAll<TrackLaneRing>().Where(x => x.name == "BigTrackLaneRing(Clone)")) {
                 bigRings.Add(trackLaneRing.gameObject);
             }
         }
 
-        private void FindVisualizers() {
+        private static void FindVisualizers() {
             visualizer = new List<GameObject>();
             FindAddGameObject("Spectrograms", visualizer);
         }
 
-        private void FindTowers() {
+        private static void FindTowers() {
             towers = new List<GameObject>();
             // Song Environments
             FindAddGameObject("Buildings", towers);
@@ -164,7 +193,7 @@ namespace CustomFloorPlugin {
             }
         }
 
-        private void FindHighway() {
+        private static void FindHighway() {
             highway = new List<GameObject>();
             FindAddGameObject("Floor", highway);
             FindAddGameObject("FloorConstruction", highway);
@@ -182,7 +211,7 @@ namespace CustomFloorPlugin {
             FindAddGameObject("RightSmallBuilding", highway);
         }
 
-        private void FindBackColumns() {
+        private static void FindBackColumns() {
             backColumns = new List<GameObject>();
             FindAddGameObject("BackColumns", backColumns);
             FindAddGameObject("BackColumns (1)", backColumns);
@@ -191,7 +220,7 @@ namespace CustomFloorPlugin {
             FindAddGameObject("CeilingLamp", backColumns);
         }
 
-        private void FindRotatingLasers() {
+        private static void FindRotatingLasers() {
             rotatingLasers = new List<GameObject>();
             // Default, BigMirror, Triangle
             FindAddGameObject("RotatingLasersPair (6)", rotatingLasers);
@@ -213,7 +242,7 @@ namespace CustomFloorPlugin {
             FindAddGameObject("RotatingLasersRight3", rotatingLasers);
         }
 
-        private void FindDoubleColorLasers() {
+        private static void FindDoubleColorLasers() {
             doubleColorLasers = new List<GameObject>();
 
             // Default, BigMirror, Nice, 
@@ -229,13 +258,13 @@ namespace CustomFloorPlugin {
             FindAddGameObject("DoubleColorLaser (9)", doubleColorLasers);
         }
 
-        private void FindBackLasers() {
+        private static void FindBackLasers() {
             backLasers = new List<GameObject>();
             FindAddGameObject("FrontLights", backLasers);
 
         }
 
-        private void FindTrackLights() {
+        private static void FindTrackLights() {
             trackLights = new List<GameObject>();
             FindAddGameObject("GlowLineR", trackLights);
             FindAddGameObject("GlowLineL", trackLights);

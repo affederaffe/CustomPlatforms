@@ -1,13 +1,21 @@
+using IPA.Utilities;
+
 using System;
-using System.Collections.Generic;
 using System.Linq;
+
 using UnityEngine;
 using UnityEngine.SceneManagement;
+
+using static CustomFloorPlugin.Utilities.Logging;
+
+
 namespace CustomFloorPlugin {
+
+
     [RequireComponent(typeof(MeshFilter))]
     [RequireComponent(typeof(MeshRenderer))]
-
-    public class TubeLight:MonoBehaviour {
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1051:Do not declare visible instance fields", Justification = "Too old to change")]
+    public class TubeLight:MonoBehaviour, NotifyOnEnableOrDisable {
         public enum LightsID {
             Static = 0,
             BackLights = 1,
@@ -35,6 +43,8 @@ namespace CustomFloorPlugin {
         public Color color = Color.white;
         public LightsID lightsID = LightsID.Static;
 
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Code Quality", "IDE0051:Remove unused private members", Justification = "Called by Unity")]
         private void OnDrawGizmos() {
             Gizmos.color = color;
             Gizmos.matrix = transform.localToWorldMatrix;
@@ -44,12 +54,12 @@ namespace CustomFloorPlugin {
 
         // ----------------
 
-        private static TubeBloomPrePassLight _prefab;
-        internal static TubeBloomPrePassLight prefab {
+        private static TubeBloomPrePassLight _Prefab;
+        internal static TubeBloomPrePassLight Prefab {
             get {
-                if(_prefab == null) {
+                if(_Prefab == null) {
                     try {
-                        _prefab =
+                        _Prefab =
                             SceneManager
                             .GetSceneByName("MenuEnvironment")
                             .GetRootGameObjects()
@@ -58,7 +68,7 @@ namespace CustomFloorPlugin {
                             .Find("NearBuildingLeft/Neon")
                             .GetComponent<TubeBloomPrePassLight>();
                     } catch(InvalidOperationException) {
-                        _prefab =
+                        _Prefab =
                             SceneManager
                             .GetSceneByName("MenuEnvironment")
                             .GetRootGameObjects()
@@ -68,16 +78,18 @@ namespace CustomFloorPlugin {
                             .GetComponent<TubeBloomPrePassLight>();
                     }
                 }
-                return _prefab;
+                return _Prefab;
             }
         }
         private TubeBloomPrePassLight tubeBloomLight;
         private GameObject iHeartBeatSaber;
-        internal void GameAwake() {
 
+
+        internal void GameAwake(LightWithIdManager lightManager) {
             GetComponent<MeshRenderer>().enabled = false;
             if(GetComponent<MeshFilter>().mesh.vertexCount == 0) {
-                tubeBloomLight = Instantiate(prefab);
+                Log("Non-Mesh");
+                tubeBloomLight = Instantiate(Prefab);
                 tubeBloomLight.transform.parent = transform;
                 PlatformManager.SpawnedObjects.Add(tubeBloomLight.gameObject);
 
@@ -87,31 +99,33 @@ namespace CustomFloorPlugin {
 
                 tubeBloomLight.gameObject.SetActive(false);
 
-                var lightWithId = tubeBloomLight.GetComponent<LightWithId>();
+                TubeBloomPrePassLightWithId lightWithId = tubeBloomLight.GetComponent<TubeBloomPrePassLightWithId>();
                 if(lightWithId) {
-                    lightWithId.SetPrivateField("_tubeBloomPrePassLight", tubeBloomLight);
-                    lightWithId.SetPrivateField("_ID", (int)lightsID);
-                    lightWithId.SetPrivateField("_lightManager", PlatformManager.LightManager);
+                    Log();
+                    Log(lightWithId);
+                    lightWithId.SetField("_tubeBloomPrePassLight", tubeBloomLight);
+                    ((LightWithId)lightWithId).SetField("_ID", (int)lightsID);
+                    ((LightWithId)lightWithId).SetField("_lightManager", lightManager);
                 }
-                // i broke it -.-
-                //try to fix it, if you can't: roll back
-                tubeBloomLight.SetPrivateField("_width", width * 2);
-                tubeBloomLight.SetPrivateField("_length", length);
-                tubeBloomLight.SetPrivateField("_center", center);
-                tubeBloomLight.SetPrivateField("_transform", tubeBloomLight.transform);
-                tubeBloomLight.SetPrivateField("_maxAlpha", 0.1f);
+
+                tubeBloomLight.SetField("_width", width * 2);
+                tubeBloomLight.SetField("_length", length);
+                tubeBloomLight.SetField("_center", center);
+                tubeBloomLight.SetField("_transform", tubeBloomLight.transform);
+                tubeBloomLight.SetField("_maxAlpha", 0.1f);
 
                 var parabox = tubeBloomLight.GetComponentInChildren<ParametricBoxController>();
-                tubeBloomLight.SetPrivateField("_parametricBoxController", parabox);
+                tubeBloomLight.SetField("_parametricBoxController", parabox);
 
                 var parasprite = tubeBloomLight.GetComponentInChildren<Parametric3SliceSpriteController>();
-                tubeBloomLight.SetPrivateField("_dynamic3SliceSprite", parasprite);
+                tubeBloomLight.SetField("_dynamic3SliceSprite", parasprite);
                 parasprite.Init();
                 parasprite.GetComponent<MeshRenderer>().enabled = false;
 
                 SetColorToDefault();
                 tubeBloomLight.gameObject.SetActive(true);
-            } else {
+            } else if(PlatformManager.Heart != null) {
+                Log("Mesh");
                 // swap for <3
                 iHeartBeatSaber = Instantiate(PlatformManager.Heart);
                 PlatformManager.SpawnedObjects.Add(iHeartBeatSaber);
@@ -119,33 +133,28 @@ namespace CustomFloorPlugin {
                 iHeartBeatSaber.transform.position = transform.position;
                 iHeartBeatSaber.transform.localScale = Vector3.one;
                 iHeartBeatSaber.transform.rotation = transform.rotation;
-                var lightWithId = iHeartBeatSaber.GetComponent<LightWithId>();
+                InstancedMaterialLightWithId lightWithId = iHeartBeatSaber.GetComponent<InstancedMaterialLightWithId>();
                 if(lightWithId) {
-                    lightWithId.SetPrivateField("_ID", (int)lightsID);
-                    lightWithId.SetPrivateField("_lightManager", PlatformManager.LightManager);
-                    lightWithId.SetPrivateField("_minAlpha", 0);
+                    ((LightWithId)lightWithId).SetField("_ID", (int)lightsID);
+                    ((LightWithId)lightWithId).SetField("_lightManager", lightManager);
+                    lightWithId.SetField("_minAlpha", 0f);
                 }
                 iHeartBeatSaber.GetComponent<MeshFilter>().mesh = GetComponent<MeshFilter>().mesh;
                 iHeartBeatSaber.SetActive(true);
             }
         }
-        IEnumerator<WaitForEndOfFrame> KerFuffel(TubeBloomPrePassLight tubeBloomLight) {
-            yield return new WaitForEndOfFrame();
-            tubeBloomLight.color = Color.black.ColorWithAlpha(0);
+
+        private void SetColorToDefault() {
+            tubeBloomLight.color = color * 0.9f;
             tubeBloomLight.Refresh();
         }
 
-        ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-        private void OnEnable() {
+        void NotifyOnEnableOrDisable.PlatformEnabled() {
             PlatformManager.SpawnQueue += GameAwake;
         }
-        private void OnDisable() {
+
+        void NotifyOnEnableOrDisable.PlatformDisabled() {
             PlatformManager.SpawnQueue -= GameAwake;
-        }
-        private void SetColorToDefault() {
-            tubeBloomLight.color = color * 0.9f; //<-------//This, i need that!
-            tubeBloomLight.Refresh();
         }
     }
 }
