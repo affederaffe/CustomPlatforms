@@ -1,10 +1,17 @@
-using CustomFloorPlugin.Extensions;
+using IPA.Utilities;
+
 using System;
 using System.Linq;
+
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
+using static CustomFloorPlugin.Utilities.Logging;
+
+
 namespace CustomFloorPlugin {
+
+
     [RequireComponent(typeof(MeshFilter))]
     [RequireComponent(typeof(MeshRenderer))]
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1051:Do not declare visible instance fields", Justification = "Too old to change")]
@@ -76,10 +83,12 @@ namespace CustomFloorPlugin {
         }
         private TubeBloomPrePassLight tubeBloomLight;
         private GameObject iHeartBeatSaber;
-        internal void GameAwake(LightWithIdManager lightManager) {
 
+
+        internal void GameAwake(LightWithIdManager lightManager) {
             GetComponent<MeshRenderer>().enabled = false;
             if(GetComponent<MeshFilter>().mesh.vertexCount == 0) {
+                Log("Non-Mesh");
                 tubeBloomLight = Instantiate(Prefab);
                 tubeBloomLight.transform.parent = transform;
                 PlatformManager.SpawnedObjects.Add(tubeBloomLight.gameObject);
@@ -90,30 +99,33 @@ namespace CustomFloorPlugin {
 
                 tubeBloomLight.gameObject.SetActive(false);
 
-                var lightWithId = tubeBloomLight.GetComponent<LightWithId>();
+                TubeBloomPrePassLightWithId lightWithId = tubeBloomLight.GetComponent<TubeBloomPrePassLightWithId>();
                 if(lightWithId) {
-                    lightWithId.SetPrivateField("_tubeBloomPrePassLight", tubeBloomLight);
-                    lightWithId.SetPrivateField("_ID", (int)lightsID);
-                    lightWithId.SetPrivateField("_lightManager", lightManager);
+                    Log();
+                    Log(lightWithId);
+                    lightWithId.SetField("_tubeBloomPrePassLight", tubeBloomLight);
+                    ((LightWithId)lightWithId).SetField("_ID", (int)lightsID);
+                    ((LightWithId)lightWithId).SetField("_lightManager", lightManager);
                 }
 
-                tubeBloomLight.SetPrivateField("_width", width * 2);
-                tubeBloomLight.SetPrivateField("_length", length);
-                tubeBloomLight.SetPrivateField("_center", center);
-                tubeBloomLight.SetPrivateField("_transform", tubeBloomLight.transform);
-                tubeBloomLight.SetPrivateField("_maxAlpha", 0.1f);
+                tubeBloomLight.SetField("_width", width * 2);
+                tubeBloomLight.SetField("_length", length);
+                tubeBloomLight.SetField("_center", center);
+                tubeBloomLight.SetField("_transform", tubeBloomLight.transform);
+                tubeBloomLight.SetField("_maxAlpha", 0.1f);
 
                 var parabox = tubeBloomLight.GetComponentInChildren<ParametricBoxController>();
-                tubeBloomLight.SetPrivateField("_parametricBoxController", parabox);
+                tubeBloomLight.SetField("_parametricBoxController", parabox);
 
                 var parasprite = tubeBloomLight.GetComponentInChildren<Parametric3SliceSpriteController>();
-                tubeBloomLight.SetPrivateField("_dynamic3SliceSprite", parasprite);
+                tubeBloomLight.SetField("_dynamic3SliceSprite", parasprite);
                 parasprite.Init();
                 parasprite.GetComponent<MeshRenderer>().enabled = false;
 
                 SetColorToDefault();
                 tubeBloomLight.gameObject.SetActive(true);
-            } else {
+            } else if(PlatformManager.Heart != null) {
+                Log("Mesh");
                 // swap for <3
                 iHeartBeatSaber = Instantiate(PlatformManager.Heart);
                 PlatformManager.SpawnedObjects.Add(iHeartBeatSaber);
@@ -121,17 +133,17 @@ namespace CustomFloorPlugin {
                 iHeartBeatSaber.transform.position = transform.position;
                 iHeartBeatSaber.transform.localScale = Vector3.one;
                 iHeartBeatSaber.transform.rotation = transform.rotation;
-                var lightWithId = iHeartBeatSaber.GetComponent<LightWithId>();
+                InstancedMaterialLightWithId lightWithId = iHeartBeatSaber.GetComponent<InstancedMaterialLightWithId>();
                 if(lightWithId) {
-                    lightWithId.SetPrivateField("_ID", (int)lightsID);
-                    lightWithId.SetPrivateField("_lightManager", lightManager);
-                    lightWithId.SetPrivateField("_minAlpha", 0);
+                    ((LightWithId)lightWithId).SetField("_ID", (int)lightsID);
+                    ((LightWithId)lightWithId).SetField("_lightManager", lightManager);
+                    lightWithId.SetField("_minAlpha", 0f);
                 }
                 iHeartBeatSaber.GetComponent<MeshFilter>().mesh = GetComponent<MeshFilter>().mesh;
                 iHeartBeatSaber.SetActive(true);
             }
         }
-        ////////////////////////////////////////////////////////////////////////////////////////////////////
+
         private void SetColorToDefault() {
             tubeBloomLight.color = color * 0.9f;
             tubeBloomLight.Refresh();

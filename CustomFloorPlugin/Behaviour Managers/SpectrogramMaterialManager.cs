@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+
 using UnityEngine;
+
 
 namespace CustomFloorPlugin {
 
@@ -38,6 +40,7 @@ namespace CustomFloorPlugin {
                 spectrogramMaterials.Add(spec);
             }
         }
+
 
         /// <summary>
         /// Passes <see cref="BasicSpectrogramData"/> on to all <see cref="SpectrogramMaterial"/>s<br/>

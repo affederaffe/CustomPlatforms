@@ -1,27 +1,18 @@
-﻿using System.Reflection;
+﻿using System.Collections.Generic;
 using System.Text;
+
 using UnityEngine;
 
+
 namespace CustomFloorPlugin.Extensions {
+
+
+    /// <summary>
+    /// This class holds extensions
+    /// </summary>
     internal static class Extentions {
-        internal static void InvokePrivateMethod<T>(this object obj, string methodName, params object[] methodParams) {
-            var method = typeof(T).GetMethod(methodName, BindingFlags.Instance | BindingFlags.NonPublic);
-            method.Invoke(obj, methodParams);
-        }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "bad design, i know")]
-        internal static void SetPrivateField<T>(this T obj, string fieldName, object value) {
-            try {
-                typeof(T).GetField(fieldName, BindingFlags.Instance | BindingFlags.NonPublic).SetValue(obj, value);
-            } catch {
-                obj.GetType().GetField(fieldName, BindingFlags.Instance | BindingFlags.NonPublic).SetValue(obj, value);
-            }
-        }
-        internal static T GetPrivateField<T>(this object obj, string fieldName) {
 
-            return (T)obj.GetType().GetField(fieldName, BindingFlags.Instance | BindingFlags.NonPublic).GetValue(obj);
-
-        }
         /// <summary>
         /// Returns the full path of a GameObject in the scene hierarchy.
         /// </summary>
@@ -39,6 +30,8 @@ namespace CustomFloorPlugin.Extensions {
             }
             return path.ToString();
         }
+
+
         /// <summary>
         /// Returns the full path of a Component in the scene hierarchy.
         /// </summary>
@@ -48,6 +41,20 @@ namespace CustomFloorPlugin.Extensions {
             StringBuilder path = new StringBuilder(component.gameObject.GetFullPath());
             path.Append("/" + component.GetType().Name);
             return path.ToString();
+        }
+
+
+        /// <summary>
+        /// Converts a <see cref="List{T}"/> to a list of <see langword="object"/>s for BSML
+        /// </summary>
+        /// <typeparam name="T">Type of the original list</typeparam>
+        /// <param name="list">The original list</param>
+        internal static List<object> ToBoxedList<T>(this List<T> list){
+            List<object> convertedList = new List<object>();
+            foreach(T thing in list) {
+                convertedList.Add(thing);
+            }
+            return convertedList;
         }
     }
 }

@@ -1,8 +1,11 @@
 using BeatSaberMarkupLanguage.Attributes;
 using BeatSaberMarkupLanguage.Components;
 using BeatSaberMarkupLanguage.ViewControllers;
+
 using HMUI;
+
 using UnityEngine;
+
 
 namespace CustomFloorPlugin.UI {
 
@@ -43,7 +46,7 @@ namespace CustomFloorPlugin.UI {
         private void PlatformSelect(TableView ignored1, int idx) {
             PlatformManager.SetPlatformAndShow(idx);
             Settings.PlayerData.overrideEnvironmentSettings.overrideEnvironments = false;
-            EnvironmentSceneOverrider.OverrideEnvironmentScene();
+            EnvironmentSceneOverrider.SetEnabled(true);
         }
 
 

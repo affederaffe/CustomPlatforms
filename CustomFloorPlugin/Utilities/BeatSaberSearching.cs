@@ -1,18 +1,32 @@
 ﻿using CustomFloorPlugin.Exceptions;
+
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
+using static CustomFloorPlugin.GlobalCollection;
+
+
 namespace CustomFloorPlugin.Utilities {
+
+
+    /// <summary>
+    /// Utilities to find objects specific to Beat Saber
+    /// </summary>
     internal static class BeatSaberSearching {
+
+
+        /// <summary>
+        /// Finds the current environment <see cref="Scene"/>, prioritizing non-menu environments
+        /// </summary>
         /// <exception cref="EnvironmentSceneNotFoundException"></exception>
+        /// <returns>The current environment <see cref="Scene"/></returns>
         internal static Scene GetCurrentEnvironment() {
             Scene scene = new Scene();
             Scene environmentScene = scene;
             for(int i = 0; i < SceneManager.sceneCount; i++) {
                 scene = SceneManager.GetSceneAt(i);
-                if(scene.name.EndsWith("Environment", Constants.StrInv)) {
-                    if(!environmentScene.IsValid() || environmentScene.name.StartsWith("Menu", Constants.StrInv))
-                        environmentScene = scene;
+                if(scene.name.EndsWith("Environment", STR_INV) && (!environmentScene.IsValid() || environmentScene.name.StartsWith("Menu", STR_INV))) {
+                    environmentScene = scene;
                 }
             }
             if(environmentScene.IsValid()) {
@@ -20,30 +34,30 @@ namespace CustomFloorPlugin.Utilities {
             }
             throw new EnvironmentSceneNotFoundException();
         }
-        /// <exception cref="ManagerNotFoundException"></exception>
-        internal static LightWithIdManager FindLightWithIdManager() {
-            Scene? scene;
-            try {
-                scene = GetCurrentEnvironment();
-            } catch(EnvironmentSceneNotFoundException e) {
-                throw new ManagerNotFoundException(e);
-            }
 
+
+
+        /// <summary>
+        /// Finds the <see cref="LightWithIdManager"/> of the given <paramref name="environment"/>
+        /// </summary>
+        /// <param name="environment">Where to search for a <see cref="LightWithIdManager"/></param>
+        /// <exception cref="ManagerNotFoundException"></exception>
+        internal static LightWithIdManager FindLightWithIdManager(Scene environment) {
             LightWithIdManager manager = null;
-            void RecursiveFindManager(GameObject directParent) {
-                for(int i = 0; i < directParent.transform.childCount; i++) {
-                    GameObject child = directParent.transform.GetChild(i).gameObject;
+            void RecursiveFindManager(Transform directParent) {
+                for(int i = 0; i < directParent.childCount; i++) {
+                    Transform child = directParent.GetChild(i);
                     if(child.GetComponent<LightWithIdManager>() != null) {
                         manager = child.GetComponent<LightWithIdManager>();
                     }
-                    if(child.transform.childCount != 0) {
+                    if(child.childCount != 0) {
                         RecursiveFindManager(child);
                     }
                 }
             }
-            GameObject[] roots = scene?.GetRootGameObjects();
+            GameObject[] roots = environment.GetRootGameObjects();
             foreach(GameObject root in roots) {
-                RecursiveFindManager(root);
+                RecursiveFindManager(root.transform);
             }
             if(manager != null) {
                 return manager;

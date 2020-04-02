@@ -1,8 +1,13 @@
 using System;
+
 using UnityEngine;
+
 using static CustomFloorPlugin.Utilities.Logging;
 
+
 namespace CustomFloorPlugin {
+
+
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1051:Do not declare visible instance fields", Justification = "Too old to change")]
     public class SpectrogramAnimationState:MonoBehaviour {
         public AnimationClip animationClip;
@@ -10,7 +15,7 @@ namespace CustomFloorPlugin {
         [Range(0, 63)]
         public int sample;
         [Header("Use the average of all samples, ignoring specified sample")]
-        
+
         public bool averageAllSamples;
 
         private Animation animation;

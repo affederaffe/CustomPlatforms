@@ -1,8 +1,11 @@
 ﻿using CustomFloorPlugin.Exceptions;
+
 using System.Collections.Generic;
 using System.Reflection;
+
 using UnityEngine;
 using UnityEngine.SceneManagement;
+
 
 namespace CustomFloorPlugin.Utilities {
 

@@ -1,4 +1,4 @@
-﻿using Harmony;
+﻿using HarmonyLib;
 using System.Reflection;
 
 namespace CustomFloorPlugin.HarmonyPatches {
@@ -21,7 +21,7 @@ namespace CustomFloorPlugin.HarmonyPatches {
         /// </summary>
         internal static void Patch() {
             if(!runOnce) {
-                HarmonyInstance.Create("com.rolopogo.customplatforms").PatchAll(Assembly.GetExecutingAssembly());
+                new Harmony("com.rolopogo.customplatforms").PatchAll(Assembly.GetExecutingAssembly());
                 runOnce = true;
             }
         }

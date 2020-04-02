@@ -1,12 +1,25 @@
 ﻿using UnityEngine;
-using static CustomFloorPlugin.Utilities.Logging;
+
+using static CustomFloorPlugin.GlobalCollection;
 using static CustomFloorPlugin.Utilities.BeatSaberSearching;
-using static CustomFloorPlugin.Constants;
+using static CustomFloorPlugin.Utilities.Logging;
+
 
 namespace CustomFloorPlugin {
 
-    public sealed partial class PlatformManager {
+
+    public static partial class PlatformManager {
+
+
+        /// <summary>
+        /// The part of the <see cref="PlatformManager"/> that handles spawning, notifying, etc.
+        /// </summary>
         private static class PlatformLifeCycleManagement {
+
+
+            /// <summary>
+            /// Changes to the user selected, or API requested, <see cref="CustomPlatform"/>.
+            /// </summary>
             internal static void InternalChangeToPlatform() {
                 if(kyleBuffer.HasValue) {
                     InternalChangeToPlatform(kyleBuffer.Value);
@@ -15,58 +28,191 @@ namespace CustomFloorPlugin {
                     InternalChangeToPlatform(CurrentPlatformIndex);
                 }
             }
+
+
+            /// <summary>
+            /// Changes to a specific <see cref="CustomPlatform"/>
+            /// </summary>
+            /// <param name="index">The index of the new <see cref="CustomPlatform"/> in the list <see cref="AllPlatforms"/></param>
             internal static void InternalChangeToPlatform(int index) {
-                if(!GetCurrentEnvironment().name.StartsWith("Menu", StrInv)) {
+                if(!GetCurrentEnvironment().name.StartsWith("Menu", STR_INV)) {
                     platformSpawned = true;
                 }
                 DestroyCustomObjects();
                 Log("Switching to " + AllPlatforms[index].name);
                 activePlatform?.gameObject.SetActive(false);
-                NotifyPlatform(NotifyType.Disable);
+                NotifyPlatform(activePlatform, NotifyType.Disable);
 
                 if(index != 0) {
                     activePlatform = AllPlatforms[index % AllPlatforms.Count];
                     activePlatform.gameObject.SetActive(true);
-                    PlatformLoader.AddManagers(activePlatform);
-                    NotifyPlatform(NotifyType.Enable);
+                    AddManagers(activePlatform);
+                    NotifyPlatform(activePlatform, NotifyType.Enable);
                     SpawnCustomObjects();
                     EnvironmentArranger.RearrangeEnvironment();
+                    MaterialSwapper.ReplaceMaterials(activePlatform.gameObject);
                 } else {
                     activePlatform = null;
                 }
-                Instance.StartCoroutine(HideForPlatformAfterOneFrame(activePlatform ?? AllPlatforms[0]));
+                EnvironmentHider.HideObjectsForPlatform(AllPlatforms[index]);
             }
-            private static void NotifyPlatform(NotifyType type) {
-                NotifyOnEnableOrDisable[] things = activePlatform?.gameObject?.GetComponentsInChildren<NotifyOnEnableOrDisable>(true);
+
+
+            /// <summary>
+            /// Notifies a given <see cref="CustomPlatform"/> when it gets activated or deactivated
+            /// </summary>
+            /// <param name="customPlatform">What <see cref="CustomPlatform"/> to notify</param>
+            /// <param name="type">What happened to the platform</param>
+            private static void NotifyPlatform(CustomPlatform customPlatform, NotifyType type) {
+                NotifyOnEnableOrDisable[] things = customPlatform?.gameObject?.GetComponentsInChildren<NotifyOnEnableOrDisable>(true);
                 if(things != null) {
                     foreach(NotifyOnEnableOrDisable thing in things) {
                         if(type == NotifyType.Disable) {
                             thing.PlatformDisabled();
                         } else {
-                            Log("Calling Enables, expecting more than one entry in the queue after this...");
                             thing.PlatformEnabled();
                         }
-                    } 
+                    }
                 }
             }
 
+
+            /// <summary>
+            /// Spawns all registered custom objects, as required by the selected <see cref="CustomPlatform"/>
+            /// </summary>
             private static void SpawnCustomObjects() {
                 Log("Members in SpawnQueue: " + SpawnQueue.GetInvocationList().Length);
-                Log(SpawnQueue.GetInvocationList()[0].Method.DeclaringType.Name);
-                SpawnQueue(FindLightWithIdManager());
+                SpawnQueue(FindLightWithIdManager(GetCurrentEnvironment()));
             }
+
+
+            /// <summary>
+            /// Despawns all registered custom objects, as required by the selected <see cref="CustomPlatform"/>
+            /// </summary>
             private static void DestroyCustomObjects() {
                 while(SpawnedObjects.Count != 0) {
                     GameObject gameObject = SpawnedObjects[0];
                     SpawnedObjects.Remove(gameObject);
-                    Destroy(gameObject);
+                    UnityEngine.Object.Destroy(gameObject);
                 }
                 while(SpawnedComponents.Count != 0) {
                     Component component = SpawnedComponents[0];
                     SpawnedComponents.Remove(component);
-                    Destroy(component);
+                    UnityEngine.Object.Destroy(component);
                 }
             }
+
+
+            /// <summary>
+            /// Adds managers to a <see cref="CustomPlatform"/>
+            /// </summary>
+            /// <param name="customPlatform">The <see cref="CustomPlatform"/> for which to spawn managers</param>
+            internal static void AddManagers(CustomPlatform customPlatform) {
+                GameObject go = customPlatform.gameObject;
+                bool active = go.activeSelf;
+                if(active) {
+                    go.SetActive(false);
+                }
+                AddManagers(go, go);
+                if(active) {
+                    go.SetActive(true);
+                }
+            }
+
+
+            /// <summary>
+            /// Recursively attaches managers to a <see cref="CustomPlatform"/>
+            /// </summary>
+            /// <param name="go">The current <see cref="GameObject"/>, this parameter acts as a pointer</param>
+            /// <param name="root">The root <see cref="GameObject"/> of the <see cref="CustomPlatform"/></param>
+            private static void AddManagers(GameObject go, GameObject root) {
+
+                // Rotation effect manager
+                if(go.GetComponentInChildren<RotationEventEffect>(true) != null || go.GetComponentInChildren<MultiRotationEventEffect>(true) != null) {
+                    RotationEventEffectManager rotManager = root.GetComponent<RotationEventEffectManager>();
+                    if(rotManager == null) {
+                        rotManager = root.AddComponent<RotationEventEffectManager>();
+                        SpawnedComponents.Add(rotManager);
+                        rotManager.CreateEffects(go);
+                        rotManager.RegisterForEvents();
+                    }
+                }
+
+                // Add a trackRing controller if there are track ring descriptors
+                if(go.GetComponentInChildren<TrackRings>(true) != null) {
+                    foreach(TrackRings trackRings in go.GetComponentsInChildren<TrackRings>(true)) {
+                        GameObject ringPrefab = trackRings.trackLaneRingPrefab;
+
+                        // Add managers to prefabs (nesting)
+                        AddManagers(ringPrefab, root);
+                    }
+
+                    TrackRingsManagerSpawner trms = root.GetComponent<TrackRingsManagerSpawner>();
+                    if(trms == null) {
+                        trms = root.AddComponent<TrackRingsManagerSpawner>();
+                        SpawnedComponents.Add(trms);
+                    }
+                    trms.CreateTrackRings(go);
+                }
+
+                // Add spectrogram manager
+                if(go.GetComponentInChildren<Spectrogram>(true) != null) {
+                    foreach(Spectrogram spec in go.GetComponentsInChildren<Spectrogram>(true)) {
+                        GameObject colPrefab = spec.columnPrefab;
+                        AddManagers(colPrefab, root);
+                    }
+
+                    SpectrogramColumnManager specManager = go.GetComponent<SpectrogramColumnManager>();
+                    if(specManager == null) {
+                        specManager = go.AddComponent<SpectrogramColumnManager>();
+                        SpawnedComponents.Add(specManager);
+                    }
+                    specManager.CreateColumns(go);
+                }
+
+                if(go.GetComponentInChildren<SpectrogramMaterial>(true) != null) {
+                    // Add spectrogram materials manager
+                    SpectrogramMaterialManager specMatManager = go.GetComponent<SpectrogramMaterialManager>();
+                    if(specMatManager == null) {
+                        specMatManager = go.AddComponent<SpectrogramMaterialManager>();
+                        SpawnedComponents.Add(specMatManager);
+                    }
+                    specMatManager.UpdateMaterials(go);
+                }
+
+                if(go.GetComponentInChildren<SpectrogramAnimationState>(true) != null) {
+                    // Add spectrogram animation state manager
+                    SpectrogramAnimationStateManager specAnimManager = go.GetComponent<SpectrogramAnimationStateManager>();
+                    if(specAnimManager == null) {
+                        specAnimManager = go.AddComponent<SpectrogramAnimationStateManager>();
+                        SpawnedComponents.Add(specAnimManager);
+                    }
+                    specAnimManager.UpdateAnimationStates();
+                }
+
+                // Add Song event manager
+                if(go.GetComponentInChildren<SongEventHandler>(true) != null) {
+                    foreach(SongEventHandler handler in go.GetComponentsInChildren<SongEventHandler>()) {
+                        SongEventManager manager = handler.gameObject.AddComponent<SongEventManager>();
+                        SpawnedComponents.Add(manager);
+                        manager._songEventHandler = handler;
+                    }
+                }
+
+                // Add EventManager 
+                if(go.GetComponentInChildren<EventManager>(true) != null) {
+                    foreach(EventManager em in go.GetComponentsInChildren<EventManager>()) {
+                        PlatformEventManager pem = em.gameObject.AddComponent<PlatformEventManager>();
+                        SpawnedComponents.Add(pem);
+                        pem._EventManager = em;
+                    }
+                }
+            }
+
+
+            /// <summary>
+            /// Used to destinguish between between platform enables and disables
+            /// </summary>
             private enum NotifyType {
                 Enable = 0,
                 Disable = 1

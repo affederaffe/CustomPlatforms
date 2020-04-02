@@ -1,8 +1,11 @@
 using BS_Utils.Utilities;
+
+using IPA.Utilities;
+
 using System.Collections.Generic;
-using System.Linq;
+
 using UnityEngine;
-using static CustomFloorPlugin.Utilities.Logging;
+
 
 namespace CustomFloorPlugin {
 
@@ -13,13 +16,18 @@ namespace CustomFloorPlugin {
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Build", "CA1812:Avoid unistantiated internal classes", Justification = "Instantiated by Unity")]
     internal class RotationEventEffectManager:MonoBehaviour {
 
+
         /// <summary>
         /// To be filled with spawned <see cref="LightRotationEventEffect"/>s
         /// </summary>
         private List<LightRotationEventEffect> lightRotationEffects;
 
 
+        /// <summary>
+        /// To be filled with spawned <see cref="MultiRotationEventEffect.Actor"/>s
+        /// </summary>
         private List<MultiRotationEventEffect.Actor> multiEffects;
+
 
         /// <summary>
         /// Registers all currently known <see cref="LightRotationEventEffect"/>s for Events.
@@ -59,15 +67,14 @@ namespace CustomFloorPlugin {
             multiEffects = new List<MultiRotationEventEffect.Actor>();
 
             var effectDescriptors = currentPlatform.GetComponentsInChildren<RotationEventEffect>(true);
-            
 
             foreach(RotationEventEffect effectDescriptor in effectDescriptors) {
                 LightRotationEventEffect rotEvent = effectDescriptor.gameObject.AddComponent<LightRotationEventEffect>();
                 PlatformManager.SpawnedComponents.Add(rotEvent);
-                ReflectionUtil.SetPrivateField(rotEvent, "_event", (BeatmapEventType)effectDescriptor.eventType);
-                ReflectionUtil.SetPrivateField(rotEvent, "_rotationVector", effectDescriptor.rotationVector);
-                ReflectionUtil.SetPrivateField(rotEvent, "_transform", rotEvent.transform);
-                ReflectionUtil.SetPrivateField(rotEvent, "_startRotation", rotEvent.transform.rotation);
+                rotEvent.SetField("_event", (BeatmapEventType)effectDescriptor.eventType);
+                rotEvent.SetField("_rotationVector", effectDescriptor.rotationVector);
+                rotEvent.SetField("_transform", rotEvent.transform);
+                rotEvent.SetField("_startRotation", rotEvent.transform.rotation);
                 lightRotationEffects.Add(rotEvent);
             }
             var effectDescriptors2 = currentPlatform.GetComponentsInChildren<MultiRotationEventEffect>(true);

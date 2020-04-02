@@ -15,15 +15,15 @@ namespace CustomFloorPlugin.UI {
         /// <summary>
         /// Static reference to the <see cref="PlatformListFlowCoordinator"/> singleton
         /// </summary>
-        private static PlatformListFlowCoordinator platformMenuFlowCoordinator {
+        private static PlatformListFlowCoordinator PlatformMenuFlowCoordinator {
             get {
-                if(_platformMenuFlowCoordinator == null) {
-                    _platformMenuFlowCoordinator = BeatSaberUI.CreateFlowCoordinator<PlatformListFlowCoordinator>();
+                if(_PlatformMenuFlowCoordinator == null) {
+                    _PlatformMenuFlowCoordinator = BeatSaberUI.CreateFlowCoordinator<PlatformListFlowCoordinator>();
                 }
-                return _platformMenuFlowCoordinator;
+                return _PlatformMenuFlowCoordinator;
             }
         }
-        private static PlatformListFlowCoordinator _platformMenuFlowCoordinator;
+        private static PlatformListFlowCoordinator _PlatformMenuFlowCoordinator;
 
 
         /// <summary>
@@ -35,7 +35,7 @@ namespace CustomFloorPlugin.UI {
         /// <summary>
         /// Sets up the UI
         /// </summary>
-        public static void SetupMenuButtons() {
+        internal static void SetupMenuButtons() {
             if(!runOnce) {
                 runOnce = true;
                 MenuButtons.instance.RegisterButton(new MenuButton("Custom Platforms", "Change Custom Plaforms Here!", CustomPlatformsMenuButtonPressed, true));
@@ -48,7 +48,7 @@ namespace CustomFloorPlugin.UI {
         /// Transitions to the CustomPlatforms selection menu
         /// </summary>
         private static void CustomPlatformsMenuButtonPressed() {
-            BeatSaberUI.MainFlowCoordinator.InvokeMethod("PresentFlowCoordinator", platformMenuFlowCoordinator, null, false, false);
+            BeatSaberUI.MainFlowCoordinator.InvokeMethod("PresentFlowCoordinator", PlatformMenuFlowCoordinator, null, false, false);
         }
     }
 

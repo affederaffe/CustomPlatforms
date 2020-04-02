@@ -1,25 +1,33 @@
-﻿using System.Collections.Generic;
+﻿using CustomFloorPlugin.UI;
+using System;
+using System.Collections.Generic;
+
 using UnityEngine;
-using CustomFloorPlugin.UI;
+
 
 namespace CustomFloorPlugin {
-    public static class EnvironmentArranger {
-        private static EnvArrangement Arrangement {
-            get {
-            return Settings.EnvArr;
+
+
+    /// <summary>
+    /// This class can attempt to move certain parts of the environment to positions these elements were at in Beat Saber's beta<br/>
+    /// This is highly flawed and outdated, as it only differentiates objects by name, and many objects in Beat Saber share names<br/>
+    /// </summary>
+    internal static class EnvironmentArranger {
+
+
+        /// <summary>
+        /// Adjusts the position of objects based on the players choice
+        /// </summary>
+        internal static void RearrangeEnvironment() {
+            if(Settings.EnvArr == EnvArrangement.Classic) {
+                RearrangeClassic();
             }
         }
 
-        public static void RearrangeEnvironment() {
-            switch(Arrangement) {
-                case EnvArrangement.Default:
-                    return;
-                case EnvArrangement.Classic:
-                    RearrangeClassic();
-                    return;
-            }
-        }
 
+        /// <summary>
+        /// Attempts to move objects back into positions seen in Beat Saber's beta
+        /// </summary>
         private static void RearrangeClassic() {
             TryMove("RotatingLaserLeft0", new Vector3(-8, 0, 45));
             TryMove("RotatingLaserLeft1", new Vector3(-8, 0, 40));
@@ -37,35 +45,48 @@ namespace CustomFloorPlugin {
             TryHide("Light (6)");
         }
 
+
+        /// <summary>
+        /// Attempts to move a <see cref="GameObject"/>
+        /// </summary>
+        /// <param name="name">Name of the <see cref="GameObject"/></param>
+        /// <param name="pos">New position of the <see cref="GameObject"/></param>
         private static void TryMove(string name, Vector3 pos) {
             GameObject toMove = GameObject.Find(name);
             if(toMove != null)
                 toMove.transform.position = pos;
         }
 
+
+        /// <summary>
+        /// Attempts to hide a <see cref="GameObject"/>
+        /// </summary>
+        /// <param name="name">Name of the <see cref="GameObject"/></param>
         private static void TryHide(string name) {
             GameObject toHide = GameObject.Find(name);
             if(toHide != null)
                 toHide.SetActive(false);
         }
 
-        public enum EnvArrangement { Default, Classic };
 
-        public static string Name(EnvArrangement mode) {
-            return mode switch
-            {
-                EnvArrangement.Default => "Default",
-                EnvArrangement.Classic => "Classic",
-                _ => "?",
-            };
+        /// <summary>
+        /// Returns a list of all arrangement modes
+        /// </summary>
+        internal static List<EnvArrangement> RepositionModes() {
+            List<EnvArrangement> list = new List<EnvArrangement>();
+            foreach(EnvArrangement item in Enum.GetValues(typeof(EnvArrangement))) {
+                list.Add(item);
+            }
+            return list;
         }
 
-        public static List<object> RepositionModes() {
-            return new List<object>
-            {
-                EnvArrangement.Default,
-                EnvArrangement.Classic
-            };
-        }
+
+        /// <summary>
+        /// All known environment arrangements
+        /// </summary>
+        internal enum EnvArrangement {
+            Default,
+            Classic
+        };
     }
 }

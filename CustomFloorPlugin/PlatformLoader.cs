@@ -3,12 +3,18 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
+
 using UnityEngine;
+
+using static CustomFloorPlugin.GlobalCollection;
 using static CustomFloorPlugin.Utilities.Logging;
 
+
 namespace CustomFloorPlugin {
+
+
     /// <summary>
-    /// Loads AssetBundles containing CustomPlatforms and handles cycling between them
+    /// Loads AssetBundles containing CustomPlatforms
     /// </summary>
     internal static class PlatformLoader {
 
@@ -18,7 +24,7 @@ namespace CustomFloorPlugin {
         /// </summary>
         public static List<CustomPlatform> CreateAllPlatforms(Transform parent) {
 
-            string customPlatformsFolderPath = Path.Combine(Environment.CurrentDirectory, Constants.customFolder);
+            string customPlatformsFolderPath = Path.Combine(Environment.CurrentDirectory, FOLDER);
 
             // Create the CustomPlatforms folder if it doesn't already exist
             if(!Directory.Exists(customPlatformsFolderPath)) {
@@ -28,7 +34,7 @@ namespace CustomFloorPlugin {
             // Find AssetBundles in our CustomPlatforms directory
             string[] allBundlePaths = Directory.GetFiles(customPlatformsFolderPath, "*.plat");
 
-            List<CustomPlatform>  platforms = new List<CustomPlatform>();
+            List<CustomPlatform> platforms = new List<CustomPlatform>();
 
             // Create a dummy CustomPlatform for the original platform
             CustomPlatform defaultPlatform = new GameObject("Default Platform").AddComponent<CustomPlatform>();
@@ -50,15 +56,22 @@ namespace CustomFloorPlugin {
             }
             Log("[END OF PLATFORM LOADING SPAM]---------------------------------------");
             // Replace materials for all renderers
-            MaterialSwapper.ReplaceMaterials(PlatformManager.PlatformManagerScene);
+            MaterialSwapper.ReplaceMaterials(SCENE);
 
             return platforms;
         }
 
+
+        /// <summary>
+        /// Loads a <see cref="CustomPlatform"/> from disk into memory and instantiates it.<br/>
+        /// Part of this logic has been moved to a different function, for no apparent reason.
+        /// </summary>
+        /// <param name="bundlePath">The location of the <see cref="CustomPlatform"/>s <see cref="AssetBundle"/> file on disk</param>
+        /// <param name="parent">The parent <see cref="Transform"/> for the new <see cref="CustomPlatform"/></param>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Security", "CA5351:Do Not Use Broken Cryptographic Algorithms", Justification = "MD5 Hash not used in security relevant context")]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Globalization", "CA1308:Normalize strings to uppercase", Justification = "Too late now... that damage was done a year ago -.-")]
-        public static CustomPlatform LoadPlatformBundle(string bundlePath, Transform parent) {
-
+        internal static CustomPlatform LoadPlatformBundle(string bundlePath, Transform parent) {
+            
             AssetBundle bundle = AssetBundle.LoadFromFile(bundlePath);
 
             if(bundle == null) return null;
@@ -69,14 +82,11 @@ namespace CustomFloorPlugin {
             using var stream = File.OpenRead(bundlePath);
 
             byte[] hash = md5.ComputeHash(stream);
-            newPlatform.platHash = BitConverter
-                .ToString(hash)
-                .Replace("-", string.Empty)
-                .ToLowerInvariant();
-
+            newPlatform.platHash = BitConverter.ToString(hash).Replace("-", string.Empty).ToLowerInvariant();
 
             return newPlatform;
         }
+
 
         /// <summary>
         /// Instantiates a platform from an assetbundle.
@@ -125,100 +135,6 @@ namespace CustomFloorPlugin {
             newPlatform.SetActive(false);
 
             return customPlatform;
-        }
-        internal static void AddManagers(CustomPlatform customPlatform) {
-            GameObject go = customPlatform.gameObject;
-            bool active = go.activeSelf;
-            if(active) {
-                go.SetActive(false);
-            }
-            AddManagers(go, go);
-            if(active) {
-                go.SetActive(true);
-            }
-        }
-        private static void AddManagers(GameObject go, GameObject root) {
-
-            // Rotation effect manager
-            if(go.GetComponentInChildren<RotationEventEffect>(true) != null || go.GetComponentInChildren<MultiRotationEventEffect>(true) != null) {
-                RotationEventEffectManager rotManager = root.GetComponent<RotationEventEffectManager>();
-                if(rotManager == null) {
-                    rotManager = root.AddComponent<RotationEventEffectManager>();
-                    PlatformManager.SpawnedComponents.Add(rotManager);
-                    rotManager.CreateEffects(go);
-                    rotManager.RegisterForEvents();
-                }
-            }
-
-            // Add a trackRing controller if there are track ring descriptors
-            if(go.GetComponentInChildren<TrackRings>(true) != null) {
-                foreach(TrackRings trackRings in go.GetComponentsInChildren<TrackRings>(true)) {
-                    GameObject ringPrefab = trackRings.trackLaneRingPrefab;
-
-                    // Add managers to prefabs (nesting)
-                    AddManagers(ringPrefab, root);
-                }
-
-                TrackRingsManagerSpawner trms = root.GetComponent<TrackRingsManagerSpawner>();
-                if(trms == null) {
-                    trms = root.AddComponent<TrackRingsManagerSpawner>();
-                    PlatformManager.SpawnedComponents.Add(trms);
-                }
-                trms.CreateTrackRings(go);
-            }
-
-            // Add spectrogram manager
-            if(go.GetComponentInChildren<Spectrogram>(true) != null) {
-                foreach(Spectrogram spec in go.GetComponentsInChildren<Spectrogram>(true)) {
-                    GameObject colPrefab = spec.columnPrefab;
-                    AddManagers(colPrefab, root);
-                }
-
-                SpectrogramColumnManager specManager = go.GetComponent<SpectrogramColumnManager>();
-                if(specManager == null) {
-                    specManager = go.AddComponent<SpectrogramColumnManager>();
-                    PlatformManager.SpawnedComponents.Add(specManager);
-                }
-                specManager.CreateColumns(go);
-            }
-
-            if(go.GetComponentInChildren<SpectrogramMaterial>(true) != null) {
-                // Add spectrogram materials manager
-                SpectrogramMaterialManager specMatManager = go.GetComponent<SpectrogramMaterialManager>();
-                if(specMatManager == null) {
-                    specMatManager = go.AddComponent<SpectrogramMaterialManager>();
-                    PlatformManager.SpawnedComponents.Add(specMatManager);
-                }
-                specMatManager.UpdateMaterials(go);
-            }
-
-            if(go.GetComponentInChildren<SpectrogramAnimationState>(true) != null) {
-                // Add spectrogram animation state manager
-                SpectrogramAnimationStateManager specAnimManager = go.GetComponent<SpectrogramAnimationStateManager>();
-                if(specAnimManager == null) {
-                    specAnimManager = go.AddComponent<SpectrogramAnimationStateManager>();
-                    PlatformManager.SpawnedComponents.Add(specAnimManager);
-                }
-                specAnimManager.UpdateAnimationStates();
-            }
-
-            // Add Song event manager
-            if(go.GetComponentInChildren<SongEventHandler>(true) != null) {
-                foreach(SongEventHandler handler in go.GetComponentsInChildren<SongEventHandler>()) {
-                    SongEventManager manager = handler.gameObject.AddComponent<SongEventManager>();
-                    PlatformManager.SpawnedComponents.Add(manager);
-                    manager._songEventHandler = handler;
-                }
-            }
-
-            // Add EventManager 
-            if(go.GetComponentInChildren<EventManager>(true) != null) {
-                foreach(EventManager em in go.GetComponentsInChildren<EventManager>()) {
-                    PlatformEventManager pem = em.gameObject.AddComponent<PlatformEventManager>();
-                    PlatformManager.SpawnedComponents.Add(pem);
-                    pem._EventManager = em;
-                }
-            }
         }
     }
 }

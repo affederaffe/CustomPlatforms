@@ -1,12 +1,19 @@
-﻿using System.Collections.Generic;
+﻿using CustomFloorPlugin.UI;
+
+using System.Collections.Generic;
 using System.Linq;
+
 using UnityEngine;
+
 using static CustomFloorPlugin.Utilities.BeatSaberSearching;
-using CustomFloorPlugin.UI;
+
 
 namespace CustomFloorPlugin {
+
+
     /// <summary> 
-    /// Activates and deactivates world geometry in the active scene as required by the chosen custom platform
+    /// Activates and deactivates world geometry in the active scene as required by the chosen custom platform<br/>
+    /// Most documentation on this file is omited because it is a giant clusterfuck and I hate it... with a passion.
     /// </summary>
     internal static class EnvironmentHider {
 
@@ -23,19 +30,32 @@ namespace CustomFloorPlugin {
         private static List<GameObject> rotatingLasers;
         private static List<GameObject> trackLights;
 
-        private static bool showFeetOverride {
+        private static bool ShowFeetOverride {
             get {
                 return Settings.AlwaysShowFeet;
             }
         }
 
+
         /// <summary>
-        /// Hide and unhide world objects as required by a platform
+        /// Hide and unhide world objects as required by a platform<br/>
+        /// Delayed by a frame because of order of operations after scene loading
         /// </summary>
         /// <param name="platform">A platform that defines which objects are to be hidden</param>
         internal static void HideObjectsForPlatform(CustomPlatform platform) {
+            SharedCoroutineStarter.instance.StartCoroutine(InternalHideObjectsForPlatform(platform));
+        }
+
+
+        /// <summary>
+        /// Hide and unhide world objects as required by a platform<br/>
+        /// It is not practical to call this directly
+        /// </summary>
+        /// <param name="platform">A platform that defines which objects are to be hidden</param>
+        private static IEnumerator<WaitForEndOfFrame> InternalHideObjectsForPlatform(CustomPlatform platform) {
+            yield return new WaitForEndOfFrame();
             FindEnvironment();
-            if(feet != null) SetCollectionHidden(feet, (platform.hideDefaultPlatform && !showFeetOverride));
+            if(feet != null) SetCollectionHidden(feet, (platform.hideDefaultPlatform && !ShowFeetOverride));
             if(originalPlatform != null) SetCollectionHidden(originalPlatform, platform.hideDefaultPlatform);
             if(smallRings != null) SetCollectionHidden(smallRings, platform.hideSmallRings);
             if(bigRings != null) SetCollectionHidden(bigRings, platform.hideBigRings);
@@ -49,10 +69,11 @@ namespace CustomFloorPlugin {
             if(trackLights != null) SetCollectionHidden(trackLights, platform.hideTrackLights);
         }
 
+
         /// <summary>
-        /// Finds all GameObjects that make up the default environment and groups them into array lists
+        /// Finds all GameObjects that make up the default environment and groups them into lists
         /// </summary>
-        internal static void FindEnvironment() {
+        private static void FindEnvironment() {
             FindFeetIcon();
             FindOriginalPlatform();
             FindSmallRings();
@@ -67,6 +88,7 @@ namespace CustomFloorPlugin {
             FindTrackLights();
         }
 
+
         /// <summary>
         /// Set the active state of a Collection of GameObjects
         /// </summary>
@@ -78,6 +100,7 @@ namespace CustomFloorPlugin {
                 if(go != null) go.SetActive(!hidden);
             }
         }
+
 
         /// <summary>
         /// Finds a GameObject by name and adds it to the provided List<GameObject>
@@ -131,7 +154,7 @@ namespace CustomFloorPlugin {
         private static void FindBigRings() {
             bigRings = new List<GameObject>();
             FindAddGameObject("BigTrackLaneRings", bigRings);
-            foreach(var trackLaneRing in Resources.FindObjectsOfTypeAll<TrackLaneRing>().Where(x => x.name == "TrackLaneRingBig(Clone)")) {
+            foreach(var trackLaneRing in Resources.FindObjectsOfTypeAll<TrackLaneRing>().Where(x => x.name == "BigTrackLaneRing(Clone)")) {
                 bigRings.Add(trackLaneRing.gameObject);
             }
         }

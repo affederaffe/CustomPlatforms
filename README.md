@@ -63,3 +63,13 @@ You cannot attach your own custom scripts to these objects. Only scripts from th
 In the inspector, click "Export". Navigate to your CustomPlatforms folder, and press save.
 
 6. Share your custom platform with other players by uploading the .plat file
+
+## Hall of Fame (Credits for major rework contributions)
+#### AkaRaiden - (The QA Department, Beta Tester, Tome of Wisdom)
+  - Without him this would have taken so much more time than it did.
+
+#### Rolo - (The Master Mind, Inventor CustomPlatforms)
+  - Went out of her way to help me clean up after six people messed with this.
+
+#### Panics - (Chief Investigator)
+  - Helped me get an initial grasp on the damage.

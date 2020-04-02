@@ -1,85 +1,133 @@
 using CustomFloorPlugin.Exceptions;
-using CustomFloorPlugin.Extensions;
 using CustomFloorPlugin.UI;
+
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+
 using UnityEngine;
 using UnityEngine.SceneManagement;
+
 using Zenject;
-using static CustomFloorPlugin.Utilities.Logging;
+
+using static CustomFloorPlugin.GlobalCollection;
 using static CustomFloorPlugin.Utilities.BeatSaberSearching;
+using static CustomFloorPlugin.Utilities.Logging;
+
 
 namespace CustomFloorPlugin {
 
-    public sealed partial class PlatformManager:MonoBehaviour {
+
+    /// <summary>
+    /// Handles Platforms, and hearts, everything about them
+    /// </summary>
+    public static partial class PlatformManager {
+
+
+        /// <summary>
+        /// List of all loaded Platforms, publicly editable. For no good reason.
+        /// </summary>
         public static List<CustomPlatform> AllPlatforms {
             get;
             private set;
         }
+
+
+        /// <summary>
+        /// The index of the currently selected <see cref="CustomPlatform"/><br/>
+        /// Returns 0 if the selection goes AWOL...
+        /// </summary>
         public static int CurrentPlatformIndex {
             get {
-                return AllPlatforms.IndexOf(CurrentPlatform);
+                int idx = -1;
+                if(CurrentPlatform != null) {
+                    idx = AllPlatforms.IndexOf(CurrentPlatform);
+                }
+                if(idx != -1) {
+                    return idx;
+                } else {
+                    return 0;
+                }
             }
         }
+
+
+        /// <summary>
+        /// Keeps track of the currently selected <see cref="CustomPlatform"/>
+        /// </summary>
         public static CustomPlatform CurrentPlatform {
             get;
             private set;
         }
-        internal static PlatformManager Instance {
-            get {
-                if(_Instance == null) {
-                    _Instance = new GameObject("Platform Manager").AddComponent<PlatformManager>();
-                    SceneManager.MoveGameObjectToScene(_Instance.gameObject, PlatformManagerScene);
-                }
-                return _Instance;
-            }
-        }
-        private static PlatformManager _Instance;
-        internal static Scene PlatformManagerScene {
-            get {
-                if(_PlatformManagerScene == null) {
-                    _PlatformManagerScene = SceneManager.CreateScene("PlatformManagerDump", new CreateSceneParameters(LocalPhysicsMode.None));
-                }
-                return _PlatformManagerScene.Value;
-            }
-        }
-        private static Scene? _PlatformManagerScene;
 
+
+        /// <summary>
+        /// The <see cref="GameObject"/> which the <see cref="PlatformManager"/> and it's submodules use as an in-world anchor
+        /// </summary>
+        private static GameObject Anchor {
+            get {
+                if(_Anchor == null) {
+                    _Anchor = new GameObject("Platform Manager");
+                    SceneManager.MoveGameObjectToScene(_Anchor, SCENE);
+                }
+                return _Anchor;
+            }
+        }
+        private static GameObject _Anchor;
+
+
+        /// <summary>
+        /// Acts as a prefab for custom light sources that require meshes...<br/>
+        /// Not 100% bug free tbh<br/>
+        /// <br/>
+        /// Also:<br/>
+        /// We <3 Beat Saber
+        /// </summary>
         internal static GameObject Heart;
+
+
+        /// <summary>
+        /// Keeps track of all spawned custom <see cref="GameObject"/>s, whichs lifetime ends on any scene transition
+        /// </summary>
         internal static List<GameObject> SpawnedObjects = new List<GameObject>();
+
+
+        /// <summary>
+        /// Keeps track of all spawned custom <see cref="Component"/>s, whichs lifetime ends on any scene transition
+        /// </summary>
         internal static List<Component> SpawnedComponents = new List<Component>();
+
+
+        /// <summary>
+        /// This <see cref="Action"/> <see langword="delegate"/> is called whenever a platform is activated,<br/>
+        /// after all instantiated objects implementing <see cref="NotifyOnEnableOrDisable"/> have been notified.
+        /// </summary>
         internal static Action<LightWithIdManager> SpawnQueue = delegate {
             Log("Spawning Lights");
         };
-        internal static CustomPlatform activePlatform;
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Code Quality", "IDE0051:Remove unused private members", Justification = "Called by Unity")]
-        private void Update() {
-            if(Input.GetKeyDown(KeyCode.Keypad0)) {
-                Log();
-                Heart.SetActive(false);
-                Heart.GetComponent<LightWithId>().SetPrivateField("_lightManager", FindLightWithIdManager());
-                Heart.SetActive(true);
-            }
-        }
+
+
         /// <summary>
-        /// Executing this line causes the Platform Manager Instance to be loaded. No really. It does.
+        /// Keeps track of the currently active <see cref="CustomPlatform"/>
         /// </summary>
-        internal void Load() {
+        internal static CustomPlatform activePlatform;
 
-            EnvironmentSceneOverrider.Load();
 
-            Plugin.Gsm.transitionDidStartEvent += TransitionPrep;
-            Plugin.Gsm.transitionDidFinishEvent += TransitionFinalize;
+        /// <summary>
+        /// Initializes the <see cref="PlatformManager"/>
+        /// </summary>
+        internal static void Init() {
+            EnvironmentSceneOverrider.Init();
+            Anchor.AddComponent<EasterEggs>();
 
-            //Create platforms list
-            AllPlatforms = PlatformLoader.CreateAllPlatforms(Instance.transform);
+            GSM.transitionDidStartEvent += (float ignored) => { TransitionPrep(); };
+            GSM.transitionDidFinishEvent += (ScenesTransitionSetupDataSO ignored1, DiContainer ignored2) => { TransitionFinalize(); };
+            AllPlatforms = PlatformLoader.CreateAllPlatforms(Anchor.transform);
+
             CurrentPlatform = AllPlatforms[0];
-            // Retrieve saved path from player prefs if it exists
-            if(Plugin.config.HasKey("Data", "CustomPlatformPath")) {
-                string savedPath = Plugin.config.GetString("Data", "CustomPlatformPath");
-                // Check if this path was loaded and update our platform index
+            if(CONFIG.HasKey("Data", "CustomPlatformPath")) {
+                string savedPath = CONFIG.GetString("Data", "CustomPlatformPath");
                 for(int i = 0; i < AllPlatforms.Count; i++) {
                     if(savedPath == AllPlatforms[i].platName + AllPlatforms[i].platAuthor) {
                         CurrentPlatform = AllPlatforms[i];
@@ -89,28 +137,37 @@ namespace CustomFloorPlugin {
             }
 
             LoadHeart();
-            
         }
-        private void TransitionPrep(float ignored) {
+
+
+        /// <summary>
+        /// Prepares for a scene transition, removes all custom elements
+        /// </summary>
+        private static void TransitionPrep() {
             Log("Transition Prep");
             try {
-                if(!GetCurrentEnvironment().name.StartsWith("Menu", Constants.StrInv)) {
+                Scene currentEvironment = GetCurrentEnvironment();
+                if(!currentEvironment.name.StartsWith("Menu", STR_INV)) {
                     PlatformLifeCycleManagement.InternalChangeToPlatform(0);
                 } else {
                     Heart.SetActive(false);
                 }
-            } catch(EnvironmentSceneNotFoundException e) {
-                Log(e);
-            }
+            } catch(EnvironmentSceneNotFoundException) { }
             Log("Transition Prep finished");
         }
-        private void TransitionFinalize(ScenesTransitionSetupDataSO ignored1, DiContainer ignored2) {
+
+
+        /// <summary>
+        /// Finishes up scene transitions, spawning the selected <see cref="CustomPlatform"/> if needed
+        /// </summary>
+        private static void TransitionFinalize() {
             Log("Transition Finalize");
             try {
-                if(!GetCurrentEnvironment().name.StartsWith("Menu", Constants.StrInv)) {
+                Scene currentEvironment = GetCurrentEnvironment();
+                if(!currentEvironment.name.StartsWith("Menu", STR_INV)) {
                     try {
                         if(!Settings.PlayerData.overrideEnvironmentSettings.overrideEnvironments) {
-                            TubeLightUtilities.CreateAdditionalLightSwitchControllers(FindLightWithIdManager());
+                            TubeLightUtilities.CreateAdditionalLightSwitchControllers(FindLightWithIdManager(currentEvironment));
                             if(!platformSpawned) {
                                 PlatformLifeCycleManagement.InternalChangeToPlatform();
                             }
@@ -123,43 +180,41 @@ namespace CustomFloorPlugin {
                     Heart.SetActive(Settings.ShowHeart);
                     Heart.GetComponent<LightWithId>().ColorWasSet(Color.magenta);
                 }
-            } catch(EnvironmentSceneNotFoundException e) {
-                Log(e);
-            }
+            } catch(EnvironmentSceneNotFoundException) { }
             Log("Transition Finalize finished");
         }
-        internal static IEnumerator<WaitForEndOfFrame> HideForPlatformAfterOneFrame(CustomPlatform customPlatform) {
-            yield return new WaitForEndOfFrame();
-            EnvironmentHider.HideObjectsForPlatform(customPlatform);
-        }
 
-        internal static void SetPlatformAndShow(int index) {
 
-            // Increment index
-            // To the uninitiated: The modulo operator makes sure that the values wraps around instead of throwing an exception... i need to change that later :>
-            CurrentPlatform = AllPlatforms[index % AllPlatforms.Count];
-
-            // Save path into Modprefs
-            // Edit: Save path into YOUR OWN GOD DAMN SETTINGS FILE!!!
-            Plugin.config.SetString("Data", "CustomPlatformPath", CurrentPlatform.platName + CurrentPlatform.platAuthor);
-
-            //Show the platform
-            PlatformLifeCycleManagement.InternalChangeToPlatform(index);
-
-        }
         /// <summary>
-        /// Stores a requested platform ID
+        /// Changes to a specific <see cref="CustomPlatform"/> and saves the choice
+        /// </summary>
+        /// <param name="index">The index of the new platform in <see cref="AllPlatforms"/></param>
+        internal static void SetPlatformAndShow(int index) {
+            CurrentPlatform = AllPlatforms[index % AllPlatforms.Count];
+            CONFIG.SetString("Data", "CustomPlatformPath", CurrentPlatform.platName + CurrentPlatform.platAuthor);
+            PlatformLifeCycleManagement.InternalChangeToPlatform(index);
+        }
+
+
+        /// <summary>
+        /// Stores a platform ID that was requested through the public API
         /// </summary>
         private static int? kyleBuffer = null;
+
+
         /// <summary>
         /// Stores an overflown platform ID if <see cref="kyleBuffer"/> already stores an ID.
         /// </summary>
         private static int? errBuffer = null;
+
+
         /// <summary>
-        /// This variable indicates whether or not a platform has been spawned since leaving the menu.<br/>
-        /// It exists because I have no control over the order in which callbacks are executed
+        /// This flag indicates whether or not a platform has been spawned already.<br/>
+        /// It exists because I have no control over the order in which event callbacks are executed
         /// </summary>
         private static bool platformSpawned;
+
+
         /// <summary>
         /// This function handles outside requests to temporarily change to a specific platform.<br/>
         /// It caches the request and will consume it when a level is played.<br/>
@@ -179,10 +234,8 @@ namespace CustomFloorPlugin {
                 kyleBuffer = index;
             }
             try {
-                if(!GetCurrentEnvironment().name.StartsWith("Menu", Constants.StrInv) && platformSpawned) {
-
+                if(!GetCurrentEnvironment().name.StartsWith("Menu", STR_INV) && platformSpawned) {
                     PlatformLifeCycleManagement.InternalChangeToPlatform();
-
                 }
             } catch(EnvironmentSceneNotFoundException e) {
                 IPA.Logging.Logger.Level L = IPA.Logging.Logger.Level.Warning;
@@ -190,13 +243,28 @@ namespace CustomFloorPlugin {
                 Log(e, L);
             }
         }
-        public CustomPlatform AddPlatform(string path) {
-            CustomPlatform newPlatform = PlatformLoader.LoadPlatformBundle(path, transform);
+
+
+        /// <summary>
+        /// Allows dynamic loading of <see cref="CustomPlatform"/>s from files.
+        /// </summary>
+        /// <param name="path">The path of file containing the <see cref="CustomPlatform"/></param>
+        /// <returns>The reference to the loaded <see cref="CustomPlatform"/></returns>
+        public static CustomPlatform AddPlatform(string path) {
+            CustomPlatform newPlatform = PlatformLoader.LoadPlatformBundle(path, Anchor.transform);
             if(newPlatform != null) {
                 AllPlatforms.Add(newPlatform);
             }
             return newPlatform;
         }
+
+
+        /// <summary>
+        /// Changes to a platform in <see cref="AllPlatforms"/>, based on <paramref name="index"/><br/>
+        /// Leave <paramref name="index"/> at <see langword="null"/> to change to the currently selected platform instead<br/>
+        /// Acts as an interface between <see cref="PlatformLifeCycleManagement"/> and the rest of the plugin
+        /// </summary>
+        /// <param name="index">The index of the <see cref="CustomPlatform"/> in the list <see cref="AllPlatforms"/></param>
         internal static void ChangeToPlatform(int? index = null) {
             if(index == null) {
                 PlatformLifeCycleManagement.InternalChangeToPlatform();
@@ -204,6 +272,8 @@ namespace CustomFloorPlugin {
                 PlatformLifeCycleManagement.InternalChangeToPlatform(index.Value);
             }
         }
+
+
         /// <summary>
         /// Overrides the previous request, if there was one<br/>
         /// May trigger a platform change if called in-song (Primarily to catch late scene change callbacks)
@@ -213,7 +283,7 @@ namespace CustomFloorPlugin {
                 kyleBuffer = errBuffer;
                 errBuffer = null;
                 try {
-                    if(!GetCurrentEnvironment().name.StartsWith("Menu", Constants.StrInv)) {
+                    if(!GetCurrentEnvironment().name.StartsWith("Menu", STR_INV)) {
                         PlatformLifeCycleManagement.InternalChangeToPlatform();
                     }
                 } catch(EnvironmentSceneNotFoundException e) {
@@ -224,26 +294,27 @@ namespace CustomFloorPlugin {
             }
         }
 
+
         /// <summary>
         /// Steals the heart from the GreenDayScene<br/>
         /// Then De-Serializes the data from the embedded resource heart.mesh onto the GreenDayHeart to make it more visually pleasing<br/>
         /// Also adjusts it position and color.
         /// </summary>
-        private void LoadHeart() {
+        private static void LoadHeart() {
             Scene greenDay = SceneManager.LoadScene("GreenDayGrenadeEnvironment", new LoadSceneParameters(LoadSceneMode.Additive));
-            StartCoroutine(fuckUnity());
+            SharedCoroutineStarter.instance.StartCoroutine(fuckUnity());
             IEnumerator<WaitUntil> fuckUnity() {//did you know loaded scenes are loaded asynchronously, regarless if you use async or not?
                 yield return new WaitUntil(() => { return greenDay.isLoaded; });
                 GameObject root = greenDay.GetRootGameObjects()[0];
                 Heart = root.transform.Find("GreenDayCity/armHeartLighting").gameObject;
                 Heart.transform.parent = null;
                 Heart.name = "<3";
-                SceneManager.MoveGameObjectToScene(Heart, PlatformManagerScene);
+                SceneManager.MoveGameObjectToScene(Heart, SCENE);
                 SceneManager.UnloadSceneAsync("GreenDayGrenadeEnvironment");
 
                 Settings.ShowHeartChanged += Heart.SetActive;
 
-                using Stream manifestResourceStream = Assembly.GetAssembly(GetType()).GetManifestResourceStream("CustomFloorPlugin.heart.mesh");
+                using Stream manifestResourceStream = Assembly.GetExecutingAssembly().GetManifestResourceStream("CustomFloorPlugin.heart.mesh");
                 using StreamReader streamReader = new StreamReader(manifestResourceStream);
 
                 string meshfile = streamReader.ReadToEnd();
@@ -259,10 +330,10 @@ namespace CustomFloorPlugin {
                 List<Vector3> vertices = new List<Vector3>();
                 List<int> triangles = new List<int>();
                 foreach(string[] string_vector3 in string_vector3s) {
-                    vertices.Add(new Vector3(float.Parse(string_vector3[0], Constants.NumInv), float.Parse(string_vector3[1], Constants.NumInv), float.Parse(string_vector3[2], Constants.NumInv)));
+                    vertices.Add(new Vector3(float.Parse(string_vector3[0], NUM_INV), float.Parse(string_vector3[1], NUM_INV), float.Parse(string_vector3[2], NUM_INV)));
                 }
                 foreach(string s_int in dimension2[1]) {
-                    triangles.Add(int.Parse(s_int, Constants.NumInv));
+                    triangles.Add(int.Parse(s_int, NUM_INV));
                 }
 
                 Mesh mesh = new Mesh {
@@ -281,7 +352,6 @@ namespace CustomFloorPlugin {
                 Heart.GetComponent<LightWithId>().ColorWasSet(Color.magenta);
                 Heart.SetActive(Settings.ShowHeart);
             }
-            
         }
     }
 }

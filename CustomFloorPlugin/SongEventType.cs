@@ -2,7 +2,7 @@
 
 
     /// <summary>
-    /// A reference for SongEvent IDs from 2+ years ago, warning outdated
+    /// A reference for SongEvent IDs from 2+ years ago. Warning outdated
     /// </summary>
     public enum SongEventType {
         BackLights = 0,

@@ -1,89 +1,52 @@
 ﻿using BS_Utils.Utilities;
-using CustomFloorPlugin.Exceptions;
-using CustomFloorPlugin.UI;
-using CustomFloorPlugin.Utilities;
+
 using CustomFloorPlugin.HarmonyPatches;
+using CustomFloorPlugin.UI;
+
 using IPA;
-using System.Linq;
-using UnityEngine.SceneManagement;
-using static CustomFloorPlugin.Utilities.UnityObjectSearching;
-using static CustomFloorPlugin.Utilities.Logging;
+
 
 namespace CustomFloorPlugin {
 
+    
+    /// <summary>
+    /// Main Plugin executable, loaded and instantiated by BSIPA before the game starts<br/>
+    /// Different callbacks will be notified throughout the games lifespan, and can be used as hooks.
+    /// </summary>
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Build", "CA1812:Avoid unistantiated internal classes", Justification = "Instantiated by BSIPA")]
-    internal class Plugin:IBeatSaberPlugin {
-        internal static Config config = new Config("Custom Platforms");
-        internal static GameScenesManager Gsm {
-            get {
-                if(_Gsm == null) {
-                    _Gsm = SceneManager.GetSceneByName("PCInit").GetRootGameObjects().First(x => x.name == "AppCoreSceneContext")?.GetComponent<MarkSceneAsPersistent>().GetPrivateField<GameScenesManager>("_gameScenesManager");
-                }
-                return _Gsm;
-            }
-        }
-        private static GameScenesManager _Gsm;
+    [Plugin(RuntimeOptions.SingleStartInit)]
+    internal class Plugin {
+
 
         /// <summary>
-        /// Do not call this out of gamescene, or else.
+        /// Initializes the Plugin, or in this case: Only the logger.
         /// </summary>
-        internal static BeatmapObjectCallbackController Bocc {
-            get {
-                if(_Bocc == null) {
-                    try {
-                        _Bocc = FindFirst<BeatmapObjectCallbackController>();
-                    } catch(ComponentNotFoundException e) {
-                        Log("Tried Referencing BOCC out of context, returning null!");
-                        Log(e);
-                    }
-
-                }
-                return _Bocc;
-            }
-        }
-        private static BeatmapObjectCallbackController _Bocc;
-
+        /// <param name="logger">The instance of the IPA logger that BSIPA hands to plugins on initialization</param>
+        [Init]
         public void Init(IPA.Logging.Logger logger) {
-            Logging.logger = logger;
+            Utilities.Logger.logger = logger;
         }
 
+
+        /// <summary>
+        /// Performs initialization<br/>
+        /// [Called by BSIPA]
+        /// </summary>
+        [OnStart]
         public void OnApplicationStart() {
             BSEvents.OnLoad();
             BSEvents.menuSceneLoadedFresh += InitAfterLoad;
             Patcher.Patch();
-
-
-            Stuff_That_Doesnt_Belong_Here_But_Has_To_Be_Here_Because_Bsml_Isnt_Half_As_Stable_Yet_As_CustomUI_Was_But_CustomUI_Has_Been_Killed_Already();
-        }
-
-        /// <summary>
-        /// Holds any clutter that's not supposed to be here, but has to.<br/>
-        /// WARNING:<br/>
-        /// NOTHING IS READY TO USE AT THIS POINT IN TIME!<br/>
-        /// ABSOLUTELY NOTHING!<br/>
-        /// BECAUSE NOTHING HAS LOADED IN YET!<br/>
-        /// THAT'S WHY NOTHING SHOULD BE HERE!<br/>
-        /// EXSPECIALLY NOT THIS!<br/>
-        /// DON'T PUT ANY LOADING-SENSITIVE LOGIC HERE!<br/>
-        /// <br/>
-        /// YES, I AM SERIOUS!
-        /// </summary>
-        private void Stuff_That_Doesnt_Belong_Here_But_Has_To_Be_Here_Because_Bsml_Isnt_Half_As_Stable_Yet_As_CustomUI_Was_But_CustomUI_Has_Been_Killed_Already() {
             PlatformUI.SetupMenuButtons();
         }
 
+
+        /// <summary>
+        /// Performs initialization steps after the game has loaded into the main menu for the first time
+        /// </summary>
         private void InitAfterLoad() {
             BSEvents.menuSceneLoadedFresh -= InitAfterLoad;
-            PlatformManager.Instance.Load();
+            PlatformManager.Init();
         }
-
-
-        ////////////////////////////////////////////////////////////////////////////////////////////////
-        public void OnSceneLoaded(Scene scene, LoadSceneMode sceneMode) { }
-        public void OnSceneUnloaded(Scene scene) { }
-        public void OnActiveSceneChanged(Scene prevScene, Scene nextScene) { }
-        public void OnUpdate() { }
-        public void OnFixedUpdate() { }
-        public void OnApplicationQuit() { }
     }
 }

@@ -1,5 +1,7 @@
 using CustomFloorPlugin;
+
 using UnityEngine;
+
 using static CustomFloorPlugin.Utilities.BeatSaberSearching;
 
 
@@ -123,9 +125,9 @@ public class SpectrogramColumns:MonoBehaviour {
     /// <param name="pos">Where to create the column(local space <see cref="Vector3"/> offset)</param>
     /// <returns></returns>
     private Transform CreateColumn(Vector3 pos) {
-        GameObject gameObject = Instantiate<GameObject>(_columnPrefab, base.transform);
+        GameObject gameObject = Instantiate(_columnPrefab, transform);
         foreach(TubeLight tubeLight in gameObject.GetComponentsInChildren<TubeLight>()) {
-            tubeLight.GameAwake(FindLightWithIdManager());
+            tubeLight.GameAwake(FindLightWithIdManager(GetCurrentEnvironment()));
         }
         PlatformManager.SpawnedObjects.Add(gameObject);
         gameObject.transform.localPosition = pos;
