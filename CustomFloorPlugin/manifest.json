@@ -2,15 +2,15 @@
   "$schema": "https://raw.githubusercontent.com/beat-saber-modding-group/BSIPA-MetadataFileSchema/master/Schema.json",
   "author": "Rolo",
   "description": "A plugin to support custom platforms and environments",
-  "gameVersion": "1.6.2",
+  "gameVersion": "1.8.0",
   "id": "Custom Platforms",
   "name": "Custom Platforms",
-  "version": "3.0.2",
+  "version": "3.1.0",
   "features": [
 
   ],
   "dependsOn": {
-    "BS Utils": "^1.4.1",
-    "BeatSaberMarkupLanguage": "^1.1.2"
+    "BS Utils": "^1.4.8",
+    "BeatSaberMarkupLanguage": "^1.2.2"
   }
 }
