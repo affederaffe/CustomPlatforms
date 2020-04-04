@@ -82,7 +82,7 @@ namespace CustomFloorPlugin {
         /// Not 100% bug free tbh<br/>
         /// <br/>
         /// Also:<br/>
-        /// We <3 Beat Saber
+        /// We love Beat Saber
         /// </summary>
         internal static GameObject Heart;
 
@@ -225,8 +225,6 @@ namespace CustomFloorPlugin {
         /// <param name="index">Index of the desired platform</param>
         /// <exception cref="StackedRequestsException"></exception>
         public static void TempChangeToPlatform(int index) {
-            Log();
-
             if(kyleBuffer != null) {
                 errBuffer = index;
                 throw new StackedRequestsException();

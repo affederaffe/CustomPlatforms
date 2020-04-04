@@ -103,10 +103,10 @@ namespace CustomFloorPlugin {
 
 
         /// <summary>
-        /// Finds a GameObject by name and adds it to the provided List<GameObject>
+        /// Finds a GameObject by name and adds it to the provided list
         /// </summary>
         /// <param name="name">The name of the desired GameObject</param>
-        /// <param name="alist">The List<GameObject> to be added to</param>
+        /// <param name="list">The list to be added to</param>
         private static bool FindAddGameObject(string name, List<GameObject> list) {
             GameObject[] roots = GetCurrentEnvironment().GetRootGameObjects();
             GameObject go;

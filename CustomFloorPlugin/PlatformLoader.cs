@@ -1,3 +1,4 @@
+using CustomFloorPlugin.Exceptions;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -8,6 +9,7 @@ using UnityEngine;
 
 using static CustomFloorPlugin.GlobalCollection;
 using static CustomFloorPlugin.Utilities.Logging;
+using static CustomFloorPlugin.Utilities.UnityObjectSearching;
 
 
 namespace CustomFloorPlugin {
@@ -92,6 +94,7 @@ namespace CustomFloorPlugin {
         /// Instantiates a platform from an assetbundle.
         /// </summary>
         /// <param name="bundle">An AssetBundle containing a CustomPlatform</param>
+        /// <param name="parent">The <see cref="Transform"/> under which this <paramref name="bundle"/> will be instantiated</param>
         /// <returns></returns>
         private static CustomPlatform LoadPlatform(AssetBundle bundle, Transform parent) {
 
@@ -102,6 +105,14 @@ namespace CustomFloorPlugin {
             }
 
             GameObject newPlatform = UnityEngine.Object.Instantiate(platformPrefab.gameObject);
+
+            try {
+                foreach(AudioListener al in FindAll<AudioListener>(newPlatform)) {
+                    UnityEngine.Object.DestroyImmediate(al);
+                }
+            } catch(ComponentNotFoundException) {
+
+            }
 
             newPlatform.transform.parent = parent;
 

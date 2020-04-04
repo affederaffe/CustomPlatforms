@@ -63,11 +63,6 @@ namespace CustomFloorPlugin {
             for(int i = 0; i < allSceneInfos.Count; i++) {
                 allSceneInfos[i].SceneName = sceneName;
             }
-            Log("Logging names after override");
-            foreach(SceneInfoWithBackup info in allSceneInfos) {
-                Log(info.SceneName);
-                Log(info.BackupName);
-            }
         }
 
 
@@ -77,11 +72,6 @@ namespace CustomFloorPlugin {
         private static void Revert() {
             for(int i = 0; i < allSceneInfos.Count; i++) {
                 allSceneInfos[i].SceneName = allSceneInfos[i].BackupName;
-            }
-            Log("Logging names after revert");
-            foreach(SceneInfoWithBackup info in allSceneInfos) {
-                Log(info.SceneName);
-                Log(info.BackupName);
             }
         }
 

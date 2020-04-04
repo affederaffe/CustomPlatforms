@@ -70,7 +70,7 @@ namespace CustomFloorPlugin.Utilities {
 
         /// <summary>
         /// Not to be used directly!<br/>
-        /// Recursive variant of <see cref="FindFirst{T}"/>
+        /// Recursive variant of <see cref="FindFirst{T}()"/>
         /// </summary>
         private static bool InternalRecursiveFindFirst<T>(Transform transform, out object component) {
             component = transform.GetComponent<T>();
@@ -146,7 +146,7 @@ namespace CustomFloorPlugin.Utilities {
 
         /// <summary>
         /// Not to be used directly!<br/>
-        /// Recursive version of <see cref="FindAll{T}"/>
+        /// Recursive variant of <see cref="FindAll{T}()"/>
         /// </summary>
         private static void InternalRecursiveFindAll<T>(Transform transform, ref List<T> components) {
             components.AddRange(transform.GetComponents<T>());
