@@ -88,7 +88,6 @@ namespace CustomFloorPlugin {
                 ringsManager.SetField("_ringPositionStep", trackRingDesc.ringPositionStep);
 
                 if(trackRingDesc.useRotationEffect) {
-                    Log(Time.fixedDeltaTime);
                     TrackLaneRingsRotationEffect rotationEffect = trackRingDesc.gameObject.AddComponent<TrackLaneRingsRotationEffect>();
                     PlatformManager.SpawnedComponents.Add(rotationEffect);
                     rotationEffect.SetField("_trackLaneRingsManager", ringsManager);
@@ -96,12 +95,8 @@ namespace CustomFloorPlugin {
                     rotationEffect.SetField("_startupRotationStep", trackRingDesc.startupRotationStep);
                     var timePerRing = trackRingDesc.startupRotationPropagationSpeed / trackRingDesc.ringCount;
                     var ringsPerFrame = Time.fixedDeltaTime / timePerRing;
-                    Log(ringsPerFrame);
                     rotationEffect.SetField("_startupRotationPropagationSpeed", Math.Max((int)ringsPerFrame, 1));
                     rotationEffect.SetField("_startupRotationFlexySpeed", trackRingDesc.startupRotationFlexySpeed);
-
-
-
 
                     TrackLaneRingsRotationEffectSpawner rotationEffectSpawner = trackRingDesc.gameObject.AddComponent<TrackLaneRingsRotationEffectSpawner>();
                     rotationSpawners.Add(rotationEffectSpawner);
@@ -111,7 +106,6 @@ namespace CustomFloorPlugin {
                     rotationEffectSpawner.SetField("_rotationStep", trackRingDesc.rotationStep);
                     var timePerRing2 = trackRingDesc.rotationPropagationSpeed / trackRingDesc.ringCount;
                     var ringsPerFrame2 = Time.fixedDeltaTime / timePerRing2;
-                    Log(ringsPerFrame2);
                     rotationEffectSpawner.SetField("_rotationPropagationSpeed", Math.Max((int)ringsPerFrame2, 1));
                     rotationEffectSpawner.SetField("_rotationFlexySpeed", trackRingDesc.rotationFlexySpeed);
                     rotationEffectSpawner.SetField("_trackLaneRingsRotationEffect", rotationEffect);

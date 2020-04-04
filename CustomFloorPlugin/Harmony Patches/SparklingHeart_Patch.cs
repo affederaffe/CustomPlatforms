@@ -1,5 +1,6 @@
 ﻿using HarmonyLib;
 
+
 namespace CustomFloorPlugin.HarmonyPatches {
 
 
@@ -21,4 +22,34 @@ namespace CustomFloorPlugin.HarmonyPatches {
             }
         }
     }
+
+
+    //This was needed to debug memory leak issues in Beat Saber 1.8.0
+    //Turns out Unity is unreliable when calling OnDisables during object destruction.
+
+
+    //using System.Collections.Generic;
+    //using System.Runtime.CompilerServices;
+    //using static CustomFloorPlugin.Utilities.Logging;
+
+
+    //[HarmonyPatch(typeof(TubeBloomPrePassLight))]
+    //[HarmonyPatch("FillMeshData")]
+    //internal class Patchwork {
+
+
+    //    [MethodImpl(MethodImplOptions.NoOptimization | MethodImplOptions.NoInlining)]
+    //    public static bool Prefix(TubeBloomPrePassLight __instance, List<BloomPrePassLight.LightsDataItem> ____lightsDataItems) {
+    //        if(__instance == null) {
+    //            Log("Null instance found.");
+    //            Log("\"Fixing it in post\" (tm)");
+    //            foreach(BloomPrePassLight.LightsDataItem lights in ____lightsDataItems) {
+    //                if(lights.lights.Contains(__instance)) {
+    //                    lights.lights.Remove(__instance);
+    //                }
+    //            }
+    //        }
+    //        return true;
+    //    }
+    //}
 }

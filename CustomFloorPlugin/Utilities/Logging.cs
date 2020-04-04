@@ -47,7 +47,7 @@ namespace CustomFloorPlugin.Utilities {
         /// <summary>
         /// Logs all list entries, <see cref="GameObject"/>s and <see cref="Component"/>s will be logged via their respective overloads
         /// </summary>
-        /// <param name="message">The list to log</param>
+        /// <param name="messages">The list to log</param>
         /// <param name="level">At what level the final message will be printed</param>
         internal static void Log<T>(List<T> messages, Level level = Level.Info) {
             foreach(T message in messages) {
@@ -69,7 +69,7 @@ namespace CustomFloorPlugin.Utilities {
         /// <summary>
         /// Logs all array entries, <see cref="GameObject"/>s and <see cref="Component"/>s will be logged via their respective overloads
         /// </summary>
-        /// <param name="message">The array to log</param>
+        /// <param name="messages">The array to log</param>
         /// <param name="level">At what level the final message will be printed</param>
         internal static void Log<T>(T[] messages, Level level = Level.Info) {
             foreach(T message in messages) {
@@ -91,7 +91,7 @@ namespace CustomFloorPlugin.Utilities {
         /// <summary>
         /// Logs all set entries, <see cref="GameObject"/>s and <see cref="Component"/>s will be logged via their respective overloads
         /// </summary>
-        /// <param name="message">The set to log</param>
+        /// <param name="messages">The set to log</param>
         /// <param name="level">At what level the final message will be printed</param>
         internal static void Log<T>(HashSet<T> messages, Level level = Level.Info) {
             foreach(T message in messages) {

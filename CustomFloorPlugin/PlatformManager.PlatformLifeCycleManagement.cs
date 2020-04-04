@@ -1,9 +1,12 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
+
+using IPA.Utilities;
 
 using static CustomFloorPlugin.GlobalCollection;
 using static CustomFloorPlugin.Utilities.BeatSaberSearching;
 using static CustomFloorPlugin.Utilities.Logging;
-
+using System.Collections.Generic;
 
 namespace CustomFloorPlugin {
 
@@ -35,13 +38,13 @@ namespace CustomFloorPlugin {
             /// </summary>
             /// <param name="index">The index of the new <see cref="CustomPlatform"/> in the list <see cref="AllPlatforms"/></param>
             internal static void InternalChangeToPlatform(int index) {
+                Log("Switching to " + AllPlatforms[index].name);
                 if(!GetCurrentEnvironment().name.StartsWith("Menu", STR_INV)) {
                     platformSpawned = true;
                 }
-                DestroyCustomObjects();
-                Log("Switching to " + AllPlatforms[index].name);
                 activePlatform?.gameObject.SetActive(false);
                 NotifyPlatform(activePlatform, NotifyType.Disable);
+                DestroyCustomObjects();
 
                 if(index != 0) {
                     activePlatform = AllPlatforms[index % AllPlatforms.Count];
@@ -86,15 +89,23 @@ namespace CustomFloorPlugin {
             }
 
 
+
             /// <summary>
             /// Despawns all registered custom objects, as required by the selected <see cref="CustomPlatform"/>
             /// </summary>
+            [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "No")]
             private static void DestroyCustomObjects() {
+
                 while(SpawnedObjects.Count != 0) {
                     GameObject gameObject = SpawnedObjects[0];
                     SpawnedObjects.Remove(gameObject);
                     UnityEngine.Object.Destroy(gameObject);
+                    foreach(TubeBloomPrePassLight tubeBloomPrePassLight in gameObject.GetComponentsInChildren<TubeBloomPrePassLight>(true)) {
+                        //Unity requires this to be present, otherwise Unregister won't be called. Memory leaks may occour if this is removed.
+                        tubeBloomPrePassLight.InvokeMethod<object, BloomPrePassLight>("UnregisterLight");
+                    }
                 }
+
                 while(SpawnedComponents.Count != 0) {
                     Component component = SpawnedComponents[0];
                     SpawnedComponents.Remove(component);

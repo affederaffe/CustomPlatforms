@@ -6,8 +6,6 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-using static CustomFloorPlugin.Utilities.Logging;
-
 
 namespace CustomFloorPlugin {
 
@@ -52,7 +50,6 @@ namespace CustomFloorPlugin {
             Gizmos.DrawCube(cubeCenter, new Vector3(2 * width, length, 2 * width));
         }
 
-        // ----------------
 
         private static TubeBloomPrePassLight _Prefab;
         internal static TubeBloomPrePassLight Prefab {
@@ -88,7 +85,6 @@ namespace CustomFloorPlugin {
         internal void GameAwake(LightWithIdManager lightManager) {
             GetComponent<MeshRenderer>().enabled = false;
             if(GetComponent<MeshFilter>().mesh.vertexCount == 0) {
-                Log("Non-Mesh");
                 tubeBloomLight = Instantiate(Prefab);
                 tubeBloomLight.transform.parent = transform;
                 PlatformManager.SpawnedObjects.Add(tubeBloomLight.gameObject);
@@ -101,8 +97,6 @@ namespace CustomFloorPlugin {
 
                 TubeBloomPrePassLightWithId lightWithId = tubeBloomLight.GetComponent<TubeBloomPrePassLightWithId>();
                 if(lightWithId) {
-                    Log();
-                    Log(lightWithId);
                     lightWithId.SetField("_tubeBloomPrePassLight", tubeBloomLight);
                     ((LightWithId)lightWithId).SetField("_ID", (int)lightsID);
                     ((LightWithId)lightWithId).SetField("_lightManager", lightManager);
@@ -124,8 +118,8 @@ namespace CustomFloorPlugin {
 
                 SetColorToDefault();
                 tubeBloomLight.gameObject.SetActive(true);
+
             } else if(PlatformManager.Heart != null) {
-                Log("Mesh");
                 // swap for <3
                 iHeartBeatSaber = Instantiate(PlatformManager.Heart);
                 PlatformManager.SpawnedObjects.Add(iHeartBeatSaber);
@@ -134,11 +128,9 @@ namespace CustomFloorPlugin {
                 iHeartBeatSaber.transform.localScale = Vector3.one;
                 iHeartBeatSaber.transform.rotation = transform.rotation;
                 InstancedMaterialLightWithId lightWithId = iHeartBeatSaber.GetComponent<InstancedMaterialLightWithId>();
-                if(lightWithId) {
-                    ((LightWithId)lightWithId).SetField("_ID", (int)lightsID);
-                    ((LightWithId)lightWithId).SetField("_lightManager", lightManager);
-                    lightWithId.SetField("_minAlpha", 0f);
-                }
+                ((LightWithId)lightWithId).SetField("_ID", (int)lightsID);
+                ((LightWithId)lightWithId).SetField("_lightManager", lightManager);
+                lightWithId.SetField("_minAlpha", 0f);
                 iHeartBeatSaber.GetComponent<MeshFilter>().mesh = GetComponent<MeshFilter>().mesh;
                 iHeartBeatSaber.SetActive(true);
             }
