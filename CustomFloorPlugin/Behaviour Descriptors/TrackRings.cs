@@ -17,12 +17,12 @@ namespace CustomFloorPlugin {
         public SongEventType rotationSongEventType = SongEventType.RingsRotationEffect; // replace this with a easier to read enum
         [Space]
         public float rotationStep = 5f;
-        public float rotationPropagationSpeed = 1f;
+        public int rotationPropagationSpeed = 1;
         public float rotationFlexySpeed = 1f;
         [Space]
         public float startupRotationAngle = 0f;
         public float startupRotationStep = 10f;
-        public float startupRotationPropagationSpeed = 10f;
+        public int startupRotationPropagationSpeed = 10;
         public float startupRotationFlexySpeed = 0.5f;
         [Space]
         [Header("Step Effect")]
