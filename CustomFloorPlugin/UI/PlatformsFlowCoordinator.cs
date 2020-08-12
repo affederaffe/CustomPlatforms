@@ -9,20 +9,14 @@ namespace CustomFloorPlugin
     {
 
         private PlatformListViewController platformListView;
-        //private SaberPreviewViewController saberPreviewView;
-        //private SaberSettingsViewController saberSettingsView;
+        private PlatformSettingsViewController platformSettingsView;
 
         public void Awake()
         {
-            /*if (!saberPreviewView)
+            if (!platformSettingsView)
             {
-                saberPreviewView = BeatSaberUI.CreateViewController<SaberPreviewViewController>();
+                platformSettingsView = BeatSaberUI.CreateViewController<PlatformSettingsViewController>();
             }
-
-            if (!saberSettingsView)
-            {
-                saberSettingsView = BeatSaberUI.CreateViewController<SaberSettingsViewController>();
-            }*/
 
             if (!platformListView)
             {
@@ -38,7 +32,7 @@ namespace CustomFloorPlugin
                 {
                     title = "Custom Platforms";
                     showBackButton = true;
-                    ProvideInitialViewControllers(platformListView);
+                    ProvideInitialViewControllers(platformListView, platformSettingsView);
                 }
             }
             catch (Exception ex)

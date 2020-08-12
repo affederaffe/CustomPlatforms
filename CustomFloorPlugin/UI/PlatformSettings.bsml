@@ -1,0 +1,16 @@
+﻿<bg xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation='https://monkeymanboy.github.io/BSML-Docs/ https://raw.githubusercontent.com/monkeymanboy/BSML-Docs/gh-pages/BSMLSchema.xsd'>
+  <vertical xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation='https://monkeymanboy.github.io/BSML-Docs/ https://raw.githubusercontent.com/monkeymanboy/BSML-Docs/gh-pages/BSMLSchema.xsd' child-control-height='false' child-expand-height='false'>
+    <vertical child-control-height='false'>
+      <horizontal bg='panel-top' pad-left='10' pad-right='10'>
+        <text text='Platform Settings' align='Center' font-size='7' />
+      </horizontal>
+    </vertical>
+
+    <vertical pad='10' pad-top='25' child-control-height='false' child-expand-height='false'>
+      <checkbox-setting text='Always Show Feet' value='always-show-feet' apply-on-change='true' />
+      <list-setting text='Environment Override' value='environment-override' options='environment-override-list' apply-on-change='true'
+                    hover-hint='Force maps to use selected environment' />
+      <list-setting text='Environment Arrangement' value='env-arrangement' options='arrangement-list' apply-on-change='true' />
+    </vertical>
+  </vertical>
+</bg>

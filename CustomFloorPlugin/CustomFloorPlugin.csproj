@@ -99,6 +99,7 @@
     <Compile Include="Exceptions\StackedRequestsException.cs" />
     <Compile Include="UI\PlatformListFlowCoordinator.cs" />
     <Compile Include="UI\PlatformsListView.cs" />
+    <Compile Include="UI\PlatformSettingsViewController.cs" />
     <Compile Include="UI\PlatformsFlowCoordinator.cs" />
     <Compile Include="UI\PlatformListViewController.cs" />
     <Compile Include="PlatformLoader.cs" />
@@ -137,6 +138,7 @@
     </None>
     <EmbeddedResource Include="UI\PlatformList.bsml" />
     <EmbeddedResource Include="UI\Settings.bsml" />
+    <EmbeddedResource Include="UI\PlatformSettings.bsml" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="0Harmony">

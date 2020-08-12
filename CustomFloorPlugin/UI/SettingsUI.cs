@@ -1,4 +1,4 @@
-﻿﻿using HMUI;
+﻿using HMUI;
 using UnityEngine;
 using CustomFloorPlugin.Util;
 using BeatSaberMarkupLanguage.MenuButtons;
@@ -33,7 +33,6 @@ namespace CustomFloorPlugin
 
             BeatSaberUI.MainFlowCoordinator.PresentFlowCoordinator(platformsFlowCoordinator, null, false, false);
         }
-
     }
     /*class PlatformUI : MonoBehaviour
     {   
