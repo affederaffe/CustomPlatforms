@@ -134,7 +134,6 @@
     </None>
     <EmbeddedResource Include="UI\PlatformList.bsml" />
     <EmbeddedResource Include="UI\Settings.bsml" />
-    <EmbeddedResource Include="UI\PlatformSettings.bsml" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="0Harmony">
