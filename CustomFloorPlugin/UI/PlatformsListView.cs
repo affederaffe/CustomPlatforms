@@ -3,7 +3,7 @@ using BeatSaberMarkupLanguage.Components;
 using BeatSaberMarkupLanguage.ViewControllers;
 
 using HMUI;
-
+using System.Linq;
 using UnityEngine;
 
 
@@ -30,7 +30,7 @@ namespace CustomFloorPlugin.UI {
         /// </summary>
         [UIComponent("PlatformsList")]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1051:Do not declare visible instance fields", Justification = "BSML is not capable of finding private instance fields. lol")]
-        public CustomListTableData PlatformListTable = null;
+        public CustomListTableData PlatformListTable;
 
 
         /// <summary>
@@ -81,11 +81,12 @@ namespace CustomFloorPlugin.UI {
         internal void SetupPlatformsList() {
             PlatformListTable.data.Clear();
             foreach(CustomPlatform platform in PlatformManager.AllPlatforms) {
-                PlatformListTable.data.Add(new CustomListTableData.CustomCellInfo(platform.platName, platform.platAuthor, platform.icon.texture));
+                PlatformListTable.data.Add(new CustomListTableData.CustomCellInfo(platform.platName, platform.platAuthor, platform.icon?.texture));
             }
             PlatformListTable.tableView.ReloadData();
             int selectedPlatform = PlatformManager.CurrentPlatformIndex;
-            PlatformListTable.tableView.ScrollToCellWithIdx(selectedPlatform, HMUI.TableViewScroller.ScrollPositionType.Beginning, false);
+            if (!PlatformListTable.tableView.visibleCells.Any(x => x.selected))
+                PlatformListTable.tableView.ScrollToCellWithIdx(selectedPlatform, HMUI.TableViewScroller.ScrollPositionType.Beginning, false);
             PlatformListTable.tableView.SelectCellWithIdx(selectedPlatform);
         }
     }

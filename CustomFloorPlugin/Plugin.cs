@@ -1,4 +1,4 @@
-﻿﻿using BS_Utils.Utilities;
+﻿using BS_Utils.Utilities;
 
 using CustomFloorPlugin.HarmonyPatches;
 using CustomFloorPlugin.UI;
@@ -37,7 +37,7 @@ namespace CustomFloorPlugin {
             BSEvents.OnLoad();
             BSEvents.menuSceneLoadedFresh += InitAfterLoad;
             Patcher.Patch();
-            SettingsUI.CreateMenu();
+            PlatformUI.SetupMenuButtons();
         }
 
 
