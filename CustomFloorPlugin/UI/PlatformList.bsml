@@ -1,7 +1,8 @@
-﻿<bg xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation='https://monkeymanboy.github.io/BSML-Docs/ https://raw.githubusercontent.com/monkeymanboy/BSML-Docs/gh-pages/BSMLSchema.xsd'>﻿
-	<vertical>
-		<page-button event-click='PlatformsList#PageUp' direction='Up'></page-button>
-		<list id='PlatformsList' expand-cell='true' select-cell='PlatformSelect'></list>
-		<page-button event-click='PlatformsList#PageDown' direction='Down'></page-button>
-	</vertical>
-</bg>
+﻿<vertical pad-top='2' spacing='1'>
+	<page-button event-click='PlatformsList#PageUp' direction='Up'></page-button>
+	<list id='PlatformsList' expand-cell='true' select-cell='PlatformSelect'></list>
+	<page-button event-click='PlatformsList#PageDown' direction='Down'></page-button>
+	<horizontal child-control-height='false'>
+		<button text='Reload all platforms' on-click='reloadPlatforms' />
+	</horizontal>
+</vertical>

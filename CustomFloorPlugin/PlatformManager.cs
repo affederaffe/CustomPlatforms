@@ -123,13 +123,21 @@ namespace CustomFloorPlugin {
 
             GSM.transitionDidStartEvent += (float ignored) => { TransitionPrep(); };
             GSM.transitionDidFinishEvent += (ScenesTransitionSetupDataSO ignored1, DiContainer ignored2) => { TransitionFinalize(); };
+            Reload();
+        }
+
+        internal static void Reload()
+        {
             AllPlatforms = PlatformLoader.CreateAllPlatforms(Anchor.transform);
 
             CurrentPlatform = AllPlatforms[0];
-            if(CONFIG.HasKey("Data", "CustomPlatformPath")) {
+            if (CONFIG.HasKey("Data", "CustomPlatformPath"))
+            {
                 string savedPath = CONFIG.GetString("Data", "CustomPlatformPath");
-                for(int i = 0; i < AllPlatforms.Count; i++) {
-                    if(savedPath == AllPlatforms[i].platName + AllPlatforms[i].platAuthor) {
+                for (int i = 0; i < AllPlatforms.Count; i++)
+                {
+                    if (savedPath == AllPlatforms[i].platName + AllPlatforms[i].platAuthor)
+                    {
                         CurrentPlatform = AllPlatforms[i];
                         break;
                     }
@@ -138,7 +146,6 @@ namespace CustomFloorPlugin {
 
             LoadHeart();
         }
-
 
         /// <summary>
         /// Prepares for a scene transition, removes all custom elements

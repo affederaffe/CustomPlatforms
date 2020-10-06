@@ -48,6 +48,11 @@ namespace CustomFloorPlugin.UI {
             Settings.PlayerData.overrideEnvironmentSettings.overrideEnvironments = false;
             EnvironmentSceneOverrider.SetEnabled(true);
         }
+        [UIAction("reloadPlatforms")]
+        public void ReloadMaterials()
+        {
+            PlatformManager.Reload();
+        }
 
 
         /// <summary>
