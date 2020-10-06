@@ -1,5 +1,8 @@
-﻿<vertical>
-  <page-button event-click='PlatformsList#PageUp' direction='Up'></page-button>
-  <list id='PlatformsList' expand-cell='true' select-cell='PlatformSelect'></list>
-  <page-button event-click='PlatformsList#PageDown' direction='Down'></page-button>
+﻿<vertical pad-top='2' spacing='1'>
+	<page-button event-click='PlatformsList#PageUp' direction='Up'></page-button>
+	<list id='PlatformsList' expand-cell='true' select-cell='PlatformSelect'></list>
+	<page-button event-click='PlatformsList#PageDown' direction='Down'></page-button>
+	<horizontal child-control-height='false'>
+		<button text='Reload all platforms' on-click='reloadPlatforms' />
+	</horizontal>
 </vertical>

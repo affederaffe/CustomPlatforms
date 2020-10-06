@@ -1,14 +1,10 @@
-# CustomPlatforms
-An IPA Plugin for BeatSaber to support custom platforms and environments
-
 ## Installation
 ### Easy Method
 
-* Ensure you have the latest verion of the Beat Saber Mod Installer installed: https://github.com/Umbranoxio/BeatSaberModInstaller/releases
+* Ensure you have the latest verion of Mod Assistant https://github.com/Assistant/ModAssistant/releases
 * Launch the mod installer
 * Select the checkbox for Custom Platforms
 * Click Install
-
 ### Manual Method
 
 * Ensure your game is patched with IPA (The mod installer does this for you)
@@ -73,3 +69,6 @@ In the inspector, click "Export". Navigate to your CustomPlatforms folder, and p
 
 #### Panics - (Chief Investigator)
   - Helped me get an initial grasp on the damage.
+
+#### Tiruialon, Top-Cat 
+ - Thank you for your contributions! 

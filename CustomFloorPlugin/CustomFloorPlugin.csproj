@@ -137,33 +137,49 @@
   </ItemGroup>
   <ItemGroup>
     <Reference Include="0Harmony">
-      <HintPath>..\..\..\..\..\Desktop\Games\Oculus\Software\hyperbolic-magnetism-beat-saber\Libs\0Harmony.dll</HintPath>
+      <HintPath Condition="Exists('D:\SteamLibrary\steamapps\common\Beat Saber\Libs\0Harmony.dll')">D:\SteamLibrary\steamapps\common\Beat Saber\Libs\0Harmony.dll</HintPath>
+      <HintPath Condition="Exists('S:\steamapps\common\Beat Saber\Libs\0Harmony.dll')">S:\steamapps\common\Beat Saber\Libs\0Harmony.dll</HintPath>
+      <HintPath Condition="Exists('..\..\..\..\..\Desktop\Games\Oculus\Software\hyperbolic-magnetism-beat-saber\Libs\0Harmony.dll')">..\..\..\..\..\Desktop\Games\Oculus\Software\hyperbolic-magnetism-beat-saber\Libs\0Harmony.dll</HintPath>
     </Reference>
     <Reference Include="BSML, Version=1.1.3.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\Desktop\Games\Oculus\Software\hyperbolic-magnetism-beat-saber\Plugins\BSML.dll</HintPath>
+      <HintPath Condition="Exists('D:\SteamLibrary\steamapps\common\Beat Saber\Plugins\BSML.dll')">D:\SteamLibrary\steamapps\common\Beat Saber\Plugins\BSML.dll</HintPath>
+      <HintPath Condition="Exists('S:\steamapps\common\Beat Saber\Plugins\BSML.dll')">S:\steamapps\common\Beat Saber\Plugins\BSML.dll</HintPath>
+      <HintPath Condition="Exists('..\..\..\..\..\Desktop\Games\Oculus\Software\hyperbolic-magnetism-beat-saber\Plugins\BSML.dll')">..\..\..\..\..\Desktop\Games\Oculus\Software\hyperbolic-magnetism-beat-saber\Plugins\BSML.dll</HintPath>
     </Reference>
     <Reference Include="BS_Utils, Version=1.4.1.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\Desktop\Games\Oculus\Software\hyperbolic-magnetism-beat-saber\Plugins\BS_Utils.dll</HintPath>
+      <HintPath Condition="Exists('D:\SteamLibrary\steamapps\common\Beat Saber\Plugins\BS_Utils.dll')">D:\SteamLibrary\steamapps\common\Beat Saber\Plugins\BS_Utils.dll</HintPath>
+      <HintPath Condition="Exists('S:\steamapps\common\Beat Saber\Plugins\BS_Utils.dll')">S:\steamapps\common\Beat Saber\Plugins\BS_Utils.dll</HintPath>
+      <HintPath Condition="Exists('..\..\..\..\..\Desktop\Games\Oculus\Software\hyperbolic-magnetism-beat-saber\Plugins\BS_Utils.dll')">..\..\..\..\..\Desktop\Games\Oculus\Software\hyperbolic-magnetism-beat-saber\Plugins\BS_Utils.dll</HintPath>
     </Reference>
     <Reference Include="HMLib, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\Desktop\Games\Oculus\Software\hyperbolic-magnetism-beat-saber\Beat Saber_Data\Managed\HMLib.dll</HintPath>
+      <HintPath Condition="Exists('D:\SteamLibrary\steamapps\common\Beat Saber\Beat Saber_Data\Managed\HMLib.dll')">D:\SteamLibrary\steamapps\common\Beat Saber\Beat Saber_Data\Managed\HMLib.dll</HintPath>
+      <HintPath Condition="Exists('S:\steamapps\common\Beat Saber\Beat Saber_Data\Managed\HMLib.dll')">S:\steamapps\common\Beat Saber\Beat Saber_Data\Managed\HMLib.dll</HintPath>
+      <HintPath Condition="Exists('..\..\..\..\..\Desktop\Games\Oculus\Software\hyperbolic-magnetism-beat-saber\Beat Saber_Data\Managed\HMLib.dll')">..\..\..\..\..\Desktop\Games\Oculus\Software\hyperbolic-magnetism-beat-saber\Beat Saber_Data\Managed\HMLib.dll</HintPath>
     </Reference>
     <Reference Include="HMRendering">
-      <HintPath>..\..\..\..\..\Desktop\Games\Oculus\Software\hyperbolic-magnetism-beat-saber\Beat Saber_Data\Managed\HMRendering.dll</HintPath>
+      <HintPath Condition="Exists('D:\SteamLibrary\steamapps\common\Beat Saber\Beat Saber_Data\Managed\HMRendering.dll')">D:\SteamLibrary\steamapps\common\Beat Saber\Beat Saber_Data\Managed\HMRendering.dll</HintPath>
+      <HintPath Condition="Exists('S:\steamapps\common\Beat Saber\Beat Saber_Data\Managed\HMRendering.dll')">S:\steamapps\common\Beat Saber\Beat Saber_Data\Managed\HMRendering.dll</HintPath>
+      <HintPath Condition="Exists('..\..\..\..\..\Desktop\Games\Oculus\Software\hyperbolic-magnetism-beat-saber\Beat Saber_Data\Managed\HMRendering.dll')">..\..\..\..\..\Desktop\Games\Oculus\Software\hyperbolic-magnetism-beat-saber\Beat Saber_Data\Managed\HMRendering.dll</HintPath>
     </Reference>
     <Reference Include="HMUI, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\Desktop\Games\Oculus\Software\hyperbolic-magnetism-beat-saber\Beat Saber_Data\Managed\HMUI.dll</HintPath>
+      <HintPath Condition="Exists('D:\SteamLibrary\steamapps\common\Beat Saber\Beat Saber_Data\Managed\HMUI.dll')">D:\SteamLibrary\steamapps\common\Beat Saber\Beat Saber_Data\Managed\HMUI.dll</HintPath>
+      <HintPath Condition="Exists('S:\steamapps\common\Beat Saber\Beat Saber_Data\Managed\HMUI.dll')">S:\steamapps\common\Beat Saber\Beat Saber_Data\Managed\HMUI.dll</HintPath>
+      <HintPath Condition="Exists('..\..\..\..\..\Desktop\Games\Oculus\Software\hyperbolic-magnetism-beat-saber\Beat Saber_Data\Managed\HMUI.dll')">..\..\..\..\..\Desktop\Games\Oculus\Software\hyperbolic-magnetism-beat-saber\Beat Saber_Data\Managed\HMUI.dll</HintPath>
     </Reference>
     <Reference Include="IPA.Loader, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\Desktop\Games\Oculus\Software\hyperbolic-magnetism-beat-saber\Beat Saber_Data\Managed\IPA.Loader.dll</HintPath>
+      <HintPath Condition="Exists('D:\SteamLibrary\steamapps\common\Beat Saber\Beat Saber_Data\Managed\IPA.Loader.dll')">D:\SteamLibrary\steamapps\common\Beat Saber\Beat Saber_Data\Managed\IPA.Loader.dll</HintPath>
+      <HintPath Condition="Exists('S:\steamapps\common\Beat Saber\Beat Saber_Data\Managed\IPA.Loader.dll')">S:\steamapps\common\Beat Saber\Beat Saber_Data\Managed\IPA.Loader.dll</HintPath>
+      <HintPath Condition="Exists('..\..\..\..\..\Desktop\Games\Oculus\Software\hyperbolic-magnetism-beat-saber\Beat Saber_Data\Managed\IPA.Loader.dll')">..\..\..\..\..\Desktop\Games\Oculus\Software\hyperbolic-magnetism-beat-saber\Beat Saber_Data\Managed\IPA.Loader.dll</HintPath>
     </Reference>
     <Reference Include="Main">
-      <HintPath>..\..\..\..\..\Desktop\Games\Oculus\Software\hyperbolic-magnetism-beat-saber\Beat Saber_Data\Managed\Main.dll</HintPath>
+      <HintPath Condition="Exists('D:\SteamLibrary\steamapps\common\Beat Saber\Beat Saber_Data\Managed\Main.dll')">D:\SteamLibrary\steamapps\common\Beat Saber\Beat Saber_Data\Managed\Main.dll</HintPath>
+      <HintPath Condition="Exists('S:\steamapps\common\Beat Saber\Beat Saber_Data\Managed\Main.dll')">S:\steamapps\common\Beat Saber\Beat Saber_Data\Managed\Main.dll</HintPath>
+      <HintPath Condition="Exists('..\..\..\..\..\Desktop\Games\Oculus\Software\hyperbolic-magnetism-beat-saber\Beat Saber_Data\Managed\Main.dll')">..\..\..\..\..\Desktop\Games\Oculus\Software\hyperbolic-magnetism-beat-saber\Beat Saber_Data\Managed\Main.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.CodeAnalysis.CSharp.Features, Version=3.4.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.CodeAnalysis.CSharp.Features.3.4.0\lib\netstandard2.0\Microsoft.CodeAnalysis.CSharp.Features.dll</HintPath>
@@ -200,31 +216,45 @@
     <Reference Include="System.Numerics" />
     <Reference Include="UnityEngine, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\Desktop\Games\Oculus\Software\hyperbolic-magnetism-beat-saber\Beat Saber_Data\Managed\UnityEngine.dll</HintPath>
+      <HintPath Condition="Exists('D:\SteamLibrary\steamapps\common\Beat Saber\Beat Saber_Data\Managed\UnityEngine.dll')">D:\SteamLibrary\steamapps\common\Beat Saber\Beat Saber_Data\Managed\UnityEngine.dll</HintPath>
+      <HintPath Condition="Exists('S:\steamapps\common\Beat Saber\Beat Saber_Data\Managed\UnityEngine.dll')">S:\steamapps\common\Beat Saber\Beat Saber_Data\Managed\UnityEngine.dll</HintPath>
+      <HintPath Condition="Exists('..\..\..\..\..\Desktop\Games\Oculus\Software\hyperbolic-magnetism-beat-saber\Beat Saber_Data\Managed\UnityEngine.dll')">..\..\..\..\..\Desktop\Games\Oculus\Software\hyperbolic-magnetism-beat-saber\Beat Saber_Data\Managed\UnityEngine.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.AnimationModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\Desktop\Games\Oculus\Software\hyperbolic-magnetism-beat-saber\Beat Saber_Data\Managed\UnityEngine.AnimationModule.dll</HintPath>
+      <HintPath Condition="Exists('D:\SteamLibrary\steamapps\common\Beat Saber\Beat Saber_Data\Managed\UnityEngine.AnimationModule.dll')">D:\SteamLibrary\steamapps\common\Beat Saber\Beat Saber_Data\Managed\UnityEngine.AnimationModule.dll</HintPath>
+      <HintPath Condition="Exists('S:\steamapps\common\Beat Saber\Beat Saber_Data\Managed\UnityEngine.AnimationModule.dll')">S:\steamapps\common\Beat Saber\Beat Saber_Data\Managed\UnityEngine.AnimationModule.dll</HintPath>
+      <HintPath Condition="Exists('..\..\..\..\..\Desktop\Games\Oculus\Software\hyperbolic-magnetism-beat-saber\Beat Saber_Data\Managed\UnityEngine.AnimationModule.dll')">..\..\..\..\..\Desktop\Games\Oculus\Software\hyperbolic-magnetism-beat-saber\Beat Saber_Data\Managed\UnityEngine.AnimationModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.AssetBundleModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\Desktop\Games\Oculus\Software\hyperbolic-magnetism-beat-saber\Beat Saber_Data\Managed\UnityEngine.AssetBundleModule.dll</HintPath>
+      <HintPath Condition="Exists('D:\SteamLibrary\steamapps\common\Beat Saber\Beat Saber_Data\Managed\UnityEngine.AssetBundleModule.dll')">D:\SteamLibrary\steamapps\common\Beat Saber\Beat Saber_Data\Managed\UnityEngine.AssetBundleModule.dll</HintPath>
+      <HintPath Condition="Exists('S:\steamapps\common\Beat Saber\Beat Saber_Data\Managed\UnityEngine.AssetBundleModule.dll')">S:\steamapps\common\Beat Saber\Beat Saber_Data\Managed\UnityEngine.AssetBundleModule.dll</HintPath>
+      <HintPath Condition="Exists('..\..\..\..\..\Desktop\Games\Oculus\Software\hyperbolic-magnetism-beat-saber\Beat Saber_Data\Managed\UnityEngine.AssetBundleModule.dll')">..\..\..\..\..\Desktop\Games\Oculus\Software\hyperbolic-magnetism-beat-saber\Beat Saber_Data\Managed\UnityEngine.AssetBundleModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.AudioModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\Desktop\Games\Oculus\Software\hyperbolic-magnetism-beat-saber\Beat Saber_Data\Managed\UnityEngine.AudioModule.dll</HintPath>
+      <HintPath Condition="Exists('D:\SteamLibrary\steamapps\common\Beat Saber\Beat Saber_Data\Managed\UnityEngine.AudioModule.dll')">D:\SteamLibrary\steamapps\common\Beat Saber\Beat Saber_Data\Managed\UnityEngine.AudioModule.dll</HintPath>
+      <HintPath Condition="Exists('S:\steamapps\common\Beat Saber\Beat Saber_Data\Managed\UnityEngine.AudioModule.dll')">S:\steamapps\common\Beat Saber\Beat Saber_Data\Managed\UnityEngine.AudioModule.dll</HintPath>
+      <HintPath Condition="Exists('..\..\..\..\..\Desktop\Games\Oculus\Software\hyperbolic-magnetism-beat-saber\Beat Saber_Data\Managed\UnityEngine.AudioModule.dll')">..\..\..\..\..\Desktop\Games\Oculus\Software\hyperbolic-magnetism-beat-saber\Beat Saber_Data\Managed\UnityEngine.AudioModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.CoreModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\Desktop\Games\Oculus\Software\hyperbolic-magnetism-beat-saber\Beat Saber_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
+      <HintPath Condition="Exists('D:\SteamLibrary\steamapps\common\Beat Saber\Beat Saber_Data\Managed\UnityEngine.CoreModule.dll')">D:\SteamLibrary\steamapps\common\Beat Saber\Beat Saber_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
+      <HintPath Condition="Exists('S:\steamapps\common\Beat Saber\Beat Saber_Data\Managed\UnityEngine.CoreModule.dll')">S:\steamapps\common\Beat Saber\Beat Saber_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
+      <HintPath Condition="Exists('..\..\..\..\..\Desktop\Games\Oculus\Software\hyperbolic-magnetism-beat-saber\Beat Saber_Data\Managed\UnityEngine.CoreModule.dll')">..\..\..\..\..\Desktop\Games\Oculus\Software\hyperbolic-magnetism-beat-saber\Beat Saber_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.InputLegacyModule">
-      <HintPath>..\..\..\..\..\Desktop\Games\Oculus\Software\hyperbolic-magnetism-beat-saber\Beat Saber_Data\Managed\UnityEngine.InputLegacyModule.dll</HintPath>
+      <HintPath Condition="Exists('D:\SteamLibrary\steamapps\common\Beat Saber\Beat Saber_Data\Managed\UnityEngine.InputLegacyModule.dll')">D:\SteamLibrary\steamapps\common\Beat Saber\Beat Saber_Data\Managed\UnityEngine.InputLegacyModule.dll</HintPath>
+      <HintPath Condition="Exists('S:\steamapps\common\Beat Saber\Beat Saber_Data\Managed\UnityEngine.InputLegacyModule.dll')">S:\steamapps\common\Beat Saber\Beat Saber_Data\Managed\UnityEngine.InputLegacyModule.dll</HintPath>
+      <HintPath Condition="Exists('..\..\..\..\..\Desktop\Games\Oculus\Software\hyperbolic-magnetism-beat-saber\Beat Saber_Data\Managed\UnityEngine.InputLegacyModule.dll')">..\..\..\..\..\Desktop\Games\Oculus\Software\hyperbolic-magnetism-beat-saber\Beat Saber_Data\Managed\UnityEngine.InputLegacyModule.dll</HintPath>
     </Reference>
     <Reference Include="WindowsBase" />
     <Reference Include="Zenject, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\Desktop\Games\Oculus\Software\hyperbolic-magnetism-beat-saber\Beat Saber_Data\Managed\Zenject.dll</HintPath>
+      <HintPath Condition="Exists('D:\SteamLibrary\steamapps\common\Beat Saber\Beat Saber_Data\Managed\Zenject.dll')">D:\SteamLibrary\steamapps\common\Beat Saber\Beat Saber_Data\Managed\Zenject.dll</HintPath>
+      <HintPath Condition="Exists('S:\steamapps\common\Beat Saber\Beat Saber_Data\Managed\Zenject.dll')">S:\steamapps\common\Beat Saber\Beat Saber_Data\Managed\Zenject.dll</HintPath>
+      <HintPath Condition="Exists('..\..\..\..\..\Desktop\Games\Oculus\Software\hyperbolic-magnetism-beat-saber\Beat Saber_Data\Managed\Zenject.dll')">..\..\..\..\..\Desktop\Games\Oculus\Software\hyperbolic-magnetism-beat-saber\Beat Saber_Data\Managed\Zenject.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -244,13 +274,21 @@
     <Analyzer Include="..\packages\Microsoft.VisualStudio.Threading.Analyzers.16.4.45\analyzers\cs\Microsoft.VisualStudio.Threading.Analyzers.dll" />
     <Analyzer Include="..\packages\Text.Analyzers.2.6.4\analyzers\dotnet\cs\Text.Analyzers.dll" />
     <Analyzer Include="..\packages\Text.Analyzers.2.6.4\analyzers\dotnet\cs\Text.CSharp.Analyzers.dll" />
+    <Analyzer Include="D:\SteamLibrary\steamapps\common\Beat Saber\Plugins\BSML.dll" />
+    <Analyzer Include="D:\SteamLibrary\steamapps\common\Beat Saber\Plugins\BS_Utils.dll" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="BuildTargets.targets" />
   <PropertyGroup>
     <PostBuildEvent>
-    </PostBuildEvent>
+IF EXIST "S:\SteamApps\common\Beat Saber\Plugins" copy /Y "$(TargetFileName)" "S:\SteamApps\common\Beat Saber\Plugins"
+IF EXIST "S:\SteamApps\common\Beat Saber\Plugins" del "S:\SteamApps\common\Beat Saber\Plugins\CustomPlatforms.dll"
+IF EXIST "S:\SteamApps\common\Beat Saber\Plugins" rename "S:\SteamApps\common\Beat Saber\Plugins\$(TargetFileName)" "CustomPlatforms.dll"
+IF EXIST "D:\SteamLibrary\SteamApps\common\Beat Saber\Plugins" copy /Y "$(TargetFileName)" "D:\SteamLibrary\SteamApps\common\Beat Saber\Plugins"
+IF EXIST "D:\SteamLibrary\SteamApps\common\Beat Saber\Plugins" del "D:\SteamLibrary\SteamApps\common\Beat Saber\Plugins\CustomPlatforms.dll"
+IF EXIST "D:\SteamLibrary\SteamApps\common\Beat Saber\Plugins" rename "D:\SteamLibrary\SteamApps\common\Beat Saber\Plugins\$(TargetFileName)" "CustomPlatforms.dll"
+</PostBuildEvent>
   </PropertyGroup>
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
