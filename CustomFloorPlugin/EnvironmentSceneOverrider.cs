@@ -7,7 +7,6 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 
 using static CustomFloorPlugin.GlobalCollection;
-using static CustomFloorPlugin.Utilities.Logging;
 
 
 namespace CustomFloorPlugin {

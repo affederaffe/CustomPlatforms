@@ -156,5 +156,24 @@ namespace CustomFloorPlugin.Utilities {
                 }
             }
         }
+
+
+        /// <summary>
+        ///  Checks if a given <see cref="List{T}"/> is <see cref="null"/>, <see cref="0"/> or contains only <see cref="null"/>.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="list"></param>
+        /// <returns></returns>
+        public static bool IsNullZeroOrContainsNull<T>(List<T> list) {
+            if (list == null || list.Count == 0) {
+                return true;
+            }
+            foreach (T t in list) {
+                if (t.ToString() == "null") { // Why t.ToString()? Idk, t == null doesn't work.
+                    return true;
+                }
+            }
+            return false;
+        }
     }
 }

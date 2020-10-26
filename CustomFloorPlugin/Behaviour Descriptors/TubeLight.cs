@@ -7,13 +7,15 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 
 
-namespace CustomFloorPlugin {
+namespace CustomFloorPlugin
+{
 
 
     [RequireComponent(typeof(MeshFilter))]
     [RequireComponent(typeof(MeshRenderer))]
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1051:Do not declare visible instance fields", Justification = "Too old to change")]
-    public class TubeLight:MonoBehaviour, NotifyOnEnableOrDisable {
+    public class TubeLight : MonoBehaviour, NotifyOnEnableOrDisable
+    {
         public enum LightsID {
             Static = 0,
             BackLights = 1,
@@ -54,24 +56,24 @@ namespace CustomFloorPlugin {
         private static TubeBloomPrePassLight _Prefab;
         internal static TubeBloomPrePassLight Prefab {
             get {
-                if(_Prefab == null) {
+                if (_Prefab == null) {
                     try {
                         _Prefab =
                             SceneManager
                             .GetSceneByName("MenuEnvironment")
                             .GetRootGameObjects()
-                            .First<GameObject>(x => x.name == "Wrapper")
+                            .First<GameObject>(x => x.name == "MenuEnvironment")
                             .transform
-                            .Find("NearBuildingLeft/Neon")
+                            .Find("DefaultEnvironment/Laser (1)")
                             .GetComponent<TubeBloomPrePassLight>();
-                    } catch(InvalidOperationException) {
+                    } catch (InvalidOperationException) {
                         _Prefab =
                             SceneManager
                             .GetSceneByName("MenuEnvironment")
                             .GetRootGameObjects()
                             .First<GameObject>(x => x.name == "RootContainer")
                             .transform
-                            .Find("Wrapper/NearBuildingLeft/Neon")
+                            .Find("MenuEnvironment/DefaultEnvironment/Laser (1)")
                             .GetComponent<TubeBloomPrePassLight>();
                     }
                 }
@@ -84,7 +86,7 @@ namespace CustomFloorPlugin {
 
         internal void GameAwake(LightWithIdManager lightManager) {
             GetComponent<MeshRenderer>().enabled = false;
-            if(GetComponent<MeshFilter>().mesh.vertexCount == 0) {
+            if (GetComponent<MeshFilter>().mesh.vertexCount == 0) {
                 tubeBloomLight = Instantiate(Prefab);
                 tubeBloomLight.transform.parent = transform;
                 PlatformManager.SpawnedObjects.Add(tubeBloomLight.gameObject);
@@ -96,7 +98,7 @@ namespace CustomFloorPlugin {
                 tubeBloomLight.gameObject.SetActive(false);
 
                 TubeBloomPrePassLightWithId lightWithId = tubeBloomLight.GetComponent<TubeBloomPrePassLightWithId>();
-                if(lightWithId) {
+                if (lightWithId) {
                     lightWithId.SetField("_tubeBloomPrePassLight", tubeBloomLight);
                     ((LightWithId)lightWithId).SetField("_ID", (int)lightsID);
                     ((LightWithId)lightWithId).SetField("_lightManager", lightManager);
@@ -107,6 +109,8 @@ namespace CustomFloorPlugin {
                 tubeBloomLight.SetField("_center", center);
                 tubeBloomLight.SetField("_transform", tubeBloomLight.transform);
                 tubeBloomLight.SetField("_maxAlpha", 0.1f);
+                tubeBloomLight.SetField("_bloomFogIntensityMultiplier", 0.1f);
+                tubeBloomLight.SetField("_lightWidthMultiplier", 1.5f);
 
                 var parabox = tubeBloomLight.GetComponentInChildren<ParametricBoxController>();
                 tubeBloomLight.SetField("_parametricBoxController", parabox);
@@ -119,7 +123,7 @@ namespace CustomFloorPlugin {
                 SetColorToDefault();
                 tubeBloomLight.gameObject.SetActive(true);
 
-            } else if(PlatformManager.Heart != null) {
+            } else if (PlatformManager.Heart != null) {
                 // swap for <3
                 iHeartBeatSaber = Instantiate(PlatformManager.Heart);
                 PlatformManager.SpawnedObjects.Add(iHeartBeatSaber);

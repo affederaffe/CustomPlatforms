@@ -1,6 +1,7 @@
+using BS_Utils.Utilities;
 using CustomFloorPlugin.Exceptions;
 using CustomFloorPlugin.UI;
-
+using CustomFloorPlugin.Utilities;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -112,7 +113,7 @@ namespace CustomFloorPlugin {
         /// Keeps track of the currently active <see cref="CustomPlatform"/>
         /// </summary>
         internal static CustomPlatform activePlatform;
-
+        
 
         /// <summary>
         /// Initializes the <see cref="PlatformManager"/>
@@ -129,7 +130,6 @@ namespace CustomFloorPlugin {
         internal static void Reload()
         {
             AllPlatforms = PlatformLoader.CreateAllPlatforms(Anchor.transform);
-
             CurrentPlatform = AllPlatforms[0];
             if (CONFIG.HasKey("Data", "CustomPlatformPath"))
             {
@@ -151,7 +151,6 @@ namespace CustomFloorPlugin {
         /// Prepares for a scene transition, removes all custom elements
         /// </summary>
         private static void TransitionPrep() {
-            Log("Transition Prep");
             try {
                 Scene currentEvironment = GetCurrentEnvironment();
                 if(!currentEvironment.name.StartsWith("Menu", STR_INV)) {
@@ -160,7 +159,6 @@ namespace CustomFloorPlugin {
                     Heart.SetActive(false);
                 }
             } catch(EnvironmentSceneNotFoundException) { }
-            Log("Transition Prep finished");
         }
 
 
@@ -168,7 +166,6 @@ namespace CustomFloorPlugin {
         /// Finishes up scene transitions, spawning the selected <see cref="CustomPlatform"/> if needed
         /// </summary>
         private static void TransitionFinalize() {
-            Log("Transition Finalize");
             try {
                 Scene currentEvironment = GetCurrentEnvironment();
                 if(!currentEvironment.name.StartsWith("Menu", STR_INV)) {
@@ -188,14 +185,14 @@ namespace CustomFloorPlugin {
                     Heart.GetComponent<LightWithId>().ColorWasSet(Color.magenta);
                 }
             } catch(EnvironmentSceneNotFoundException) { }
-            Log("Transition Finalize finished");
         }
 
 
         /// <summary>
         /// Changes to a specific <see cref="CustomPlatform"/> and saves the choice
         /// </summary>
-        /// <param name="index">The index of the new platform in <see cref="AllPlatforms"/></param>
+        /// <param name="
+        /// ">The index of the new platform in <see cref="AllPlatforms"/></param>
         internal static void SetPlatformAndShow(int index) {
             CurrentPlatform = AllPlatforms[index % AllPlatforms.Count];
             CONFIG.SetString("Data", "CustomPlatformPath", CurrentPlatform.platName + CurrentPlatform.platAuthor);

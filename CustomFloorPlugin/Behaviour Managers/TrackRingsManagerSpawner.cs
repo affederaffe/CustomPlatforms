@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 using static CustomFloorPlugin.GlobalCollection;
+using static CustomFloorPlugin.Utilities.BeatSaberSearching;
 using static CustomFloorPlugin.Utilities.Logging;
 
 
@@ -101,7 +102,7 @@ namespace CustomFloorPlugin {
                     TrackLaneRingsRotationEffectSpawner rotationEffectSpawner = trackRingDesc.gameObject.AddComponent<TrackLaneRingsRotationEffectSpawner>();
                     rotationSpawners.Add(rotationEffectSpawner);
                     PlatformManager.SpawnedComponents.Add(rotationEffectSpawner);
-                    rotationEffectSpawner.SetField("_beatmapObjectCallbackController", BOCC);
+                    if (!GetCurrentEnvironment().name.StartsWith("Menu", STR_INV)) rotationEffectSpawner.SetField("_beatmapObjectCallbackController", BOCC);
                     rotationEffectSpawner.SetField("_beatmapEventType", (BeatmapEventType)trackRingDesc.rotationSongEventType);
                     rotationEffectSpawner.SetField("_rotationStep", trackRingDesc.rotationStep);
                     var timePerRing2 = trackRingDesc.rotationPropagationSpeed / trackRingDesc.ringCount;
@@ -114,7 +115,7 @@ namespace CustomFloorPlugin {
                     TrackLaneRingsPositionStepEffectSpawner stepEffectSpawner = trackRingDesc.gameObject.AddComponent<TrackLaneRingsPositionStepEffectSpawner>();
                     stepSpawners.Add(stepEffectSpawner);
                     PlatformManager.SpawnedComponents.Add(stepEffectSpawner);
-                    stepEffectSpawner.SetField("_beatmapObjectCallbackController", BOCC);
+                    if (!GetCurrentEnvironment().name.StartsWith("Menu", STR_INV)) stepEffectSpawner.SetField("_beatmapObjectCallbackController", BOCC);
                     stepEffectSpawner.SetField("_trackLaneRingsManager", ringsManager);
                     stepEffectSpawner.SetField("_beatmapEventType", (BeatmapEventType)trackRingDesc.stepSongEventType);
                     stepEffectSpawner.SetField("_minPositionStep", trackRingDesc.minPositionStep);

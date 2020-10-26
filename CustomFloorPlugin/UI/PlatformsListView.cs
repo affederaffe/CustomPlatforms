@@ -60,9 +60,9 @@ namespace CustomFloorPlugin.UI {
         /// [Called by Beat Saber]
         /// </summary>
         /// <param name="deactivationType">Type of deactivation</param>
-        protected override void DidDeactivate(DeactivationType deactivationType) {
+        protected override void DidDeactivate(bool removedFromHierarchy, bool screenSystemDisabling) {
             PlatformManager.ChangeToPlatform(0);
-            base.DidDeactivate(deactivationType);
+            base.DidDeactivate(removedFromHierarchy, screenSystemDisabling);
         }
 
 
@@ -72,9 +72,9 @@ namespace CustomFloorPlugin.UI {
         /// </summary>
         /// <param name="firstActivation">Was this the first activation?</param>
         /// <param name="type">Type of activation</param>
-        protected override void DidActivate(bool firstActivation, ActivationType type) {
+        protected override void DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling) {
             PlatformManager.ChangeToPlatform();
-            base.DidActivate(firstActivation, type);
+            base.DidActivate(firstActivation, addedToHierarchy, screenSystemEnabling);
         }
 
 
@@ -86,7 +86,7 @@ namespace CustomFloorPlugin.UI {
         internal void SetupPlatformsList() {
             PlatformListTable.data.Clear();
             foreach(CustomPlatform platform in PlatformManager.AllPlatforms) {
-                PlatformListTable.data.Add(new CustomListTableData.CustomCellInfo(platform.platName, platform.platAuthor, platform.icon?.texture));
+                PlatformListTable.data.Add(new CustomListTableData.CustomCellInfo(platform.platName, platform.platAuthor, platform.icon));
             }
             PlatformListTable.tableView.ReloadData();
             int selectedPlatform = PlatformManager.CurrentPlatformIndex;

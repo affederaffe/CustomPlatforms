@@ -1,6 +1,8 @@
 ﻿using BeatSaberMarkupLanguage;
+using CustomFloorPlugin.Utilities;
 using HMUI;
 using IPA.Utilities;
+using static CustomFloorPlugin.Utilities.Logging;
 
 namespace CustomFloorPlugin.UI {
 
@@ -32,9 +34,9 @@ namespace CustomFloorPlugin.UI {
         /// </summary>
         /// <param name="firstActivation">Was this the first activation?</param>
         /// <param name="activationType">Was this call added to the hierachy.</param>
-        protected override void DidActivate(bool firstActivation, ActivationType activationType) {
-            if(firstActivation) {
-                title = "Custom Platforms";
+        protected override void DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling) {
+            if (firstActivation) {
+                SetTitle("Custom Platforms");
                 showBackButton = true;
                 ProvideInitialViewControllers(PlatformsListView);
             }
@@ -47,8 +49,8 @@ namespace CustomFloorPlugin.UI {
         /// </summary>
         /// <param name="ignored1"></param>
         protected override void BackButtonWasPressed(ViewController ignored1) {
-            Log("Selected Environment:" + PlatformManager.CurrentPlatform.platName);
-            BeatSaberUI.MainFlowCoordinator.InvokeMethod<object, MainFlowCoordinator>("DismissFlowCoordinator", this, null, false);
+            Logging.Log("Selected Environment:" + PlatformManager.CurrentPlatform.platName);
+            BeatSaberUI.MainFlowCoordinator.DismissFlowCoordinator(this, null, ViewController.AnimationDirection.Horizontal, false);
         }
     }
 }

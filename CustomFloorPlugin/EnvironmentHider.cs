@@ -1,11 +1,12 @@
 ﻿using CustomFloorPlugin.UI;
-
+using CustomFloorPlugin.Utilities;
 using System.Collections.Generic;
 using System.Linq;
 
 using UnityEngine;
 
 using static CustomFloorPlugin.Utilities.BeatSaberSearching;
+using static CustomFloorPlugin.Utilities.UnityObjectSearching;
 
 
 namespace CustomFloorPlugin {
@@ -17,8 +18,8 @@ namespace CustomFloorPlugin {
     /// </summary>
     internal static class EnvironmentHider {
 
+        private static List<GameObject> menuEnvironment;
         private static List<GameObject> feet;
-        private static List<GameObject> originalPlatform;
         private static List<GameObject> smallRings;
         private static List<GameObject> bigRings;
         private static List<GameObject> visualizer;
@@ -34,6 +35,14 @@ namespace CustomFloorPlugin {
             get {
                 return Settings.AlwaysShowFeet;
             }
+        }
+
+        private static bool FakePlatformExists() {
+            GameObject[] roots = GetCurrentEnvironment().GetRootGameObjects();
+            foreach (var root in roots) {
+                if (root.name == "DefaultPlatformFake") return true;
+            }
+            return false;
         }
 
 
@@ -55,9 +64,13 @@ namespace CustomFloorPlugin {
         private static IEnumerator<WaitForEndOfFrame> InternalHideObjectsForPlatform(CustomPlatform platform) {
             yield return new WaitForEndOfFrame();
             FindEnvironment();
-            if(feet != null) SetCollectionHidden(feet, (platform.hideDefaultPlatform && !ShowFeetOverride));
-            if(originalPlatform != null) SetCollectionHidden(originalPlatform, platform.hideDefaultPlatform);
-            if(smallRings != null) SetCollectionHidden(smallRings, platform.hideSmallRings);
+            if (!FakePlatformExists()) CreateFakePlatform();
+            else if (PlatformManager.activePlatform != null) GameObject.Find("DefaultPlatformFake").SetActive(true);
+            else GameObject.Find("DefaultPlatformFake").SetActive(false);
+            if (menuEnvironment != null && PlatformManager.activePlatform != null) SetCollectionHidden(menuEnvironment, true); // Always hide the Menu Environment in Song...
+            else SetCollectionHidden(menuEnvironment, false); // ...but not in Menu
+            if (feet != null) SetCollectionHidden(feet, (platform.hideDefaultPlatform && !ShowFeetOverride));
+            if (smallRings != null) SetCollectionHidden(smallRings, platform.hideSmallRings);
             if(bigRings != null) SetCollectionHidden(bigRings, platform.hideBigRings);
             if(visualizer != null) SetCollectionHidden(visualizer, platform.hideEQVisualizer);
             if(towers != null) SetCollectionHidden(towers, platform.hideTowers);
@@ -74,8 +87,8 @@ namespace CustomFloorPlugin {
         /// Finds all GameObjects that make up the default environment and groups them into lists
         /// </summary>
         private static void FindEnvironment() {
+            if (IsNullZeroOrContainsNull(menuEnvironment)) FindMenuEnvironmnet();
             FindFeetIcon();
-            FindOriginalPlatform();
             FindSmallRings();
             FindBigRings();
             FindVisualizers();
@@ -111,7 +124,7 @@ namespace CustomFloorPlugin {
             GameObject[] roots = GetCurrentEnvironment().GetRootGameObjects();
             GameObject go;
             foreach(GameObject root in roots) {
-                go = root.transform.Find(name)?.gameObject;
+                go = GameObject.Find(name);
                 if(go != null) {
                     list.Add(go);
                     return true;
@@ -122,33 +135,43 @@ namespace CustomFloorPlugin {
             return false;
         }
 
-        private static void FindFeetIcon() {
-            feet = new List<GameObject>();
-            FindAddGameObject("MenuPlayersPlace/Feet", feet);
-            FindAddGameObject("PlayersPlace/Feet", feet);
-            FindAddGameObject("Feet", feet);
-            feet[0].transform.parent = null; // remove from original platform 
+        private static void FindMenuEnvironmnet() {
+            menuEnvironment = new List<GameObject>();
+            FindAddGameObject("MenuEnvironment/DefaultEnvironment", menuEnvironment);
+            FindAddGameObject("MenuEnvironment/Note (18)", menuEnvironment);
+            FindAddGameObject("MenuEnvironment/Note (19)", menuEnvironment);
+            FindAddGameObject("MenuEnvironment/Shadow (2)", menuEnvironment);
+            FindAddGameObject("MenuEnvironment/Arrow", menuEnvironment);
+            FindAddGameObject("MenuEnvironment/Arrow (1)", menuEnvironment);
+            FindAddGameObject("MenuEnvironment/Arrow (2)", menuEnvironment);
+            FindAddGameObject("MenuEnvironment/Arrow (3)", menuEnvironment);
+            FindAddGameObject("MenuEnvironment/Ground", menuEnvironment);
+            FindAddGameObject("MenuEnvironment/GroundCollider", menuEnvironment);
         }
 
-        private static void FindOriginalPlatform() {
-            originalPlatform = new List<GameObject>();
-            FindAddGameObject("PlayersPlace", originalPlatform);
-            FindAddGameObject("MenuPlayersPlace", originalPlatform);
+        private static void FindFeetIcon() {
+            feet = new List<GameObject>();
+            FindAddGameObject("MenuEnvironment/DefaultEnvironment/PlayersPlace/Feet", feet);
+            FindAddGameObject("MenuEnvironment/DefaultEnvironment/PlayersPlace/Version", feet);
+            FindAddGameObject("Feet", feet);
+            FindAddGameObject("Version", feet);
+
+            foreach (GameObject feet in feet) {
+                feet.transform.SetParent(null, true); // remove from original platform 
+            }
         }
 
         private static void FindSmallRings() {
             smallRings = new List<GameObject>();
-            FindAddGameObject("SmallTrackLaneRings", smallRings);
-            foreach(TrackLaneRing trackLaneRing in Resources.FindObjectsOfTypeAll<TrackLaneRing>().Where(x => x.name == "TrackLaneRing(Clone)")) {
+            FindAddGameObject("TrackLaneRing", smallRings);
+            FindAddGameObject("Environment/SmallTrackLaneRings", smallRings);
+            foreach (var trackLaneRing in Resources.FindObjectsOfTypeAll<TrackLaneRing>().Where(x => x.name == "TrackLaneRing(Clone)")) {
                 smallRings.Add(trackLaneRing.gameObject);
             }
-            FindAddGameObject("TriangleTrackLaneRings", smallRings); // Triangle Rings from TriangleEnvironment
-            foreach(TrackLaneRing trackLaneRing in Resources.FindObjectsOfTypeAll<TrackLaneRing>().Where(x => x.name == "TriangleTrackLaneRing(Clone)")) {
-                smallRings.Add(trackLaneRing.gameObject);
-            }
+            //FindAddGameObject("TriangleTrackLaneRings", smallRings); // Triangle Rings from TriangleEnvironment
             // KDA
-            FindAddGameObject("TentacleLeft", smallRings);
-            FindAddGameObject("TentacleRight", smallRings);
+            FindAddGameObject("Environment/TentacleLeft", smallRings);
+            FindAddGameObject("Environment/TentacleRight", smallRings);
         }
 
         private static void FindBigRings() {
@@ -161,27 +184,19 @@ namespace CustomFloorPlugin {
 
         private static void FindVisualizers() {
             visualizer = new List<GameObject>();
-            FindAddGameObject("Spectrograms", visualizer);
+            FindAddGameObject("Environment/Spectrograms", visualizer);
         }
 
         private static void FindTowers() {
             towers = new List<GameObject>();
             // Song Environments
-            FindAddGameObject("Buildings", towers);
-            FindAddGameObject("NearBuildingRight (1)", towers);
-            FindAddGameObject("NearBuildingLeft (1)", towers);
-            FindAddGameObject("NearBuildingLeft", towers);
-            FindAddGameObject("NearBuildingRight", towers);
-
-            // Menu
-            FindAddGameObject("NearBuildingRight (1)", towers);
-            FindAddGameObject("NearBuildingLeft (1)", towers);
-            FindAddGameObject("NearBuildingLeft", towers);
-            FindAddGameObject("NearBuildingRight", towers);
+            FindAddGameObject("Environment/Buildings", towers);
 
             // Monstercat
-            FindAddGameObject("MonstercatLogoL", towers);
-            FindAddGameObject("MonstercatLogoR", towers);
+            FindAddGameObject("Environment/MonstercatLogoL", towers);
+            FindAddGameObject("Environment/MonstercatLogoR", towers);
+            FindAddGameObject("Environment/VConstruction", towers);
+            FindAddGameObject("Environment/FarBuildings", towers);
 
             // KDA
             FindAddGameObject("FloorL", towers);
@@ -195,89 +210,74 @@ namespace CustomFloorPlugin {
 
         private static void FindHighway() {
             highway = new List<GameObject>();
-            FindAddGameObject("Floor", highway);
-            FindAddGameObject("FloorConstruction", highway);
-            FindAddGameObject("Construction", highway);
-            FindAddGameObject("TrackConstruction", highway);
-            FindAddGameObject("TrackMirror", highway);
+            FindAddGameObject("Environment/TrackConstruction", highway);
+            FindAddGameObject("Environment/TrackMirror", highway);
 
-            FindAddGameObject($"Cube", highway);
-            for(int i = 1; i <= 10; i++) {
-                FindAddGameObject($"Cube ({i})", highway);
-            }
+            // KDA
+            FindAddGameObject("Environment/Construction", highway);
 
-            //Menu
-            FindAddGameObject("LeftSmallBuilding", highway);
-            FindAddGameObject("RightSmallBuilding", highway);
         }
 
         private static void FindBackColumns() {
             backColumns = new List<GameObject>();
-            FindAddGameObject("BackColumns", backColumns);
-            FindAddGameObject("BackColumns (1)", backColumns);
-
-            FindAddGameObject("BackColumns", backColumns);
-            FindAddGameObject("CeilingLamp", backColumns);
+            FindAddGameObject("Environment/BackColumns", backColumns);
         }
 
         private static void FindRotatingLasers() {
             rotatingLasers = new List<GameObject>();
             // Default, BigMirror, Triangle
-            FindAddGameObject("RotatingLasersPair (6)", rotatingLasers);
-            FindAddGameObject("RotatingLasersPair (5)", rotatingLasers);
-            FindAddGameObject("RotatingLasersPair (4)", rotatingLasers);
-            FindAddGameObject("RotatingLasersPair (3)", rotatingLasers);
-            FindAddGameObject("RotatingLasersPair (2)", rotatingLasers);
-            FindAddGameObject("RotatingLasersPair (1)", rotatingLasers);
-            FindAddGameObject("RotatingLasersPair", rotatingLasers);
+            FindAddGameObject("Environment/RotatingLasersPair (3)", rotatingLasers);
+            FindAddGameObject("Environment/RotatingLasersPair (4)", rotatingLasers);
+            FindAddGameObject("Environment/RotatingLasersPair (5)", rotatingLasers);
+            FindAddGameObject("Environment/RotatingLasersPair (6)", rotatingLasers);
 
             // Nice Env
-            FindAddGameObject("RotatingLasersLeft0", rotatingLasers);
-            FindAddGameObject("RotatingLasersLeft1", rotatingLasers);
-            FindAddGameObject("RotatingLasersLeft2", rotatingLasers);
-            FindAddGameObject("RotatingLasersLeft3", rotatingLasers);
-            FindAddGameObject("RotatingLasersRight0", rotatingLasers);
-            FindAddGameObject("RotatingLasersRight1", rotatingLasers);
-            FindAddGameObject("RotatingLasersRight2", rotatingLasers);
-            FindAddGameObject("RotatingLasersRight3", rotatingLasers);
+            FindAddGameObject("Environment/RotatingLasersLeft0", rotatingLasers);
+            FindAddGameObject("Environment/RotatingLasersLeft1", rotatingLasers);
+            FindAddGameObject("Environment/RotatingLasersLeft2", rotatingLasers);
+            FindAddGameObject("Environment/RotatingLasersLeft3", rotatingLasers);
+            FindAddGameObject("Environment/RotatingLasersRight0", rotatingLasers);
+            FindAddGameObject("Environment/RotatingLasersRight1", rotatingLasers);
+            FindAddGameObject("Environment/RotatingLasersRight2", rotatingLasers);
+            FindAddGameObject("Environment/RotatingLasersRight3", rotatingLasers);
         }
 
         private static void FindDoubleColorLasers() {
             doubleColorLasers = new List<GameObject>();
 
             // Default, BigMirror, Nice, 
-            FindAddGameObject("DoubleColorLaser", doubleColorLasers);
-            FindAddGameObject("DoubleColorLaser (1)", doubleColorLasers);
-            FindAddGameObject("DoubleColorLaser (2)", doubleColorLasers);
-            FindAddGameObject("DoubleColorLaser (3)", doubleColorLasers);
-            FindAddGameObject("DoubleColorLaser (4)", doubleColorLasers);
-            FindAddGameObject("DoubleColorLaser (5)", doubleColorLasers);
-            FindAddGameObject("DoubleColorLaser (6)", doubleColorLasers);
-            FindAddGameObject("DoubleColorLaser (7)", doubleColorLasers);
-            FindAddGameObject("DoubleColorLaser (8)", doubleColorLasers);
-            FindAddGameObject("DoubleColorLaser (9)", doubleColorLasers);
+            FindAddGameObject("Environment/DoubleColorLaser", doubleColorLasers);
+            FindAddGameObject("Environment/DoubleColorLaser (1)", doubleColorLasers);
+            FindAddGameObject("Environment/DoubleColorLaser (2)", doubleColorLasers);
+            FindAddGameObject("Environment/DoubleColorLaser (3)", doubleColorLasers);
+            FindAddGameObject("Environment/DoubleColorLaser (4)", doubleColorLasers);
+            FindAddGameObject("Environment/DoubleColorLaser (5)", doubleColorLasers);
+            FindAddGameObject("Environment/DoubleColorLaser (6)", doubleColorLasers);
+            FindAddGameObject("Environment/DoubleColorLaser (7)", doubleColorLasers);
+            FindAddGameObject("Environment/DoubleColorLaser (8)", doubleColorLasers);
+            FindAddGameObject("Environment/DoubleColorLaser (9)", doubleColorLasers);
         }
 
         private static void FindBackLasers() {
             backLasers = new List<GameObject>();
-            FindAddGameObject("FrontLights", backLasers);
+            FindAddGameObject("Environment/FrontLights", backLasers);
 
         }
 
         private static void FindTrackLights() {
             trackLights = new List<GameObject>();
-            FindAddGameObject("GlowLineR", trackLights);
-            FindAddGameObject("GlowLineL", trackLights);
-            FindAddGameObject("GlowLineR2", trackLights);
-            FindAddGameObject("GlowLineL2", trackLights);
-            FindAddGameObject("GlowLineFarL", trackLights);
-            FindAddGameObject("GlowLineFarR", trackLights);
-
-            //KDA
+            FindAddGameObject("Environment/GlowLineR", trackLights);
+            FindAddGameObject("Environment/GlowLineL", trackLights);
+            //FindAddGameObject("GlowLineR2", trackLights);
+            //FindAddGameObject("GlowLineL2", trackLights);
+            FindAddGameObject("Environment/GlowLineFarL", trackLights);
+            FindAddGameObject("Environment/GlowLineFarR", trackLights);
+            
+            // KDA
             FindAddGameObject("GlowLineLVisible", trackLights);
             FindAddGameObject("GlowLineRVisible", trackLights);
 
-            //KDA, Monstercat
+            // KDA, Monstercat
             FindAddGameObject("Laser", trackLights);
             for(int i = 0; i < 15; i++) {
                 FindAddGameObject($"Laser ({i})", trackLights);
@@ -290,6 +290,40 @@ namespace CustomFloorPlugin {
             // Monstercat
             FindAddGameObject("GlowLineLHidden", trackLights);
             FindAddGameObject("GlowLineRHidden", trackLights);
+        }
+
+        private static void CreateFakePlatform() {
+            Material[] materials = Resources.FindObjectsOfTypeAll<Material>();
+            Material dark = materials.First(x => x.name == "DarkEnvironmentSimple");
+            Material glow = materials.First(x => x.name == "EnvLight");
+            Material opaqueGlow = materials.First(x => x.name == "EnvLightOpaque");
+
+            GameObject Column = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            GameObject GlowLineL = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            GameObject GlowLineR = GameObject.CreatePrimitive(PrimitiveType.Cube);
+
+            Column.GetComponent<MeshRenderer>().material = dark;
+            GlowLineL.GetComponent<MeshRenderer>().material = opaqueGlow;
+            GlowLineR.GetComponent<MeshRenderer>().material = opaqueGlow;
+
+            Column.transform.localScale = new Vector3(1.5f, 10f, 1f);
+            GlowLineL.transform.position = new Vector3(0.75f, 0f, 0f);
+            GlowLineR.transform.position = new Vector3(-0.75f, 0f, 0f);
+            GlowLineL.transform.localScale = new Vector3(0.05f, 0.05f, 1f);
+            GlowLineR.transform.localScale = new Vector3(0.05f, 0.05f, 1f);
+            Column.transform.Translate(new Vector3(0f, -5f, 0f));
+            Column.name = "Column";
+            GlowLineL.name = "GlowLineL";
+            GlowLineR.name = "GlowLineR";
+
+            GameObject DefaultPlatformFake = new GameObject {
+                name = "DefaultPlatformFake"
+            };
+            Column.transform.SetParent(DefaultPlatformFake.transform);
+            GlowLineL.transform.SetParent(DefaultPlatformFake.transform);
+            GlowLineR.transform.SetParent(DefaultPlatformFake.transform);
+
+            DefaultPlatformFake.SetActive(false);
         }
     }
 }

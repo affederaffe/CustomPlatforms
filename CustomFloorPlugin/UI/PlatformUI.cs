@@ -2,6 +2,8 @@
 using BeatSaberMarkupLanguage.MenuButtons;
 using BeatSaberMarkupLanguage.Settings;
 using BS_Utils.Utilities;
+using HMUI;
+using CustomFloorPlugin.Utilities;
 
 namespace CustomFloorPlugin.UI
 {
@@ -56,7 +58,7 @@ namespace CustomFloorPlugin.UI
         /// </summary>
         private static void CustomPlatformsMenuButtonPressed()
         {
-            BeatSaberUI.MainFlowCoordinator.InvokeMethod("PresentFlowCoordinator", PlatformMenuFlowCoordinator, null, false, false);
+            BeatSaberUI.MainFlowCoordinator.PresentFlowCoordinator(PlatformMenuFlowCoordinator, null, ViewController.AnimationDirection.Horizontal, true, false);
         }
     }
 
