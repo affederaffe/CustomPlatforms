@@ -1,7 +1,5 @@
-using BS_Utils.Utilities;
 using CustomFloorPlugin.Exceptions;
 using CustomFloorPlugin.UI;
-using CustomFloorPlugin.Utilities;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -9,6 +7,7 @@ using System.Reflection;
 
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.VR;
 
 using Zenject;
 
@@ -89,6 +88,12 @@ namespace CustomFloorPlugin {
 
 
         /// <summary>
+        /// Used as a platform in Platform Preview if <see cref="CustomPlatform.hideDefaultPlatform"/> is false.
+        /// </summary>
+        internal static GameObject PlayersPlace;
+
+
+        /// <summary>
         /// Keeps track of all spawned custom <see cref="GameObject"/>s, whichs lifetime ends on any scene transition
         /// </summary>
         internal static List<GameObject> SpawnedObjects = new List<GameObject>();
@@ -145,6 +150,7 @@ namespace CustomFloorPlugin {
             }
 
             LoadHeart();
+            LoadDefaultPlatform();
         }
 
         /// <summary>
@@ -353,6 +359,30 @@ namespace CustomFloorPlugin {
 
                 Heart.GetComponent<LightWithId>().ColorWasSet(Color.magenta);
                 Heart.SetActive(Settings.ShowHeart);
+            }
+        }
+
+
+        /// <summary>
+        /// Steals the default Platform from the Default Environment and modifies it in order to work properly.
+        /// </summary>
+        private static void LoadDefaultPlatform() {
+            Scene env = SceneManager.LoadScene("DefaultEnvironment", new LoadSceneParameters(LoadSceneMode.Additive));
+            SharedCoroutineStarter.instance.StartCoroutine(fuckUnity());
+            IEnumerator<WaitUntil> fuckUnity() {//did you know loaded scenes are loaded asynchronously, regarless if you use async or not?
+                yield return new WaitUntil(() => { return env.isLoaded; });
+                GameObject root = env.GetRootGameObjects()[0];
+                PlayersPlace = root.transform.Find("PlayersPlace").gameObject;
+                var test = root.transform.GetComponentsInChildren<Transform>();
+                PlayersPlace.transform.parent = null;
+                GameObject.DestroyImmediate(PlayersPlace.transform.Find("Feet").gameObject);
+                GameObject.DestroyImmediate(PlayersPlace.transform.Find("FloorUICollider").gameObject);
+                GameObject.DestroyImmediate(PlayersPlace.transform.Find("SaberBurnMarksParticles").gameObject);
+                GameObject.DestroyImmediate(PlayersPlace.transform.Find("SaberBurnMarksArea").gameObject);
+                PlayersPlace.SetActive(false);
+
+                SceneManager.MoveGameObjectToScene(PlayersPlace, SCENE);
+                SceneManager.UnloadSceneAsync("DefaultEnvironment");
             }
         }
     }

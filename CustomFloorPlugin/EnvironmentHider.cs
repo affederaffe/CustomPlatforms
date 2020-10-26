@@ -1,13 +1,11 @@
 ﻿using CustomFloorPlugin.UI;
-using CustomFloorPlugin.Utilities;
 using System.Collections.Generic;
 using System.Linq;
 
 using UnityEngine;
-
 using static CustomFloorPlugin.Utilities.BeatSaberSearching;
 using static CustomFloorPlugin.Utilities.UnityObjectSearching;
-
+using static CustomFloorPlugin.GlobalCollection;
 
 namespace CustomFloorPlugin {
 
@@ -37,14 +35,6 @@ namespace CustomFloorPlugin {
             }
         }
 
-        private static bool FakePlatformExists() {
-            GameObject[] roots = GetCurrentEnvironment().GetRootGameObjects();
-            foreach (var root in roots) {
-                if (root.name == "DefaultPlatformFake") return true;
-            }
-            return false;
-        }
-
 
         /// <summary>
         /// Hide and unhide world objects as required by a platform<br/>
@@ -64,12 +54,8 @@ namespace CustomFloorPlugin {
         private static IEnumerator<WaitForEndOfFrame> InternalHideObjectsForPlatform(CustomPlatform platform) {
             yield return new WaitForEndOfFrame();
             FindEnvironment();
-            if (!FakePlatformExists()) CreateFakePlatform();
-            else if (PlatformManager.activePlatform != null) GameObject.Find("DefaultPlatformFake").SetActive(true);
-            else GameObject.Find("DefaultPlatformFake").SetActive(false);
-            if (menuEnvironment != null && PlatformManager.activePlatform != null) SetCollectionHidden(menuEnvironment, true); // Always hide the Menu Environment in Song...
-            else SetCollectionHidden(menuEnvironment, false); // ...but not in Menu
-            if (feet != null) SetCollectionHidden(feet, (platform.hideDefaultPlatform && !ShowFeetOverride));
+            HandelEnvironment(platform);
+            if (feet != null) SetCollectionHidden(feet, platform.hideDefaultPlatform && !ShowFeetOverride);
             if (smallRings != null) SetCollectionHidden(smallRings, platform.hideSmallRings);
             if(bigRings != null) SetCollectionHidden(bigRings, platform.hideBigRings);
             if(visualizer != null) SetCollectionHidden(visualizer, platform.hideEQVisualizer);
@@ -135,9 +121,21 @@ namespace CustomFloorPlugin {
             return false;
         }
 
+        private static void HandelEnvironment(CustomPlatform platform) {
+            if (PlatformManager.PlayersPlace != null && PlatformManager.activePlatform != null && GetCurrentEnvironment().name.StartsWith("Menu", STR_INV) && !platform.hideDefaultPlatform) PlatformManager.PlayersPlace.SetActive(true); // Handles Platforms which would normally use the default Platform...
+            else if (PlatformManager.PlayersPlace != null && GetCurrentEnvironment().name.StartsWith("Menu", STR_INV)) PlatformManager.PlayersPlace.SetActive(false); // Only in Menu (thx for the new MenuEnvironment lol)
+            if (menuEnvironment != null && PlatformManager.activePlatform != null) SetCollectionHidden(menuEnvironment, true); // Always hide the Menu Environment in Song...
+            else SetCollectionHidden(menuEnvironment, false); // ...but not in Menu
+        }
+
         private static void FindMenuEnvironmnet() {
             menuEnvironment = new List<GameObject>();
-            FindAddGameObject("MenuEnvironment/DefaultEnvironment", menuEnvironment);
+            FindAddGameObject("MenuEnvironment/DefaultEnvironment/Laser (1)", menuEnvironment);
+            FindAddGameObject("MenuEnvironment/DefaultEnvironment/Laser (2)", menuEnvironment);
+            FindAddGameObject("MenuEnvironment/DefaultEnvironment/Laser (3)", menuEnvironment);
+            FindAddGameObject("MenuEnvironment/DefaultEnvironment/Laser (4)", menuEnvironment);
+            FindAddGameObject("MenuEnvironment/DefaultEnvironment/NeonLights", menuEnvironment);
+            FindAddGameObject("MenuEnvironment/DefaultEnvironment/Notes", menuEnvironment);
             FindAddGameObject("MenuEnvironment/Note (18)", menuEnvironment);
             FindAddGameObject("MenuEnvironment/Note (19)", menuEnvironment);
             FindAddGameObject("MenuEnvironment/Shadow (2)", menuEnvironment);
@@ -290,40 +288,6 @@ namespace CustomFloorPlugin {
             // Monstercat
             FindAddGameObject("GlowLineLHidden", trackLights);
             FindAddGameObject("GlowLineRHidden", trackLights);
-        }
-
-        private static void CreateFakePlatform() {
-            Material[] materials = Resources.FindObjectsOfTypeAll<Material>();
-            Material dark = materials.First(x => x.name == "DarkEnvironmentSimple");
-            Material glow = materials.First(x => x.name == "EnvLight");
-            Material opaqueGlow = materials.First(x => x.name == "EnvLightOpaque");
-
-            GameObject Column = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            GameObject GlowLineL = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            GameObject GlowLineR = GameObject.CreatePrimitive(PrimitiveType.Cube);
-
-            Column.GetComponent<MeshRenderer>().material = dark;
-            GlowLineL.GetComponent<MeshRenderer>().material = opaqueGlow;
-            GlowLineR.GetComponent<MeshRenderer>().material = opaqueGlow;
-
-            Column.transform.localScale = new Vector3(1.5f, 10f, 1f);
-            GlowLineL.transform.position = new Vector3(0.75f, 0f, 0f);
-            GlowLineR.transform.position = new Vector3(-0.75f, 0f, 0f);
-            GlowLineL.transform.localScale = new Vector3(0.05f, 0.05f, 1f);
-            GlowLineR.transform.localScale = new Vector3(0.05f, 0.05f, 1f);
-            Column.transform.Translate(new Vector3(0f, -5f, 0f));
-            Column.name = "Column";
-            GlowLineL.name = "GlowLineL";
-            GlowLineR.name = "GlowLineR";
-
-            GameObject DefaultPlatformFake = new GameObject {
-                name = "DefaultPlatformFake"
-            };
-            Column.transform.SetParent(DefaultPlatformFake.transform);
-            GlowLineL.transform.SetParent(DefaultPlatformFake.transform);
-            GlowLineR.transform.SetParent(DefaultPlatformFake.transform);
-
-            DefaultPlatformFake.SetActive(false);
         }
     }
 }
