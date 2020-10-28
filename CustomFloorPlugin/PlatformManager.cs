@@ -7,7 +7,6 @@ using System.Reflection;
 
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using UnityEngine.VR;
 
 using Zenject;
 
@@ -177,10 +176,13 @@ namespace CustomFloorPlugin {
                 if(!currentEvironment.name.StartsWith("Menu", STR_INV)) {
                     try {
                         if(!Settings.PlayerData.overrideEnvironmentSettings.overrideEnvironments) {
-                            TubeLightUtilities.CreateAdditionalLightSwitchControllers(FindLightWithIdManager(currentEvironment));
+                            TubeLightUtilities.CreateAdditionalLightSwitchControllers(FindLightWithIdManager(currentEvironment)); //@TODO Multiplayer issues, light in general (I'm bad I know)
                             if(!platformSpawned) {
                                 PlatformLifeCycleManagement.InternalChangeToPlatform();
                             }
+                        }
+                        if (currentEvironment.name.StartsWith("Multiplayer", STR_INV) && Settings.RotateHUD) {
+                            RotateMultiplayerHUD();
                         }
                     } catch(ManagerNotFoundException e) {
                         Log(e);
@@ -384,6 +386,12 @@ namespace CustomFloorPlugin {
                 SceneManager.MoveGameObjectToScene(PlayersPlace, SCENE);
                 SceneManager.UnloadSceneAsync("DefaultEnvironment");
             }
+        }
+
+        private static void RotateMultiplayerHUD() {
+            GameObject HUD = GameObject.Find("MultiplayerLocalActivePlayerController(Clone)/IsActiveObjects/HUD");
+            HUD.transform.Translate(new Vector3(0f, 0f, 5f));
+            HUD.transform.Rotate(new Vector3(270f, 0f, 0f));
         }
     }
 }
