@@ -1,4 +1,5 @@
 using BeatSaberMarkupLanguage.Attributes;
+using BeatSaberMarkupLanguage.Components;
 
 using CustomFloorPlugin.Extensions;
 
@@ -143,6 +144,41 @@ namespace CustomFloorPlugin.UI {
         };
 
 
+        /// <summary>
+        /// Should this Plugin spawn a Custom Platform in Multiplayer?
+        /// Forwards the current choice to the UI, and the new choice to the plugin
+        /// </summary>
+        [UIValue("use-in-multiplayer")]
+        public static bool UseInMultiplayer
+        {
+            get
+            {
+                if (_UseInMultiplayer == null)
+                {
+                    _UseInMultiplayer = CONFIG.GetBool("Settings", "UseInMultiplayer", false, true);
+                }
+                return _UseInMultiplayer.Value;
+            }
+            set
+            {
+                if (value != _UseInMultiplayer.Value)
+                {
+                    CONFIG.SetBool("Settings", "UseInMultiplayer", value);
+                    _UseInMultiplayer = value;
+                    UseInMultiplayerChanged(value);
+                }
+            }
+        }
+        private static bool? _UseInMultiplayer;
+        internal static event Action<bool> UseInMultiplayerChanged = delegate (bool value) {
+            Log("UseInMultiplayer value changed. Notifying listeners.\nNew value: " + value);
+        };
+
+
+        /// <summary>
+        /// Should the HUD in Multiplayer be rotated?
+        /// Forwards the current choice to the UI, and the new choice to the plugin
+        /// </summary>
         [UIValue("rotate-hud")]
         public static bool RotateHUD {
             get {

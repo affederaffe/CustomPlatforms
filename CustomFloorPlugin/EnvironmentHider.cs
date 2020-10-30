@@ -127,7 +127,7 @@ namespace CustomFloorPlugin {
 
         private static void HandelEnvironment(CustomPlatform platform) {
             if (PlatformManager.PlayersPlace != null && PlatformManager.activePlatform != null && !platform.hideDefaultPlatform && (GetCurrentEnvironment().name.StartsWith("Menu", STR_INV) || GetCurrentEnvironment().name == "MultiplayerEnvironment")) PlatformManager.PlayersPlace.SetActive(true); // Handles Platforms which would normally use the default Platform...
-            else if (PlatformManager.PlayersPlace != null) PlatformManager.PlayersPlace.SetActive(false); // Only in Menu (thx for the new MenuEnvironment lol)
+            else if (PlatformManager.PlayersPlace != null) PlatformManager.PlayersPlace.SetActive(false); // Only in Menu
             if (menuEnvironment != null && PlatformManager.activePlatform != null) SetCollectionHidden(menuEnvironment, true); // Always hide the Menu Environment in Song...
             else SetCollectionHidden(menuEnvironment, false); // ...but not in Menu
         }
@@ -154,7 +154,7 @@ namespace CustomFloorPlugin {
         private static void FindPlayersPlace() {
             playersPlace = new List<GameObject>();
             FindAddGameObject("Environment/PlayersPlace", playersPlace);
-            FindAddGameObject("MultiplayerLocalActivePlayerController(Clone)/IsActiveObjects/Construction/PlayersPlace", playersPlace);
+            if (Settings.UseInMultiplayer) FindAddGameObject("MultiplayerLocalActivePlayerController(Clone)/IsActiveObjects/Construction/PlayersPlace", playersPlace);
         }
 
         private static void FindFeetIcon() {
@@ -226,7 +226,7 @@ namespace CustomFloorPlugin {
             FindAddGameObject("Environment/Construction", highway);
 
             //Multiplayer
-            FindAddGameObject("MultiplayerLocalActivePlayerController(Clone)/IsActiveObjects/Construction", highway);
+            if (Settings.UseInMultiplayer) FindAddGameObject("MultiplayerLocalActivePlayerController(Clone)/IsActiveObjects/Construction", highway);
         }
 
         private static void FindBackColumns() {
@@ -272,8 +272,10 @@ namespace CustomFloorPlugin {
         private static void FindBackLasers() {
             backLasers = new List<GameObject>();
             FindAddGameObject("Environment/FrontLights", backLasers);
-            FindAddGameObject("MultiplayerLocalActivePlayerController(Clone)/IsActiveObjects/Lasers/LaserBackL", backLasers);
-            FindAddGameObject("MultiplayerLocalActivePlayerController(Clone)/IsActiveObjects/Lasers/LaserBackR", backLasers);
+            if (Settings.UseInMultiplayer) {
+                FindAddGameObject("MultiplayerLocalActivePlayerController(Clone)/IsActiveObjects/Lasers/LaserBackL", backLasers);
+                FindAddGameObject("MultiplayerLocalActivePlayerController(Clone)/IsActiveObjects/Lasers/LaserBackR", backLasers);
+            }
         }
 
         private static void FindTrackLights() {
@@ -302,13 +304,15 @@ namespace CustomFloorPlugin {
             FindAddGameObject("GlowLineRHidden", trackLights);
 
             //Multiplayer
-            FindAddGameObject("MultiplayerLocalActivePlayerController(Clone)/IsActiveObjects/Lasers/LaserFrontL", trackLights);
-            FindAddGameObject("MultiplayerLocalActivePlayerController(Clone)/IsActiveObjects/Lasers/LaserFrontR", trackLights);
-            FindAddGameObject("MultiplayerLocalActivePlayerController(Clone)/IsActiveObjects/Lasers/LaserL", trackLights);
-            FindAddGameObject("MultiplayerLocalActivePlayerController(Clone)/IsActiveObjects/Lasers/LaserR", trackLights);
-            FindAddGameObject("MultiplayerLocalActivePlayerController(Clone)/IsActiveObjects/Lasers/LaserFarL", trackLights);
-            FindAddGameObject("MultiplayerLocalActivePlayerController(Clone)/IsActiveObjects/Lasers/LaserFarR", trackLights);
-            FindAddGameObject("MultiplayerLocalActivePlayerController(Clone)/IsActiveObjects/DirectionalLights", trackLights);
+            if (Settings.UseInMultiplayer) {
+                FindAddGameObject("MultiplayerLocalActivePlayerController(Clone)/IsActiveObjects/Lasers/LaserFrontL", trackLights);
+                FindAddGameObject("MultiplayerLocalActivePlayerController(Clone)/IsActiveObjects/Lasers/LaserFrontR", trackLights);
+                FindAddGameObject("MultiplayerLocalActivePlayerController(Clone)/IsActiveObjects/Lasers/LaserL", trackLights);
+                FindAddGameObject("MultiplayerLocalActivePlayerController(Clone)/IsActiveObjects/Lasers/LaserR", trackLights);
+                FindAddGameObject("MultiplayerLocalActivePlayerController(Clone)/IsActiveObjects/Lasers/LaserFarL", trackLights);
+                FindAddGameObject("MultiplayerLocalActivePlayerController(Clone)/IsActiveObjects/Lasers/LaserFarR", trackLights);
+                FindAddGameObject("MultiplayerLocalActivePlayerController(Clone)/IsActiveObjects/DirectionalLights", trackLights);
+            }
         }
     }
 }

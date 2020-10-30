@@ -173,16 +173,13 @@ namespace CustomFloorPlugin {
         private static void TransitionFinalize() {
             try {
                 Scene currentEvironment = GetCurrentEnvironment();
-                if(!currentEvironment.name.StartsWith("Menu", STR_INV)) {
+                if(!currentEvironment.name.StartsWith("Menu", STR_INV) && MultiplayerCheck()) {
                     try {
                         if(!Settings.PlayerData.overrideEnvironmentSettings.overrideEnvironments) {
-                            TubeLightUtilities.CreateAdditionalLightSwitchControllers(FindLightWithIdManager(currentEvironment)); //@TODO Multiplayer issues, light in general (I'm bad I know)
+                            if (!currentEvironment.name.StartsWith("Multiplayer", STR_INV)) TubeLightUtilities.CreateAdditionalLightSwitchControllers(FindLightWithIdManager(currentEvironment)); //Generates Issues preventing a Platform to load in Multiplayer
                             if(!platformSpawned) {
                                 PlatformLifeCycleManagement.InternalChangeToPlatform();
                             }
-                        }
-                        if (currentEvironment.name.StartsWith("Multiplayer", STR_INV) && Settings.RotateHUD) {
-                            RotateMultiplayerHUD();
                         }
                     } catch(ManagerNotFoundException e) {
                         Log(e);
@@ -191,6 +188,9 @@ namespace CustomFloorPlugin {
                     platformSpawned = false;
                     Heart.SetActive(Settings.ShowHeart);
                     Heart.GetComponent<LightWithId>().ColorWasSet(Color.magenta);
+                }
+                if (currentEvironment.name.StartsWith("Multiplayer", STR_INV) && Settings.RotateHUD){
+                    RotateMultiplayerHUD();
                 }
             } catch(EnvironmentSceneNotFoundException) { }
         }
@@ -390,8 +390,34 @@ namespace CustomFloorPlugin {
 
         private static void RotateMultiplayerHUD() {
             GameObject HUD = GameObject.Find("MultiplayerLocalActivePlayerController(Clone)/IsActiveObjects/HUD");
-            HUD.transform.Translate(new Vector3(0f, 0f, 5f));
+            GameObject EnergyPanel = HUD.transform.Find("EnergyPanel").gameObject;
+            GameObject ComboPanel = HUD.transform.Find("ComboPanel").gameObject;
+            GameObject MultiplierCanvas = HUD.transform.Find("MultiplierCanvas").gameObject;
+            GameObject ScoreCanvas = HUD.transform.Find("ScoreCanvas").gameObject;
+            GameObject SongProgressCanvas = HUD.transform.Find("SongProgressCanvas").gameObject;
+            GameObject ActivePlayers = GameObject.Find("MultiplayerLocalActivePlayerController(Clone)/IsActiveObjects/MultiplayerPositionHUD");
+
             HUD.transform.Rotate(new Vector3(270f, 0f, 0f));
+            ActivePlayers.transform.Rotate(new Vector3(270f, 0f, 0f));
+            EnergyPanel.transform.Rotate(new Vector3(-270f, 0f, 0f));
+
+            EnergyPanel.transform.position = new Vector3(0f, 0f, 5f);
+            ComboPanel.transform.position = new Vector3(-3.5f, 2f, 5f);
+            MultiplierCanvas.transform.position = new Vector3(3.5f, 2f, 5f);
+            ScoreCanvas.transform.position = new Vector3(-3.5f, 1f, 5f);
+            SongProgressCanvas.transform.position = new Vector3(0f, 3.5f, 5f);
+            ActivePlayers.transform.position = new Vector3(0f, 4.5f, 5f);
+        }
+
+        private static  bool MultiplayerCheck() {
+            Scene currentEvironment = GetCurrentEnvironment();
+            if (currentEvironment.name.StartsWith("Multiplayer", STR_INV) && Settings.UseInMultiplayer) {
+                return true;
+            } else if (currentEvironment.name.StartsWith("Multiplayer", STR_INV) && !Settings.UseInMultiplayer) {
+                return false;
+            } else {
+                return true;
+            }
         }
     }
 }
