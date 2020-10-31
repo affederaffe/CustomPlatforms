@@ -1,5 +1,4 @@
 ﻿using IPA.Utilities;
-
 using UnityEngine;
 
 using static CustomFloorPlugin.Utilities.BeatSaberSearching;
@@ -31,7 +30,7 @@ namespace CustomFloorPlugin {
                     Heart.SetActive(false);
                     Heart.GetComponent<LightWithId>().SetField("_lightManager", FindLightWithIdManager(GetCurrentEnvironment()));
                     Heart.SetActive(true);
-                }
+                }                
             }
         }
     }

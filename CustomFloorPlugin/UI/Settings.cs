@@ -179,7 +179,7 @@ namespace CustomFloorPlugin.UI {
         /// Should the HUD in Multiplayer be rotated?
         /// Forwards the current choice to the UI, and the new choice to the plugin
         /// </summary>
-        [UIValue("rotate-hud")]
+        /*[UIValue("rotate-hud")]
         public static bool RotateHUD {
             get {
                 if (_RotateHUD == null) {
@@ -198,7 +198,7 @@ namespace CustomFloorPlugin.UI {
         private static bool? _RotateHUD;
         internal static event Action<bool> RotateHUDChanged = delegate (bool value) {
             Log("RotateHUD value changed. Notifying listeners.\nNew value: " + value);
-        };
+        };*/
 
 
         /// <summary>

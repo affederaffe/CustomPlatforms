@@ -4,5 +4,4 @@
   <dropdown-list-setting text='Environment Arrangement' value='env-arr' options='env-arrs'></dropdown-list-setting>
   <bool-setting text='Show heart' value='show-heart' hover-hint='Makes the heart, that Custom Platforms uses to generate most lights, visible in the menu'></bool-setting>
   <bool-setting text='Use in Multiplayer' value='use-in-multiplayer' hover-hint='Toggle if Custom Platforms is used in Multiplayer'></bool-setting>
-  <bool-setting text='Rotate HUD' value='rotate-hud' hover-hint='Rotates the HUD in Multiplayer'></bool-setting>
 </settings-container>
