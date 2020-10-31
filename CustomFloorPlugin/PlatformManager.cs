@@ -180,6 +180,7 @@ namespace CustomFloorPlugin {
                             //if (!currentEvironment.name.StartsWith("Multiplayer", STR_INV)) TubeLightUtilities.CreateAdditionalLightSwitchControllers(FindLightWithIdManager(currentEvironment)); //Generates Issues preventing a Platform to load in Multiplayer
                             if(!platformSpawned) {
                                 PlatformLifeCycleManagement.InternalChangeToPlatform();
+                                MultiplayerController.disabledPlatformInMultiplayer = false;
                             }
                         }
                     } catch(ManagerNotFoundException e) {

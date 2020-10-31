@@ -69,7 +69,6 @@ namespace CustomFloorPlugin {
             if (doubleColorLasers != null) SetCollectionHidden(doubleColorLasers, platform.hideDoubleColorLasers);
             if (rotatingLasers != null) SetCollectionHidden(rotatingLasers, platform.hideRotatingLasers);
             if (trackLights != null) SetCollectionHidden(trackLights, platform.hideTrackLights);
-            Logging.Log(GetCurrentEnvironment().name);
         }
 
 

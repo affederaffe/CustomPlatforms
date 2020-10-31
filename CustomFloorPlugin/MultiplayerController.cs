@@ -14,7 +14,7 @@ namespace CustomFloorPlugin
         /// </summary
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Build", "CA1812:Avoid unistantiated internal classes", Justification = "Instantiated by Unity")]
         private class MultiplayerController : MonoBehaviour {
-
+            internal static bool disabledPlatformInMultiplayer = false;
 
             /// <summary>
             /// Checks if the Player is spectating by trying to find an element of the spectator menu<br/>
@@ -23,8 +23,9 @@ namespace CustomFloorPlugin
             /// </summary>
             [System.Diagnostics.CodeAnalysis.SuppressMessage("Code Quality", "IDE0051:Remove unused private members", Justification = "Called by Unity")]
             private void Update() {
-                if (IsSpectating() && PlatformManager.CurrentPlatformIndex != 0) {
+                if (IsSpectating() && !disabledPlatformInMultiplayer) {
                     PlatformManager.ChangeToPlatform(0);
+                    disabledPlatformInMultiplayer = true;
                 }
             }
 
