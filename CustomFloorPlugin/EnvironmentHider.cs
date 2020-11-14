@@ -31,6 +31,8 @@ namespace CustomFloorPlugin {
         private static List<GameObject> rotatingLasers;
         private static List<GameObject> trackLights;
 
+        //private static List<GameObject> MPPCs;
+
         private static bool ShowFeetOverride {
             get {
                 return Settings.AlwaysShowFeet;
@@ -132,6 +134,29 @@ namespace CustomFloorPlugin {
             else SetCollectionHidden(menuEnvironment, false); // ...but not in Menu
         }
 
+        /*private static void MultiplayerFinder(string name, List<GameObject> list) {
+            if (Settings.UseInMultiplayer && GetCurrentEnvironment().name.Contains("Multiplayer")) {
+                MultiplayerLocalActivePlayerFacade[] MPLAPFs = GameObject.FindObjectsOfType<MultiplayerLocalActivePlayerFacade>();
+                MultiplayerConnectedPlayerFacade[] MPCPFs = GameObject.FindObjectsOfType<MultiplayerConnectedPlayerFacade>();
+                //Array.ForEach(MPLAPFs, x => MPPCs.Add(x.gameObject));
+                //Array.ForEach(MPCPFs, x => MPPCs.Add(x.gameObject));
+                foreach (var MPLAPF in MPLAPFs) if (MPLAPF != null) MPPCs.Add(MPLAPF.gameObject);
+                foreach (var MPCPF in MPCPFs) if (MPCPF != null) MPPCs.Add(MPCPF.gameObject);
+                Logging.Log("MPPCs Lenght: " + MPPCs.Count);
+                foreach (GameObject MPPC in MPPCs) {
+                    Logging.Log("before finding GO");
+                    Transform goTransform = MPPC.transform.Find(name);
+                    Logging.Log("before adding GO");    
+                    if (goTransform != null) {
+                        list.Add(goTransform.gameObject);
+                    }
+                    else {
+                        Logging.Log("go is null. fuck.");
+                    }
+                }
+            }
+        }*/
+
         private static void FindMenuEnvironmnet() {
             menuEnvironment = new List<GameObject>();
             FindAddGameObject("MenuEnvironment/DefaultEnvironment/Laser (1)", menuEnvironment);
@@ -154,7 +179,7 @@ namespace CustomFloorPlugin {
         private static void FindPlayersPlace() {
             playersPlace = new List<GameObject>();
             FindAddGameObject("Environment/PlayersPlace", playersPlace);
-            if (Settings.UseInMultiplayer) FindAddGameObject("MultiplayerLocalActivePlayerController(Clone)/IsActiveObjects/Construction/PlayersPlace", playersPlace);
+            //MultiplayerFinder("Construction/PlayersPlace", playersPlace);
         }
 
         private static void FindFeetIcon() {
@@ -221,12 +246,13 @@ namespace CustomFloorPlugin {
             FindAddGameObject("Environment/TrackConstruction", highway);
             FindAddGameObject("Environment/FloorConstruction", highway);
             FindAddGameObject("Environment/TrackMirror", highway);
+            FindAddGameObject("Environment/Floor", highway);
 
             // KDA
             FindAddGameObject("Environment/Construction", highway);
 
             //Multiplayer
-            if (Settings.UseInMultiplayer) FindAddGameObject("MultiplayerLocalActivePlayerController(Clone)/IsActiveObjects/Construction", highway);
+            //MultiplayerFinder("Construction", highway);
         }
 
         private static void FindBackColumns() {
@@ -273,8 +299,8 @@ namespace CustomFloorPlugin {
             backLasers = new List<GameObject>();
             FindAddGameObject("Environment/FrontLights", backLasers);
             if (Settings.UseInMultiplayer) {
-                FindAddGameObject("MultiplayerLocalActivePlayerController(Clone)/IsActiveObjects/Lasers/LaserBackL", backLasers);
-                FindAddGameObject("MultiplayerLocalActivePlayerController(Clone)/IsActiveObjects/Lasers/LaserBackR", backLasers);
+                //MultiplayerFinder("Lasers/LaserBackL", backLasers);
+                //MultiplayerFinder("Lasers/LaserBackR", backLasers);
             }
         }
 
@@ -304,15 +330,13 @@ namespace CustomFloorPlugin {
             FindAddGameObject("GlowLineRHidden", trackLights);
 
             //Multiplayer
-            if (Settings.UseInMultiplayer) {
-                FindAddGameObject("MultiplayerLocalActivePlayerController(Clone)/IsActiveObjects/Lasers/LaserFrontL", trackLights);
-                FindAddGameObject("MultiplayerLocalActivePlayerController(Clone)/IsActiveObjects/Lasers/LaserFrontR", trackLights);
-                FindAddGameObject("MultiplayerLocalActivePlayerController(Clone)/IsActiveObjects/Lasers/LaserL", trackLights);
-                FindAddGameObject("MultiplayerLocalActivePlayerController(Clone)/IsActiveObjects/Lasers/LaserR", trackLights);
-                FindAddGameObject("MultiplayerLocalActivePlayerController(Clone)/IsActiveObjects/Lasers/LaserFarL", trackLights);
-                FindAddGameObject("MultiplayerLocalActivePlayerController(Clone)/IsActiveObjects/Lasers/LaserFarR", trackLights);
-                FindAddGameObject("MultiplayerLocalActivePlayerController(Clone)/IsActiveObjects/DirectionalLights", trackLights);
-            }
+            //MultiplayerFinder("Lasers/LaserFrontL", trackLights);
+            //MultiplayerFinder("Lasers/LaserFrontR", trackLights);
+            //MultiplayerFinder("Lasers/LaserL", trackLights);
+            //MultiplayerFinder("Lasers/LaserR", trackLights);
+            //MultiplayerFinder("Lasers/LaserFarL", trackLights);
+            //MultiplayerFinder("Lasers/LaserFarR", trackLights);
+            //MultiplayerFinder("DirectionalLights", trackLights);
         }
     }
 }

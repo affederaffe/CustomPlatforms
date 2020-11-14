@@ -176,32 +176,6 @@ namespace CustomFloorPlugin.UI {
 
 
         /// <summary>
-        /// Should the HUD in Multiplayer be rotated?
-        /// Forwards the current choice to the UI, and the new choice to the plugin
-        /// </summary>
-        /*[UIValue("rotate-hud")]
-        public static bool RotateHUD {
-            get {
-                if (_RotateHUD == null) {
-                    _RotateHUD = CONFIG.GetBool("Settings", "RotateHUD", false, true);
-                }
-                return _RotateHUD.Value;
-            }
-            set {
-                if (value != _RotateHUD.Value) {
-                    CONFIG.SetBool("Settings", "RotateHUD", value);
-                    _RotateHUD = value;
-                    RotateHUDChanged(value);
-                }
-            }
-        }
-        private static bool? _RotateHUD;
-        internal static event Action<bool> RotateHUDChanged = delegate (bool value) {
-            Log("RotateHUD value changed. Notifying listeners.\nNew value: " + value);
-        };*/
-
-
-        /// <summary>
         /// This is a wrapper for Beat Saber's player data structure.<br/>
         /// </summary>
         internal static PlayerData PlayerData {

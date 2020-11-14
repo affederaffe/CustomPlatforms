@@ -1,7 +1,5 @@
-﻿using CustomFloorPlugin.Utilities;
-using UnityEngine;
+﻿using UnityEngine;
 
-using static CustomFloorPlugin.Utilities.BeatSaberSearching;
 
 namespace CustomFloorPlugin
 {
@@ -30,7 +28,10 @@ namespace CustomFloorPlugin
             }
 
             internal static bool IsSpectating() {
-                if (GetCurrentEnvironment().name.StartsWith("Multiplayer", GlobalCollection.STR_INV) && GameObject.Find("Environment/GrandstandSpectatingSpot/MultiplayerLocalInactivePlayerController(Clone)/MultiplayerLocalInactivePlayerInGameMenuViewController/MenuWrapper/Canvas/MainBar") != null) {
+                string specSpot = "Environment/GrandstandSpectatingSpot/MultiplayerLocalInactivePlayerController(Clone)/MultiplayerLocalInactivePlayerInGameMenuViewController/MenuWrapper/Canvas";
+                string specSpotDuel1 = "Environment/GrandstandSpectatingSpot-Duel1/MultiplayerLocalInactivePlayerController(Clone)/MultiplayerLocalInactivePlayerInGameMenuViewController/MenuWrapper/Canvas";
+                string specSpotDuel2 = "Environment/GrandstandSpectatingSpot-Duel2/MultiplayerLocalInactivePlayerController(Clone)/MultiplayerLocalInactivePlayerInGameMenuViewController/MenuWrapper/Canvas";
+                if (GameObject.Find(specSpot) != null || GameObject.Find(specSpotDuel1) != null || GameObject.Find(specSpotDuel2)) {
                     return true;
                 } else {
                     return false;
@@ -39,3 +40,8 @@ namespace CustomFloorPlugin
         }
     }
 }
+// MultiplayerConnectedPlayerController
+// MultiplayerConnectedPlayerController(Clone)
+// MultiplayerDuelConnectedPlayerController
+// MultiplayerDuelLocalActivePlayerController
+// MultiplayerLocalActivePlayerController

@@ -93,6 +93,12 @@ namespace CustomFloorPlugin {
 
 
         /// <summary>
+        /// The Light Source used since 1.13.0 broke the lasers in Menu.
+        /// </summary>
+        internal static GameObject LightSource;
+
+
+        /// <summary>
         /// Keeps track of all spawned custom <see cref="GameObject"/>s, whichs lifetime ends on any scene transition
         /// </summary>
         internal static List<GameObject> SpawnedObjects = new List<GameObject>();
@@ -149,7 +155,7 @@ namespace CustomFloorPlugin {
                 }
             }
 
-            LoadHeart();
+            LoadHeartAndLightSource();
             LoadDefaultPlatform();
         }
 
@@ -177,7 +183,6 @@ namespace CustomFloorPlugin {
                 if(!currentEvironment.name.StartsWith("Menu", STR_INV) && MultiplayerCheck() && currentEvironment.name != "TutorialEnvironment") { //Excluding TutorialEnvironment for Counters+ to not make Caeden sad
                     try {
                         if(!Settings.PlayerData.overrideEnvironmentSettings.overrideEnvironments) {
-                            //if (!currentEvironment.name.StartsWith("Multiplayer", STR_INV)) TubeLightUtilities.CreateAdditionalLightSwitchControllers(FindLightWithIdManager(currentEvironment)); //Generates Issues preventing a Platform to load in Multiplayer
                             if(!platformSpawned) {
                                 PlatformLifeCycleManagement.InternalChangeToPlatform();
                                 MultiplayerController.disabledPlatformInMultiplayer = false;
@@ -189,7 +194,7 @@ namespace CustomFloorPlugin {
                 } else {
                     platformSpawned = false;
                     Heart.SetActive(Settings.ShowHeart);
-                    Heart.GetComponent<LightWithId>().ColorWasSet(Color.magenta);
+                    Heart.GetComponent<LightWithIdMonoBehaviour>().ColorWasSet(Color.magenta);
                 }
             } catch(EnvironmentSceneNotFoundException) { }
         }
@@ -308,17 +313,23 @@ namespace CustomFloorPlugin {
         /// Steals the heart from the GreenDayScene<br/>
         /// Then De-Serializes the data from the embedded resource heart.mesh onto the GreenDayHeart to make it more visually pleasing<br/>
         /// Also adjusts it position and color.
+        /// Now Loads a Light Prefab since the one in the Menu is fucked.
         /// </summary>
-        private static void LoadHeart() {
+        private static void LoadHeartAndLightSource() {
             Scene greenDay = SceneManager.LoadScene("GreenDayGrenadeEnvironment", new LoadSceneParameters(LoadSceneMode.Additive));
             SharedCoroutineStarter.instance.StartCoroutine(fuckUnity());
             IEnumerator<WaitUntil> fuckUnity() {//did you know loaded scenes are loaded asynchronously, regarless if you use async or not?
                 yield return new WaitUntil(() => { return greenDay.isLoaded; });
                 GameObject root = greenDay.GetRootGameObjects()[0];
                 Heart = root.transform.Find("GreenDayCity/armHeartLighting").gameObject;
-                Heart.transform.parent = null;
+                Heart.transform.SetParent(null);
                 Heart.name = "<3";
                 SceneManager.MoveGameObjectToScene(Heart, SCENE);
+                LightSource = root.transform.Find("GlowLineL (2)").gameObject;
+                LightSource.transform.SetParent(null);
+                LightSource.name = "LightSource";
+                LightSource.SetActive(false);
+                SceneManager.MoveGameObjectToScene(LightSource, SCENE);
                 SceneManager.UnloadSceneAsync("GreenDayGrenadeEnvironment");
 
                 Settings.ShowHeartChanged += Heart.SetActive;
@@ -358,14 +369,14 @@ namespace CustomFloorPlugin {
                 Heart.transform.rotation = rotation;
                 Heart.transform.localScale = scale;
 
-                Heart.GetComponent<LightWithId>().ColorWasSet(Color.magenta);
+                Heart.GetComponent<LightWithIdMonoBehaviour>().ColorWasSet(Color.magenta);
                 Heart.SetActive(Settings.ShowHeart);
             }
         }
 
 
         /// <summary>
-        /// Steals the default Platform from the Default Environment and modifies it in order to work properly.
+        /// Steals the default Platform from the Default Environment to display it in Platform Preview.
         /// </summary>
         private static void LoadDefaultPlatform() {
             Scene env = SceneManager.LoadScene("DefaultEnvironment", new LoadSceneParameters(LoadSceneMode.Additive));
@@ -374,12 +385,7 @@ namespace CustomFloorPlugin {
                 yield return new WaitUntil(() => { return env.isLoaded; });
                 GameObject root = env.GetRootGameObjects()[0];
                 PlayersPlace = root.transform.Find("PlayersPlace").gameObject;
-                var test = root.transform.GetComponentsInChildren<Transform>();
-                PlayersPlace.transform.parent = null;
-                GameObject.DestroyImmediate(PlayersPlace.transform.Find("Feet").gameObject);
-                GameObject.DestroyImmediate(PlayersPlace.transform.Find("FloorUICollider").gameObject);
-                GameObject.DestroyImmediate(PlayersPlace.transform.Find("SaberBurnMarksParticles").gameObject);
-                GameObject.DestroyImmediate(PlayersPlace.transform.Find("SaberBurnMarksArea").gameObject);
+                PlayersPlace.transform.SetParent(null);
                 PlayersPlace.SetActive(false);
 
                 SceneManager.MoveGameObjectToScene(PlayersPlace, SCENE);
