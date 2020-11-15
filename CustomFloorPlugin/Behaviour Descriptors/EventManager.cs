@@ -8,7 +8,7 @@ namespace CustomFloorPlugin {
 
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1051:Do not declare visible instance fields", Justification = "Too old to change")]
-    public class EventManager:MonoBehaviour {
+    public class EventManager : MonoBehaviour {
         public UnityEvent OnSlice;
         public UnityEvent OnComboBreak;
         public UnityEvent MultiplierUp;
@@ -21,7 +21,7 @@ namespace CustomFloorPlugin {
 
         [Serializable]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1034:Nested types should not be visible", Justification = "Too old to change")]
-        public class ComboChangedEvent:UnityEvent<int> {
+        public class ComboChangedEvent : UnityEvent<int> {
         }
         public ComboChangedEvent OnComboChanged = new ComboChangedEvent();
     }

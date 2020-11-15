@@ -1,10 +1,6 @@
 using IPA.Utilities;
 
-using System;
-using System.Linq;
-
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 
 namespace CustomFloorPlugin {

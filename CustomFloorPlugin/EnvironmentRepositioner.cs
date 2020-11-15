@@ -19,7 +19,7 @@ namespace CustomFloorPlugin {
         /// Adjusts the position of objects based on the players choice
         /// </summary>
         internal static void RearrangeEnvironment() {
-            if(Settings.EnvArr == EnvArrangement.Classic) {
+            if (Settings.EnvArr == EnvArrangement.Classic) {
                 RearrangeClassic();
             }
         }
@@ -53,7 +53,7 @@ namespace CustomFloorPlugin {
         /// <param name="pos">New position of the <see cref="GameObject"/></param>
         private static void TryMove(string name, Vector3 pos) {
             GameObject toMove = GameObject.Find(name);
-            if(toMove != null)
+            if (toMove != null)
                 toMove.transform.position = pos;
         }
 
@@ -64,7 +64,7 @@ namespace CustomFloorPlugin {
         /// <param name="name">Name of the <see cref="GameObject"/></param>
         private static void TryHide(string name) {
             GameObject toHide = GameObject.Find(name);
-            if(toHide != null)
+            if (toHide != null)
                 toHide.SetActive(false);
         }
 
@@ -74,7 +74,7 @@ namespace CustomFloorPlugin {
         /// </summary>
         internal static List<EnvArrangement> RepositionModes() {
             List<EnvArrangement> list = new List<EnvArrangement>();
-            foreach(EnvArrangement item in Enum.GetValues(typeof(EnvArrangement))) {
+            foreach (EnvArrangement item in Enum.GetValues(typeof(EnvArrangement))) {
                 list.Add(item);
             }
             return list;

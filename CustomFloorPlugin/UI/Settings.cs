@@ -1,5 +1,4 @@
 using BeatSaberMarkupLanguage.Attributes;
-using BeatSaberMarkupLanguage.Components;
 
 using CustomFloorPlugin.Extensions;
 
@@ -23,7 +22,7 @@ namespace CustomFloorPlugin.UI {
     /// Why is everything here public? I don't know... -.-
     /// </summary>
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Build", "CA1812:Avoid unistantiated internal classes", Justification = "Instantiated by Unity")]
-    internal class Settings:PersistentSingleton<Settings> {
+    internal class Settings : PersistentSingleton<Settings> {
 
 
         /// <summary>
@@ -54,14 +53,14 @@ namespace CustomFloorPlugin.UI {
         [UIValue("env-ov")]
         public static EnvOverrideMode EnvOr {
             get {
-                if(_EnvOr == null) {
+                if (_EnvOr == null) {
                     //Wrapping value because 'Off' no longer exists
                     _EnvOr = (EnvOverrideMode)(CONFIG.GetInt("Settings", "EnvironmentOverrideMode", 0, true) % 6);
                 }
                 return _EnvOr.Value;
             }
             set {
-                if(value != _EnvOr.Value) {
+                if (value != _EnvOr.Value) {
                     CONFIG.SetInt("Settings", "EnvironmentOverrideMode", (int)value);
                     _EnvOr = value;
                     EnvOrChanged(value);
@@ -81,13 +80,13 @@ namespace CustomFloorPlugin.UI {
         [UIValue("env-arr")]
         public static EnvironmentArranger.EnvArrangement EnvArr {
             get {
-                if(_EnvArr == null) {
+                if (_EnvArr == null) {
                     _EnvArr = (EnvironmentArranger.EnvArrangement)CONFIG.GetInt("Settings", "EnvironmentArrangement", 0, true);
                 }
                 return _EnvArr.Value;
             }
             set {
-                if(value != _EnvArr.Value) {
+                if (value != _EnvArr.Value) {
                     CONFIG.SetInt("Settings", "EnvironmentArrangement", (int)value);
                     _EnvArr = value;
                 }
@@ -103,13 +102,13 @@ namespace CustomFloorPlugin.UI {
         [UIValue("always-show-feet")]
         public static bool AlwaysShowFeet {
             get {
-                if(_AlwaysShowFeet == null) {
+                if (_AlwaysShowFeet == null) {
                     _AlwaysShowFeet = CONFIG.GetBool("Settings", "AlwaysShowFeet", false, true);
                 }
                 return _AlwaysShowFeet.Value;
             }
             set {
-                if(value != _AlwaysShowFeet.Value) {
+                if (value != _AlwaysShowFeet.Value) {
                     CONFIG.SetBool("Settings", "AlwaysShowFeet", value);
                     _AlwaysShowFeet = value;
                 }
@@ -125,13 +124,13 @@ namespace CustomFloorPlugin.UI {
         [UIValue("show-heart")]
         public static bool ShowHeart {
             get {
-                if(_ShowHeart == null) {
+                if (_ShowHeart == null) {
                     _ShowHeart = CONFIG.GetBool("Settings", "ShowHeart", true, true);
                 }
                 return _ShowHeart.Value;
             }
             set {
-                if(value != _ShowHeart.Value) {
+                if (value != _ShowHeart.Value) {
                     CONFIG.SetBool("Settings", "ShowHeart", value);
                     _ShowHeart = value;
                     ShowHeartChanged(value);
@@ -149,20 +148,15 @@ namespace CustomFloorPlugin.UI {
         /// Forwards the current choice to the UI, and the new choice to the plugin
         /// </summary>
         [UIValue("use-in-multiplayer")]
-        public static bool UseInMultiplayer
-        {
-            get
-            {
-                if (_UseInMultiplayer == null)
-                {
+        public static bool UseInMultiplayer {
+            get {
+                if (_UseInMultiplayer == null) {
                     _UseInMultiplayer = CONFIG.GetBool("Settings", "UseInMultiplayer", false, true);
                 }
                 return _UseInMultiplayer.Value;
             }
-            set
-            {
-                if (value != _UseInMultiplayer.Value)
-                {
+            set {
+                if (value != _UseInMultiplayer.Value) {
                     CONFIG.SetBool("Settings", "UseInMultiplayer", value);
                     _UseInMultiplayer = value;
                     UseInMultiplayerChanged(value);
@@ -180,9 +174,9 @@ namespace CustomFloorPlugin.UI {
         /// </summary>
         internal static PlayerData PlayerData {
             get {
-                if(_PlayerData == null) {
+                if (_PlayerData == null) {
                     PlayerDataModel[] playerDataModels = Resources.FindObjectsOfTypeAll<PlayerDataModel>();
-                    if(playerDataModels.Length >= 1) {
+                    if (playerDataModels.Length >= 1) {
                         _PlayerData = Resources.FindObjectsOfTypeAll<PlayerDataModel>()[0].playerData;
                     }
                 }

@@ -1,12 +1,10 @@
 ﻿using CustomFloorPlugin.UI;
 using System.Collections.Generic;
 using System.Linq;
-
 using UnityEngine;
+using static CustomFloorPlugin.GlobalCollection;
 using static CustomFloorPlugin.Utilities.BeatSaberSearching;
 using static CustomFloorPlugin.Utilities.UnityObjectSearching;
-using static CustomFloorPlugin.GlobalCollection;
-using CustomFloorPlugin.Utilities;
 
 namespace CustomFloorPlugin {
 
@@ -100,9 +98,9 @@ namespace CustomFloorPlugin {
         /// <param name="list">A <see cref="List{T}"/> of GameObjects</param>
         /// <param name="hidden">A boolean describing the desired hidden state</param>
         private static void SetCollectionHidden(List<GameObject> list, bool hidden) {
-            if(list == null) return;
-            foreach(GameObject go in list) {
-                if(go != null) go.SetActive(!hidden);
+            if (list == null) return;
+            foreach (GameObject go in list) {
+                if (go != null) go.SetActive(!hidden);
             }
         }
 
@@ -115,12 +113,13 @@ namespace CustomFloorPlugin {
         private static bool FindAddGameObject(string name, List<GameObject> list) {
             GameObject[] roots = GetCurrentEnvironment().GetRootGameObjects();
             GameObject go;
-            foreach(GameObject root in roots) {
+            foreach (GameObject root in roots) {
                 go = GameObject.Find(name);
-                if(go != null) {
+                if (go != null) {
                     list.Add(go);
                     return true;
-                } else if(root.name == name) {
+                }
+                else if (root.name == name) {
                     list.Add(root);
                 }
             }
@@ -210,7 +209,7 @@ namespace CustomFloorPlugin {
         private static void FindBigRings() {
             bigRings = new List<GameObject>();
             FindAddGameObject("BigTrackLaneRings", bigRings);
-            foreach(var trackLaneRing in Resources.FindObjectsOfTypeAll<TrackLaneRing>().Where(x => x.name == "BigTrackLaneRing(Clone)")) {
+            foreach (var trackLaneRing in Resources.FindObjectsOfTypeAll<TrackLaneRing>().Where(x => x.name == "BigTrackLaneRing(Clone)")) {
                 bigRings.Add(trackLaneRing.gameObject);
             }
         }
@@ -234,8 +233,8 @@ namespace CustomFloorPlugin {
             // KDA
             FindAddGameObject("FloorL", towers);
             FindAddGameObject("FloorR", towers);
-            if(FindAddGameObject($"GlowLine", towers)) {
-                for(int i = 0; i < 100; i++) {
+            if (FindAddGameObject($"GlowLine", towers)) {
+                for (int i = 0; i < 100; i++) {
                     FindAddGameObject($"GlowLine ({i})", towers);
                 }
             }
@@ -310,18 +309,18 @@ namespace CustomFloorPlugin {
             FindAddGameObject("Environment/GlowLineL", trackLights);
             FindAddGameObject("Environment/GlowLineFarL", trackLights);
             FindAddGameObject("Environment/GlowLineFarR", trackLights);
-            
+
             // KDA
             FindAddGameObject("GlowLineLVisible", trackLights);
             FindAddGameObject("GlowLineRVisible", trackLights);
 
             // KDA, Monstercat
             FindAddGameObject("Laser", trackLights);
-            for(int i = 0; i < 15; i++) {
+            for (int i = 0; i < 15; i++) {
                 FindAddGameObject($"Laser ({i})", trackLights);
             }
             FindAddGameObject("GlowTopLine", trackLights);
-            for(int i = 0; i < 10; i++) {
+            for (int i = 0; i < 10; i++) {
                 FindAddGameObject($"GlowTopLine ({i})", trackLights);
             }
 

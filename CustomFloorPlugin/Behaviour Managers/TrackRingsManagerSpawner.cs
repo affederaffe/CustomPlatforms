@@ -7,7 +7,6 @@ using UnityEngine;
 
 using static CustomFloorPlugin.GlobalCollection;
 using static CustomFloorPlugin.Utilities.BeatSaberSearching;
-using static CustomFloorPlugin.Utilities.Logging;
 
 
 namespace CustomFloorPlugin {
@@ -19,7 +18,7 @@ namespace CustomFloorPlugin {
     /// Handles reparenting of <see cref="TrackLaneRing"/>s after the game has spawned them<br/>
     /// </summary>
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Build", "CA1812:Avoid unistantiated internal classes", Justification = "Instantiated by Unity")]
-    internal class TrackRingsManagerSpawner:MonoBehaviour {
+    internal class TrackRingsManagerSpawner : MonoBehaviour {
 
 
         /// <summary>
@@ -52,9 +51,9 @@ namespace CustomFloorPlugin {
         /// </summary>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Code Quality", "IDE0051:Remove unused private members", Justification = "Called by Unity")]
         private void Start() {
-            foreach(TrackLaneRingsManager trackLaneRingsManager in trackLaneRingsManagers) {
+            foreach (TrackLaneRingsManager trackLaneRingsManager in trackLaneRingsManagers) {
                 TrackLaneRing[] rings = trackLaneRingsManager.GetField<TrackLaneRing[], TrackLaneRingsManager>("_rings");
-                foreach(TrackLaneRing ring in rings) {
+                foreach (TrackLaneRing ring in rings) {
                     ring.transform.parent = transform;
                     PlatformManager.SpawnedObjects.Add(ring.gameObject);
                     MaterialSwapper.ReplaceMaterials(ring.gameObject);
@@ -74,7 +73,7 @@ namespace CustomFloorPlugin {
             trackRingsDescriptors = new List<TrackRings>();
 
             TrackRings[] ringsDescriptors = gameObject.GetComponentsInChildren<TrackRings>();
-            foreach(TrackRings trackRingDesc in ringsDescriptors) {
+            foreach (TrackRings trackRingDesc in ringsDescriptors) {
                 trackRingsDescriptors.Add(trackRingDesc);
 
                 TrackLaneRingsManager ringsManager = trackRingDesc.gameObject.AddComponent<TrackLaneRingsManager>();
@@ -88,7 +87,7 @@ namespace CustomFloorPlugin {
                 ringsManager.SetField("_ringCount", trackRingDesc.ringCount);
                 ringsManager.SetField("_ringPositionStep", trackRingDesc.ringPositionStep);
 
-                if(trackRingDesc.useRotationEffect) {
+                if (trackRingDesc.useRotationEffect) {
                     TrackLaneRingsRotationEffect rotationEffect = trackRingDesc.gameObject.AddComponent<TrackLaneRingsRotationEffect>();
                     PlatformManager.SpawnedComponents.Add(rotationEffect);
                     rotationEffect.SetField("_trackLaneRingsManager", ringsManager);
@@ -111,7 +110,7 @@ namespace CustomFloorPlugin {
                     rotationEffectSpawner.SetField("_rotationFlexySpeed", trackRingDesc.rotationFlexySpeed);
                     rotationEffectSpawner.SetField("_trackLaneRingsRotationEffect", rotationEffect);
                 }
-                if(trackRingDesc.useStepEffect) {
+                if (trackRingDesc.useStepEffect) {
                     TrackLaneRingsPositionStepEffectSpawner stepEffectSpawner = trackRingDesc.gameObject.AddComponent<TrackLaneRingsPositionStepEffectSpawner>();
                     stepSpawners.Add(stepEffectSpawner);
                     PlatformManager.SpawnedComponents.Add(stepEffectSpawner);

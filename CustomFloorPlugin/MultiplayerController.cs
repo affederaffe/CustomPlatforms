@@ -1,8 +1,7 @@
 ﻿using UnityEngine;
 
 
-namespace CustomFloorPlugin
-{
+namespace CustomFloorPlugin {
     public static partial class PlatformManager {
 
 
@@ -13,6 +12,9 @@ namespace CustomFloorPlugin
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Build", "CA1812:Avoid unistantiated internal classes", Justification = "Instantiated by Unity")]
         private class MultiplayerController : MonoBehaviour {
             internal static bool disabledPlatformInMultiplayer = false;
+            const string specSpot = "Environment/GrandstandSpectatingSpot/MultiplayerLocalInactivePlayerController(Clone)/MultiplayerLocalInactivePlayerInGameMenuViewController/MenuWrapper/Canvas";
+            const string specSpotDuel1 = "Environment/GrandstandSpectatingSpot-Duel1/MultiplayerLocalInactivePlayerController(Clone)/MultiplayerLocalInactivePlayerInGameMenuViewController/MenuWrapper/Canvas";
+            const string specSpotDuel2 = "Environment/GrandstandSpectatingSpot-Duel2/MultiplayerLocalInactivePlayerController(Clone)/MultiplayerLocalInactivePlayerInGameMenuViewController/MenuWrapper/Canvas";
 
             /// <summary>
             /// Checks if the Player is spectating by trying to find an element of the spectator menu<br/>
@@ -28,12 +30,10 @@ namespace CustomFloorPlugin
             }
 
             internal static bool IsSpectating() {
-                string specSpot = "Environment/GrandstandSpectatingSpot/MultiplayerLocalInactivePlayerController(Clone)/MultiplayerLocalInactivePlayerInGameMenuViewController/MenuWrapper/Canvas";
-                string specSpotDuel1 = "Environment/GrandstandSpectatingSpot-Duel1/MultiplayerLocalInactivePlayerController(Clone)/MultiplayerLocalInactivePlayerInGameMenuViewController/MenuWrapper/Canvas";
-                string specSpotDuel2 = "Environment/GrandstandSpectatingSpot-Duel2/MultiplayerLocalInactivePlayerController(Clone)/MultiplayerLocalInactivePlayerInGameMenuViewController/MenuWrapper/Canvas";
                 if (GameObject.Find(specSpot) != null || GameObject.Find(specSpotDuel1) != null || GameObject.Find(specSpotDuel2)) {
                     return true;
-                } else {
+                }
+                else {
                     return false;
                 }
             }

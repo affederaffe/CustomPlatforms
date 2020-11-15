@@ -3,8 +3,8 @@ using System.Reflection;
 
 namespace CustomFloorPlugin.Exceptions {
 
-    
-    public sealed class ComponentNotFoundException:Exception {
+
+    public sealed class ComponentNotFoundException : Exception {
         public TypeInfo TypeInfo { get; }
 
         internal ComponentNotFoundException(TypeInfo typeInfo) :

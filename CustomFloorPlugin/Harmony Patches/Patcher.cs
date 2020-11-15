@@ -20,7 +20,7 @@ namespace CustomFloorPlugin.HarmonyPatches {
         /// Used to patch the game, applies all patches.
         /// </summary>
         internal static void Patch() {
-            if(!runOnce) {
+            if (!runOnce) {
                 new Harmony("com.rolopogo.customplatforms").PatchAll(Assembly.GetExecutingAssembly());
                 runOnce = true;
             }

@@ -1,8 +1,6 @@
 ﻿using BeatSaberMarkupLanguage;
 using CustomFloorPlugin.Utilities;
 using HMUI;
-using IPA.Utilities;
-using static CustomFloorPlugin.Utilities.Logging;
 
 namespace CustomFloorPlugin.UI {
 
@@ -11,7 +9,7 @@ namespace CustomFloorPlugin.UI {
     /// Instatiable custom <see cref="FlowCoordinator"/> used by BSML
     /// </summary>
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Build", "CA1812:Avoid unistantiated internal classes", Justification = "Instantiated by Unity")]
-    internal class PlatformListFlowCoordinator:FlowCoordinator {
+    internal class PlatformListFlowCoordinator : FlowCoordinator {
 
 
         /// <summary>
@@ -19,7 +17,7 @@ namespace CustomFloorPlugin.UI {
         /// </summary>
         private static PlatformsListView PlatformsListView {
             get {
-                if(_PlatformsListView == null) {
+                if (_PlatformsListView == null) {
                     _PlatformsListView = BeatSaberUI.CreateViewController<UI.PlatformsListView>();
                 }
                 return _PlatformsListView;

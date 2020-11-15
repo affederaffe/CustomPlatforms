@@ -10,7 +10,7 @@ namespace CustomFloorPlugin {
     /// Instantiable wrapper class for a single <see cref="EventManager"/> that handles registering and de-registering, as well as Light Event CallsBacks
     /// </summary>
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Build", "CA1812:Avoid unistantiated internal classes", Justification = "Instantiated by Unity")]
-    internal class PlatformEventManager:MonoBehaviour {
+    internal class PlatformEventManager : MonoBehaviour {
 
 
         /// <summary>
@@ -46,7 +46,7 @@ namespace CustomFloorPlugin {
         /// </summary>
         private void SubscribeToEvents() {
             BSEvents.gameSceneLoaded += delegate () { _EventManager.OnLevelStart.Invoke(); };
-            BSEvents.noteWasCut += delegate (NoteData data, NoteCutInfo info, int multiplier) { if(info.allIsOK) _EventManager.OnSlice.Invoke(); };
+            BSEvents.noteWasCut += delegate (NoteData data, NoteCutInfo info, int multiplier) { if (info.allIsOK) _EventManager.OnSlice.Invoke(); };
             BSEvents.comboDidBreak += delegate () { _EventManager.OnComboBreak.Invoke(); };
             BSEvents.multiplierDidIncrease += delegate (int multiplier) { _EventManager.MultiplierUp.Invoke(); };
             BSEvents.comboDidChange += delegate (int combo) { _EventManager.OnComboChanged.Invoke(combo); };
@@ -62,7 +62,7 @@ namespace CustomFloorPlugin {
         /// </summary>
         private void UnsubscribeFromEvents() {
             BSEvents.gameSceneLoaded -= delegate () { _EventManager.OnLevelStart.Invoke(); };
-            BSEvents.noteWasCut -= delegate (NoteData data, NoteCutInfo info, int multiplier) { if(info.allIsOK) _EventManager.OnSlice.Invoke(); };
+            BSEvents.noteWasCut -= delegate (NoteData data, NoteCutInfo info, int multiplier) { if (info.allIsOK) _EventManager.OnSlice.Invoke(); };
             BSEvents.comboDidBreak -= delegate () { _EventManager.OnComboBreak.Invoke(); };
             BSEvents.multiplierDidIncrease -= delegate (int multiplier) { _EventManager.MultiplierUp.Invoke(); };
             BSEvents.comboDidChange -= delegate (int combo) { _EventManager.OnComboChanged.Invoke(combo); };
@@ -77,11 +77,11 @@ namespace CustomFloorPlugin {
         /// Triggers subscribed functions if lights are turned on.
         /// </summary>
         private void LightEventCallBack(BeatmapEventData songEvent) {
-            if((int)songEvent.type < 5) {
-                if(songEvent.value > 0 && songEvent.value < 4) {
+            if ((int)songEvent.type < 5) {
+                if (songEvent.value > 0 && songEvent.value < 4) {
                     _EventManager.OnBlueLightOn.Invoke();
                 }
-                if(songEvent.value > 4 && songEvent.value < 8) {
+                if (songEvent.value > 4 && songEvent.value < 8) {
                     _EventManager.OnRedLightOn.Invoke();
                 }
             }

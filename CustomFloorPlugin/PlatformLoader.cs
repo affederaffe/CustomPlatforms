@@ -29,7 +29,7 @@ namespace CustomFloorPlugin {
             string customPlatformsFolderPath = Path.Combine(Environment.CurrentDirectory, FOLDER);
 
             // Create the CustomPlatforms folder if it doesn't already exist
-            if(!Directory.Exists(customPlatformsFolderPath)) {
+            if (!Directory.Exists(customPlatformsFolderPath)) {
                 Directory.CreateDirectory(customPlatformsFolderPath);
             }
 
@@ -49,10 +49,10 @@ namespace CustomFloorPlugin {
             // Populate the platforms array
             Log("[START OF PLATFORM LOADING SPAM]-------------------------------------");
             int j = 0;
-            for(int i = 0; i < allBundlePaths.Length; i++) {
+            for (int i = 0; i < allBundlePaths.Length; i++) {
                 j++;
                 CustomPlatform newPlatform = LoadPlatformBundle(allBundlePaths[i], parent);
-                if(newPlatform != null) {
+                if (newPlatform != null) {
                     platforms.Add(newPlatform);
                 }
             }
@@ -73,10 +73,10 @@ namespace CustomFloorPlugin {
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Security", "CA5351:Do Not Use Broken Cryptographic Algorithms", Justification = "MD5 Hash not used in security relevant context")]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Globalization", "CA1308:Normalize strings to uppercase", Justification = "Too late now... that damage was done a year ago -.-")]
         internal static CustomPlatform LoadPlatformBundle(string bundlePath, Transform parent) {
-            
+
             AssetBundle bundle = AssetBundle.LoadFromFile(bundlePath);
 
-            if(bundle == null) return null;
+            if (bundle == null) return null;
 
             CustomPlatform newPlatform = LoadPlatform(bundle, parent);
 
@@ -100,17 +100,18 @@ namespace CustomFloorPlugin {
 
             GameObject platformPrefab = bundle.LoadAsset<GameObject>("_CustomPlatform");
 
-            if(platformPrefab == null) {
+            if (platformPrefab == null) {
                 return null;
             }
 
             GameObject newPlatform = UnityEngine.Object.Instantiate(platformPrefab.gameObject);
 
             try {
-                foreach(AudioListener al in FindAll<AudioListener>(newPlatform)) {
+                foreach (AudioListener al in FindAll<AudioListener>(newPlatform)) {
                     UnityEngine.Object.DestroyImmediate(al);
                 }
-            } catch(ComponentNotFoundException) {
+            }
+            catch (ComponentNotFoundException) {
 
             }
 
@@ -121,10 +122,10 @@ namespace CustomFloorPlugin {
             // Collect author and name
             CustomPlatform customPlatform = newPlatform.GetComponent<CustomPlatform>();
 
-            if(customPlatform == null) {
+            if (customPlatform == null) {
                 // Check for old platform 
                 global::CustomPlatform legacyPlatform = newPlatform.GetComponent<global::CustomPlatform>();
-                if(legacyPlatform != null) {
+                if (legacyPlatform != null) {
                     // Replace legacyplatform component with up to date one
                     customPlatform = newPlatform.AddComponent<CustomPlatform>();
                     customPlatform.platName = legacyPlatform.platName;
@@ -132,7 +133,8 @@ namespace CustomFloorPlugin {
                     customPlatform.hideDefaultPlatform = true;
                     // Remove old platform data
                     GameObject.Destroy(legacyPlatform);
-                } else {
+                }
+                else {
                     // no customplatform component, abort
                     GameObject.Destroy(newPlatform);
                     return null;
@@ -141,7 +143,7 @@ namespace CustomFloorPlugin {
 
             newPlatform.name = customPlatform.platName + " by " + customPlatform.platAuthor;
 
-            if(customPlatform.icon == null) customPlatform.icon = Resources.FindObjectsOfTypeAll<Sprite>().Where(x => x.name == "FeetIcon").FirstOrDefault();
+            if (customPlatform.icon == null) customPlatform.icon = Resources.FindObjectsOfTypeAll<Sprite>().Where(x => x.name == "FeetIcon").FirstOrDefault();
 
             newPlatform.SetActive(false);
 

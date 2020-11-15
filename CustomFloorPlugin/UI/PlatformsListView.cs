@@ -16,7 +16,7 @@ namespace CustomFloorPlugin.UI {
     /// Tagged functions and variables from this class may be used/called by BSML if the .bsml file mentions them.<br/>
     /// </summary>
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Build", "CA1812:Avoid unistantiated internal classes", Justification = "Instantiated by Unity")]
-    internal class PlatformsListView:BSMLResourceViewController {
+    internal class PlatformsListView : BSMLResourceViewController {
 
 
         /// <summary>
@@ -49,8 +49,7 @@ namespace CustomFloorPlugin.UI {
             EnvironmentSceneOverrider.SetEnabled(true);
         }
         [UIAction("reloadPlatforms")]
-        public void ReloadMaterials()
-        {
+        public void ReloadMaterials() {
             PlatformManager.Reload();
         }
 
@@ -85,7 +84,7 @@ namespace CustomFloorPlugin.UI {
         [UIAction("#post-parse")]
         internal void SetupPlatformsList() {
             PlatformListTable.data.Clear();
-            foreach(CustomPlatform platform in PlatformManager.AllPlatforms) {
+            foreach (CustomPlatform platform in PlatformManager.AllPlatforms) {
                 PlatformListTable.data.Add(new CustomListTableData.CustomCellInfo(platform.platName, platform.platAuthor, platform.icon));
             }
             PlatformListTable.tableView.ReloadData();

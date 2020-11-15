@@ -11,7 +11,7 @@ namespace CustomFloorPlugin {
     /// Instantiable wrapper class for <see cref="SpectrogramAnimationState"/>s that handles registering and de-registering, as well setting up and updating visuals of the <see cref="Spectrogram"/>
     /// </summary>
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Build", "CA1812:Avoid unistantiated internal classes", Justification = "Instantiated by Unity")]
-    internal class SpectrogramAnimationStateManager:MonoBehaviour {
+    internal class SpectrogramAnimationStateManager : MonoBehaviour {
 
 
         /// <summary>
@@ -36,7 +36,7 @@ namespace CustomFloorPlugin {
         internal void UpdateAnimationStates() {
             animationStates = new List<SpectrogramAnimationState>();
 
-            foreach(SpectrogramAnimationState spec in Resources.FindObjectsOfTypeAll(typeof(SpectrogramAnimationState))) {
+            foreach (SpectrogramAnimationState spec in Resources.FindObjectsOfTypeAll(typeof(SpectrogramAnimationState))) {
                 animationStates.Add(spec);
             }
         }
@@ -47,9 +47,9 @@ namespace CustomFloorPlugin {
         /// </summary>
         internal void UpdateSpectrogramDataProvider() {
             BasicSpectrogramData[] datas = Resources.FindObjectsOfTypeAll<BasicSpectrogramData>();
-            if(datas.Length != 0) {
+            if (datas.Length != 0) {
                 BasicSpectrogramData spectrogramData = datas.First();
-                foreach(SpectrogramAnimationState specAnim in animationStates) {
+                foreach (SpectrogramAnimationState specAnim in animationStates) {
                     specAnim.SetData(spectrogramData);
                 }
             }

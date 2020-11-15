@@ -1,13 +1,10 @@
 ﻿using CustomFloorPlugin.Exceptions;
-
 using System.Linq;
-
 using UnityEngine;
 using UnityEngine.SceneManagement;
-
 using static CustomFloorPlugin.GlobalCollection;
-using static CustomFloorPlugin.Utilities.UnityObjectSearching;
 using static CustomFloorPlugin.Utilities.Logging;
+using static CustomFloorPlugin.Utilities.UnityObjectSearching;
 
 
 namespace CustomFloorPlugin {
@@ -51,10 +48,11 @@ namespace CustomFloorPlugin {
         /// <param name="scene"><see cref="Scene"/> to search for <see cref="Renderer"/>s</param>
         internal static void ReplaceMaterials(Scene scene) {
             try {
-                foreach(Renderer renderer in FindAll<Renderer>(scene)) {
+                foreach (Renderer renderer in FindAll<Renderer>(scene)) {
                     ReplaceForRenderer(renderer);
                 }
-            } catch(ComponentNotFoundException) {
+            }
+            catch (ComponentNotFoundException) {
                 Log("No Renderers present, skipping...");
             }
         }
@@ -65,7 +63,7 @@ namespace CustomFloorPlugin {
         /// </summary>
         /// <param name="gameObject"><see cref="GameObject"/> to search for <see cref="Renderer"/>s</param>
         internal static void ReplaceMaterials(GameObject gameObject) {
-            foreach(Renderer renderer in FindAll<Renderer>(gameObject)) {
+            foreach (Renderer renderer in FindAll<Renderer>(gameObject)) {
                 ReplaceForRenderer(renderer);
             }
         }
@@ -78,21 +76,23 @@ namespace CustomFloorPlugin {
         private static void ReplaceForRenderer(Renderer renderer) {
             Material[] materialsCopy = renderer.materials;
             bool materialsDidChange = false;
-            for(int i = 0; i < materialsCopy.Length; i++) {
-                if(materialsCopy[i] != null) {
-                    if(materialsCopy[i].name.Equals(fakeDarkMatName, STR_INV)) {
+            for (int i = 0; i < materialsCopy.Length; i++) {
+                if (materialsCopy[i] != null) {
+                    if (materialsCopy[i].name.Equals(fakeDarkMatName, STR_INV)) {
                         materialsCopy[i] = dark;
                         materialsDidChange = true;
-                    } else if(materialsCopy[i].name.Equals(fakeGlowMatName, STR_INV)) {
+                    }
+                    else if (materialsCopy[i].name.Equals(fakeGlowMatName, STR_INV)) {
                         materialsCopy[i] = glow;
                         materialsDidChange = true;
-                    } else if(materialsCopy[i].name.Equals(fakeOpaqueGlowMatName, STR_INV)) {
+                    }
+                    else if (materialsCopy[i].name.Equals(fakeOpaqueGlowMatName, STR_INV)) {
                         materialsCopy[i] = opaqueGlow;
                         materialsDidChange = true;
                     }
                 }
             }
-            if(materialsDidChange) {
+            if (materialsDidChange) {
                 renderer.sharedMaterials = materialsCopy;
             }
         }

@@ -5,7 +5,7 @@ namespace CustomFloorPlugin {
 
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1051:Do not declare visible instance fields", Justification = "Too old to change")]
-    public class Spectrogram:MonoBehaviour {
+    public class Spectrogram : MonoBehaviour {
         public GameObject columnPrefab;
         public Vector3 separator = Vector3.forward;
         public float minHeight = 1f;
@@ -20,13 +20,14 @@ namespace CustomFloorPlugin {
             Gizmos.color = Color.green;
             Vector3 zOffset;
 
-            for(int i = -64; i < 64; i++) {
+            for (int i = -64; i < 64; i++) {
                 zOffset = i * separator;
-                if(columnPrefab != null) {
-                    foreach(Renderer r in columnPrefab.GetComponentsInChildren<Renderer>()) {
+                if (columnPrefab != null) {
+                    foreach (Renderer r in columnPrefab.GetComponentsInChildren<Renderer>()) {
                         Gizmos.DrawCube(zOffset + r.bounds.center, r.bounds.size);
                     }
-                } else {
+                }
+                else {
                     Gizmos.DrawCube(zOffset, Vector3.one * 0.5f);
                 }
             }

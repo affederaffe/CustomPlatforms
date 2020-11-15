@@ -8,7 +8,7 @@ using IPA;
 
 namespace CustomFloorPlugin {
 
-    
+
     /// <summary>
     /// Main Plugin executable, loaded and instantiated by BSIPA before the game starts<br/>
     /// Different callbacks will be notified throughout the games lifespan, and can be used as hooks.

@@ -40,12 +40,13 @@ namespace CustomFloorPlugin {
         public static int CurrentPlatformIndex {
             get {
                 int idx = -1;
-                if(CurrentPlatform != null) {
+                if (CurrentPlatform != null) {
                     idx = AllPlatforms.IndexOf(CurrentPlatform);
                 }
-                if(idx != -1) {
+                if (idx != -1) {
                     return idx;
-                } else {
+                }
+                else {
                     return 0;
                 }
             }
@@ -66,7 +67,7 @@ namespace CustomFloorPlugin {
         /// </summary>
         private static GameObject Anchor {
             get {
-                if(_Anchor == null) {
+                if (_Anchor == null) {
                     _Anchor = new GameObject("Platform Manager");
                     SceneManager.MoveGameObjectToScene(_Anchor, SCENE);
                 }
@@ -123,7 +124,7 @@ namespace CustomFloorPlugin {
         /// Keeps track of the currently active <see cref="CustomPlatform"/>
         /// </summary>
         internal static CustomPlatform activePlatform;
-        
+
 
         /// <summary>
         /// Initializes the <see cref="PlatformManager"/>
@@ -132,23 +133,19 @@ namespace CustomFloorPlugin {
             EnvironmentSceneOverrider.Init();
             Anchor.AddComponent<EasterEggs>();
             Anchor.AddComponent<MultiplayerController>();
-
+            Anchor.AddComponent<SpectrogramMaterialSwapper>(); //@TODO Make an actual solution
             GSM.transitionDidStartEvent += (float ignored) => { TransitionPrep(); };
             GSM.transitionDidFinishEvent += (ScenesTransitionSetupDataSO ignored1, DiContainer ignored2) => { TransitionFinalize(); };
             Reload();
         }
 
-        internal static void Reload()
-        {
+        internal static void Reload() {
             AllPlatforms = PlatformLoader.CreateAllPlatforms(Anchor.transform);
             CurrentPlatform = AllPlatforms[0];
-            if (CONFIG.HasKey("Data", "CustomPlatformPath"))
-            {
+            if (CONFIG.HasKey("Data", "CustomPlatformPath")) {
                 string savedPath = CONFIG.GetString("Data", "CustomPlatformPath");
-                for (int i = 0; i < AllPlatforms.Count; i++)
-                {
-                    if (savedPath == AllPlatforms[i].platName + AllPlatforms[i].platAuthor)
-                    {
+                for (int i = 0; i < AllPlatforms.Count; i++) {
+                    if (savedPath == AllPlatforms[i].platName + AllPlatforms[i].platAuthor) {
                         CurrentPlatform = AllPlatforms[i];
                         break;
                     }
@@ -165,12 +162,14 @@ namespace CustomFloorPlugin {
         private static void TransitionPrep() {
             try {
                 Scene currentEvironment = GetCurrentEnvironment();
-                if(!currentEvironment.name.StartsWith("Menu", STR_INV)) {
+                if (!currentEvironment.name.StartsWith("Menu", STR_INV)) {
                     PlatformLifeCycleManagement.InternalChangeToPlatform(0);
-                } else {
+                }
+                else {
                     Heart.SetActive(false);
                 }
-            } catch(EnvironmentSceneNotFoundException) { }
+            }
+            catch (EnvironmentSceneNotFoundException) { }
         }
 
 
@@ -180,23 +179,26 @@ namespace CustomFloorPlugin {
         private static void TransitionFinalize() {
             try {
                 Scene currentEvironment = GetCurrentEnvironment();
-                if(!currentEvironment.name.StartsWith("Menu", STR_INV) && MultiplayerCheck() && currentEvironment.name != "TutorialEnvironment") { //Excluding TutorialEnvironment for Counters+ to not make Caeden sad
+                if (!currentEvironment.name.StartsWith("Menu", STR_INV) && MultiplayerCheck() && currentEvironment.name != "TutorialEnvironment") { //Excluding TutorialEnvironment for Counters+ to work properly
                     try {
-                        if(!Settings.PlayerData.overrideEnvironmentSettings.overrideEnvironments) {
-                            if(!platformSpawned) {
+                        if (!Settings.PlayerData.overrideEnvironmentSettings.overrideEnvironments) {
+                            if (!platformSpawned) {
                                 PlatformLifeCycleManagement.InternalChangeToPlatform();
                                 MultiplayerController.disabledPlatformInMultiplayer = false;
                             }
                         }
-                    } catch(ManagerNotFoundException e) {
+                    }
+                    catch (ManagerNotFoundException e) {
                         Log(e);
                     }
-                } else {
+                }
+                else {
                     platformSpawned = false;
                     Heart.SetActive(Settings.ShowHeart);
                     Heart.GetComponent<LightWithIdMonoBehaviour>().ColorWasSet(Color.magenta);
                 }
-            } catch(EnvironmentSceneNotFoundException) { }
+            }
+            catch (EnvironmentSceneNotFoundException) { }
         }
 
 
@@ -241,17 +243,19 @@ namespace CustomFloorPlugin {
         /// <param name="index">Index of the desired platform</param>
         /// <exception cref="StackedRequestsException"></exception>
         public static void TempChangeToPlatform(int index) {
-            if(kyleBuffer != null) {
+            if (kyleBuffer != null) {
                 errBuffer = index;
                 throw new StackedRequestsException();
-            } else {
+            }
+            else {
                 kyleBuffer = index;
             }
             try {
-                if(!GetCurrentEnvironment().name.StartsWith("Menu", STR_INV) && platformSpawned) {
+                if (!GetCurrentEnvironment().name.StartsWith("Menu", STR_INV) && platformSpawned) {
                     PlatformLifeCycleManagement.InternalChangeToPlatform();
                 }
-            } catch(EnvironmentSceneNotFoundException e) {
+            }
+            catch (EnvironmentSceneNotFoundException e) {
                 IPA.Logging.Logger.Level L = IPA.Logging.Logger.Level.Warning;
                 Log("TempChangeToPlatform was called out of place. Please send me a bug report.", L);
                 Log(e, L);
@@ -266,7 +270,7 @@ namespace CustomFloorPlugin {
         /// <returns>The reference to the loaded <see cref="CustomPlatform"/></returns>
         public static CustomPlatform AddPlatform(string path) {
             CustomPlatform newPlatform = PlatformLoader.LoadPlatformBundle(path, Anchor.transform);
-            if(newPlatform != null) {
+            if (newPlatform != null) {
                 AllPlatforms.Add(newPlatform);
             }
             return newPlatform;
@@ -280,9 +284,10 @@ namespace CustomFloorPlugin {
         /// </summary>
         /// <param name="index">The index of the <see cref="CustomPlatform"/> in the list <see cref="AllPlatforms"/></param>
         internal static void ChangeToPlatform(int? index = null) {
-            if(index == null) {
+            if (index == null) {
                 PlatformLifeCycleManagement.InternalChangeToPlatform();
-            } else {
+            }
+            else {
                 PlatformLifeCycleManagement.InternalChangeToPlatform(index.Value);
             }
         }
@@ -293,14 +298,15 @@ namespace CustomFloorPlugin {
         /// May trigger a platform change if called in-song (Primarily to catch late scene change callbacks)
         /// </summary>
         internal static void OverridePreviousRequest() {
-            if(errBuffer != null) {
+            if (errBuffer != null) {
                 kyleBuffer = errBuffer;
                 errBuffer = null;
                 try {
-                    if(!GetCurrentEnvironment().name.StartsWith("Menu", STR_INV)) {
+                    if (!GetCurrentEnvironment().name.StartsWith("Menu", STR_INV)) {
                         PlatformLifeCycleManagement.InternalChangeToPlatform();
                     }
-                } catch(EnvironmentSceneNotFoundException e) {
+                }
+                catch (EnvironmentSceneNotFoundException e) {
                     IPA.Logging.Logger.Level L = IPA.Logging.Logger.Level.Warning;
                     Log("OverridePreviousRequest was called out of place. Please send me a bug report.", L);
                     Log(e, L);
@@ -343,16 +349,16 @@ namespace CustomFloorPlugin {
                 string[][] string_vector3s = new string[dimension2[0].Length][];
 
                 int i = 0;
-                foreach(string string_vector3 in dimension2[0]) {
+                foreach (string string_vector3 in dimension2[0]) {
                     string_vector3s[i++] = string_vector3.Split(',');
                 }
 
                 List<Vector3> vertices = new List<Vector3>();
                 List<int> triangles = new List<int>();
-                foreach(string[] string_vector3 in string_vector3s) {
+                foreach (string[] string_vector3 in string_vector3s) {
                     vertices.Add(new Vector3(float.Parse(string_vector3[0], NUM_INV), float.Parse(string_vector3[1], NUM_INV), float.Parse(string_vector3[2], NUM_INV)));
                 }
-                foreach(string s_int in dimension2[1]) {
+                foreach (string s_int in dimension2[1]) {
                     triangles.Add(int.Parse(s_int, NUM_INV));
                 }
 
@@ -393,13 +399,15 @@ namespace CustomFloorPlugin {
             }
         }
 
-        private static  bool MultiplayerCheck() {
+        private static bool MultiplayerCheck() {
             Scene currentEvironment = GetCurrentEnvironment();
             if (currentEvironment.name.StartsWith("Multiplayer", STR_INV) && Settings.UseInMultiplayer) {
                 return true;
-            } else if (currentEvironment.name.StartsWith("Multiplayer", STR_INV) && !Settings.UseInMultiplayer) {
+            }
+            else if (currentEvironment.name.StartsWith("Multiplayer", STR_INV) && !Settings.UseInMultiplayer) {
                 return false;
-            } else {
+            }
+            else {
                 return true;
             }
         }

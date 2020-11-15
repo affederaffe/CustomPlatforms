@@ -4,7 +4,7 @@
 /// <summary>
 /// Legacy Platform.
 /// </summary>
-public class CustomPlatform:MonoBehaviour {
+public class CustomPlatform : MonoBehaviour {
 
 
     /// <summary>

@@ -45,9 +45,10 @@ namespace CustomFloorPlugin {
         /// </summary>
         /// <param name="enable">Whether to enable or disable the override</param>
         internal static void SetEnabled(bool enable) {
-            if(enable && PlatformManager.CurrentPlatformIndex != 0) {
+            if (enable && PlatformManager.CurrentPlatformIndex != 0) {
                 OverrideEnvironment(Settings.EnvOr);
-            } else {
+            }
+            else {
                 Revert();
             }
         }
@@ -59,7 +60,7 @@ namespace CustomFloorPlugin {
         /// <param name="mode">The environment to load when transitioning into play mode</param>
         internal static void OverrideEnvironment(EnvOverrideMode mode) {
             string sceneName = supportedSceneInfos[mode].SceneName;
-            for(int i = 0; i < allSceneInfos.Count; i++) {
+            for (int i = 0; i < allSceneInfos.Count; i++) {
                 allSceneInfos[i].SceneName = sceneName;
             }
         }
@@ -69,7 +70,7 @@ namespace CustomFloorPlugin {
         /// Reverts all overridden <see cref="SceneInfo"/>s to their original state
         /// </summary>
         private static void Revert() {
-            for(int i = 0; i < allSceneInfos.Count; i++) {
+            for (int i = 0; i < allSceneInfos.Count; i++) {
                 allSceneInfos[i].SceneName = allSceneInfos[i].BackupName;
             }
         }
@@ -91,7 +92,7 @@ namespace CustomFloorPlugin {
                 ).ToList()
             ;
             List<SceneInfoWithBackup> list = new List<SceneInfoWithBackup>();
-            foreach(SceneInfo sceneInfo in rawList) {
+            foreach (SceneInfo sceneInfo in rawList) {
                 list.Add(new SceneInfoWithBackup(sceneInfo));
             }
             return list;

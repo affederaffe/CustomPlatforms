@@ -6,7 +6,7 @@ using static CustomFloorPlugin.Utilities.BeatSaberSearching;
 
 
 [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0044:Add readonly modifier", Justification = "Unity can't deserialize values onto readonly fields")]
-public class SpectrogramColumns:MonoBehaviour {
+public class SpectrogramColumns : MonoBehaviour {
 
     /// <summary>
     /// Prefab for individual columns
@@ -65,9 +65,9 @@ public class SpectrogramColumns:MonoBehaviour {
     /// </summary>
     private static float[] FallbackSamples {
         get {
-            if(_FallbackSamples == null) {
+            if (_FallbackSamples == null) {
                 _FallbackSamples = new float[64];
-                for(int i = 0; i < FallbackSamples.Length; i++) {
+                for (int i = 0; i < FallbackSamples.Length; i++) {
                     FallbackSamples[i] = (Mathf.Sin((float)i / 64 * 9 * Mathf.PI + 1.4f * Mathf.PI) + 1.2f) / 25;
                 }
             }
@@ -95,9 +95,9 @@ public class SpectrogramColumns:MonoBehaviour {
     private void Update() {
         float[] processedSamples = _spectrogramData?.ProcessedSamples.ToArray() ?? FallbackSamples;
 
-        for(int i = 0; i < processedSamples.Length; i++) {
+        for (int i = 0; i < processedSamples.Length; i++) {
             float num = processedSamples[i] * (5f + i * 0.07f);
-            if(num > 1f) {
+            if (num > 1f) {
                 num = 1f;
             }
             num = Mathf.Pow(num, 2f);
@@ -112,7 +112,7 @@ public class SpectrogramColumns:MonoBehaviour {
     /// </summary>
     private void CreateColums() {
         _columnTransforms = new Transform[128];
-        for(int i = 0; i < 64; i++) {
+        for (int i = 0; i < 64; i++) {
             _columnTransforms[i] = CreateColumn(_separator * i);
             _columnTransforms[i + 64] = CreateColumn(-_separator * (i + 1));
         }
@@ -126,7 +126,7 @@ public class SpectrogramColumns:MonoBehaviour {
     /// <returns></returns>
     private Transform CreateColumn(Vector3 pos) {
         GameObject gameObject = Instantiate(_columnPrefab, transform);
-        foreach(TubeLight tubeLight in gameObject.GetComponentsInChildren<TubeLight>()) {
+        foreach (TubeLight tubeLight in gameObject.GetComponentsInChildren<TubeLight>()) {
             tubeLight.GameAwake(FindLightWithIdManager(GetCurrentEnvironment()));
         }
         PlatformManager.SpawnedObjects.Add(gameObject);
