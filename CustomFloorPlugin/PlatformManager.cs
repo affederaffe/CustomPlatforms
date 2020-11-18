@@ -133,7 +133,6 @@ namespace CustomFloorPlugin {
             EnvironmentSceneOverrider.Init();
             Anchor.AddComponent<EasterEggs>();
             Anchor.AddComponent<MultiplayerController>();
-            Anchor.AddComponent<SpectrogramMaterialSwapper>(); //@TODO Make an actual solution
             GSM.transitionDidStartEvent += (float ignored) => { TransitionPrep(); };
             GSM.transitionDidFinishEvent += (ScenesTransitionSetupDataSO ignored1, DiContainer ignored2) => { TransitionFinalize(); };
             Reload();

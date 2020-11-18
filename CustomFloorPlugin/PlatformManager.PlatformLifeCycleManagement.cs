@@ -1,5 +1,10 @@
-﻿using IPA.Utilities;
+﻿using System;
+using System.Collections.Generic;
+
+using IPA.Utilities;
+
 using UnityEngine;
+
 using static CustomFloorPlugin.GlobalCollection;
 using static CustomFloorPlugin.Utilities.BeatSaberSearching;
 using static CustomFloorPlugin.Utilities.Logging;
@@ -50,9 +55,11 @@ namespace CustomFloorPlugin {
                     NotifyPlatform(activePlatform, NotifyType.Enable);
                     SpawnCustomObjects();
                     EnvironmentArranger.RearrangeEnvironment();
-                    MaterialSwapper.ReplaceMaterials(activePlatform.gameObject);   
-                    //if (GameObject.Find("Platform Manager").transform.Find("Small Spectrogram(Clone)") == null) Log("Small Spectrogram(Clone) is not present!");
-                    //System.Array.ForEach(activePlatform.gameObject.GetComponentsInChildren<Transform>(), x => Log(x.gameObject.name));
+                    SharedCoroutineStarter.instance.StartCoroutine(WaitAndReplaceMaterials()); //Waiting until the end of the Frame to prevent the Materials of Spectrograms not being replaced ("White Spectrograms Bug").
+                    static IEnumerator<WaitForEndOfFrame> WaitAndReplaceMaterials() {
+                        yield return new WaitForEndOfFrame();
+                        MaterialSwapper.ReplaceMaterials(activePlatform.gameObject);
+                    }
                 }
                 else {
                     activePlatform = null;

@@ -78,7 +78,6 @@
     <Compile Include="Harmony Patches\HandleOverrideEnvironmentsToggleValueChanged_EnvironmentOverrideSettingsPanelController_Patch.cs" />
     <Compile Include="PlatformManager.EasterEggs.cs" />
     <Compile Include="PlatformManager.PlatformLifeCycleManagement.cs" />
-    <Compile Include="SpectrogramMaterialSwapper.cs" />
     <Compile Include="Utilities\BeatSaberSearching.cs" />
     <Compile Include="GlobalCollection.cs" />
     <Compile Include="Utilities\UnityObjectSearching.cs" />
