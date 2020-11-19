@@ -29,7 +29,6 @@ namespace CustomFloorPlugin.UI {
         /// The table of currently loaded Platforms
         /// </summary>
         [UIComponent("PlatformsList")]
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1051:Do not declare visible instance fields", Justification = "BSML is not capable of finding private instance fields. lol")]
         public CustomListTableData PlatformListTable = null;
 
 

@@ -133,29 +133,6 @@ namespace CustomFloorPlugin {
             else SetCollectionHidden(menuEnvironment, false); // ...but not in Menu
         }
 
-        /*private static void MultiplayerFinder(string name, List<GameObject> list) {
-            if (Settings.UseInMultiplayer && GetCurrentEnvironment().name.Contains("Multiplayer")) {
-                MultiplayerLocalActivePlayerFacade[] MPLAPFs = GameObject.FindObjectsOfType<MultiplayerLocalActivePlayerFacade>();
-                MultiplayerConnectedPlayerFacade[] MPCPFs = GameObject.FindObjectsOfType<MultiplayerConnectedPlayerFacade>();
-                //Array.ForEach(MPLAPFs, x => MPPCs.Add(x.gameObject));
-                //Array.ForEach(MPCPFs, x => MPPCs.Add(x.gameObject));
-                foreach (var MPLAPF in MPLAPFs) if (MPLAPF != null) MPPCs.Add(MPLAPF.gameObject);
-                foreach (var MPCPF in MPCPFs) if (MPCPF != null) MPPCs.Add(MPCPF.gameObject);
-                Logging.Log("MPPCs Lenght: " + MPPCs.Count);
-                foreach (GameObject MPPC in MPPCs) {
-                    Logging.Log("before finding GO");
-                    Transform goTransform = MPPC.transform.Find(name);
-                    Logging.Log("before adding GO");    
-                    if (goTransform != null) {
-                        list.Add(goTransform.gameObject);
-                    }
-                    else {
-                        Logging.Log("go is null. fuck.");
-                    }
-                }
-            }
-        }*/
-
         private static void FindMenuEnvironmnet() {
             menuEnvironment = new List<GameObject>();
             FindAddGameObject("MenuEnvironment/DefaultEnvironment/Laser (1)", menuEnvironment);

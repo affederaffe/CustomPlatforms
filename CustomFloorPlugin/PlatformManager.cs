@@ -113,7 +113,7 @@ namespace CustomFloorPlugin {
 
         /// <summary>
         /// This <see cref="Action"/> <see langword="delegate"/> is called whenever a platform is activated,<br/>
-        /// after all instantiated objects implementing <see cref="NotifyOnEnableOrDisable"/> have been notified.
+        /// after all instantiated objects implementing <see cref="INotifyOnEnableOrDisable"/> have been notified.
         /// </summary>
         internal static Action<LightWithIdManager> SpawnQueue = delegate {
             Log("Spawning Lights");

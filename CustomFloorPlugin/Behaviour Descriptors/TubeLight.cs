@@ -9,7 +9,7 @@ namespace CustomFloorPlugin {
     [RequireComponent(typeof(MeshFilter))]
     [RequireComponent(typeof(MeshRenderer))]
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1051:Do not declare visible instance fields", Justification = "Too old to change")]
-    public class TubeLight : MonoBehaviour, NotifyOnEnableOrDisable {
+    public class TubeLight : MonoBehaviour, INotifyOnEnableOrDisable {
         public enum LightsID {
             Static = 0,
             BackLights = 1,
@@ -51,26 +51,6 @@ namespace CustomFloorPlugin {
         internal static TubeBloomPrePassLight Prefab {
             get {
                 if (_Prefab == null) {
-                    /*try {
-                        _Prefab =
-                            SceneManager
-                            .GetSceneByName("MenuEnvironment")
-                            .GetRootGameObjects()
-                            .First<GameObject>(x => x.name == "MenuEnvironment")
-                            .transform
-                            .Find("DefaultEnvironment/Laser (4)")
-                            .GetComponent<TubeBloomPrePassLight>();
-                    }
-                    catch (InvalidOperationException) {
-                        _Prefab =
-                            SceneManager
-                            .GetSceneByName("MenuEnvironment")
-                            .GetRootGameObjects()
-                            .First<GameObject>(x => x.name == "RootContainer")
-                            .transform
-                            .Find("MenuEnvironment/DefaultEnvironment/Laser (4)")
-                            .GetComponent<TubeBloomPrePassLight>();
-                    }*/
                     _Prefab = PlatformManager.LightSource.GetComponent<TubeBloomPrePassLight>();
                 }
                 return _Prefab;
@@ -141,11 +121,11 @@ namespace CustomFloorPlugin {
             tubeBloomLight.Refresh();
         }
 
-        void NotifyOnEnableOrDisable.PlatformEnabled() {
+        void INotifyOnEnableOrDisable.PlatformEnabled() {
             PlatformManager.SpawnQueue += GameAwake;
         }
 
-        void NotifyOnEnableOrDisable.PlatformDisabled() {
+        void INotifyOnEnableOrDisable.PlatformDisabled() {
             PlatformManager.SpawnQueue -= GameAwake;
         }
     }

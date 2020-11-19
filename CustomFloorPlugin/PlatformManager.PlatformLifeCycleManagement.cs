@@ -1,10 +1,6 @@
-﻿using System;
+﻿using IPA.Utilities;
 using System.Collections.Generic;
-
-using IPA.Utilities;
-
 using UnityEngine;
-
 using static CustomFloorPlugin.GlobalCollection;
 using static CustomFloorPlugin.Utilities.BeatSaberSearching;
 using static CustomFloorPlugin.Utilities.Logging;
@@ -74,9 +70,9 @@ namespace CustomFloorPlugin {
             /// <param name="customPlatform">What <see cref="CustomPlatform"/> to notify</param>
             /// <param name="type">What happened to the platform</param>
             private static void NotifyPlatform(CustomPlatform customPlatform, NotifyType type) {
-                NotifyOnEnableOrDisable[] things = customPlatform?.gameObject?.GetComponentsInChildren<NotifyOnEnableOrDisable>(true);
+                INotifyOnEnableOrDisable[] things = customPlatform?.gameObject?.GetComponentsInChildren<INotifyOnEnableOrDisable>(true);
                 if (things != null) {
-                    foreach (NotifyOnEnableOrDisable thing in things) {
+                    foreach (INotifyOnEnableOrDisable thing in things) {
                         if (type == NotifyType.Disable) {
                             thing.PlatformDisabled();
                         }
@@ -101,9 +97,7 @@ namespace CustomFloorPlugin {
             /// <summary>
             /// Despawns all registered custom objects, as required by the selected <see cref="CustomPlatform"/>
             /// </summary>
-            [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "No")]
             private static void DestroyCustomObjects() {
-
                 while (SpawnedObjects.Count != 0) {
                     GameObject gameObject = SpawnedObjects[0];
                     SpawnedObjects.Remove(gameObject);
@@ -132,7 +126,7 @@ namespace CustomFloorPlugin {
                 if (active) {
                     go.SetActive(false);
                 }
-                AddManagers(go, go);
+                if (!GetCurrentEnvironment().name.StartsWith("Multiplayer", STR_INV)) AddManagers(go, go); //@TODO Prevents the attaching of Managers bc Events are handeled differently in Multiplayer (temporary)
                 if (active) {
                     go.SetActive(true);
                 }

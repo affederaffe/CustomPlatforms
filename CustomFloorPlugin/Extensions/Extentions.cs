@@ -39,7 +39,6 @@ namespace CustomFloorPlugin.Extensions {
         /// <param name="component">The instance of a Component to generate a path for.</param>
         /// <returns></returns>
         [MethodImpl(MethodImplOptions.NoOptimization | MethodImplOptions.NoInlining)]
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "No")]
         internal static string GetFullPath(this Component component) {
             StringBuilder path = new StringBuilder(component.gameObject.GetFullPath());
             path.Append("/" + component.GetType().Name);

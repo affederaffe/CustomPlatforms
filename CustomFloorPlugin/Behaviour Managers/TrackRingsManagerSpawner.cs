@@ -101,7 +101,7 @@ namespace CustomFloorPlugin {
                     TrackLaneRingsRotationEffectSpawner rotationEffectSpawner = trackRingDesc.gameObject.AddComponent<TrackLaneRingsRotationEffectSpawner>();
                     rotationSpawners.Add(rotationEffectSpawner);
                     PlatformManager.SpawnedComponents.Add(rotationEffectSpawner);
-                    if (!GetCurrentEnvironment().name.StartsWith("Menu", STR_INV)) rotationEffectSpawner.SetField("_beatmapObjectCallbackController", BOCC);
+                    if (!GetCurrentEnvironment().name.StartsWith("Menu", STR_INV)) rotationEffectSpawner.SetField("_beatmapObjectCallbackController", BOCC); //@TODO
                     rotationEffectSpawner.SetField("_beatmapEventType", (BeatmapEventType)trackRingDesc.rotationSongEventType);
                     rotationEffectSpawner.SetField("_rotationStep", trackRingDesc.rotationStep);
                     var timePerRing2 = trackRingDesc.rotationPropagationSpeed / trackRingDesc.ringCount;
