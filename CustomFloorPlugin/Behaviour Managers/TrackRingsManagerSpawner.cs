@@ -57,6 +57,9 @@ namespace CustomFloorPlugin {
                     ring.transform.parent = transform;
                     PlatformManager.SpawnedObjects.Add(ring.gameObject);
                     MaterialSwapper.ReplaceMaterials(ring.gameObject);
+                    foreach (TubeLight tubeLight in ring.GetComponentsInChildren<TubeLight>()) {
+                        tubeLight.GameAwake(FindLightWithIdManager(GetCurrentEnvironment()));
+                    }
                 }
             }
         }
