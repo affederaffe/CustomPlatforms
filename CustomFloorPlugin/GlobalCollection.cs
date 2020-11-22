@@ -92,5 +92,11 @@ namespace CustomFloorPlugin {
         /// The folder path used by CustomPlatforms
         /// </summary>
         internal const string FOLDER = "CustomPlatforms";
+
+
+        /// <summary>
+        /// The Scripts folder path used for custom scripts
+        /// </summary>
+        internal const string SCRIPT_FOLDER = "Scripts";
     }
 }

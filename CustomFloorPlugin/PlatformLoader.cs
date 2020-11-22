@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Security.Cryptography;
 
 using UnityEngine;
@@ -27,14 +28,28 @@ namespace CustomFloorPlugin {
         public static List<CustomPlatform> CreateAllPlatforms(Transform parent) {
 
             string customPlatformsFolderPath = Path.Combine(Environment.CurrentDirectory, FOLDER);
+            string customPlatformsScriptFolderPath = Path.Combine(customPlatformsFolderPath, SCRIPT_FOLDER);
 
             // Create the CustomPlatforms folder if it doesn't already exist
             if (!Directory.Exists(customPlatformsFolderPath)) {
                 Directory.CreateDirectory(customPlatformsFolderPath);
             }
 
+            // Create the CustomPlatforms script folder if it doesn't already exist
+            if (!Directory.Exists(customPlatformsScriptFolderPath)) {
+                Directory.CreateDirectory(customPlatformsScriptFolderPath);
+            }
+
             // Find AssetBundles in our CustomPlatforms directory
             string[] allBundlePaths = Directory.GetFiles(customPlatformsFolderPath, "*.plat");
+
+            // Find Dlls in our CustomPlatformsScript directory
+            string[] allScriptPaths = Directory.GetFiles(customPlatformsScriptFolderPath, "*.dll");
+
+            // Load all CustomScripts
+            foreach (string path in allScriptPaths) {
+                Assembly.LoadFrom(path);
+            }
 
             List<CustomPlatform> platforms = new List<CustomPlatform>();
 
