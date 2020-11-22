@@ -223,6 +223,9 @@ namespace CustomFloorPlugin {
             FindAddGameObject("Environment/FloorConstruction", highway);
             FindAddGameObject("Environment/TrackMirror", highway);
             FindAddGameObject("Environment/Floor", highway);
+            FindAddGameObject("Environment/Mirror", highway);
+            FindAddGameObject("Environment/RocketCar", highway);
+            FindAddGameObject("Environment/RocketCar (1)", highway);
 
             // KDA
             FindAddGameObject("Environment/Construction", highway);
