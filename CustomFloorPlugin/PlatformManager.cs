@@ -88,6 +88,12 @@ namespace CustomFloorPlugin {
 
 
         /// <summary>
+        /// Real Prefab for lights, has to be Inactive to prevent NullReference spam
+        /// </summary>
+        internal static GameObject InactiveHeart;
+
+
+        /// <summary>
         /// Used as a platform in Platform Preview if <see cref="CustomPlatform.hideDefaultPlatform"/> is false.
         /// </summary>
         internal static GameObject PlayersPlace;
@@ -327,13 +333,16 @@ namespace CustomFloorPlugin {
                 yield return new WaitUntil(() => { return greenDay.isLoaded; });
                 GameObject root = greenDay.GetRootGameObjects()[0];
                 Heart = root.transform.Find("GreenDayCity/armHeartLighting").gameObject;
+                Heart.SetActive(false);
                 Heart.transform.SetParent(null);
                 Heart.name = "<3";
+                InactiveHeart = Heart;
                 SceneManager.MoveGameObjectToScene(Heart, SCENE);
+
                 LightSource = root.transform.Find("GlowLineL (2)").gameObject;
+                LightSource.SetActive(false);
                 LightSource.transform.SetParent(null);
                 LightSource.name = "LightSource";
-                LightSource.SetActive(false);
                 SceneManager.MoveGameObjectToScene(LightSource, SCENE);
                 SceneManager.UnloadSceneAsync("GreenDayGrenadeEnvironment");
 
@@ -390,9 +399,8 @@ namespace CustomFloorPlugin {
                 yield return new WaitUntil(() => { return env.isLoaded; });
                 GameObject root = env.GetRootGameObjects()[0];
                 PlayersPlace = root.transform.Find("PlayersPlace").gameObject;
-                PlayersPlace.transform.SetParent(null);
                 PlayersPlace.SetActive(false);
-
+                PlayersPlace.transform.SetParent(null);
                 SceneManager.MoveGameObjectToScene(PlayersPlace, SCENE);
                 SceneManager.UnloadSceneAsync("DefaultEnvironment");
             }

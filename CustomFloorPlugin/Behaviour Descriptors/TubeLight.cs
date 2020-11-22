@@ -99,9 +99,10 @@ namespace CustomFloorPlugin {
                 tubeBloomLight.gameObject.SetActive(true);
 
             }
-            else if (PlatformManager.Heart != null) {
+            else if (PlatformManager.InactiveHeart != null) {
                 // swap for <3
-                iHeartBeatSaber = Instantiate(PlatformManager.Heart);
+                PlatformManager.InactiveHeart.SetActive(false);
+                iHeartBeatSaber = Instantiate(PlatformManager.InactiveHeart);
                 PlatformManager.SpawnedObjects.Add(iHeartBeatSaber);
                 iHeartBeatSaber.transform.parent = transform;
                 iHeartBeatSaber.transform.position = transform.position;
