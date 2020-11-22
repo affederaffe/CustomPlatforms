@@ -34,6 +34,7 @@ namespace CustomFloorPlugin {
         public float length = 1f;
         [Range(0, 1)]
         public float center = 0.5f;
+        public float fogIntensityMultiplier = 0.15f;
         public Color color = Color.white;
         public LightsID lightsID = LightsID.Static;
 
@@ -85,7 +86,7 @@ namespace CustomFloorPlugin {
                 tubeBloomLight.SetField("_center", center);
                 tubeBloomLight.SetField("_transform", tubeBloomLight.transform);
                 tubeBloomLight.SetField("_maxAlpha", 0.1f);
-                tubeBloomLight.SetField("_bloomFogIntensityMultiplier", 0.1f);
+                tubeBloomLight.SetField("_bloomFogIntensityMultiplier", fogIntensityMultiplier);
 
                 var parabox = tubeBloomLight.GetComponentInChildren<ParametricBoxController>();
                 tubeBloomLight.SetField("_parametricBoxController", parabox);
