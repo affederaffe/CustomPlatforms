@@ -300,7 +300,7 @@
   <Import Project="BuildTargets.targets" />
   <PropertyGroup>
     <PostBuildEvent>
-<!--IF EXIST "S:\SteamApps\common\Beat Saber\Plugins" copy /Y "$(TargetFileName)" "S:\SteamApps\common\Beat Saber\Plugins"
+      <!--IF EXIST "S:\SteamApps\common\Beat Saber\Plugins" copy /Y "$(TargetFileName)" "S:\SteamApps\common\Beat Saber\Plugins"
 IF EXIST "S:\SteamApps\common\Beat Saber\Plugins" del "S:\SteamApps\common\Beat Saber\Plugins\CustomPlatforms.dll"
 IF EXIST "S:\SteamApps\common\Beat Saber\Plugins" rename "S:\SteamApps\common\Beat Saber\Plugins\$(TargetFileName)" "CustomPlatforms.dll"
 IF EXIST "D:\SteamLibrary\SteamApps\common\Beat Saber\Plugins" copy /Y "$(TargetFileName)" "D:\SteamLibrary\SteamApps\common\Beat Saber\Plugins"
@@ -309,7 +309,7 @@ IF EXIST "D:\SteamLibrary\SteamApps\common\Beat Saber\Plugins" rename "D:\SteamL
 IF EXIST "C:\Program Files (x86)\Steam\steamapps\common\Beat Saber\Plugins" copy /Y "$(TargetFileName)" "C:\Program Files (x86)\Steam\steamapps\common\Beat Saber\Plugins"
 IF EXIST "C:\Program Files (x86)\Steam\steamapps\common\Beat Saber\Plugins" del "C:\Program Files (x86)\Steam\steamapps\common\Beat Saber\Plugins\CustomPlatforms.dll"
 IF EXIST "C:\Program Files (x86)\Steam\steamapps\common\Beat Saber\Plugins" rename "C:\Program Files (x86)\Steam\steamapps\common\Beat Saber\Plugins\$(TargetFileName)" "CustomPlatforms.dll"-->
-</PostBuildEvent>
+    </PostBuildEvent>
   </PropertyGroup>
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
