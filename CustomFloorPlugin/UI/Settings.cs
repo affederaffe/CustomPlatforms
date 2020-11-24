@@ -47,6 +47,20 @@ namespace CustomFloorPlugin.UI {
 
 
         /// <summary>
+        /// Hover hint of load-custom-scripts
+        /// </summary>
+        [UIValue("LoadingCustomScriptsText")]
+        public const string loadingCustomScriptsText = "Loading Custom Scripts \nUse this at your own risk! \nOnly use scripts of trusted sources!";
+
+
+        /// <summary>
+        /// Hover hint of use-in-multiplayer
+        /// </summary>
+        [UIValue("UseInMultiplayerText")]
+        public const string useInMultiplayerText = "Toggle if Custom Platforms is used in Multiplayer \n!BUGGY!";
+
+
+        /// <summary>
         /// Override choice for platform base model/environment<br/>
         /// Forwards the current choice to the UI, and the new choice to the plugin
         /// </summary>
