@@ -1,15 +1,15 @@
 ## Installation
 ### Easy Method
 
-* Ensure you have the latest verion of Mod Assistant https://github.com/Assistant/ModAssistant/releases
+* Ensure you have the latest verion of ModAssistant https://github.com/Assistant/ModAssistant/releases
 * Launch the mod installer
 * Select the checkbox for Custom Platforms
 * Click Install
 ### Manual Method
 
-* Ensure your game is patched with IPA (The mod installer does this for you)
-* Extract CustomPlatformsX.Y.zip (Not the Unity Project zip!) into your Beat Saber directory
-* Add .plat files to the "CustomPlatforms" directory - A few are included 
+* Ensure your game is patched with BSIPA (ModAssistant does this for you)
+* Extract CustomPlatformsX.Y.Z.zip into your Beat Saber directory
+* Extract the Platform .zip into your Beat Saber directory - A few are Platforms are included in the CustomPlatformsX.Y.Z.zip
 
 Your Beat Saber folder should then look like this:
 
@@ -19,6 +19,8 @@ Your Beat Saber folder should then look like this:
     | CustomPlatforms.dll     <-- 
   | CustomPlatforms		<--
     | <.plat files>		<--
+    | Scripts   <--
+      | <.dll Custom Script files>    <--
   | IPA
   | Beat Saber.exe
   | (other files and folders)
@@ -29,20 +31,24 @@ Your Beat Saber folder should then look like this:
 Visit the ModSettings page ingame to access important settings, like:
 * Always show feet, to mark the center of the room,
 * Hide the :heart: that CustomPlatforms uses as a cloneable light source
+* Load Custom Scripts, only use this option if all Scripts are from a trusted source!
+* Use in Miltiplayer to use Custom Platforms in Multiplayer, not recommended.
 * etc.
 
 You can press Numpad0 (while playing songs) to toggle the heart on and have it react to light events.
 
 ## Adding More Platforms
 
-Place platforms (.plat) files in the "BeatSaber\CustomPlatforms" folder.
+Extract the Platforms' .zip file in the Beat Saber directory.
 Your installed platforms will be available upon relaunching the game.
 
 ## Creating New Platforms
 
-There's a comprehensive guide at https://bs.assistant.moe/Platforms/ written by Emma. The following are the basic steps:
+There's a comprehensive guide at https://bsmg.wiki/models/platforms-guide.html written by Emma.
+For a guide about how to create Custom Scripts use the guide at https://affederaffe.github.io/CustomPlatformsUnityProject/.
+The following are the basic steps:
 
-1. Download the Unity project from the releases page, unzip it.
+1. Download the Unity project from https://github.com/affederaffe/CustomPlatformsUnityProject, unzip it.
 
 2. Open the Unity project
 The project was created and tested in version 2018.1.6f1, other versions may not be supported.
@@ -58,7 +64,7 @@ You cannot attach your own custom scripts to these objects. Only scripts from th
 5. When you are finished, select the root object you attached the "Custom Platform" component to.
 In the inspector, click "Export". Navigate to your CustomPlatforms folder, and press save.
 
-6. Share your custom platform with other players by uploading the .plat file
+6. Share your custom platform with other players by uploading the Platforms' .zip file
 
 ## Hall of Fame (Credits for major rework contributions)
 #### AkaRaiden - (The QA Department, Beta Tester, Tome of Wisdom)
