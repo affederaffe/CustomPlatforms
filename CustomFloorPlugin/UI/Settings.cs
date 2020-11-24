@@ -143,6 +143,25 @@ namespace CustomFloorPlugin.UI {
         };
 
 
+        [UIValue("load-custom-scripts")]
+        public static bool LoadCustomScripts {
+            get {
+                if (_LoadCustomScripts == null) {
+                    _LoadCustomScripts = CONFIG.GetBool("Settings", "LoadCustomScripts", false, true);
+                }
+                return _LoadCustomScripts.Value;
+            }
+            set {
+                if (value != _LoadCustomScripts.Value) {
+                    CONFIG.SetBool("Settings", "LoadCustomScripts", value);
+                    _LoadCustomScripts = value;
+                    PlatformManager.Reload();
+                }
+            }
+        }
+        private static bool? _LoadCustomScripts;
+
+
         /// <summary>
         /// Should this Plugin spawn a Custom Platform in Multiplayer?
         /// Forwards the current choice to the UI, and the new choice to the plugin
@@ -159,14 +178,10 @@ namespace CustomFloorPlugin.UI {
                 if (value != _UseInMultiplayer.Value) {
                     CONFIG.SetBool("Settings", "UseInMultiplayer", value);
                     _UseInMultiplayer = value;
-                    UseInMultiplayerChanged(value);
                 }
             }
         }
         private static bool? _UseInMultiplayer;
-        internal static event Action<bool> UseInMultiplayerChanged = delegate (bool value) {
-            Log("UseInMultiplayer value changed. Notifying listeners.\nNew value: " + value);
-        };
 
 
         /// <summary>

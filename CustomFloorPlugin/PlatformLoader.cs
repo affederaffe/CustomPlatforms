@@ -47,8 +47,10 @@ namespace CustomFloorPlugin {
             string[] allScriptPaths = Directory.GetFiles(customPlatformsScriptFolderPath, "*.dll");
 
             // Load all CustomScripts
-            foreach (string path in allScriptPaths) {
-                Assembly.LoadFrom(path);
+            if (UI.Settings.LoadCustomScripts) {
+                foreach (string path in allScriptPaths) {
+                    Assembly.LoadFrom(path);
+                }
             }
 
             List<CustomPlatform> platforms = new List<CustomPlatform>();
