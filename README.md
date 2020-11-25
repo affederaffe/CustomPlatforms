@@ -32,10 +32,11 @@ Visit the ModSettings page ingame to access important settings, like:
 * Always show feet, to mark the center of the room,
 * Hide the :heart: that CustomPlatforms uses as a cloneable light source
 * Load Custom Scripts, only use this option if all Scripts are from a trusted source!
-* Use in Miltiplayer to use Custom Platforms in Multiplayer, not recommended.
+* Use in Multiplayer to use Custom Platforms in Multiplayer, not recommended.
 * etc.
 
 You can press Numpad0 (while playing songs) to toggle the heart on and have it react to light events.
+To disable the Mod, turn on "Override Environment" in the Gameplay Setup
 
 ## Adding More Platforms
 
