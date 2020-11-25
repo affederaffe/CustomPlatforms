@@ -213,5 +213,13 @@ namespace CustomFloorPlugin.UI {
             }
         }
         private static PlayerData _PlayerData;
+
+
+        /// <summary>
+        /// Call this Method before using <see cref="PlayerData"/> again to Update it
+        /// </summary>
+        internal static void UpdatePlayerData() {
+            _PlayerData = null;
+        }
     }
 }
