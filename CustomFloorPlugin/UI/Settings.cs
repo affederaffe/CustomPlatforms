@@ -30,12 +30,23 @@ namespace CustomFloorPlugin.UI {
         /// </summary>
         [UIValue("env-ovs")]
         public static readonly List<object> envOrs = new List<object>() {
+            EnvOverrideMode.None,
             EnvOverrideMode.Origins,
             EnvOverrideMode.Nice,
             EnvOverrideMode.BigMirror,
             EnvOverrideMode.Triangle,
             EnvOverrideMode.KDA,
-            EnvOverrideMode.Monstercat
+            EnvOverrideMode.Monstercat,
+            EnvOverrideMode.Dragons,
+            EnvOverrideMode.CrabRave,
+            EnvOverrideMode.Panic,
+            EnvOverrideMode.Rocket,
+            EnvOverrideMode.GreenDayGrenade,
+            EnvOverrideMode.GreenDay,
+            EnvOverrideMode.Timbaland,
+            EnvOverrideMode.FitBeat,
+            EnvOverrideMode.LinkinPark,
+            EnvOverrideMode.BTS
         };
 
 

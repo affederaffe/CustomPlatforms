@@ -21,12 +21,23 @@ namespace CustomFloorPlugin {
         private static readonly EnvironmentInfoSO[] allSceneInfos = GetAllEnvs();
         private static readonly EnvironmentTypeSO environmentType = Resources.FindObjectsOfTypeAll<EnvironmentTypeSO>()[0]; // NormalEnvironemntTypeSO
         private static readonly Dictionary<EnvOverrideMode, EnvironmentInfoSO> supportedEnvironmentInfos = new Dictionary<EnvOverrideMode, EnvironmentInfoSO>() {
+            {EnvOverrideMode.None, null},
             {EnvOverrideMode.Origins, EnvWithName("Origins")},
             {EnvOverrideMode.Nice, EnvWithName("Nice")},
             {EnvOverrideMode.BigMirror, EnvWithName("BigMirror")},
             {EnvOverrideMode.Triangle, EnvWithName("Triangle")},
             {EnvOverrideMode.KDA, EnvWithName("KDA")},
-            {EnvOverrideMode.Monstercat, EnvWithName("Monstercat")}
+            {EnvOverrideMode.Monstercat, EnvWithName("Monstercat")},
+            {EnvOverrideMode.Dragons, EnvWithName("Dragons")},
+            {EnvOverrideMode.CrabRave, EnvWithName("CrabRave")},
+            {EnvOverrideMode.Panic, EnvWithName("Panic")},
+            {EnvOverrideMode.Rocket, EnvWithName("Rocket")},
+            {EnvOverrideMode.GreenDayGrenade, EnvWithName("GreenDayGrenade")},
+            {EnvOverrideMode.GreenDay, EnvWithName("GreenDay")},
+            {EnvOverrideMode.Timbaland, EnvWithName("Timbaland")},
+            {EnvOverrideMode.FitBeat, EnvWithName("FitBeat")},
+            {EnvOverrideMode.LinkinPark, EnvWithName("LinkinPark")},
+            {EnvOverrideMode.BTS, EnvWithName("BTS")}
         };
         private static EnvironmentInfoSO oldEnvironmentInfoSO;
 
@@ -38,11 +49,13 @@ namespace CustomFloorPlugin {
         /// </summary>
         /// <param name="mode">The environment to load when transitioning into play mode</param>
         internal static void OverrideEnvironment(EnvOverrideMode mode) {
-            Utilities.Logging.Log("Overridden Environment: " + supportedEnvironmentInfos[mode].environmentName);
-            Settings.PlayerData.overrideEnvironmentSettings.overrideEnvironments = true;
-            oldEnvironmentInfoSO = Settings.PlayerData.overrideEnvironmentSettings.GetOverrideEnvironmentInfoForType(environmentType);
-            Settings.PlayerData.overrideEnvironmentSettings.SetEnvironmentInfoForType(environmentType, supportedEnvironmentInfos[mode]);
-            didOverrideEnvironment = true;
+            if (supportedEnvironmentInfos[mode] != null) {
+                Utilities.Logging.Log("Overridden Environment: " + supportedEnvironmentInfos[mode].environmentName);
+                Settings.PlayerData.overrideEnvironmentSettings.overrideEnvironments = true;
+                oldEnvironmentInfoSO = Settings.PlayerData.overrideEnvironmentSettings.GetOverrideEnvironmentInfoForType(environmentType);
+                Settings.PlayerData.overrideEnvironmentSettings.SetEnvironmentInfoForType(environmentType, supportedEnvironmentInfos[mode]);
+                didOverrideEnvironment = true;
+            }
         }
 
 

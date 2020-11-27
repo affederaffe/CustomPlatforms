@@ -186,7 +186,8 @@ namespace CustomFloorPlugin {
                 Scene currentEvironment = GetCurrentEnvironment();
                 if (!currentEvironment.name.StartsWith("Menu", STR_INV) && MultiplayerCheck() && currentEvironment.name != "TutorialEnvironment") { //Excluding TutorialEnvironment for Counters+ to work properly
                     try {
-                        if (EnvironmentSceneOverrider.didOverrideEnvironment) {
+                        Settings.UpdatePlayerData();
+                        if (EnvironmentSceneOverrider.didOverrideEnvironment || (Settings.EnvOr == EnvOverrideMode.None && !Settings.PlayerData.overrideEnvironmentSettings.overrideEnvironments)) {
                             if (!platformSpawned) {
                                 MultiplayerController.disabledPlatformInMultiplayer = false;
                                 PlatformLifeCycleManagement.InternalChangeToPlatform();
