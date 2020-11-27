@@ -30,20 +30,13 @@ namespace CustomFloorPlugin.UI {
         /// </summary>
         [UIValue("env-ovs")]
         public static readonly List<object> envOrs = new List<object>() {
-            EnvOverrideMode.Default,
+            EnvOverrideMode.Origins,
             EnvOverrideMode.Nice,
             EnvOverrideMode.BigMirror,
             EnvOverrideMode.Triangle,
             EnvOverrideMode.KDA,
             EnvOverrideMode.Monstercat
         };
-
-
-        /// <summary>
-        /// The list of supported old environment configurations
-        /// </summary>
-        [UIValue("env-arrs")]
-        public static readonly List<object> envArrs = EnvironmentArranger.RepositionModes().ToBoxedList();
 
 
         /// <summary>
@@ -85,28 +78,6 @@ namespace CustomFloorPlugin.UI {
         internal static event Action<EnvOverrideMode> EnvOrChanged = delegate (EnvOverrideMode value) {
             Log("EnvOr value changed. Notifying listeners.\nNew value: " + value);
         };
-
-
-        /// <summary>
-        /// Override choice for platform base model/environment<br/>
-        /// Forwards the current choice to the UI, and the new choice to the plugin
-        /// </summary>
-        [UIValue("env-arr")]
-        public static EnvironmentArranger.EnvArrangement EnvArr {
-            get {
-                if (_EnvArr == null) {
-                    _EnvArr = (EnvironmentArranger.EnvArrangement)CONFIG.GetInt("Settings", "EnvironmentArrangement", 0, true);
-                }
-                return _EnvArr.Value;
-            }
-            set {
-                if (value != _EnvArr.Value) {
-                    CONFIG.SetInt("Settings", "EnvironmentArrangement", (int)value);
-                    _EnvArr = value;
-                }
-            }
-        }
-        private static EnvironmentArranger.EnvArrangement? _EnvArr;
 
 
         /// <summary>

@@ -133,34 +133,9 @@ namespace CustomFloorPlugin {
 
 
         /// <summary>
-        /// Default <see cref="EnvironmentTypeSO"/> to set <see cref="OverrideEnvironmentSettings"/>
-        /// </summary>
-        private static readonly EnvironmentTypeSO environmentType = Resources.FindObjectsOfTypeAll<EnvironmentTypeSO>()[0];
-
-
-        /// <summary>
-        /// Default <see cref="EnvironmentInfoSO"/> to set <see cref="OverrideEnvironmentSettings"/>
-        /// </summary>
-        private static readonly EnvironmentInfoSO environmentInfo = Resources.FindObjectsOfTypeAll<EnvironmentInfoSO>()[0];
-
-
-        /// <summary>
-        /// Old <see cref="EnvironmentInfoSO"/> to change back after despawning a <see cref="CustomPlatform"/>
-        /// </summary>
-        private static EnvironmentInfoSO oldEnvironmentInfo;
-
-
-        /// <summary>
-        /// Old overrideEnvironments Setting in <see cref="PlayerData.overrideEnvironmentSettings"/>
-        /// </summary>
-        private static bool didUpdateOverrideEnvironmentSettings;
-
-
-        /// <summary>
         /// Initializes the <see cref="PlatformManager"/>
         /// </summary>
         internal static void Init() {
-            EnvironmentSceneOverrider.Init();
             Anchor.AddComponent<EasterEggs>();
             Anchor.AddComponent<MultiplayerController>();
             GSM.transitionDidStartEvent += (float ignored) => { TransitionPrep(); };
@@ -193,6 +168,7 @@ namespace CustomFloorPlugin {
                 Scene currentEvironment = GetCurrentEnvironment();
                 if (!currentEvironment.name.StartsWith("Menu", STR_INV)) {
                     PlatformLifeCycleManagement.InternalChangeToPlatform(0);
+                    EnvironmentSceneOverrider.Revert();
                 }
                 else {
                     Heart.SetActive(false);
@@ -210,13 +186,8 @@ namespace CustomFloorPlugin {
                 Scene currentEvironment = GetCurrentEnvironment();
                 if (!currentEvironment.name.StartsWith("Menu", STR_INV) && MultiplayerCheck() && currentEvironment.name != "TutorialEnvironment") { //Excluding TutorialEnvironment for Counters+ to work properly
                     try {
-                        Settings.UpdatePlayerData();
-                        if (!Settings.PlayerData.overrideEnvironmentSettings.overrideEnvironments) {
+                        if (EnvironmentSceneOverrider.didOverrideEnvironment) {
                             if (!platformSpawned) {
-                                Settings.PlayerData.overrideEnvironmentSettings.overrideEnvironments = true;
-                                didUpdateOverrideEnvironmentSettings = true;
-                                oldEnvironmentInfo = Settings.PlayerData.overrideEnvironmentSettings.GetOverrideEnvironmentInfoForType(environmentType);
-                                Settings.PlayerData.overrideEnvironmentSettings.SetEnvironmentInfoForType(environmentType, environmentInfo);
                                 MultiplayerController.disabledPlatformInMultiplayer = false;
                                 PlatformLifeCycleManagement.InternalChangeToPlatform();
                             }
@@ -227,11 +198,6 @@ namespace CustomFloorPlugin {
                     }
                 }
                 else {
-                    if (didUpdateOverrideEnvironmentSettings) {
-                        Settings.PlayerData.overrideEnvironmentSettings.SetEnvironmentInfoForType(environmentType, oldEnvironmentInfo);
-                        Settings.PlayerData.overrideEnvironmentSettings.overrideEnvironments = false;
-                        didUpdateOverrideEnvironmentSettings = false;
-                    }
                     platformSpawned = false;
                     Heart.SetActive(Settings.ShowHeart);
                     Heart.GetComponent<LightWithIdMonoBehaviour>().ColorWasSet(Color.magenta);

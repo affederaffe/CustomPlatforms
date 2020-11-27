@@ -63,6 +63,7 @@
     <Compile Include="Behaviour Descriptors\CameraVisibility.cs" />
     <Compile Include="Behaviour Descriptors\ComboReachedEvent.cs" />
     <Compile Include="Behaviour Descriptors\MultiRotationEventEffect.cs" />
+    <Compile Include="Harmony Patches\EnvironmentOverride_Patch.cs" />
     <Compile Include="MultiplayerController.cs" />
     <Compile Include="NotifyOnEnableOrDisable.cs" />
     <Compile Include="Behaviour Descriptors\PrefabLightmapData.cs" />
@@ -72,7 +73,6 @@
     <Compile Include="Behaviour Managers\SpectrogramAnimationStateManager.cs" />
     <Compile Include="Behaviour Managers\SpectrogramMaterialManager.cs" />
     <Compile Include="Behaviours\SpectrogramColumns.cs" />
-    <Compile Include="EnvironmentSceneOverrider.SceneInfoWithBackup.cs" />
     <Compile Include="EnvOverrideMode.cs" />
     <Compile Include="Extensions\Extentions.cs" />
     <Compile Include="Harmony Patches\HandleOverrideEnvironmentsToggleValueChanged_EnvironmentOverrideSettingsPanelController_Patch.cs" />
@@ -82,7 +82,6 @@
     <Compile Include="GlobalCollection.cs" />
     <Compile Include="Utilities\UnityObjectSearching.cs" />
     <EmbeddedResource Include="manifest.json" />
-    <Compile Include="EnvironmentRepositioner.cs" />
     <Compile Include="Exceptions\EnvironmentSceneNotFoundException.cs" />
     <Compile Include="EnvironmentSceneOverrider.cs" />
     <Compile Include="Exceptions\ComponentNotFoundException.cs" />

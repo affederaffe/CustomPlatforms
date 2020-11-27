@@ -44,8 +44,8 @@ namespace CustomFloorPlugin.UI {
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "BSML")]
         private void PlatformSelect(TableView ignored1, int idx) {
             PlatformManager.SetPlatformAndShow(idx);
-            Settings.PlayerData.overrideEnvironmentSettings.overrideEnvironments = false;
-            EnvironmentSceneOverrider.SetEnabled(true);
+            //Settings.PlayerData.overrideEnvironmentSettings.overrideEnvironments = false;
+            //EnvironmentSceneOverrider.SetEnabled(true);
         }
         [UIAction("reloadPlatforms")]
         public void ReloadMaterials() {

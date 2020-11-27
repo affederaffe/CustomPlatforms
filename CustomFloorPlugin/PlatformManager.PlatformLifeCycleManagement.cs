@@ -50,7 +50,6 @@ namespace CustomFloorPlugin {
                     AddManagers(activePlatform);
                     NotifyPlatform(activePlatform, NotifyType.Enable);
                     SpawnCustomObjects();
-                    EnvironmentArranger.RearrangeEnvironment();
                     SharedCoroutineStarter.instance.StartCoroutine(WaitAndReplaceMaterials()); //Waiting until the end of the Frame to prevent the Materials of Spectrograms not being replaced ("White Spectrograms Bug").
                     static IEnumerator<WaitForEndOfFrame> WaitAndReplaceMaterials() {
                         yield return new WaitForEndOfFrame();

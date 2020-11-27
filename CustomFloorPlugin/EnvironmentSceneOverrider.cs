@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Linq;
 
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 using static CustomFloorPlugin.GlobalCollection;
 
@@ -19,92 +18,72 @@ namespace CustomFloorPlugin {
     /// </summary>
     internal static partial class EnvironmentSceneOverrider {
 
-        private static readonly List<SceneInfoWithBackup> allSceneInfos = GetAllEnvs();
-        private static readonly Dictionary<EnvOverrideMode, SceneInfoWithBackup> supportedSceneInfos = new Dictionary<EnvOverrideMode, SceneInfoWithBackup>() {
-            {EnvOverrideMode.Default, EnvWithName("Default")},
+        private static readonly EnvironmentInfoSO[] allSceneInfos = GetAllEnvs();
+        private static readonly EnvironmentTypeSO environmentType = Resources.FindObjectsOfTypeAll<EnvironmentTypeSO>()[0]; // NormalEnvironemntTypeSO
+        private static readonly Dictionary<EnvOverrideMode, EnvironmentInfoSO> supportedEnvironmentInfos = new Dictionary<EnvOverrideMode, EnvironmentInfoSO>() {
+            {EnvOverrideMode.Origins, EnvWithName("Origins")},
             {EnvOverrideMode.Nice, EnvWithName("Nice")},
             {EnvOverrideMode.BigMirror, EnvWithName("BigMirror")},
             {EnvOverrideMode.Triangle, EnvWithName("Triangle")},
             {EnvOverrideMode.KDA, EnvWithName("KDA")},
             {EnvOverrideMode.Monstercat, EnvWithName("Monstercat")}
         };
+        private static EnvironmentInfoSO oldEnvironmentInfoSO;
+
+        internal static bool didOverrideEnvironment;
 
 
         /// <summary>
-        /// Initializes the <see cref="EnvironmentSceneOverrider"/>
-        /// </summary>
-        internal static void Init() {
-            Settings.EnvOrChanged -= OverrideEnvironment;
-            Settings.EnvOrChanged += OverrideEnvironment;
-            SetEnabled(!Settings.PlayerData.overrideEnvironmentSettings.overrideEnvironments);
-        }
-
-
-        /// <summary>
-        /// Enables or disables the override.
-        /// </summary>
-        /// <param name="enable">Whether to enable or disable the override</param>
-        internal static void SetEnabled(bool enable) {
-            if (enable && PlatformManager.CurrentPlatformIndex != 0) {
-                OverrideEnvironment(Settings.EnvOr);
-            }
-            else {
-                Revert();
-            }
-        }
-
-
-        /// <summary>
-        /// Overrides the environment <see cref="Scene"/>, which the game attempts to load when transitioning into the game scene
+        /// Enables the <see cref="OverrideEnvironmentSettings"/> and changes it to the selected <see cref="EnvOverrideMode"/>
         /// </summary>
         /// <param name="mode">The environment to load when transitioning into play mode</param>
         internal static void OverrideEnvironment(EnvOverrideMode mode) {
-            string sceneName = supportedSceneInfos[mode].SceneName;
-            for (int i = 0; i < allSceneInfos.Count; i++) {
-                allSceneInfos[i].SceneName = sceneName;
+            Utilities.Logging.Log("Overridden Environment: " + supportedEnvironmentInfos[mode].environmentName);
+            Settings.PlayerData.overrideEnvironmentSettings.overrideEnvironments = true;
+            oldEnvironmentInfoSO = Settings.PlayerData.overrideEnvironmentSettings.GetOverrideEnvironmentInfoForType(environmentType);
+            Settings.PlayerData.overrideEnvironmentSettings.SetEnvironmentInfoForType(environmentType, supportedEnvironmentInfos[mode]);
+            didOverrideEnvironment = true;
+        }
+
+
+        /// <summary>
+        /// Reverts the changes to the <see cref="OverrideEnvironmentSettings"/>
+        /// </summary>
+        internal static void Revert() {
+            if (didOverrideEnvironment && oldEnvironmentInfoSO != null) {
+                Utilities.Logging.Log("Resetted Environment Override Settings");
+                Settings.PlayerData.overrideEnvironmentSettings.SetEnvironmentInfoForType(environmentType, oldEnvironmentInfoSO);
+                Settings.PlayerData.overrideEnvironmentSettings.overrideEnvironments = false;
+                didOverrideEnvironment = false;
             }
         }
 
 
         /// <summary>
-        /// Reverts all overridden <see cref="SceneInfo"/>s to their original state
+        /// Gathers all <see cref="EnvironmentInfoSO"/>s in Beat Saber
         /// </summary>
-        private static void Revert() {
-            for (int i = 0; i < allSceneInfos.Count; i++) {
-                allSceneInfos[i].SceneName = allSceneInfos[i].BackupName;
-            }
-        }
-
-
-        /// <summary>
-        /// Gathers all <see cref="SceneInfo"/>s in Beat Saber, then creates backups for them
-        /// </summary>
-        private static List<SceneInfoWithBackup> GetAllEnvs() {
-            List<SceneInfo> rawList =
-                Resources.FindObjectsOfTypeAll<SceneInfo>().Where(x =>
-                   x.name.EndsWith("EnvironmentSceneInfo", STR_INV)
-                   &&
+        private static EnvironmentInfoSO[] GetAllEnvs() {
+            EnvironmentInfoSO[] environmentInfos = Resources.FindObjectsOfTypeAll<EnvironmentInfoSO>().Where(x =>
                    !(
-                       x.name.StartsWith("Menu", STR_INV)
+                       x.name.Contains("Menu")
                        ||
-                       x.name.StartsWith("Tutorial", STR_INV)
+                       x.name.Contains("Tutorial")
+                       ||
+                       x.name.Contains("GlassDesert")
+                       ||
+                       x.name.Contains("Multiplayer")
                    )
-                ).ToList()
-            ;
-            List<SceneInfoWithBackup> list = new List<SceneInfoWithBackup>();
-            foreach (SceneInfo sceneInfo in rawList) {
-                list.Add(new SceneInfoWithBackup(sceneInfo));
-            }
-            return list;
+                ).ToArray();
+            return environmentInfos;
         }
 
 
         /// <summary>
-        /// Identifies a <see cref="SceneInfoWithBackup"/> in <see cref="allSceneInfos"/>
+        /// Identifies a <see cref="EnvironmentInfoSO"/> in <see cref="allSceneInfos"/>
         /// </summary>
         /// <param name="name">The original SceneName of the wrapped <see cref="SceneInfo"/></param>
-        private static SceneInfoWithBackup EnvWithName(string name) {
-            return allSceneInfos.First(x => x.BackupName.StartsWith(name, STR_INV));
+        private static EnvironmentInfoSO EnvWithName(string name) {
+            return allSceneInfos.First(x => x.name.StartsWith(name, STR_INV));
         }
     }
 }
