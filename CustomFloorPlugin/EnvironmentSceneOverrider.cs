@@ -21,7 +21,7 @@ namespace CustomFloorPlugin {
         private static readonly EnvironmentInfoSO[] allSceneInfos = GetAllEnvs();
         private static readonly EnvironmentTypeSO environmentType = Resources.FindObjectsOfTypeAll<EnvironmentTypeSO>()[0]; // NormalEnvironemntTypeSO
         private static readonly Dictionary<EnvOverrideMode, EnvironmentInfoSO> supportedEnvironmentInfos = new Dictionary<EnvOverrideMode, EnvironmentInfoSO>() {
-            {EnvOverrideMode.None, null},
+            {EnvOverrideMode.Song, null},
             {EnvOverrideMode.Origins, EnvWithName("Origins")},
             {EnvOverrideMode.Nice, EnvWithName("Nice")},
             {EnvOverrideMode.BigMirror, EnvWithName("BigMirror")},

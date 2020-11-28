@@ -1,8 +1,25 @@
-﻿<vertical>
-  <page-button event-click='PlatformsList#PageUp' direction='Up'></page-button>
-  <list id='PlatformsList' expand-cell='true' select-cell='PlatformSelect'></list>
-  <page-button event-click='PlatformsList#PageDown' direction='Down'></page-button>
-  <horizontal child-control-height='false'>
-    <button text='Reload all platforms' on-click='reloadPlatforms' />
+﻿<vertical vertical-fit="PreferredSize">
+  <horizontal>
+    <vertical>
+      <horizontal bg='panel-top' pad='1'>
+        <label text="Custom Platform" align='Center' font-size='6'></label>
+      </horizontal>
+      <page-button event-click="PlatformsList#PageUp" direction="Up"></page-button>
+      <list id="PlatformsList" expand-cell="true" select-cell="PlatformSelect"></list>
+      <page-button event-click="PlatformsList#PageDown" direction="Down"></page-button>
+    </vertical>
+
+    <vertical>
+      <horizontal bg='panel-top' pad='1'>
+        <label text="Underlying Environment" align='Center' font-size='6'></label>
+      </horizontal>
+      <page-button event-click="OverrideList#PageUp" direction="Up" interactable="true"></page-button>
+      <list id="OverrideList" expand-cell="true" select-cell="OverrideSelect"></list>
+      <page-button event-click="OverrideList#PageDown" direction="Down" interactable="true"></page-button>
+    </vertical>
+  </horizontal>
+  
+  <horizontal>
+    <button text="Reload all platforms" on-click="reloadPlatforms"/>
   </horizontal>
 </vertical>

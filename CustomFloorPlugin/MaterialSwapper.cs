@@ -63,8 +63,13 @@ namespace CustomFloorPlugin {
         /// </summary>
         /// <param name="gameObject"><see cref="GameObject"/> to search for <see cref="Renderer"/>s</param>
         internal static void ReplaceMaterials(GameObject gameObject) {
-            foreach (Renderer renderer in FindAll<Renderer>(gameObject)) {
-                ReplaceForRenderer(renderer);
+            try {
+                foreach (Renderer renderer in FindAll<Renderer>(gameObject)) {
+                    ReplaceForRenderer(renderer);
+                }
+            }
+            catch (ComponentNotFoundException) {
+                Log("No Renderers present, skipping...");
             }
         }
 

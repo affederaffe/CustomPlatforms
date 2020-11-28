@@ -26,31 +26,6 @@ namespace CustomFloorPlugin.UI {
 
 
         /// <summary>
-        /// The list of options the user can choose from for override modes
-        /// </summary>
-        [UIValue("env-ovs")]
-        public static readonly List<object> envOrs = new List<object>() {
-            EnvOverrideMode.None,
-            EnvOverrideMode.Origins,
-            EnvOverrideMode.Nice,
-            EnvOverrideMode.BigMirror,
-            EnvOverrideMode.Triangle,
-            EnvOverrideMode.KDA,
-            EnvOverrideMode.Monstercat,
-            EnvOverrideMode.Dragons,
-            EnvOverrideMode.CrabRave,
-            EnvOverrideMode.Panic,
-            EnvOverrideMode.Rocket,
-            EnvOverrideMode.GreenDayGrenade,
-            EnvOverrideMode.GreenDay,
-            EnvOverrideMode.Timbaland,
-            EnvOverrideMode.FitBeat,
-            EnvOverrideMode.LinkinPark,
-            EnvOverrideMode.BTS
-        };
-
-
-        /// <summary>
         /// Hover hint of load-custom-scripts
         /// </summary>
         [UIValue("LoadingCustomScriptsText")]
@@ -62,33 +37,6 @@ namespace CustomFloorPlugin.UI {
         /// </summary>
         [UIValue("UseInMultiplayerText")]
         public const string useInMultiplayerText = "Toggle if Custom Platforms is used in Multiplayer \n!BUGGY!";
-
-
-        /// <summary>
-        /// Override choice for platform base model/environment<br/>
-        /// Forwards the current choice to the UI, and the new choice to the plugin
-        /// </summary>
-        [UIValue("env-ov")]
-        public static EnvOverrideMode EnvOr {
-            get {
-                if (_EnvOr == null) {
-                    //Wrapping value because 'Off' no longer exists
-                    _EnvOr = (EnvOverrideMode)(CONFIG.GetInt("Settings", "EnvironmentOverrideMode", 0, true) % 6);
-                }
-                return _EnvOr.Value;
-            }
-            set {
-                if (value != _EnvOr.Value) {
-                    CONFIG.SetInt("Settings", "EnvironmentOverrideMode", (int)value);
-                    _EnvOr = value;
-                    EnvOrChanged(value);
-                }
-            }
-        }
-        private static EnvOverrideMode? _EnvOr;
-        internal static event Action<EnvOverrideMode> EnvOrChanged = delegate (EnvOverrideMode value) {
-            Log("EnvOr value changed. Notifying listeners.\nNew value: " + value);
-        };
 
 
         /// <summary>

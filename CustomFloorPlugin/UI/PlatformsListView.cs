@@ -1,10 +1,17 @@
+using System;
+using System.Linq;
+
 using BeatSaberMarkupLanguage.Attributes;
 using BeatSaberMarkupLanguage.Components;
+using BeatSaberMarkupLanguage.Parser;
 using BeatSaberMarkupLanguage.ViewControllers;
 
 using HMUI;
-using System.Linq;
+
 using UnityEngine;
+using UnityEngine.UI;
+
+using static CustomFloorPlugin.GlobalCollection;
 
 
 namespace CustomFloorPlugin.UI {
@@ -26,10 +33,43 @@ namespace CustomFloorPlugin.UI {
 
 
         /// <summary>
+        /// Override choice for platform base model/environment<br/>
+        /// Forwards the current choice to the UI, and the new choice to the plugin
+        /// </summary>
+        //[UIValue("env-ov")]
+        public static EnvOverrideMode EnvOr {
+            get {
+                if (_EnvOr == null) {
+                    _EnvOr = (EnvOverrideMode)(CONFIG.GetInt("Settings", "EnvironmentOverrideMode", 0, true) % 6);
+                }
+                return _EnvOr.Value;
+            }
+            set {
+                if (value != _EnvOr.Value) {
+                    CONFIG.SetInt("Settings", "EnvironmentOverrideMode", (int)value);
+                    _EnvOr = value;
+                    EnvOrChanged(value);
+                }
+            }
+        }
+        private static EnvOverrideMode? _EnvOr;
+        internal static event Action<EnvOverrideMode> EnvOrChanged = delegate (EnvOverrideMode value) {
+            Utilities.Logging.Log("EnvOr value changed. Notifying listeners.\nNew value: " + value);
+        };
+
+
+        [UIParams]
+        internal BSMLParserParams parserParams;
+
+
+        /// <summary>
         /// The table of currently loaded Platforms
         /// </summary>
         [UIComponent("PlatformsList")]
         public CustomListTableData PlatformListTable = null;
+
+        [UIComponent("OverrideList")]
+        public CustomListTableData OverrideListTable = null;
 
 
         /// <summary>
@@ -44,9 +84,17 @@ namespace CustomFloorPlugin.UI {
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "BSML")]
         private void PlatformSelect(TableView ignored1, int idx) {
             PlatformManager.SetPlatformAndShow(idx);
-            //Settings.PlayerData.overrideEnvironmentSettings.overrideEnvironments = false;
-            //EnvironmentSceneOverrider.SetEnabled(true);
         }
+
+        [UIAction("OverrideSelect")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Code Quality", "IDE0051:Remove unused private members", Justification = "Called by BSML")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Build", "CA1801:Review unused parameters", Justification = "BSML")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "BSML")]
+        private void OverrideSelect(TableView ignored1, int idx) {
+            EnvOr = (EnvOverrideMode)idx;
+            parserParams.EmitEvent("close-OverrideModal");
+        }
+
         [UIAction("reloadPlatforms")]
         public void ReloadMaterials() {
             PlatformManager.Reload();
@@ -81,7 +129,12 @@ namespace CustomFloorPlugin.UI {
         /// [Called by BSML]
         /// </summary>
         [UIAction("#post-parse")]
-        internal void SetupPlatformsList() {
+        internal void SetupLists() {
+            SetupPlatformsList();
+            SetupOverrideList();
+        }
+
+        private void SetupPlatformsList() {
             PlatformListTable.data.Clear();
             foreach (CustomPlatform platform in PlatformManager.AllPlatforms) {
                 PlatformListTable.data.Add(new CustomListTableData.CustomCellInfo(platform.platName, platform.platAuthor, platform.icon));
@@ -89,8 +142,20 @@ namespace CustomFloorPlugin.UI {
             PlatformListTable.tableView.ReloadData();
             int selectedPlatform = PlatformManager.CurrentPlatformIndex;
             if (!PlatformListTable.tableView.visibleCells.Any(x => x.selected))
-                PlatformListTable.tableView.ScrollToCellWithIdx(selectedPlatform, HMUI.TableViewScroller.ScrollPositionType.Beginning, false);
+                PlatformListTable.tableView.ScrollToCellWithIdx(selectedPlatform, TableViewScroller.ScrollPositionType.Beginning, false);
             PlatformListTable.tableView.SelectCellWithIdx(selectedPlatform);
+        }
+
+        private void SetupOverrideList() {
+            OverrideListTable.data.Clear();
+            foreach (string name in Enum.GetNames(typeof(EnvOverrideMode))) {
+                OverrideListTable.data.Add(new CustomListTableData.CustomCellInfo(name));
+            }
+            OverrideListTable.tableView.ReloadData();
+            int selectedOverride = (int)EnvOr;
+            if (!OverrideListTable.tableView.visibleCells.Any(x => x.selected))
+                OverrideListTable.tableView.ScrollToCellWithIdx(selectedOverride, TableViewScroller.ScrollPositionType.Beginning, false);
+            OverrideListTable.tableView.SelectCellWithIdx(selectedOverride);
         }
     }
 }

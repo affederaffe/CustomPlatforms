@@ -5,7 +5,7 @@
     /// Used to determine what Scene will be loaded after hitting the play button, if the <see cref="EnvironmentSceneOverrider"/> is active.
     /// </summary>
     internal enum EnvOverrideMode {
-        None,
+        Song,
         Origins,
         Nice,
         BigMirror,
