@@ -184,7 +184,7 @@ namespace CustomFloorPlugin {
         private static void TransitionFinalize() {
             try {
                 Scene currentEvironment = GetCurrentEnvironment();
-                if (!currentEvironment.name.StartsWith("Menu", STR_INV) && MultiplayerCheck() && currentEvironment.name != "TutorialEnvironment") { //Excluding TutorialEnvironment for Counters+ to work properly
+                if (!currentEvironment.name.StartsWith("Menu", STR_INV) && MultiplayerCheck() &&  D360Check() && currentEvironment.name != "TutorialEnvironment") { //Excluding TutorialEnvironment for Counters+ to work properly
                     try {
                         Settings.UpdatePlayerData();
                         if (EnvironmentSceneOverrider.didOverrideEnvironment || (PlatformsListView.EnvOr == EnvOverrideMode.Song && !Settings.PlayerData.overrideEnvironmentSettings.overrideEnvironments)) {
@@ -418,6 +418,22 @@ namespace CustomFloorPlugin {
             else {
                 return true;
             }
+        }
+
+        private static bool D360Check() {
+            string[] d360Environments = {
+                "GlassDesertEnvironment"
+            };
+            Scene currentEnvironment = GetCurrentEnvironment();
+            foreach (string environmentName in d360Environments) {
+                if (currentEnvironment.name == environmentName && Settings.UseIn360) {
+                    return true;
+                }
+                else if (currentEnvironment.name == environmentName && !Settings.UseIn360) {
+                    return false;
+                }
+            }
+            return true;
         }
     }
 }

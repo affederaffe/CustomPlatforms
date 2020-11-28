@@ -1,7 +1,9 @@
-﻿using CustomFloorPlugin.UI;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
+
 using UnityEngine;
+
+using CustomFloorPlugin.UI;
 using static CustomFloorPlugin.GlobalCollection;
 using static CustomFloorPlugin.Utilities.BeatSaberSearching;
 using static CustomFloorPlugin.Utilities.UnityObjectSearching;
@@ -317,11 +319,19 @@ namespace CustomFloorPlugin {
 
             // BTS
             FindAddGameObject("Environment/Clouds", highway);
+
+            // 360°
+            FindAddGameObject("Environment/Collider", highway);
         }
 
         private static void FindBackColumns() {
             backColumns = new List<GameObject>();
             FindAddGameObject("Environment/BackColumns", backColumns);
+
+            // 360°
+            for (int i = 2; i < 24; i++) {
+                FindAddGameObject($"Environment/GameObject ({i})", backColumns);
+            }
         }
 
         private static void FindRotatingLasers() {
@@ -341,6 +351,11 @@ namespace CustomFloorPlugin {
             FindAddGameObject("Environment/RotatingLaserRight1", rotatingLasers);
             FindAddGameObject("Environment/RotatingLaserRight2", rotatingLasers);
             FindAddGameObject("Environment/RotatingLaserRight3", rotatingLasers);
+
+            // 360°
+            for (int i = 9; i < 19; i++) {
+                FindAddGameObject($"Environment/LightPillar ({i})", rotatingLasers);
+            }
         }
 
         private static void FindDoubleColorLasers() {
@@ -350,6 +365,11 @@ namespace CustomFloorPlugin {
             FindAddGameObject("Environment/DoubleColorLaser", doubleColorLasers);
             for (int i = 0; i < 9; i++) {
                 FindAddGameObject($"Environment/DoubleColorLaser ({i+1})", doubleColorLasers);
+            }
+
+            // 360°
+            for (int i = 4; i < 13; i++) {
+                FindAddGameObject($"Environment/DownLaser ({i})", doubleColorLasers);
             }
         }
 
@@ -376,6 +396,9 @@ namespace CustomFloorPlugin {
             }
             FindAddGameObject("Environment/GradientBackground", backLasers);
             FindAddGameObject("Environment/StarHemisphere", backLasers);
+
+            // 360°
+            //FindAddGameObject("Environment/SpawnRotationChevronManager", backLasers);
         }
 
         private static void FindTrackLights() {
@@ -458,6 +481,17 @@ namespace CustomFloorPlugin {
             FindAddGameObject("Environment/GlowLineC", trackLights);
             FindAddGameObject("Environment/BottomGlow", trackLights);
             FindAddGameObject("Environment/LaserR", trackLights);
+
+            // 360°
+            FindAddGameObject("Environment/TopLaser", trackLights);
+            for (int i = 1; i < 6; i++) {
+                FindAddGameObject($"Environment/TopLaser ({i})", trackLights);
+            }
+            FindAddGameObject("Environment/Cube", trackLights);
+            FindAddGameObject("Environment/Cube (82)", trackLights);
+            for (int i = 82; i < 90; i++) {
+                FindAddGameObject($"Environment/Cube ({i})", trackLights);
+            }
         }
     }
 }

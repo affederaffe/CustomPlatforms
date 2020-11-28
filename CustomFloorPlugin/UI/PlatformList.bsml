@@ -1,8 +1,8 @@
 ﻿<vertical vertical-fit="PreferredSize">
-  <horizontal>
+  <horizontal pad-top="10">
     <vertical>
-      <horizontal bg='panel-top' pad='1'>
-        <label text="Custom Platform" align='Center' font-size='6'></label>
+      <horizontal bg="panel-top" pad="1">
+        <label text="Custom Platform" align="Center" font-size="6"></label>
       </horizontal>
       <page-button event-click="PlatformsList#PageUp" direction="Up"></page-button>
       <list id="PlatformsList" expand-cell="true" select-cell="PlatformSelect"></list>
@@ -10,8 +10,8 @@
     </vertical>
 
     <vertical>
-      <horizontal bg='panel-top' pad='1'>
-        <label text="Underlying Environment" align='Center' font-size='6'></label>
+      <horizontal bg="panel-top" pad="1">
+        <label text="Underlying Environment" align="Center" font-size="6"></label>
       </horizontal>
       <page-button event-click="OverrideList#PageUp" direction="Up" interactable="true"></page-button>
       <list id="OverrideList" expand-cell="true" select-cell="OverrideSelect"></list>
@@ -20,6 +20,6 @@
   </horizontal>
   
   <horizontal>
-    <button text="Reload all platforms" on-click="reloadPlatforms"/>
+    <button text="Reload all platforms" on-click="reloadPlatforms" font-size="6"/>
   </horizontal>
 </vertical>

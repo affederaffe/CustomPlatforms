@@ -31,12 +31,18 @@ namespace CustomFloorPlugin.UI {
         [UIValue("LoadingCustomScriptsText")]
         public const string loadingCustomScriptsText = "Loading Custom Scripts \nUse this at your own risk! \nOnly use scripts of trusted sources!";
 
+        /// <summary>
+        /// Hover hint for use-in-360
+        /// </summary>
+        [UIValue("UseIn360Text")]
+        public const string useIn360Text = "Toggle if Custom Platforms is used in 360°-Levels \n!Not supported!";
+
 
         /// <summary>
         /// Hover hint of use-in-multiplayer
         /// </summary>
         [UIValue("UseInMultiplayerText")]
-        public const string useInMultiplayerText = "Toggle if Custom Platforms is used in Multiplayer \n!BUGGY!";
+        public const string useInMultiplayerText = "Toggle if Custom Platforms is used in Multiplayer \n!Not supported!";
 
 
         /// <summary>
@@ -87,6 +93,10 @@ namespace CustomFloorPlugin.UI {
         };
 
 
+        /// <summary>
+        /// Should this Plugin load CustomScripts?
+        /// Forwards the current choice to the UI, and the new choice to the plugin
+        /// </summary>
         [UIValue("load-custom-scripts")]
         public static bool LoadCustomScripts {
             get {
@@ -104,6 +114,28 @@ namespace CustomFloorPlugin.UI {
             }
         }
         private static bool? _LoadCustomScripts;
+
+
+        /// <summary>
+        /// Should this Plugin spawn a Custom Platform in 360°-Levels?
+        /// Forwards the current choice to the UI, and the new choice to the plugin
+        /// </summary>
+        [UIValue("use-in-360")]
+        public static bool UseIn360 {
+            get {
+                if (_UseIn360 == null) {
+                    _UseIn360 = CONFIG.GetBool("Settings", "UseIn360", false, true);
+                }
+                return _UseIn360.Value;
+            }
+            set {
+                if (value != _UseIn360.Value) {
+                    CONFIG.SetBool("Settings", "UseInMultiplayer", value);
+                    _UseIn360 = value;
+                }
+            }
+        }
+        private static bool? _UseIn360;
 
 
         /// <summary>

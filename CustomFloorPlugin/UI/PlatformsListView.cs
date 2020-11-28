@@ -9,7 +9,6 @@ using BeatSaberMarkupLanguage.ViewControllers;
 using HMUI;
 
 using UnityEngine;
-using UnityEngine.UI;
 
 using static CustomFloorPlugin.GlobalCollection;
 
@@ -36,7 +35,6 @@ namespace CustomFloorPlugin.UI {
         /// Override choice for platform base model/environment<br/>
         /// Forwards the current choice to the UI, and the new choice to the plugin
         /// </summary>
-        //[UIValue("env-ov")]
         public static EnvOverrideMode EnvOr {
             get {
                 if (_EnvOr == null) {
@@ -58,6 +56,9 @@ namespace CustomFloorPlugin.UI {
         };
 
 
+        /// <summary>
+        /// <see cref="BSMLParserParams"/> used to fire <see cref="UIAction"/>s
+        /// </summary>
         [UIParams]
         internal BSMLParserParams parserParams;
 
@@ -74,7 +75,7 @@ namespace CustomFloorPlugin.UI {
 
         /// <summary>
         /// Called when a <see cref="CustomPlatform"/> is selected by the user<br/>
-        /// Passes the choice to the <see cref="PlatformManager"/> and deactivates Beat Sabers inbuilt Environment Override
+        /// Passes the choice to the <see cref="PlatformManager"/>
         /// </summary>
         /// <param name="ignored1">I love how optimised BSML is</param>
         /// <param name="idx">Cell index of the users selection</param>
@@ -86,6 +87,12 @@ namespace CustomFloorPlugin.UI {
             PlatformManager.SetPlatformAndShow(idx);
         }
 
+        /// <summary>
+        /// Called when a <see cref="EnvOverrideMode"/> is selected by the user<br/>
+        /// Passes the choice to <see cref="EnvOr"/>
+        /// </summary>
+        /// <param name="ignored1">I love how optimised BSML is</param>
+        /// <param name="idx">Cell index of the users selection</param>
         [UIAction("OverrideSelect")]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Code Quality", "IDE0051:Remove unused private members", Justification = "Called by BSML")]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Build", "CA1801:Review unused parameters", Justification = "BSML")]
@@ -105,7 +112,6 @@ namespace CustomFloorPlugin.UI {
         /// Swapping back to the standard menu environment when the menu is closed<br/>
         /// [Called by Beat Saber]
         /// </summary>
-        /// <param name="deactivationType">Type of deactivation</param>
         protected override void DidDeactivate(bool removedFromHierarchy, bool screenSystemDisabling) {
             PlatformManager.ChangeToPlatform(0);
             base.DidDeactivate(removedFromHierarchy, screenSystemDisabling);
@@ -116,8 +122,6 @@ namespace CustomFloorPlugin.UI {
         /// Changing to the current platform when the menu is shown<br/>
         /// [Called by Beat Saber]
         /// </summary>
-        /// <param name="firstActivation">Was this the first activation?</param>
-        /// <param name="type">Type of activation</param>
         protected override void DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling) {
             PlatformManager.ChangeToPlatform();
             base.DidActivate(firstActivation, addedToHierarchy, screenSystemEnabling);
@@ -125,7 +129,7 @@ namespace CustomFloorPlugin.UI {
 
 
         /// <summary>
-        /// (Re-)Loading the table for the ListView of available platforms.<br/>
+        /// (Re-)Loading the table for the ListView of available platforms and environments to override.<br/>
         /// [Called by BSML]
         /// </summary>
         [UIAction("#post-parse")]
