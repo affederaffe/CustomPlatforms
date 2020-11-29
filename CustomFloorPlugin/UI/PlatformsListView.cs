@@ -142,8 +142,10 @@ namespace CustomFloorPlugin.UI {
             }
             PlatformListTable.tableView.ReloadData();
             int selectedPlatform = PlatformManager.CurrentPlatformIndex;
-            if (!PlatformListTable.tableView.visibleCells.Any(x => x.selected))
+            if (!PlatformListTable.tableView.visibleCells.Any(x => x.selected)) {
                 PlatformListTable.tableView.ScrollToCellWithIdx(selectedPlatform, TableViewScroller.ScrollPositionType.Beginning, false);
+            }
+
             PlatformListTable.tableView.SelectCellWithIdx(selectedPlatform);
         }
 
@@ -154,8 +156,10 @@ namespace CustomFloorPlugin.UI {
             }
             OverrideListTable.tableView.ReloadData();
             int selectedOverride = (int)EnvOr;
-            if (!OverrideListTable.tableView.visibleCells.Any(x => x.selected))
+            if (!OverrideListTable.tableView.visibleCells.Any(x => x.selected)) {
                 OverrideListTable.tableView.ScrollToCellWithIdx(selectedOverride, TableViewScroller.ScrollPositionType.Beginning, false);
+            }
+
             OverrideListTable.tableView.SelectCellWithIdx(selectedOverride);
         }
     }

@@ -1,5 +1,7 @@
 ﻿using BeatSaberMarkupLanguage;
+
 using CustomFloorPlugin.Utilities;
+
 using HMUI;
 
 namespace CustomFloorPlugin.UI {

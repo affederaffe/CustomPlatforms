@@ -46,7 +46,7 @@ namespace CustomFloorPlugin {
         /// </summary>
         private void SubscribeToEvents() {
             BSEvents.gameSceneLoaded += delegate () { _EventManager.OnLevelStart.Invoke(); };
-            BSEvents.noteWasCut += delegate (NoteData data, NoteCutInfo info, int multiplier) { if (info.allIsOK) _EventManager.OnSlice.Invoke(); };
+            BSEvents.noteWasCut += delegate (NoteData data, NoteCutInfo info, int multiplier) { if (info.allIsOK) { _EventManager.OnSlice.Invoke(); } };
             BSEvents.comboDidBreak += delegate () { _EventManager.OnComboBreak.Invoke(); };
             BSEvents.multiplierDidIncrease += delegate (int multiplier) { _EventManager.MultiplierUp.Invoke(); };
             BSEvents.comboDidChange += delegate (int combo) { _EventManager.OnComboChanged.Invoke(combo); };
@@ -62,7 +62,7 @@ namespace CustomFloorPlugin {
         /// </summary>
         private void UnsubscribeFromEvents() {
             BSEvents.gameSceneLoaded -= delegate () { _EventManager.OnLevelStart.Invoke(); };
-            BSEvents.noteWasCut -= delegate (NoteData data, NoteCutInfo info, int multiplier) { if (info.allIsOK) _EventManager.OnSlice.Invoke(); };
+            BSEvents.noteWasCut -= delegate (NoteData data, NoteCutInfo info, int multiplier) { if (info.allIsOK) { _EventManager.OnSlice.Invoke(); } };
             BSEvents.comboDidBreak -= delegate () { _EventManager.OnComboBreak.Invoke(); };
             BSEvents.multiplierDidIncrease -= delegate (int multiplier) { _EventManager.MultiplierUp.Invoke(); };
             BSEvents.comboDidChange -= delegate (int combo) { _EventManager.OnComboChanged.Invoke(combo); };

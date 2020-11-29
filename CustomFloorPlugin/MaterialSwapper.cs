@@ -1,7 +1,10 @@
-﻿using CustomFloorPlugin.Exceptions;
-using System.Linq;
+﻿using System.Linq;
+
+using CustomFloorPlugin.Exceptions;
+
 using UnityEngine;
 using UnityEngine.SceneManagement;
+
 using static CustomFloorPlugin.GlobalCollection;
 using static CustomFloorPlugin.Utilities.Logging;
 using static CustomFloorPlugin.Utilities.UnityObjectSearching;
@@ -15,7 +18,7 @@ namespace CustomFloorPlugin {
     /// Primary reason for this is the absence of proper custom <see cref="Shader"/>s (or decompiled source <see cref="Shader"/>s) and a lack of knowledge about their inner workings...<br/>
     /// Part of the documentation for this file is omited because it's a clusterfuck and under construction.
     /// </summary>
-    static class MaterialSwapper {
+    internal static class MaterialSwapper {
         private static readonly Material dark;
         private static readonly Material glow;
         private static readonly Material opaqueGlow;

@@ -1,6 +1,6 @@
-using BS_Utils.Utilities;
-
 using System.Linq;
+
+using BS_Utils.Utilities;
 
 using UnityEngine;
 

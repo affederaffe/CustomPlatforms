@@ -1,6 +1,9 @@
-﻿using IPA.Utilities;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+
+using IPA.Utilities;
+
 using UnityEngine;
+
 using static CustomFloorPlugin.GlobalCollection;
 using static CustomFloorPlugin.Utilities.BeatSaberSearching;
 using static CustomFloorPlugin.Utilities.Logging;
@@ -125,7 +128,10 @@ namespace CustomFloorPlugin {
                 if (active) {
                     go.SetActive(false);
                 }
-                if (!GetCurrentEnvironment().name.StartsWith("Multiplayer", STR_INV)) AddManagers(go, go); //@TODO Prevents the attaching of Managers bc Events are handeled differently in Multiplayer (temporary)
+                if (!GetCurrentEnvironment().name.StartsWith("Multiplayer", STR_INV)) {
+                    AddManagers(go, go); //@TODO Prevents the attaching of Managers bc Events are handeled differently in Multiplayer (temporary)
+                }
+
                 if (active) {
                     go.SetActive(true);
                 }

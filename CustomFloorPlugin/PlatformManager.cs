@@ -3,17 +3,13 @@ using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 
+using CustomFloorPlugin.Exceptions;
+using CustomFloorPlugin.UI;
+
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-using HMUI;
-
-using BeatSaberMarkupLanguage;
-
 using Zenject;
-
-using CustomFloorPlugin.Exceptions;
-using CustomFloorPlugin.UI;
 
 using static CustomFloorPlugin.GlobalCollection;
 using static CustomFloorPlugin.Utilities.BeatSaberSearching;
@@ -190,7 +186,7 @@ namespace CustomFloorPlugin {
         private static void TransitionFinalize() {
             try {
                 Scene currentEvironment = GetCurrentEnvironment();
-                if (!currentEvironment.name.StartsWith("Menu", STR_INV) && MultiplayerCheck() &&  D360Check() && currentEvironment.name != "TutorialEnvironment") { //Excluding TutorialEnvironment for Counters+ to work properly
+                if (!currentEvironment.name.StartsWith("Menu", STR_INV) && MultiplayerCheck() && D360Check() && currentEvironment.name != "TutorialEnvironment") { //Excluding TutorialEnvironment for Counters+ to work properly
                     try {
                         Settings.UpdatePlayerData();
                         if (EnvironmentSceneOverrider.didOverrideEnvironment || (PlatformsListView.EnvOr == EnvOverrideMode.Song && !Settings.PlayerData.overrideEnvironmentSettings.overrideEnvironments)) {

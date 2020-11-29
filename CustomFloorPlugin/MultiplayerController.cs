@@ -12,9 +12,9 @@ namespace CustomFloorPlugin {
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Build", "CA1812:Avoid unistantiated internal classes", Justification = "Instantiated by Unity")]
         private class MultiplayerController : MonoBehaviour {
             internal static bool disabledPlatformInMultiplayer = false;
-            const string specSpot = "Environment/GrandstandSpectatingSpot/MultiplayerLocalInactivePlayerController(Clone)/MultiplayerLocalInactivePlayerInGameMenuViewController/MenuWrapper/Canvas";
-            const string specSpotDuel1 = "Environment/GrandstandSpectatingSpot-Duel1/MultiplayerLocalInactivePlayerController(Clone)/MultiplayerLocalInactivePlayerInGameMenuViewController/MenuWrapper/Canvas";
-            const string specSpotDuel2 = "Environment/GrandstandSpectatingSpot-Duel2/MultiplayerLocalInactivePlayerController(Clone)/MultiplayerLocalInactivePlayerInGameMenuViewController/MenuWrapper/Canvas";
+            private const string specSpot = "Environment/GrandstandSpectatingSpot/MultiplayerLocalInactivePlayerController(Clone)/MultiplayerLocalInactivePlayerInGameMenuViewController/MenuWrapper/Canvas";
+            private const string specSpotDuel1 = "Environment/GrandstandSpectatingSpot-Duel1/MultiplayerLocalInactivePlayerController(Clone)/MultiplayerLocalInactivePlayerInGameMenuViewController/MenuWrapper/Canvas";
+            private const string specSpotDuel2 = "Environment/GrandstandSpectatingSpot-Duel2/MultiplayerLocalInactivePlayerController(Clone)/MultiplayerLocalInactivePlayerInGameMenuViewController/MenuWrapper/Canvas";
 
             /// <summary>
             /// Checks if the Player is spectating by trying to find an element of the spectator menu<br/>

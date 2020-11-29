@@ -1,9 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 
+using CustomFloorPlugin.UI;
+
 using UnityEngine;
 
-using CustomFloorPlugin.UI;
 using static CustomFloorPlugin.GlobalCollection;
 using static CustomFloorPlugin.Utilities.BeatSaberSearching;
 using static CustomFloorPlugin.Utilities.UnityObjectSearching;
@@ -33,11 +34,7 @@ namespace CustomFloorPlugin {
 
         //private static List<GameObject> MPPCs;
 
-        private static bool ShowFeetOverride {
-            get {
-                return Settings.AlwaysShowFeet;
-            }
-        }
+        private static bool ShowFeetOverride => Settings.AlwaysShowFeet;
 
 
         /// <summary>
@@ -59,18 +56,53 @@ namespace CustomFloorPlugin {
             yield return new WaitForEndOfFrame();
             FindEnvironment();
             HandelEnvironment(platform);
-            if (playersPlace != null) SetCollectionHidden(playersPlace, platform.hideDefaultPlatform);
-            if (feet != null) SetCollectionHidden(feet, platform.hideDefaultPlatform && !ShowFeetOverride);
-            if (smallRings != null) SetCollectionHidden(smallRings, platform.hideSmallRings);
-            if (bigRings != null) SetCollectionHidden(bigRings, platform.hideBigRings);
-            if (visualizer != null) SetCollectionHidden(visualizer, platform.hideEQVisualizer);
-            if (towers != null) SetCollectionHidden(towers, platform.hideTowers);
-            if (highway != null) SetCollectionHidden(highway, platform.hideHighway);
-            if (backColumns != null) SetCollectionHidden(backColumns, platform.hideBackColumns);
-            if (backLasers != null) SetCollectionHidden(backLasers, platform.hideBackLasers);
-            if (doubleColorLasers != null) SetCollectionHidden(doubleColorLasers, platform.hideDoubleColorLasers);
-            if (rotatingLasers != null) SetCollectionHidden(rotatingLasers, platform.hideRotatingLasers);
-            if (trackLights != null) SetCollectionHidden(trackLights, platform.hideTrackLights);
+            if (playersPlace != null) {
+                SetCollectionHidden(playersPlace, platform.hideDefaultPlatform);
+            }
+
+            if (feet != null) {
+                SetCollectionHidden(feet, platform.hideDefaultPlatform && !ShowFeetOverride);
+            }
+
+            if (smallRings != null) {
+                SetCollectionHidden(smallRings, platform.hideSmallRings);
+            }
+
+            if (bigRings != null) {
+                SetCollectionHidden(bigRings, platform.hideBigRings);
+            }
+
+            if (visualizer != null) {
+                SetCollectionHidden(visualizer, platform.hideEQVisualizer);
+            }
+
+            if (towers != null) {
+                SetCollectionHidden(towers, platform.hideTowers);
+            }
+
+            if (highway != null) {
+                SetCollectionHidden(highway, platform.hideHighway);
+            }
+
+            if (backColumns != null) {
+                SetCollectionHidden(backColumns, platform.hideBackColumns);
+            }
+
+            if (backLasers != null) {
+                SetCollectionHidden(backLasers, platform.hideBackLasers);
+            }
+
+            if (doubleColorLasers != null) {
+                SetCollectionHidden(doubleColorLasers, platform.hideDoubleColorLasers);
+            }
+
+            if (rotatingLasers != null) {
+                SetCollectionHidden(rotatingLasers, platform.hideRotatingLasers);
+            }
+
+            if (trackLights != null) {
+                SetCollectionHidden(trackLights, platform.hideTrackLights);
+            }
         }
 
 
@@ -78,7 +110,10 @@ namespace CustomFloorPlugin {
         /// Finds all GameObjects that make up the default environment and groups them into lists
         /// </summary>
         private static void FindEnvironment() {
-            if (IsNullZeroOrContainsNull(menuEnvironment)) FindMenuEnvironmnet();
+            if (IsNullZeroOrContainsNull(menuEnvironment)) {
+                FindMenuEnvironmnet();
+            }
+
             FindPlayersPlace();
             FindFeetIcon();
             FindSmallRings();
@@ -100,9 +135,14 @@ namespace CustomFloorPlugin {
         /// <param name="list">A <see cref="List{T}"/> of GameObjects</param>
         /// <param name="hidden">A boolean describing the desired hidden state</param>
         private static void SetCollectionHidden(List<GameObject> list, bool hidden) {
-            if (list == null) return;
+            if (list == null) {
+                return;
+            }
+
             foreach (GameObject go in list) {
-                if (go != null) go.SetActive(!hidden);
+                if (go != null) {
+                    go.SetActive(!hidden);
+                }
             }
         }
 
@@ -147,10 +187,19 @@ namespace CustomFloorPlugin {
         }
 
         private static void HandelEnvironment(CustomPlatform platform) {
-            if (PlatformManager.PlayersPlace != null && PlatformManager.activePlatform != null && !platform.hideDefaultPlatform && (GetCurrentEnvironment().name.StartsWith("Menu", STR_INV) || GetCurrentEnvironment().name == "MultiplayerEnvironment")) PlatformManager.PlayersPlace.SetActive(true); // Handles Platforms which would normally use the default Platform...
-            else if (PlatformManager.PlayersPlace != null) PlatformManager.PlayersPlace.SetActive(false); // Only in Menu
-            if (menuEnvironment != null && PlatformManager.activePlatform != null) SetCollectionHidden(menuEnvironment, true); // Always hide the Menu Environment in Song...
-            else SetCollectionHidden(menuEnvironment, false); // ...but not in Menu
+            if (PlatformManager.PlayersPlace != null && PlatformManager.activePlatform != null && !platform.hideDefaultPlatform && (GetCurrentEnvironment().name.StartsWith("Menu", STR_INV) || GetCurrentEnvironment().name == "MultiplayerEnvironment")) {
+                PlatformManager.PlayersPlace.SetActive(true); // Handles Platforms which would normally use the default Platform...
+            }
+            else if (PlatformManager.PlayersPlace != null) {
+                PlatformManager.PlayersPlace.SetActive(false); // Only in Menu
+            }
+
+            if (menuEnvironment != null && PlatformManager.activePlatform != null) {
+                SetCollectionHidden(menuEnvironment, true); // Always hide the Menu Environment in Song...
+            }
+            else {
+                SetCollectionHidden(menuEnvironment, false); // ...but not in Menu
+            }
         }
 
         private static void FindMenuEnvironmnet() {
@@ -197,9 +246,9 @@ namespace CustomFloorPlugin {
             FindAddGameObject("TrackLaneRing", smallRings);
             FindAddGameObject("Environment/SmallTrackLaneRings", smallRings);
             FindAddGameObject("TriangleTrackLaneRing", smallRings);
-            foreach (var trackLaneRing in Resources.FindObjectsOfTypeAll<TrackLaneRing>().Where(x => 
-                x.name == "TrackLaneRing(Clone)" || 
-                x.name == "TriangleTrackLaneRing(Clone)" || 
+            foreach (TrackLaneRing trackLaneRing in Resources.FindObjectsOfTypeAll<TrackLaneRing>().Where(x =>
+                x.name == "TrackLaneRing(Clone)" ||
+                x.name == "TriangleTrackLaneRing(Clone)" ||
                 x.name == "PanelsTrackLaneRing(Clone)" ||
                 x.name == "Panels4TrackLaneRing(Clone)" ||
                 x.name == "PairLaserTrackLaneRing(Clone)" ||
@@ -215,7 +264,7 @@ namespace CustomFloorPlugin {
         private static void FindBigRings() {
             bigRings = new List<GameObject>();
             FindAddGameObject("Environment/BigLightsTrackLaneRings", bigRings);
-            foreach (var trackLaneRing in Resources.FindObjectsOfTypeAll<TrackLaneRing>().Where(x => 
+            foreach (TrackLaneRing trackLaneRing in Resources.FindObjectsOfTypeAll<TrackLaneRing>().Where(x =>
                 x.name == "BigTrackLaneRing(Clone)" ||
                 x.name == "BigCenterLightTrackLaneRing(Clone)"
                 )) {
@@ -364,7 +413,7 @@ namespace CustomFloorPlugin {
             // Default, BigMirror, Nice, 
             FindAddGameObject("Environment/DoubleColorLaser", doubleColorLasers);
             for (int i = 0; i < 9; i++) {
-                FindAddGameObject($"Environment/DoubleColorLaser ({i+1})", doubleColorLasers);
+                FindAddGameObject($"Environment/DoubleColorLaser ({i + 1})", doubleColorLasers);
             }
 
             // 360°
@@ -439,7 +488,7 @@ namespace CustomFloorPlugin {
             FindAddGameObject("Environment/DragonsSidePSL", trackLights);
             FindAddGameObject("Environment/DragonsSidePSR", trackLights);
             for (int i = 0; i < 15; i++) {
-                FindAddGameObject($"Environment/ConstructionGlowLine ({i+1})", trackLights);
+                FindAddGameObject($"Environment/ConstructionGlowLine ({i + 1})", trackLights);
             }
 
             // Rocket

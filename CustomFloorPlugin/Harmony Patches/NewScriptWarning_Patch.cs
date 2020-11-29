@@ -1,6 +1,7 @@
-﻿using HarmonyLib;
+﻿using BeatSaberMarkupLanguage;
 
-using BeatSaberMarkupLanguage;
+using HarmonyLib;
+
 using HMUI;
 
 namespace CustomFloorPlugin.HarmonyPatches {
@@ -10,9 +11,11 @@ namespace CustomFloorPlugin.HarmonyPatches {
     internal class NewScriptWarning_Patch {
 
 
-        public static void Postfix(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling) {
-            if (PlatformLoader.newScriptsFound) {
-                Utilities.Logging.Log("FlowCoordinator should be presented");
+        private static bool runOnce = false;
+
+        public static void Postfix() {
+            if (PlatformLoader.newScriptsFound && !runOnce) {
+                runOnce = true;
                 BeatSaberUI.MainFlowCoordinator.PresentFlowCoordinator(UI.PlatformUI.NewScriptWarningFlowCoordinator, null, ViewController.AnimationDirection.Horizontal, true, false);
             }
         }

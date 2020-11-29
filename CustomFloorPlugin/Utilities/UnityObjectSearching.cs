@@ -1,7 +1,7 @@
-﻿using CustomFloorPlugin.Exceptions;
-
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Reflection;
+
+using CustomFloorPlugin.Exceptions;
 
 using UnityEngine;
 using UnityEngine.SceneManagement;

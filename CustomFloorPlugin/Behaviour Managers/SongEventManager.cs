@@ -1,7 +1,7 @@
-﻿using BS_Utils.Utilities;
-
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Reflection;
+
+using BS_Utils.Utilities;
 
 using UnityEngine;
 

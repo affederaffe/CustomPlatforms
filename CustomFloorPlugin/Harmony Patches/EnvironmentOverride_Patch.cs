@@ -5,7 +5,7 @@ namespace CustomFloorPlugin.HarmonyPatches {
 
     [HarmonyPatch(typeof(StandardLevelScenesTransitionSetupDataSO))]
     [HarmonyPatch("Init")]
-    class EnvironmentOverride_Patch {
+    internal class EnvironmentOverride_Patch {
 
 
         public static void Prefix(ref OverrideEnvironmentSettings overrideEnvironmentSettings) {

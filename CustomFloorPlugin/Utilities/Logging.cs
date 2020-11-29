@@ -1,7 +1,7 @@
-﻿using CustomFloorPlugin.Extensions;
-
-using System;
+﻿using System;
 using System.Collections.Generic;
+
+using CustomFloorPlugin.Extensions;
 
 using UnityEngine;
 

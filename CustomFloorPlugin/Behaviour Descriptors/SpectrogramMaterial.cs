@@ -17,11 +17,11 @@ namespace CustomFloorPlugin {
             spectrogramData = newData;
         }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Code Quality", "IDE0051:Remove unused private members", Justification = "Called by Unity")]
-        void Start() {
+        private void Start() {
             renderer = gameObject.GetComponent<Renderer>();
         }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Code Quality", "IDE0051:Remove unused private members", Justification = "Called by Unity")]
-        void Update() {
+        private void Update() {
             if (spectrogramData != null && renderer != null) {
                 float average = 0.0f;
                 for (int i = 0; i < 64; i++) {

@@ -34,11 +34,12 @@ namespace CustomFloorPlugin {
                     m_Renderers.Length <= 0 ||
                     m_Renderers.Length != m_LightmapOffsetScales.Length ||
                     m_Renderers.Length != m_Lightmaps.Length ||
-                    m_LightmapOffsetScales.Length != m_Lightmaps.Length)
+                    m_LightmapOffsetScales.Length != m_Lightmaps.Length) {
                     return;
+                }
 
-                var lightmaps = LightmapSettings.lightmaps;
-                var combinedLightmaps = new LightmapData[m_Lightmaps.Length + lightmaps.Length];
+                LightmapData[] lightmaps = LightmapSettings.lightmaps;
+                LightmapData[] combinedLightmaps = new LightmapData[m_Lightmaps.Length + lightmaps.Length];
 
                 Array.Copy(lightmaps, combinedLightmaps, lightmaps.Length);
                 for (int i = 0; i < m_Lightmaps.Length; i++) {
@@ -58,7 +59,7 @@ namespace CustomFloorPlugin {
 
         private static void ApplyRendererInfo(Renderer[] renderers, Vector4[] lightmapOffsetScales, int lightmapIndexOffset) {
             for (int i = 0; i < renderers.Length; i++) {
-                var renderer = renderers[i];
+                Renderer renderer = renderers[i];
                 renderer.lightmapIndex = i + lightmapIndexOffset;
                 renderer.lightmapScaleOffset = lightmapOffsetScales[i];
             }

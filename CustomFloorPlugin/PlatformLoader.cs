@@ -5,13 +5,9 @@ using System.Linq;
 using System.Reflection;
 using System.Security.Cryptography;
 
-using UnityEngine;
-
-using HMUI;
-
-using BeatSaberMarkupLanguage;
-
 using CustomFloorPlugin.Exceptions;
+
+using UnityEngine;
 
 using static CustomFloorPlugin.GlobalCollection;
 using static CustomFloorPlugin.Utilities.Logging;
@@ -36,9 +32,9 @@ namespace CustomFloorPlugin {
         internal static bool newScriptsFound = false;
 
 
-        static readonly internal string customPlatformsFolderPath = Path.Combine(Environment.CurrentDirectory, FOLDER);
-        static readonly internal string customPlatformsScriptFolderPath = Path.Combine(customPlatformsFolderPath, SCRIPT_FOLDER);
-        static readonly internal string scriptHashesPath = Path.Combine(Environment.CurrentDirectory, "Beat Saber_Data/Plugins", SCRIPT_HASHES_FILENAME);
+        internal static readonly string customPlatformsFolderPath = Path.Combine(Environment.CurrentDirectory, FOLDER);
+        internal static readonly string customPlatformsScriptFolderPath = Path.Combine(customPlatformsFolderPath, SCRIPT_FOLDER);
+        internal static readonly string scriptHashesPath = Path.Combine(Environment.CurrentDirectory, "Beat Saber_Data/Plugins", SCRIPT_HASHES_FILENAME);
 
 
         /// <summary>
@@ -95,12 +91,14 @@ namespace CustomFloorPlugin {
 
             AssetBundle bundle = AssetBundle.LoadFromFile(bundlePath);
 
-            if (bundle == null) return null;
+            if (bundle == null) {
+                return null;
+            }
 
             CustomPlatform newPlatform = LoadPlatform(bundle, parent);
 
-            using var md5 = MD5.Create();
-            using var stream = File.OpenRead(bundlePath);
+            using MD5 md5 = MD5.Create();
+            using FileStream stream = File.OpenRead(bundlePath);
 
             byte[] hash = md5.ComputeHash(stream);
             newPlatform.platHash = BitConverter.ToString(hash).Replace("-", string.Empty).ToLowerInvariant();
@@ -162,7 +160,9 @@ namespace CustomFloorPlugin {
 
             newPlatform.name = customPlatform.platName + " by " + customPlatform.platAuthor;
 
-            if (customPlatform.icon == null) customPlatform.icon = Resources.FindObjectsOfTypeAll<Sprite>().Where(x => x.name == "FeetIcon").FirstOrDefault();
+            if (customPlatform.icon == null) {
+                customPlatform.icon = Resources.FindObjectsOfTypeAll<Sprite>().Where(x => x.name == "FeetIcon").FirstOrDefault();
+            }
 
             newPlatform.SetActive(false);
 
@@ -217,6 +217,7 @@ namespace CustomFloorPlugin {
                 }
 
                 if (!newScriptsFound) {
+                    Log("No new CustomScripts found, loading all in directory " + customPlatformsScriptFolderPath);
                     foreach (string path in allScriptPaths) {
                         Assembly.LoadFrom(path);
                     }
@@ -235,8 +236,8 @@ namespace CustomFloorPlugin {
         /// <returns>The Hex Hash of the File</returns>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Security", "CA5351:Do Not Use Broken Cryptographic Algorithms", Justification = "MD5 Hash not used in security relevant context")]
         private static string ComputeHashFromPath(string path) {
-            using var md5 = MD5.Create();
-            using var stream = File.OpenRead(path);
+            using MD5 md5 = MD5.Create();
+            using FileStream stream = File.OpenRead(path);
             byte[] byteHash = md5.ComputeHash(stream);
             string hash = BitConverter.ToString(byteHash).Replace("-", string.Empty).ToUpperInvariant();
             return hash;

@@ -1,8 +1,8 @@
+using System.Collections.Generic;
+
 using BS_Utils.Utilities;
 
 using IPA.Utilities;
-
-using System.Collections.Generic;
 
 using UnityEngine;
 
@@ -66,7 +66,7 @@ namespace CustomFloorPlugin {
             lightRotationEffects = new List<LightRotationEventEffect>();
             multiEffects = new List<MultiRotationEventEffect.Actor>();
 
-            var effectDescriptors = currentPlatform.GetComponentsInChildren<RotationEventEffect>(true);
+            RotationEventEffect[] effectDescriptors = currentPlatform.GetComponentsInChildren<RotationEventEffect>(true);
 
             foreach (RotationEventEffect effectDescriptor in effectDescriptors) {
                 LightRotationEventEffect rotEvent = effectDescriptor.gameObject.AddComponent<LightRotationEventEffect>();
@@ -77,7 +77,7 @@ namespace CustomFloorPlugin {
                 rotEvent.SetField("_startRotation", rotEvent.transform.rotation);
                 lightRotationEffects.Add(rotEvent);
             }
-            var effectDescriptors2 = currentPlatform.GetComponentsInChildren<MultiRotationEventEffect>(true);
+            MultiRotationEventEffect[] effectDescriptors2 = currentPlatform.GetComponentsInChildren<MultiRotationEventEffect>(true);
             foreach (MultiRotationEventEffect effectDescriptor in effectDescriptors2) {
                 MultiRotationEventEffect.Actor rotEvent = effectDescriptor.Create();
                 PlatformManager.SpawnedComponents.Add(rotEvent);

@@ -26,7 +26,7 @@ namespace CustomFloorPlugin {
         }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Code Quality", "IDE0051:Remove unused private members", Justification = "Called by Unity")]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "I don't have enough information on what COULD be thrown here to edit this catch block")]
-        void Update() {
+        private void Update() {
             try {
                 if (animationClip != null) {
                     animation = GetComponent<Animation>();

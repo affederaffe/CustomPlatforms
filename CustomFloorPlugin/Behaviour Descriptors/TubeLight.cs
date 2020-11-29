@@ -88,10 +88,10 @@ namespace CustomFloorPlugin {
                 tubeBloomLight.SetField("_maxAlpha", 0.1f);
                 tubeBloomLight.SetField("_bloomFogIntensityMultiplier", fogIntensityMultiplier);
 
-                var parabox = tubeBloomLight.GetComponentInChildren<ParametricBoxController>();
+                ParametricBoxController parabox = tubeBloomLight.GetComponentInChildren<ParametricBoxController>();
                 tubeBloomLight.SetField("_parametricBoxController", parabox);
 
-                var parasprite = tubeBloomLight.GetComponentInChildren<Parametric3SliceSpriteController>();
+                Parametric3SliceSpriteController parasprite = tubeBloomLight.GetComponentInChildren<Parametric3SliceSpriteController>();
                 tubeBloomLight.SetField("_dynamic3SliceSprite", parasprite);
                 parasprite.Init();
                 parasprite.GetComponent<MeshRenderer>().enabled = false;
