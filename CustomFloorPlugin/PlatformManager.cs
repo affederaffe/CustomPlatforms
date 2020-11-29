@@ -1,5 +1,3 @@
-using CustomFloorPlugin.Exceptions;
-using CustomFloorPlugin.UI;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -8,7 +6,14 @@ using System.Reflection;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
+using HMUI;
+
+using BeatSaberMarkupLanguage;
+
 using Zenject;
+
+using CustomFloorPlugin.Exceptions;
+using CustomFloorPlugin.UI;
 
 using static CustomFloorPlugin.GlobalCollection;
 using static CustomFloorPlugin.Utilities.BeatSaberSearching;
@@ -144,6 +149,7 @@ namespace CustomFloorPlugin {
         }
 
         internal static void Reload() {
+            PlatformLoader.LoadScripts();
             AllPlatforms = PlatformLoader.CreateAllPlatforms(Anchor.transform);
             CurrentPlatform = AllPlatforms[0];
             if (CONFIG.HasKey("Data", "CustomPlatformPath")) {

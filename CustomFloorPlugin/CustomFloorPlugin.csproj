@@ -64,6 +64,7 @@
     <Compile Include="Behaviour Descriptors\ComboReachedEvent.cs" />
     <Compile Include="Behaviour Descriptors\MultiRotationEventEffect.cs" />
     <Compile Include="Harmony Patches\EnvironmentOverride_Patch.cs" />
+    <Compile Include="Harmony Patches\NewScriptWarning_Patch.cs" />
     <Compile Include="MultiplayerController.cs" />
     <Compile Include="NotifyOnEnableOrDisable.cs" />
     <Compile Include="Behaviour Descriptors\PrefabLightmapData.cs" />
@@ -77,6 +78,8 @@
     <Compile Include="Extensions\Extentions.cs" />
     <Compile Include="PlatformManager.EasterEggs.cs" />
     <Compile Include="PlatformManager.PlatformLifeCycleManagement.cs" />
+    <Compile Include="UI\NewScriptWarningFlowCoordinator.cs" />
+    <Compile Include="UI\NewScriptWarningView.cs" />
     <Compile Include="Utilities\BeatSaberSearching.cs" />
     <Compile Include="GlobalCollection.cs" />
     <Compile Include="Utilities\UnityObjectSearching.cs" />
@@ -305,7 +308,9 @@
     <Analyzer Include="D:\SteamLibrary\steamapps\common\Beat Saber\Plugins\BS_Utils.dll" />
     -->
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <EmbeddedResource Include="UI\NewScriptWarning.bsml" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="BuildTargets.targets" />
   <PropertyGroup>

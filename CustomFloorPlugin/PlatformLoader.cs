@@ -1,4 +1,3 @@
-using CustomFloorPlugin.Exceptions;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -7,6 +6,12 @@ using System.Reflection;
 using System.Security.Cryptography;
 
 using UnityEngine;
+
+using HMUI;
+
+using BeatSaberMarkupLanguage;
+
+using CustomFloorPlugin.Exceptions;
 
 using static CustomFloorPlugin.GlobalCollection;
 using static CustomFloorPlugin.Utilities.Logging;
@@ -23,35 +28,32 @@ namespace CustomFloorPlugin {
 
 
         /// <summary>
+        /// <see cref="List{string}<"/> holding all Hashes of CustomScripts
+        /// </summary>
+        internal static List<string> scriptHashList;
+
+
+        internal static bool newScriptsFound = false;
+
+
+        static readonly internal string customPlatformsFolderPath = Path.Combine(Environment.CurrentDirectory, FOLDER);
+        static readonly internal string customPlatformsScriptFolderPath = Path.Combine(customPlatformsFolderPath, SCRIPT_FOLDER);
+        static readonly internal string scriptHashesPath = Path.Combine(Environment.CurrentDirectory, "Beat Saber_Data/Plugins", SCRIPT_HASHES_FILENAME);
+
+
+        /// <summary>
         /// Loads AssetBundles and populates the platforms array with CustomPlatform objects
         /// </summary>
-        public static List<CustomPlatform> CreateAllPlatforms(Transform parent) {
+        internal static List<CustomPlatform> CreateAllPlatforms(Transform parent) {
 
-            string customPlatformsFolderPath = Path.Combine(Environment.CurrentDirectory, FOLDER);
-            string customPlatformsScriptFolderPath = Path.Combine(customPlatformsFolderPath, SCRIPT_FOLDER);
 
             // Create the CustomPlatforms folder if it doesn't already exist
             if (!Directory.Exists(customPlatformsFolderPath)) {
                 Directory.CreateDirectory(customPlatformsFolderPath);
             }
 
-            // Create the CustomPlatforms script folder if it doesn't already exist
-            if (!Directory.Exists(customPlatformsScriptFolderPath)) {
-                Directory.CreateDirectory(customPlatformsScriptFolderPath);
-            }
-
             // Find AssetBundles in our CustomPlatforms directory
             string[] allBundlePaths = Directory.GetFiles(customPlatformsFolderPath, "*.plat");
-
-            // Find Dlls in our CustomPlatformsScript directory
-            string[] allScriptPaths = Directory.GetFiles(customPlatformsScriptFolderPath, "*.dll");
-
-            // Load all CustomScripts
-            if (UI.Settings.LoadCustomScripts) {
-                foreach (string path in allScriptPaths) {
-                    Assembly.LoadFrom(path);
-                }
-            }
 
             List<CustomPlatform> platforms = new List<CustomPlatform>();
 
@@ -165,6 +167,79 @@ namespace CustomFloorPlugin {
             newPlatform.SetActive(false);
 
             return customPlatform;
+        }
+
+
+        /// <summary>
+        ///  Tries to load all CustomScripts, but aborts when <see cref="UI.Settings.LoadCustomScripts"/> is false or a new Script is found
+        /// </summary>
+        /// <returns>
+        /// <see cref="bool"/> newScriptsFound
+        /// </returns>
+        internal static void LoadScripts() {
+
+            // Create the CustomPlatforms script folder if it doesn't already exist
+            if (!Directory.Exists(customPlatformsScriptFolderPath)) {
+                Directory.CreateDirectory(customPlatformsScriptFolderPath);
+            }
+
+            // Find Dlls in our CustomPlatformsScript directory
+            string[] allScriptPaths = Directory.GetFiles(customPlatformsScriptFolderPath, "*.dll");
+
+            // Checks if a new CustomScript is found, if not loads all Scripts
+            if (UI.Settings.LoadCustomScripts) {
+                scriptHashList = new List<string>();
+                foreach (string path in allScriptPaths) {
+                    string hash = ComputeHashFromPath(path);
+                    scriptHashList.Add(hash);
+                }
+                if (File.Exists(scriptHashesPath)) {
+                    string[] oldHashes = File.ReadAllLines(scriptHashesPath);
+                    int i = 0;
+                    if (scriptHashList.Count == oldHashes.Length) {
+                        foreach (string hash1 in scriptHashList) {
+                            foreach (string hash2 in oldHashes) {
+                                if (hash1 == hash2) {
+                                    i++;
+                                }
+                            }
+                        }
+                        if (scriptHashList.Count != i) {
+                            newScriptsFound = true;
+                        }
+                        else {
+                            newScriptsFound = false;
+                        }
+                    }
+                    else {
+                        newScriptsFound = true;
+                    }
+                }
+
+                if (!newScriptsFound) {
+                    foreach (string path in allScriptPaths) {
+                        Assembly.LoadFrom(path);
+                    }
+                }
+                else {
+                    Log("New CustomScripts found, loading aborted!");
+                }
+            }
+        }
+
+
+        /// <summary>
+        /// Computes a MD5 Hash and converts it to Hex
+        /// </summary>
+        /// <param name="path">Path to the File the Hash should be created for</param>
+        /// <returns>The Hex Hash of the File</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Security", "CA5351:Do Not Use Broken Cryptographic Algorithms", Justification = "MD5 Hash not used in security relevant context")]
+        private static string ComputeHashFromPath(string path) {
+            using var md5 = MD5.Create();
+            using var stream = File.OpenRead(path);
+            byte[] byteHash = md5.ComputeHash(stream);
+            string hash = BitConverter.ToString(byteHash).Replace("-", string.Empty).ToUpperInvariant();
+            return hash;
         }
     }
 }

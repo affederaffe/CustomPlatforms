@@ -31,7 +31,6 @@ namespace CustomFloorPlugin.UI {
         /// [Called by Beat Saber]
         /// </summary>
         /// <param name="firstActivation">Was this the first activation?</param>
-        /// <param name="activationType">Was this call added to the hierachy.</param>
         protected override void DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling) {
             if (firstActivation) {
                 SetTitle("Custom Platforms");
@@ -48,6 +47,7 @@ namespace CustomFloorPlugin.UI {
         /// <param name="ignored1"></param>
         protected override void BackButtonWasPressed(ViewController ignored1) {
             Logging.Log("Selected Environment:" + PlatformManager.CurrentPlatform.platName);
+            Logging.Log("Selected Override: " + PlatformsListView.EnvOr);
             BeatSaberUI.MainFlowCoordinator.DismissFlowCoordinator(this, null, ViewController.AnimationDirection.Horizontal, false);
         }
     }

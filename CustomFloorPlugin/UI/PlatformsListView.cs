@@ -46,14 +46,10 @@ namespace CustomFloorPlugin.UI {
                 if (value != _EnvOr.Value) {
                     CONFIG.SetInt("Settings", "EnvironmentOverrideMode", (int)value);
                     _EnvOr = value;
-                    EnvOrChanged(value);
                 }
             }
         }
         private static EnvOverrideMode? _EnvOr;
-        internal static event Action<EnvOverrideMode> EnvOrChanged = delegate (EnvOverrideMode value) {
-            Utilities.Logging.Log("EnvOr value changed. Notifying listeners.\nNew value: " + value);
-        };
 
 
         /// <summary>
@@ -103,7 +99,8 @@ namespace CustomFloorPlugin.UI {
         }
 
         [UIAction("reloadPlatforms")]
-        public void ReloadMaterials() {
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Code Quality", "IDE0051:Remove unused private members", Justification = "Called by BSML")]
+        private void ReloadMaterials() {
             PlatformManager.Reload();
         }
 

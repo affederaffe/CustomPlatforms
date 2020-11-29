@@ -27,6 +27,20 @@ namespace CustomFloorPlugin.UI {
 
 
         /// <summary>
+        /// Static reference to the <see cref="NewScriptWarningFlowCoordinator"/> singleton
+        /// </summary>
+        internal static NewScriptWarningFlowCoordinator NewScriptWarningFlowCoordinator {
+            get {
+                if (_NewScriptWarningFlowCoordinator == null) {
+                    _NewScriptWarningFlowCoordinator = BeatSaberUI.CreateFlowCoordinator<NewScriptWarningFlowCoordinator>();
+                }
+                return _NewScriptWarningFlowCoordinator;
+            }
+        }
+        private static NewScriptWarningFlowCoordinator _NewScriptWarningFlowCoordinator;
+
+
+        /// <summary>
         /// Used to make sure setup is only performed once
         /// </summary>
         private static bool runOnce = false;

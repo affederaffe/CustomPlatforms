@@ -35,7 +35,7 @@ namespace CustomFloorPlugin {
         [OnStart]
         public void OnApplicationStart() {
             BSEvents.OnLoad();
-            BSEvents.menuSceneLoadedFresh += InitAfterLoad;
+            BSEvents.lateMenuSceneLoadedFresh += InitAfterLoad;
             Patcher.Patch();
             PlatformUI.SetupMenuButtons();
         }
@@ -44,8 +44,8 @@ namespace CustomFloorPlugin {
         /// <summary>
         /// Performs initialization steps after the game has loaded into the main menu for the first time
         /// </summary>
-        private void InitAfterLoad() {
-            BSEvents.menuSceneLoadedFresh -= InitAfterLoad;
+        private void InitAfterLoad(ScenesTransitionSetupDataSO ignored1) {
+            BSEvents.lateMenuSceneLoadedFresh -= InitAfterLoad;
             PlatformManager.Init();
         }
     }

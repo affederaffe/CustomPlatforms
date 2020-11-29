@@ -98,5 +98,8 @@ namespace CustomFloorPlugin {
         /// The Scripts folder path used for custom scripts
         /// </summary>
         internal const string SCRIPT_FOLDER = "Scripts";
+
+
+        internal const string SCRIPT_HASHES_FILENAME = "CustomScriptHashes.hashes";
     }
 }
