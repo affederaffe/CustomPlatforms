@@ -34,7 +34,7 @@ namespace CustomFloorPlugin {
 
         internal static readonly string customPlatformsFolderPath = Path.Combine(Environment.CurrentDirectory, FOLDER);
         internal static readonly string customPlatformsScriptFolderPath = Path.Combine(customPlatformsFolderPath, SCRIPT_FOLDER);
-        internal static readonly string scriptHashesPath = Path.Combine(Environment.CurrentDirectory, "Beat Saber_Data/Plugins", SCRIPT_HASHES_FILENAME);
+        internal static readonly string scriptHashesPath = Path.Combine(Environment.CurrentDirectory, "UserData", SCRIPT_HASHES_FILENAME);
 
 
         /// <summary>
@@ -183,6 +183,11 @@ namespace CustomFloorPlugin {
                 Directory.CreateDirectory(customPlatformsScriptFolderPath);
             }
 
+            // Preventing Issue when a script exists but the option is first enabled in menu
+            if (!File.Exists(scriptHashesPath)) {
+                File.Create(scriptHashesPath).Close();
+            }
+
             // Find Dlls in our CustomPlatformsScript directory
             string[] allScriptPaths = Directory.GetFiles(customPlatformsScriptFolderPath, "*.dll");
 
@@ -193,27 +198,26 @@ namespace CustomFloorPlugin {
                     string hash = ComputeHashFromPath(path);
                     scriptHashList.Add(hash);
                 }
-                if (File.Exists(scriptHashesPath)) {
-                    string[] oldHashes = File.ReadAllLines(scriptHashesPath);
-                    int i = 0;
-                    if (scriptHashList.Count == oldHashes.Length) {
-                        foreach (string hash1 in scriptHashList) {
-                            foreach (string hash2 in oldHashes) {
-                                if (hash1 == hash2) {
-                                    i++;
-                                }
+
+                string[] oldHashes = File.ReadAllLines(scriptHashesPath);
+                int i = 0;
+                if (scriptHashList.Count == oldHashes.Length) {
+                    foreach (string hash1 in scriptHashList) {
+                        foreach (string hash2 in oldHashes) {
+                            if (hash1 == hash2) {
+                                i++;
                             }
                         }
-                        if (scriptHashList.Count != i) {
-                            newScriptsFound = true;
-                        }
-                        else {
-                            newScriptsFound = false;
-                        }
                     }
-                    else {
+                    if (scriptHashList.Count != i) {
                         newScriptsFound = true;
                     }
+                    else {
+                        newScriptsFound = false;
+                    }
+                }
+                else {
+                    newScriptsFound = true;
                 }
 
                 if (!newScriptsFound) {

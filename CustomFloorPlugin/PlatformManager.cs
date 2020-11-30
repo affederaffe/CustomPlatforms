@@ -189,6 +189,7 @@ namespace CustomFloorPlugin {
                 if (!currentEvironment.name.StartsWith("Menu", STR_INV) && MultiplayerCheck() && D360Check() && currentEvironment.name != "TutorialEnvironment") { //Excluding TutorialEnvironment for Counters+ to work properly
                     try {
                         Settings.UpdatePlayerData();
+                        Heart.SetActive(false); // Make 100% sure Heart is disabled, in my test that wasn't the case all the time
                         if (EnvironmentSceneOverrider.didOverrideEnvironment || (PlatformsListView.EnvOr == EnvOverrideMode.Song && !Settings.PlayerData.overrideEnvironmentSettings.overrideEnvironments)) {
                             if (!platformSpawned) {
                                 MultiplayerController.disabledPlatformInMultiplayer = false;

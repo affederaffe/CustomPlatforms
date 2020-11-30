@@ -187,11 +187,13 @@ namespace CustomFloorPlugin {
         }
 
         private static void HandelEnvironment(CustomPlatform platform) {
-            if (PlatformManager.PlayersPlace != null && PlatformManager.activePlatform != null && !platform.hideDefaultPlatform && (GetCurrentEnvironment().name.StartsWith("Menu", STR_INV) || GetCurrentEnvironment().name == "MultiplayerEnvironment")) {
-                PlatformManager.PlayersPlace.SetActive(true); // Handles Platforms which would normally use the default Platform...
-            }
-            else if (PlatformManager.PlayersPlace != null) {
-                PlatformManager.PlayersPlace.SetActive(false); // Only in Menu
+            if (PlatformManager.PlayersPlace != null) {
+                if (PlatformManager.activePlatform != null && !platform.hideDefaultPlatform && GetCurrentEnvironment().name.StartsWith("Menu", STR_INV)) {
+                    PlatformManager.PlayersPlace.SetActive(true); // Handles Platforms which would normally use the default Platform...
+                }
+                else {
+                    PlatformManager.PlayersPlace.SetActive(false); // Only in Menu
+                }
             }
 
             if (menuEnvironment != null && PlatformManager.activePlatform != null) {

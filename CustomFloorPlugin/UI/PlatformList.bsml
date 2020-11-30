@@ -19,7 +19,7 @@
     </vertical>
   </horizontal>
   
-  <!--<horizontal>
+  <horizontal>
     <button text="Reload all platforms" on-click="reloadPlatforms" font-size="6"/>
-  </horizontal>-->
+  </horizontal>
 </vertical>
