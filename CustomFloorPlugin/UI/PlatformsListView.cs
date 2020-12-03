@@ -38,7 +38,7 @@ namespace CustomFloorPlugin.UI {
         public static EnvOverrideMode EnvOr {
             get {
                 if (_EnvOr == null) {
-                    _EnvOr = (EnvOverrideMode)(CONFIG.GetInt("Settings", "EnvironmentOverrideMode", 0, true) % 6);
+                    _EnvOr = (EnvOverrideMode)(CONFIG.GetInt("Settings", "EnvironmentOverrideMode", 0, true));
                 }
                 return _EnvOr.Value;
             }

@@ -203,6 +203,9 @@ namespace CustomFloorPlugin {
                         Log(e);
                     }
                 }
+                else if (currentEvironment.name == "TutorialEnvironment") {
+                    Heart.SetActive(false);
+                }
                 else {
                     platformSpawned = false;
                     Heart.SetActive(Settings.ShowHeart);
@@ -392,8 +395,13 @@ namespace CustomFloorPlugin {
                 InstancedMaterialLightWithId lightWithId = Heart.GetComponent<InstancedMaterialLightWithId>();
                 typeof(LightWithIdMonoBehaviour).GetField("_lightManager", BindingFlags.Instance | BindingFlags.NonPublic).SetValue(lightWithId, manager);
 
-                Heart.GetComponent<InstancedMaterialLightWithId>().ColorWasSet(Color.magenta);
+                if (InactiveHeart != null) {
+                    Heart.SetActive(false);
+                    InactiveHeart = GameObject.Instantiate(Heart);
+                }
+
                 Heart.SetActive(Settings.ShowHeart);
+                Heart.GetComponent<InstancedMaterialLightWithId>().ColorWasSet(Color.magenta);
             }
         }
 
