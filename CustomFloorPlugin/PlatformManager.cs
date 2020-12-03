@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 
+using BS_Utils.Utilities;
+
 using CustomFloorPlugin.Exceptions;
 using CustomFloorPlugin.UI;
 
@@ -170,7 +172,6 @@ namespace CustomFloorPlugin {
                 Scene currentEvironment = GetCurrentEnvironment();
                 if (!currentEvironment.name.StartsWith("Menu", STR_INV)) {
                     PlatformLifeCycleManagement.InternalChangeToPlatform(0);
-                    EnvironmentSceneOverrider.Revert();
                 }
                 else {
                     Heart.SetActive(false);
@@ -186,14 +187,15 @@ namespace CustomFloorPlugin {
         private static void TransitionFinalize() {
             try {
                 Scene currentEvironment = GetCurrentEnvironment();
-                if (!currentEvironment.name.StartsWith("Menu", STR_INV) && MultiplayerCheck() && D360Check() && currentEvironment.name != "TutorialEnvironment") { //Excluding TutorialEnvironment for Counters+ to work properly
+                if (!currentEvironment.name.StartsWith("Menu", STR_INV) && MultiplayerCheck() && D360Check()  && currentEvironment.name != "TutorialEnvironment") { //Excluding TutorialEnvironment for Counters+ to work properly
                     try {
                         Settings.UpdatePlayerData();
-                        Heart.SetActive(false); // Make 100% sure Heart is disabled, in my test that wasn't the case all the time
-                        if (EnvironmentSceneOverrider.didOverrideEnvironment || (PlatformsListView.EnvOr == EnvOverrideMode.Song && !Settings.PlayerData.overrideEnvironmentSettings.overrideEnvironments)) {
+                        if (EnvironmentSceneOverrider.didOverrideEnvironment || (PlatformsListView.EnvOr == EnvOverrideMode.Song && !Settings.PlayerData.overrideEnvironmentSettings.overrideEnvironments) || currentEvironment.name.StartsWith("Multiplayer", STR_INV)) {
                             if (!platformSpawned) {
                                 MultiplayerController.disabledPlatformInMultiplayer = false;
                                 PlatformLifeCycleManagement.InternalChangeToPlatform();
+                                Heart.SetActive(false); // TubeLight sets it to the current setting, so it has to be disabled twice
+                                EnvironmentSceneOverrider.Revert();
                             }
                         }
                     }
@@ -340,7 +342,6 @@ namespace CustomFloorPlugin {
                 Heart.SetActive(false);
                 Heart.transform.SetParent(null);
                 Heart.name = "<3";
-                InactiveHeart = Heart;
                 SceneManager.MoveGameObjectToScene(Heart, SCENE);
 
                 LightSource = root.transform.Find("GlowLineL (2)").gameObject;
@@ -387,7 +388,11 @@ namespace CustomFloorPlugin {
                 Heart.transform.rotation = rotation;
                 Heart.transform.localScale = scale;
 
-                Heart.GetComponent<LightWithIdMonoBehaviour>().ColorWasSet(Color.magenta);
+                LightWithIdManager manager = FindLightWithIdManager(GetCurrentEnvironment());
+                InstancedMaterialLightWithId lightWithId = Heart.GetComponent<InstancedMaterialLightWithId>();
+                typeof(LightWithIdMonoBehaviour).GetField("_lightManager", BindingFlags.Instance | BindingFlags.NonPublic).SetValue(lightWithId, manager);
+
+                Heart.GetComponent<InstancedMaterialLightWithId>().ColorWasSet(Color.magenta);
                 Heart.SetActive(Settings.ShowHeart);
             }
         }
@@ -412,11 +417,8 @@ namespace CustomFloorPlugin {
 
         private static bool MultiplayerCheck() {
             Scene currentEvironment = GetCurrentEnvironment();
-            if (currentEvironment.name.StartsWith("Multiplayer", STR_INV) && Settings.UseInMultiplayer) {
-                return true;
-            }
-            else if (currentEvironment.name.StartsWith("Multiplayer", STR_INV) && !Settings.UseInMultiplayer) {
-                return false;
+            if (currentEvironment.name.StartsWith("Multiplayer", STR_INV)) {
+                return Settings.UseInMultiplayer;
             }
             else {
                 return true;
@@ -429,11 +431,8 @@ namespace CustomFloorPlugin {
             };
             Scene currentEnvironment = GetCurrentEnvironment();
             foreach (string environmentName in d360Environments) {
-                if (currentEnvironment.name == environmentName && Settings.UseIn360) {
-                    return true;
-                }
-                else if (currentEnvironment.name == environmentName && !Settings.UseIn360) {
-                    return false;
+                if (currentEnvironment.name == environmentName) {
+                    return Settings.UseIn360;
                 }
             }
             return true;

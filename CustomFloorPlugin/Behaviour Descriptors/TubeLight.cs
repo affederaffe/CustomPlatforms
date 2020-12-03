@@ -1,3 +1,5 @@
+using System.Reflection;
+
 using IPA.Utilities;
 
 using UnityEngine;
@@ -100,9 +102,14 @@ namespace CustomFloorPlugin {
                 tubeBloomLight.gameObject.SetActive(true);
 
             }
-            else if (PlatformManager.InactiveHeart != null) {
+            else if (PlatformManager.Heart != null) {
                 // swap for <3
-                PlatformManager.InactiveHeart.SetActive(false);
+                if (PlatformManager.InactiveHeart == null) {
+                    PlatformManager.Heart.SetActive(false);
+                    PlatformManager.InactiveHeart = GameObject.Instantiate(PlatformManager.Heart);
+                    PlatformManager.Heart.SetActive(UI.Settings.ShowHeart);
+                    PlatformManager.Heart.GetComponent<InstancedMaterialLightWithId>().ColorWasSet(Color.magenta);
+                }
                 iHeartBeatSaber = Instantiate(PlatformManager.InactiveHeart);
                 PlatformManager.SpawnedObjects.Add(iHeartBeatSaber);
                 iHeartBeatSaber.transform.parent = transform;

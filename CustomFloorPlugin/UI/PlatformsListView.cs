@@ -56,7 +56,7 @@ namespace CustomFloorPlugin.UI {
         /// <see cref="BSMLParserParams"/> used to fire <see cref="UIAction"/>s
         /// </summary>
         [UIParams]
-        internal BSMLParserParams parserParams;
+        internal BSMLParserParams parserParams = new BSMLParserParams();
 
 
         /// <summary>

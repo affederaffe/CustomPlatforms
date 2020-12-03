@@ -20,7 +20,7 @@ namespace CustomFloorPlugin {
 
         private static readonly EnvironmentInfoSO[] allSceneInfos = GetAllEnvs();
         private static readonly EnvironmentTypeSO environmentType = Resources.FindObjectsOfTypeAll<EnvironmentTypeSO>()[0]; // NormalEnvironemntTypeSO
-        private static readonly Dictionary<EnvOverrideMode, EnvironmentInfoSO> supportedEnvironmentInfos = new Dictionary<EnvOverrideMode, EnvironmentInfoSO>() {
+        internal static readonly Dictionary<EnvOverrideMode, EnvironmentInfoSO> supportedEnvironmentInfos = new Dictionary<EnvOverrideMode, EnvironmentInfoSO>() {
             {EnvOverrideMode.Song, null},
             {EnvOverrideMode.Origins, EnvWithName("Origins")},
             {EnvOverrideMode.Nice, EnvWithName("Nice")},
@@ -50,7 +50,6 @@ namespace CustomFloorPlugin {
         /// <param name="mode">The environment to load when transitioning into play mode</param>
         internal static void OverrideEnvironment(EnvOverrideMode mode) {
             if (supportedEnvironmentInfos[mode] != null) {
-                Utilities.Logging.Log("Overridden Environment: " + supportedEnvironmentInfos[mode].environmentName);
                 Settings.PlayerData.overrideEnvironmentSettings.overrideEnvironments = true;
                 oldEnvironmentInfoSO = Settings.PlayerData.overrideEnvironmentSettings.GetOverrideEnvironmentInfoForType(environmentType);
                 Settings.PlayerData.overrideEnvironmentSettings.SetEnvironmentInfoForType(environmentType, supportedEnvironmentInfos[mode]);
@@ -64,7 +63,6 @@ namespace CustomFloorPlugin {
         /// </summary>
         internal static void Revert() {
             if (didOverrideEnvironment && oldEnvironmentInfoSO != null) {
-                Utilities.Logging.Log("Resetted Environment Override Settings");
                 Settings.PlayerData.overrideEnvironmentSettings.SetEnvironmentInfoForType(environmentType, oldEnvironmentInfoSO);
                 Settings.PlayerData.overrideEnvironmentSettings.overrideEnvironments = false;
                 didOverrideEnvironment = false;
