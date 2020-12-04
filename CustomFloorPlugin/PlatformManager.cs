@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 
-using BS_Utils.Utilities;
-
 using CustomFloorPlugin.Exceptions;
 using CustomFloorPlugin.UI;
 
@@ -93,7 +91,19 @@ namespace CustomFloorPlugin {
         /// <summary>
         /// Real Prefab for lights, has to be Inactive to prevent NullReference spam
         /// </summary>
-        internal static GameObject InactiveHeart;
+        internal static GameObject InactiveHeart {
+            get {
+                if (_InactiveHeart == null) {
+                    bool active = Heart.activeSelf;
+                    Heart.SetActive(false);
+                    _InactiveHeart = GameObject.Instantiate(Heart);
+                    Heart.SetActive(active);
+                    Heart.GetComponent<InstancedMaterialLightWithId>().ColorWasSet(Color.magenta);
+                }
+                return _InactiveHeart;
+            }
+        }
+        private static GameObject _InactiveHeart;
 
 
         /// <summary>
@@ -140,7 +150,6 @@ namespace CustomFloorPlugin {
         /// </summary>
         internal static void Init() {
             Anchor.AddComponent<EasterEggs>();
-            Anchor.AddComponent<MultiplayerController>();
             GSM.transitionDidStartEvent += (float ignored) => { TransitionPrep(); };
             GSM.transitionDidFinishEvent += (ScenesTransitionSetupDataSO ignored1, DiContainer ignored2) => { TransitionFinalize(); };
             Reload();
@@ -192,9 +201,7 @@ namespace CustomFloorPlugin {
                         Settings.UpdatePlayerData();
                         if (EnvironmentSceneOverrider.didOverrideEnvironment || (PlatformsListView.EnvOr == EnvOverrideMode.Song && !Settings.PlayerData.overrideEnvironmentSettings.overrideEnvironments) || currentEvironment.name.StartsWith("Multiplayer", STR_INV)) {
                             if (!platformSpawned) {
-                                MultiplayerController.disabledPlatformInMultiplayer = false;
                                 PlatformLifeCycleManagement.InternalChangeToPlatform();
-                                Heart.SetActive(false); // TubeLight sets it to the current setting, so it has to be disabled twice
                                 EnvironmentSceneOverrider.Revert();
                             }
                         }
@@ -394,11 +401,6 @@ namespace CustomFloorPlugin {
                 LightWithIdManager manager = FindLightWithIdManager(GetCurrentEnvironment());
                 InstancedMaterialLightWithId lightWithId = Heart.GetComponent<InstancedMaterialLightWithId>();
                 typeof(LightWithIdMonoBehaviour).GetField("_lightManager", BindingFlags.Instance | BindingFlags.NonPublic).SetValue(lightWithId, manager);
-
-                if (InactiveHeart != null) {
-                    Heart.SetActive(false);
-                    InactiveHeart = GameObject.Instantiate(Heart);
-                }
 
                 Heart.SetActive(Settings.ShowHeart);
                 Heart.GetComponent<InstancedMaterialLightWithId>().ColorWasSet(Color.magenta);

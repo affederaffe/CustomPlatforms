@@ -64,8 +64,8 @@
     <Compile Include="Behaviour Descriptors\ComboReachedEvent.cs" />
     <Compile Include="Behaviour Descriptors\MultiRotationEventEffect.cs" />
     <Compile Include="Harmony Patches\EnvironmentOverride_Patch.cs" />
+    <Compile Include="Harmony Patches\Multiplayer_Patch.cs" />
     <Compile Include="Harmony Patches\NewScriptWarning_Patch.cs" />
-    <Compile Include="MultiplayerController.cs" />
     <Compile Include="NotifyOnEnableOrDisable.cs" />
     <Compile Include="Behaviour Descriptors\PrefabLightmapData.cs" />
     <Compile Include="Behaviour Descriptors\SpectrogramAnimationState.cs" />
@@ -148,6 +148,10 @@
     <Reference Include="BeatmapCore, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>C:\Program Files (x86)\Steam\steamapps\common\Beat Saber\Beat Saber_Data\Managed\BeatmapCore.dll</HintPath>
+    </Reference>
+    <Reference Include="BGNet, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>C:\Program Files (x86)\Steam\steamapps\common\Beat Saber\Beat Saber_Data\Managed\BGNet.dll</HintPath>
     </Reference>
     <Reference Include="BSML">
       <HintPath>C:\Program Files (x86)\Steam\steamapps\common\Beat Saber\Plugins\BSML.dll</HintPath>

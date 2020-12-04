@@ -1,5 +1,3 @@
-using System.Reflection;
-
 using IPA.Utilities;
 
 using UnityEngine;
@@ -102,7 +100,7 @@ namespace CustomFloorPlugin {
                 tubeBloomLight.gameObject.SetActive(true);
 
             }
-            else if (PlatformManager.InactiveHeart != null) {
+            else {
                 // swap for <3
                 PlatformManager.InactiveHeart.SetActive(false);
                 iHeartBeatSaber = Instantiate(PlatformManager.InactiveHeart);
