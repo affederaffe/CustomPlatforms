@@ -127,7 +127,7 @@ namespace CustomFloorPlugin.UI {
             }
             set {
                 if (value != _UseIn360.Value) {
-                    CONFIG.SetBool("Settings", "UseInMultiplayer", value);
+                    CONFIG.SetBool("Settings", "UseIn360", value);
                     _UseIn360 = value;
                 }
             }

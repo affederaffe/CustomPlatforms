@@ -10,9 +10,7 @@ namespace CustomFloorPlugin.HarmonyPatches {
     [HarmonyPatch(typeof(MultiplayerPlayersManager))]
     [HarmonyPatch("SpawnPlayers")]
     internal class MultiplayerFinish_Patch {
-
-
-        static readonly AccessTools.FieldRef<MultiplayerPlayersManager, Action<LevelCompletionResults>> playerDidFinishEvent = AccessTools.FieldRefAccess<MultiplayerPlayersManager, Action<LevelCompletionResults>>("playerDidFinishEvent");
+        private static readonly AccessTools.FieldRef<MultiplayerPlayersManager, Action<LevelCompletionResults>> playerDidFinishEvent = AccessTools.FieldRefAccess<MultiplayerPlayersManager, Action<LevelCompletionResults>>("playerDidFinishEvent");
 
         public static void Postfix(MultiplayerPlayersManager __instance) {
             playerDidFinishEvent(__instance) += delegate { PlatformManager.ChangeToPlatform(0); };
@@ -23,10 +21,8 @@ namespace CustomFloorPlugin.HarmonyPatches {
     [HarmonyPatch(typeof(MultiplayerConnectedPlayerLevelFailController))]
     [HarmonyPatch("CheckIfPlayerFailed")]
     internal class MultiplayerFail_Patch {
-
-
-        static readonly AccessTools.FieldRef<MultiplayerConnectedPlayerLevelFailController, IConnectedPlayer> _connectedPlayer = AccessTools.FieldRefAccess<MultiplayerConnectedPlayerLevelFailController, IConnectedPlayer>("_connectedPlayer");
-        static readonly AccessTools.FieldRef<MultiplayerConnectedPlayerLevelFailController, bool> _wasActive = AccessTools.FieldRefAccess<MultiplayerConnectedPlayerLevelFailController, bool>("_wasActive");
+        private static readonly AccessTools.FieldRef<MultiplayerConnectedPlayerLevelFailController, IConnectedPlayer> _connectedPlayer = AccessTools.FieldRefAccess<MultiplayerConnectedPlayerLevelFailController, IConnectedPlayer>("_connectedPlayer");
+        private static readonly AccessTools.FieldRef<MultiplayerConnectedPlayerLevelFailController, bool> _wasActive = AccessTools.FieldRefAccess<MultiplayerConnectedPlayerLevelFailController, bool>("_wasActive");
 
         public static void Postfix(MultiplayerConnectedPlayerLevelFailController __instance, IConnectedPlayer player) {
             if (player.userId != _connectedPlayer(__instance).userId) {
@@ -40,20 +36,19 @@ namespace CustomFloorPlugin.HarmonyPatches {
     }
 
 
-    [HarmonyPatch(typeof(LobbyGameStateController))]
-    [HarmonyPatch("Activate")]
-    internal class MultiplayerLobbyHeartActivate_Patch {
+    [HarmonyPatch(typeof(MultiplayerLobbyController))]
+    [HarmonyPatch("ActivateMultiplayerLobby")]
+    internal class MultiplayerLobbyHeartDeactivate_Patch {
 
 
-        public static void Prefix() {
+        public static void Postfix() {
             PlatformManager.Heart.SetActive(false);
         }
     }
 
-
-    [HarmonyPatch(typeof(LobbyGameStateController))]
-    [HarmonyPatch("Deactivate")]
-    internal class MultiplayerLobbyHeartDeactivate_Patch {
+    [HarmonyPatch(typeof(MultiplayerModeSelectionFlowCoordinator))]
+    [HarmonyPatch("DidActivate")]
+    internal class MultiplayerLobbyHeartActivate_Patch {
 
 
         public static void Prefix() {

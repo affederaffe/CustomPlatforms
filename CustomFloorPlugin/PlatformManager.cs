@@ -196,7 +196,7 @@ namespace CustomFloorPlugin {
         private static void TransitionFinalize() {
             try {
                 Scene currentEvironment = GetCurrentEnvironment();
-                if (!currentEvironment.name.StartsWith("Menu", STR_INV) && MultiplayerCheck() && D360Check()  && currentEvironment.name != "TutorialEnvironment") { //Excluding TutorialEnvironment for Counters+ to work properly
+                if (!currentEvironment.name.StartsWith("Menu", STR_INV) && MultiplayerCheck() && D360Check() && currentEvironment.name != "TutorialEnvironment") { //Excluding TutorialEnvironment for Counters+ to work properly
                     try {
                         Settings.UpdatePlayerData();
                         if (EnvironmentSceneOverrider.didOverrideEnvironment || (PlatformsListView.EnvOr == EnvOverrideMode.Song && !Settings.PlayerData.overrideEnvironmentSettings.overrideEnvironments) || currentEvironment.name.StartsWith("Multiplayer", STR_INV)) {
@@ -210,10 +210,7 @@ namespace CustomFloorPlugin {
                         Log(e);
                     }
                 }
-                else if (currentEvironment.name == "TutorialEnvironment") {
-                    Heart.SetActive(false);
-                }
-                else {
+                else if (currentEvironment.name.StartsWith("Menu", STR_INV)) {
                     platformSpawned = false;
                     Heart.SetActive(Settings.ShowHeart);
                     Heart.GetComponent<LightWithIdMonoBehaviour>().ColorWasSet(Color.magenta);
@@ -425,7 +422,7 @@ namespace CustomFloorPlugin {
             }
         }
 
-        private static bool MultiplayerCheck() {
+        internal static bool MultiplayerCheck() {
             Scene currentEvironment = GetCurrentEnvironment();
             if (currentEvironment.name.StartsWith("Multiplayer", STR_INV)) {
                 return Settings.UseInMultiplayer;
@@ -435,7 +432,7 @@ namespace CustomFloorPlugin {
             }
         }
 
-        private static bool D360Check() {
+        internal static bool D360Check() {
             string[] d360Environments = {
                 "GlassDesertEnvironment"
             };
