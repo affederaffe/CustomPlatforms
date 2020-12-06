@@ -16,10 +16,10 @@ Your Beat Saber folder should then look like this:
 ```
 | Beat Saber
   | Plugins
-    | CustomPlatforms.dll     <-- 
-  | CustomPlatforms		<--
-    | <.plat files>		<--
-    | Scripts   <--
+    | CustomPlatforms.dll             <-- 
+  | CustomPlatforms		      <--
+    | <.plat files>		      <--
+    | Scripts                         <--
       | <.dll Custom Script files>    <--
   | IPA
   | Beat Saber.exe
@@ -32,7 +32,8 @@ Visit the ModSettings page ingame to access important settings, like:
 * Always show feet, to mark the center of the room,
 * Hide the :heart: that CustomPlatforms uses as a cloneable light source
 * Load Custom Scripts, only use this option if all Scripts are from a trusted source!
-* Use in Multiplayer to use Custom Platforms in Multiplayer, not recommended.
+* Use in 360- and 90° Levels, not recommended.
+* Use in Multiplayer, not recommended.
 * etc.
 
 You can press Numpad0 (while playing songs) to toggle the heart on and have it react to light events.
@@ -77,5 +78,8 @@ In the inspector, click "Export". Navigate to your CustomPlatforms folder, and p
 #### Panics - (Chief Investigator)
   - Helped me get an initial grasp on the damage.
 
-#### Tiruialon, Top-Cat 
- - Thank you for your contributions! 
+#### Tiruialon - (Top-Cat)
+  - Thank you for your contributions!
+ 
+#### Boulders2000 - (Bug Hunter Extreme)
+  - Stopped counting how many bugreports he sent.
