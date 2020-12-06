@@ -21,9 +21,9 @@ namespace CustomFloorPlugin.Extensions {
         /// <returns></returns>
         internal static string GetFullPath(this GameObject gameObject) {
             StringBuilder path = new StringBuilder();
-            while(true) {
+            while (true) {
                 path.Insert(0, "/" + gameObject.name);
-                if(gameObject.transform.parent == null) {
+                if (gameObject.transform.parent == null) {
                     path.Insert(0, gameObject.scene.name);
                     break;
                 }
@@ -39,7 +39,6 @@ namespace CustomFloorPlugin.Extensions {
         /// <param name="component">The instance of a Component to generate a path for.</param>
         /// <returns></returns>
         [MethodImpl(MethodImplOptions.NoOptimization | MethodImplOptions.NoInlining)]
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "No")]
         internal static string GetFullPath(this Component component) {
             StringBuilder path = new StringBuilder(component.gameObject.GetFullPath());
             path.Append("/" + component.GetType().Name);
@@ -54,7 +53,7 @@ namespace CustomFloorPlugin.Extensions {
         /// <param name="list">The original list</param>
         internal static List<object> ToBoxedList<T>(this List<T> list) {
             List<object> convertedList = new List<object>();
-            foreach(T thing in list) {
+            foreach (T thing in list) {
                 convertedList.Add(thing);
             }
             return convertedList;

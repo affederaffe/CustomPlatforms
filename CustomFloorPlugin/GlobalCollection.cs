@@ -1,9 +1,10 @@
-﻿using BS_Utils.Utilities;
-
-using CustomFloorPlugin.Exceptions;
-using System;
+﻿using System;
 using System.Globalization;
 using System.Linq;
+
+using BS_Utils.Utilities;
+
+using CustomFloorPlugin.Exceptions;
 
 using UnityEngine.SceneManagement;
 
@@ -32,7 +33,7 @@ namespace CustomFloorPlugin {
         /// </summary>
         internal static GameScenesManager GSM {
             get {
-                if(_GSM == null) {
+                if (_GSM == null) {
                     _GSM = SceneManager.GetSceneByName("PCInit").GetRootGameObjects().First(x => x.name == "AppCoreSceneContext")?.GetComponent<MarkSceneAsPersistent>().GetPrivateField<GameScenesManager>("_gameScenesManager");
                 }
                 return _GSM;
@@ -46,10 +47,11 @@ namespace CustomFloorPlugin {
         /// </summary>
         internal static BeatmapObjectCallbackController BOCC {
             get {
-                if(_BOCC == null) {
+                if (_BOCC == null) {
                     try {
                         _BOCC = FindFirst<BeatmapObjectCallbackController>();
-                    } catch(ComponentNotFoundException e) {
+                    }
+                    catch (ComponentNotFoundException e) {
                         Log("Tried Referencing BOCC out of context, returning null!");
                         Log(e);
                     }
@@ -66,7 +68,7 @@ namespace CustomFloorPlugin {
         /// </summary>
         internal static Scene SCENE {
             get {
-                if(_SCENE == null) {
+                if (_SCENE == null) {
                     _SCENE = SceneManager.CreateScene("CustomPlatforms", new CreateSceneParameters(LocalPhysicsMode.None));
                 }
                 return _SCENE.Value;
@@ -91,5 +93,14 @@ namespace CustomFloorPlugin {
         /// The folder path used by CustomPlatforms
         /// </summary>
         internal const string FOLDER = "CustomPlatforms";
+
+
+        /// <summary>
+        /// The Scripts folder path used for custom scripts
+        /// </summary>
+        internal const string SCRIPT_FOLDER = "Scripts";
+
+
+        internal const string SCRIPT_HASHES_FILENAME = "CustomScriptHashes.hashes";
     }
 }

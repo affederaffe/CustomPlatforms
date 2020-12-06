@@ -6,13 +6,13 @@ namespace CustomFloorPlugin {
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0044:Add readonly modifier", Justification = "Unity can't deserialize data onto readonly fields")]
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Build", "CA1812:Avoid unistantiated internal classes", Justification = "Instantiated by Unity")]
-    public class MultiRotationEventEffect:MonoBehaviour {
+    public class MultiRotationEventEffect : MonoBehaviour {
         internal Actor Create() {
             Actor actor = gameObject.AddComponent<Actor>();
             actor.Init(_transformL, _transformR, _toggleGameObjects, _rotationVectorsL, _rotationVectorsR, _eventL, _eventR, _useRandomValues);
             return actor;
         }
-        internal class Actor:MonoBehaviour {
+        internal class Actor : MonoBehaviour {
             //private Transform[] _transformL;
             //private Transform[] _transformR;
             private RotationData _rotationDataL;
@@ -39,10 +39,10 @@ namespace CustomFloorPlugin {
                 this._useRandomValues = _useRandomValues;
                 Quaternion[] rotL = new Quaternion[_transformL.Length];
                 Quaternion[] rotR = new Quaternion[_transformR.Length];
-                for(int i = 0; i < _transformL.Length; i++) {
+                for (int i = 0; i < _transformL.Length; i++) {
                     rotL[i] = _transformL[i].rotation;
                 }
-                for(int i = 0; i < _transformR.Length; i++) {
+                for (int i = 0; i < _transformR.Length; i++) {
                     rotR[i] = _transformR[i].rotation;
                 }
 
@@ -61,79 +61,80 @@ namespace CustomFloorPlugin {
                     rotationVector = _rotationVectorsR
                 };
                 enabled = false;
-                if(_toggleGameObjects) {
-                    for(int i = 0; i < _rotationVectorsL.Length; i++) {
+                if (_toggleGameObjects) {
+                    for (int i = 0; i < _rotationVectorsL.Length; i++) {
                         _rotationDataL.transforms[i].gameObject.SetActive(false);
                     }
-                    for(int i = 0; i < _rotationVectorsR.Length; i++) {
+                    for (int i = 0; i < _rotationVectorsR.Length; i++) {
                         _rotationDataR.transforms[i].gameObject.SetActive(false);
                     }
                 }
             }
             [System.Diagnostics.CodeAnalysis.SuppressMessage("Code Quality", "IDE0051:Remove unused private members", Justification = "Called by Unity")]
             private void Update() {
-                if(_rotationDataL.enabled) {
-                    for(int i = 0; i < _rotationVectorsL.Length; i++) {
+                if (_rotationDataL.enabled) {
+                    for (int i = 0; i < _rotationVectorsL.Length; i++) {
                         _rotationDataL.transforms[i].Rotate(_rotationVectorsL[i], Time.deltaTime * _rotationDataL.rotationSpeed, Space.Self);
                     }
                 }
-                if(_rotationDataR.enabled) {
-                    for(int i = 0; i < _rotationVectorsR.Length; i++) {
+                if (_rotationDataR.enabled) {
+                    for (int i = 0; i < _rotationVectorsR.Length; i++) {
                         _rotationDataR.transforms[i].Rotate(_rotationVectorsR[i], Time.deltaTime * _rotationDataR.rotationSpeed, Space.Self);
                     }
                 }
             }
             [System.Diagnostics.CodeAnalysis.SuppressMessage("Code Quality", "IDE0051:Remove unused private members", Justification = "Called by Unity")]
             private void Destroy() {
-                if(_toggleGameObjects) {
+                if (_toggleGameObjects) {
                     UpdateRotationData(0, ref _rotationDataL, _randomStartRotation, _randomDirection);
                     UpdateRotationData(0, ref _rotationDataR, _randomStartRotation, _randomDirection);
-                    for(int i = 0; i < _rotationVectorsL.Length; i++) {
+                    for (int i = 0; i < _rotationVectorsL.Length; i++) {
                         _rotationDataL.transforms[i].gameObject.SetActive(true);
                     }
-                    for(int i = 0; i < _rotationVectorsR.Length; i++) {
+                    for (int i = 0; i < _rotationVectorsR.Length; i++) {
                         _rotationDataR.transforms[i].gameObject.SetActive(true);
                     }
                 }
             }
             internal void EventCallback(BeatmapEventData beatmapEventData) {
 
-                if(beatmapEventData.type == (BeatmapEventType)_eventL || beatmapEventData.type == (BeatmapEventType)_eventR) {
+                if (beatmapEventData.type == (BeatmapEventType)_eventL || beatmapEventData.type == (BeatmapEventType)_eventR) {
                     int frameCount = Time.frameCount;
-                    if(_randomGenerationFrameNum != frameCount) {
-                        if(!_useRandomValues) {
+                    if (_randomGenerationFrameNum != frameCount) {
+                        if (!_useRandomValues) {
                             _randomDirection = ((beatmapEventData.type == (BeatmapEventType)_eventL) ? 1f : -1f);
                             _randomStartRotation = ((beatmapEventData.type == (BeatmapEventType)_eventL) ? frameCount : (-frameCount));
-                        } else {
+                        }
+                        else {
                             _randomDirection = ((UnityEngine.Random.value > 0.5f) ? 1f : -1f);
                             _randomStartRotation = UnityEngine.Random.Range(0f, 360f);
                         }
                         _randomGenerationFrameNum = Time.frameCount;
                     }
-                    if(beatmapEventData.type == (BeatmapEventType)_eventL) {
+                    if (beatmapEventData.type == (BeatmapEventType)_eventL) {
                         UpdateRotationData(beatmapEventData.value, ref _rotationDataL, _randomStartRotation, _randomDirection);
                     }
-                    if(beatmapEventData.type == (BeatmapEventType)_eventR) {
+                    if (beatmapEventData.type == (BeatmapEventType)_eventR) {
                         UpdateRotationData(beatmapEventData.value, ref _rotationDataR, -_randomStartRotation, -_randomDirection);
                     }
                     enabled = (_rotationDataL.enabled || _rotationDataR.enabled);
                 }
             }
             private void UpdateRotationData(int beatmapEventDataValue, ref RotationData rotationData, float startRotationOffset, float direction) {
-                if(beatmapEventDataValue == 0) {
+                if (beatmapEventDataValue == 0) {
                     rotationData.enabled = false;
-                    for(int i = 0; i < rotationData.transforms.Length; i++) {
+                    for (int i = 0; i < rotationData.transforms.Length; i++) {
                         rotationData.transforms[i].localRotation = rotationData.startRotations[i];
-                        if(_toggleGameObjects) {
+                        if (_toggleGameObjects) {
                             rotationData.transforms[i].gameObject.SetActive(false);
                         }
                     }
                     return;
                 }
-                if(beatmapEventDataValue > 0) {
+                if (beatmapEventDataValue > 0) {
                     rotationData.enabled = true;
-                    for(int i = 0; i < rotationData.transforms.Length; i++) {
-                        if(_toggleGameObjects) {
+                    for (int i = 0; i < rotationData.transforms.Length; i++) {
+                        if (_toggleGameObjects) {
                             rotationData.transforms[i].gameObject.SetActive(true);
                         }
                         rotationData.transforms[i].localRotation = rotationData.startRotations[i];

@@ -1,7 +1,7 @@
-using BS_Utils.Utilities;
-
 using System.Collections.Generic;
 using System.Linq;
+
+using BS_Utils.Utilities;
 
 using UnityEngine;
 
@@ -13,7 +13,7 @@ namespace CustomFloorPlugin {
     /// Instantiable manager class for <see cref="Spectrogram"/>s that handles creation of <see cref="SpectrogramColumns"/> and updating their <see cref="BasicSpectrogramData"/> references
     /// </summary>
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Build", "CA1812:Avoid unistantiated internal classes", Justification = "Instantiated by Unity")]
-    internal class SpectrogramColumnManager:MonoBehaviour {
+    internal class SpectrogramColumnManager : MonoBehaviour {
 
 
         /// <summary>
@@ -47,7 +47,7 @@ namespace CustomFloorPlugin {
             columnDescriptors = new List<Spectrogram>();
 
             Spectrogram[] localDescriptors = gameObject.GetComponentsInChildren<Spectrogram>(true);
-            foreach(Spectrogram spec in localDescriptors) {
+            foreach (Spectrogram spec in localDescriptors) {
                 SpectrogramColumns specCol = spec.gameObject.AddComponent<SpectrogramColumns>();
                 PlatformManager.SpawnedComponents.Add(specCol);
 
@@ -69,10 +69,10 @@ namespace CustomFloorPlugin {
         /// </summary>
         internal void UpdateSpectrogramDataProvider() {
             BasicSpectrogramData[] datas = Resources.FindObjectsOfTypeAll<BasicSpectrogramData>();
-            if(datas.Length != 0) {
+            if (datas.Length != 0) {
                 BasicSpectrogramData spectrogramData = datas.FirstOrDefault();
-                if(spectrogramData != null) {
-                    foreach(SpectrogramColumns specCol in spectrogramColumns) {
+                if (spectrogramData != null) {
+                    foreach (SpectrogramColumns specCol in spectrogramColumns) {
                         ReflectionUtil.SetPrivateField(specCol, "_spectrogramData", spectrogramData);
                     }
                 }

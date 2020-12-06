@@ -1,9 +1,11 @@
-using CustomFloorPlugin.Exceptions;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Security.Cryptography;
+
+using CustomFloorPlugin.Exceptions;
 
 using UnityEngine;
 
@@ -22,14 +24,27 @@ namespace CustomFloorPlugin {
 
 
         /// <summary>
+        /// <see cref="List{string}<"/> holding all Hashes of CustomScripts
+        /// </summary>
+        internal static List<string> scriptHashList;
+
+
+        internal static bool newScriptsFound = false;
+
+
+        internal static readonly string customPlatformsFolderPath = Path.Combine(Environment.CurrentDirectory, FOLDER);
+        internal static readonly string customPlatformsScriptFolderPath = Path.Combine(customPlatformsFolderPath, SCRIPT_FOLDER);
+        internal static readonly string scriptHashesPath = Path.Combine(Environment.CurrentDirectory, "UserData", SCRIPT_HASHES_FILENAME);
+
+
+        /// <summary>
         /// Loads AssetBundles and populates the platforms array with CustomPlatform objects
         /// </summary>
-        public static List<CustomPlatform> CreateAllPlatforms(Transform parent) {
+        internal static List<CustomPlatform> CreateAllPlatforms(Transform parent) {
 
-            string customPlatformsFolderPath = Path.Combine(Environment.CurrentDirectory, FOLDER);
 
             // Create the CustomPlatforms folder if it doesn't already exist
-            if(!Directory.Exists(customPlatformsFolderPath)) {
+            if (!Directory.Exists(customPlatformsFolderPath)) {
                 Directory.CreateDirectory(customPlatformsFolderPath);
             }
 
@@ -49,10 +64,10 @@ namespace CustomFloorPlugin {
             // Populate the platforms array
             Log("[START OF PLATFORM LOADING SPAM]-------------------------------------");
             int j = 0;
-            for(int i = 0; i < allBundlePaths.Length; i++) {
+            for (int i = 0; i < allBundlePaths.Length; i++) {
                 j++;
                 CustomPlatform newPlatform = LoadPlatformBundle(allBundlePaths[i], parent);
-                if(newPlatform != null) {
+                if (newPlatform != null) {
                     platforms.Add(newPlatform);
                 }
             }
@@ -73,15 +88,17 @@ namespace CustomFloorPlugin {
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Security", "CA5351:Do Not Use Broken Cryptographic Algorithms", Justification = "MD5 Hash not used in security relevant context")]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Globalization", "CA1308:Normalize strings to uppercase", Justification = "Too late now... that damage was done a year ago -.-")]
         internal static CustomPlatform LoadPlatformBundle(string bundlePath, Transform parent) {
-            
+
             AssetBundle bundle = AssetBundle.LoadFromFile(bundlePath);
 
-            if(bundle == null) return null;
+            if (bundle == null) {
+                return null;
+            }
 
             CustomPlatform newPlatform = LoadPlatform(bundle, parent);
 
-            using var md5 = MD5.Create();
-            using var stream = File.OpenRead(bundlePath);
+            using MD5 md5 = MD5.Create();
+            using FileStream stream = File.OpenRead(bundlePath);
 
             byte[] hash = md5.ComputeHash(stream);
             newPlatform.platHash = BitConverter.ToString(hash).Replace("-", string.Empty).ToLowerInvariant();
@@ -100,17 +117,18 @@ namespace CustomFloorPlugin {
 
             GameObject platformPrefab = bundle.LoadAsset<GameObject>("_CustomPlatform");
 
-            if(platformPrefab == null) {
+            if (platformPrefab == null) {
                 return null;
             }
 
             GameObject newPlatform = UnityEngine.Object.Instantiate(platformPrefab.gameObject);
 
             try {
-                foreach(AudioListener al in FindAll<AudioListener>(newPlatform)) {
+                foreach (AudioListener al in FindAll<AudioListener>(newPlatform)) {
                     UnityEngine.Object.DestroyImmediate(al);
                 }
-            } catch(ComponentNotFoundException) {
+            }
+            catch (ComponentNotFoundException) {
 
             }
 
@@ -121,10 +139,10 @@ namespace CustomFloorPlugin {
             // Collect author and name
             CustomPlatform customPlatform = newPlatform.GetComponent<CustomPlatform>();
 
-            if(customPlatform == null) {
+            if (customPlatform == null) {
                 // Check for old platform 
                 global::CustomPlatform legacyPlatform = newPlatform.GetComponent<global::CustomPlatform>();
-                if(legacyPlatform != null) {
+                if (legacyPlatform != null) {
                     // Replace legacyplatform component with up to date one
                     customPlatform = newPlatform.AddComponent<CustomPlatform>();
                     customPlatform.platName = legacyPlatform.platName;
@@ -132,7 +150,8 @@ namespace CustomFloorPlugin {
                     customPlatform.hideDefaultPlatform = true;
                     // Remove old platform data
                     GameObject.Destroy(legacyPlatform);
-                } else {
+                }
+                else {
                     // no customplatform component, abort
                     GameObject.Destroy(newPlatform);
                     return null;
@@ -141,11 +160,91 @@ namespace CustomFloorPlugin {
 
             newPlatform.name = customPlatform.platName + " by " + customPlatform.platAuthor;
 
-            if(customPlatform.icon == null) customPlatform.icon = Resources.FindObjectsOfTypeAll<Sprite>().Where(x => x.name == "FeetIcon").FirstOrDefault();
+            if (customPlatform.icon == null) {
+                customPlatform.icon = Resources.FindObjectsOfTypeAll<Sprite>().Where(x => x.name == "FeetIcon").FirstOrDefault();
+            }
 
             newPlatform.SetActive(false);
 
             return customPlatform;
+        }
+
+
+        /// <summary>
+        ///  Tries to load all CustomScripts, but aborts when <see cref="UI.Settings.LoadCustomScripts"/> is false or a new Script is found
+        /// </summary>
+        /// <returns>
+        /// <see cref="bool"/> newScriptsFound
+        /// </returns>
+        internal static void LoadScripts() {
+
+            // Create the CustomPlatforms script folder if it doesn't already exist
+            if (!Directory.Exists(customPlatformsScriptFolderPath)) {
+                Directory.CreateDirectory(customPlatformsScriptFolderPath);
+            }
+
+            // Preventing Issue when a script exists but the option is first enabled in menu
+            if (!File.Exists(scriptHashesPath)) {
+                File.Create(scriptHashesPath).Close();
+            }
+
+            // Find Dlls in our CustomPlatformsScript directory
+            string[] allScriptPaths = Directory.GetFiles(customPlatformsScriptFolderPath, "*.dll");
+
+            // Checks if a new CustomScript is found, if not loads all Scripts
+            if (UI.Settings.LoadCustomScripts) {
+                scriptHashList = new List<string>();
+                foreach (string path in allScriptPaths) {
+                    string hash = ComputeHashFromPath(path);
+                    scriptHashList.Add(hash);
+                }
+
+                string[] oldHashes = File.ReadAllLines(scriptHashesPath);
+                int i = 0;
+                if (scriptHashList.Count == oldHashes.Length) {
+                    foreach (string hash1 in scriptHashList) {
+                        foreach (string hash2 in oldHashes) {
+                            if (hash1 == hash2) {
+                                i++;
+                            }
+                        }
+                    }
+                    if (scriptHashList.Count != i) {
+                        newScriptsFound = true;
+                    }
+                    else {
+                        newScriptsFound = false;
+                    }
+                }
+                else {
+                    newScriptsFound = true;
+                }
+
+                if (!newScriptsFound) {
+                    Log("No new CustomScripts found, loading all in directory " + customPlatformsScriptFolderPath);
+                    foreach (string path in allScriptPaths) {
+                        Assembly.LoadFrom(path);
+                    }
+                }
+                else {
+                    Log("New CustomScripts found, loading aborted!");
+                }
+            }
+        }
+
+
+        /// <summary>
+        /// Computes a MD5 Hash and converts it to Hex
+        /// </summary>
+        /// <param name="path">Path to the File the Hash should be created for</param>
+        /// <returns>The Hex Hash of the File</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Security", "CA5351:Do Not Use Broken Cryptographic Algorithms", Justification = "MD5 Hash not used in security relevant context")]
+        private static string ComputeHashFromPath(string path) {
+            using MD5 md5 = MD5.Create();
+            using FileStream stream = File.OpenRead(path);
+            byte[] byteHash = md5.ComputeHash(stream);
+            string hash = BitConverter.ToString(byteHash).Replace("-", string.Empty).ToUpperInvariant();
+            return hash;
         }
     }
 }

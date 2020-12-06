@@ -5,7 +5,7 @@
     /// Interface for CustomPlatform objects<br/>
     /// The <see cref="PlatformManager"/> will notify any objects under the affected <see cref="CustomPlatform"/> when it gets enabled or disabled
     /// </summary>
-    internal interface NotifyOnEnableOrDisable {
+    internal interface INotifyOnEnableOrDisable {
 
 
         /// <summary>

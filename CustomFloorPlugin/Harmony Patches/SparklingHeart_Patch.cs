@@ -14,11 +14,11 @@ namespace CustomFloorPlugin.HarmonyPatches {
         private static readonly float magenta_green = UnityEngine.Color.magenta.g;
         private static readonly float magenta_blue = UnityEngine.Color.magenta.b;
 
-        public static void Prefix(InstancedMaterialLightWithId __instance, ref UnityEngine.Color color) {
-            if(__instance.gameObject.name == "<3") {
-                color.r = magenta_red;
-                color.g = magenta_green;
-                color.b = magenta_blue;
+        public static void Prefix(InstancedMaterialLightWithId __instance, ref UnityEngine.Color newColor) {
+            if (__instance.gameObject.name == "<3") {
+                newColor.r = magenta_red;
+                newColor.g = magenta_green;
+                newColor.b = magenta_blue;
             }
         }
     }

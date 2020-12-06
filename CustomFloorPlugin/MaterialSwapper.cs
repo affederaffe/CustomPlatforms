@@ -1,13 +1,13 @@
-﻿using CustomFloorPlugin.Exceptions;
+﻿using System.Linq;
 
-using System.Linq;
+using CustomFloorPlugin.Exceptions;
 
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
 using static CustomFloorPlugin.GlobalCollection;
-using static CustomFloorPlugin.Utilities.UnityObjectSearching;
 using static CustomFloorPlugin.Utilities.Logging;
+using static CustomFloorPlugin.Utilities.UnityObjectSearching;
 
 
 namespace CustomFloorPlugin {
@@ -18,7 +18,7 @@ namespace CustomFloorPlugin {
     /// Primary reason for this is the absence of proper custom <see cref="Shader"/>s (or decompiled source <see cref="Shader"/>s) and a lack of knowledge about their inner workings...<br/>
     /// Part of the documentation for this file is omited because it's a clusterfuck and under construction.
     /// </summary>
-    static class MaterialSwapper {
+    internal static class MaterialSwapper {
         private static readonly Material dark;
         private static readonly Material glow;
         private static readonly Material opaqueGlow;
@@ -51,10 +51,11 @@ namespace CustomFloorPlugin {
         /// <param name="scene"><see cref="Scene"/> to search for <see cref="Renderer"/>s</param>
         internal static void ReplaceMaterials(Scene scene) {
             try {
-                foreach(Renderer renderer in FindAll<Renderer>(scene)) {
+                foreach (Renderer renderer in FindAll<Renderer>(scene)) {
                     ReplaceForRenderer(renderer);
                 }
-            } catch(ComponentNotFoundException) {
+            }
+            catch (ComponentNotFoundException) {
                 Log("No Renderers present, skipping...");
             }
         }
@@ -65,8 +66,13 @@ namespace CustomFloorPlugin {
         /// </summary>
         /// <param name="gameObject"><see cref="GameObject"/> to search for <see cref="Renderer"/>s</param>
         internal static void ReplaceMaterials(GameObject gameObject) {
-            foreach(Renderer renderer in FindAll<Renderer>(gameObject)) {
-                ReplaceForRenderer(renderer);
+            try {
+                foreach (Renderer renderer in FindAll<Renderer>(gameObject)) {
+                    ReplaceForRenderer(renderer);
+                }
+            }
+            catch (ComponentNotFoundException) {
+                Log("No Renderers present, skipping...");
             }
         }
 
@@ -78,21 +84,23 @@ namespace CustomFloorPlugin {
         private static void ReplaceForRenderer(Renderer renderer) {
             Material[] materialsCopy = renderer.materials;
             bool materialsDidChange = false;
-            for(int i = 0; i < materialsCopy.Length; i++) {
-                if(materialsCopy[i] != null) {
-                    if(materialsCopy[i].name.Equals(fakeDarkMatName, STR_INV)) {
+            for (int i = 0; i < materialsCopy.Length; i++) {
+                if (materialsCopy[i] != null) {
+                    if (materialsCopy[i].name.Equals(fakeDarkMatName, STR_INV)) {
                         materialsCopy[i] = dark;
                         materialsDidChange = true;
-                    } else if(materialsCopy[i].name.Equals(fakeGlowMatName, STR_INV)) {
+                    }
+                    else if (materialsCopy[i].name.Equals(fakeGlowMatName, STR_INV)) {
                         materialsCopy[i] = glow;
                         materialsDidChange = true;
-                    } else if(materialsCopy[i].name.Equals(fakeOpaqueGlowMatName, STR_INV)) {
+                    }
+                    else if (materialsCopy[i].name.Equals(fakeOpaqueGlowMatName, STR_INV)) {
                         materialsCopy[i] = opaqueGlow;
                         materialsDidChange = true;
                     }
                 }
             }
-            if(materialsDidChange) {
+            if (materialsDidChange) {
                 renderer.sharedMaterials = materialsCopy;
             }
         }

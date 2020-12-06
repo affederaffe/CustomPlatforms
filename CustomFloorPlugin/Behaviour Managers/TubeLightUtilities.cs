@@ -1,6 +1,6 @@
-using BS_Utils.Utilities;
-
 using System.Linq;
+
+using BS_Utils.Utilities;
 
 using UnityEngine;
 
@@ -25,7 +25,7 @@ namespace CustomFloorPlugin {
         internal static void CreateAdditionalLightSwitchControllers(LightWithIdManager lightManager) {
             LightSwitchEventEffect templateSwitchEffect = Resources.FindObjectsOfTypeAll<LightSwitchEventEffect>().FirstOrDefault();
 
-            for(int i = 6; i < 16; i++) {
+            for (int i = 6; i < 16; i++) {
                 //This Component is spawned onto a base game object and not cleaned up by Custom Platforms (in good faith that the game does so for us by unloading the environment scene)
                 LightSwitchEventEffect newSwitchEffect = ReflectionUtil.CopyComponent(templateSwitchEffect, typeof(LightSwitchEventEffect), typeof(LightSwitchEventEffect), templateSwitchEffect.gameObject) as LightSwitchEventEffect;
                 newSwitchEffect.SetPrivateField("_lightManager", lightManager);

@@ -5,7 +5,7 @@ namespace CustomFloorPlugin {
 
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1051:Do not declare visible instance fields", Justification = "Too old to change")]
-    public class CameraVisibility:MonoBehaviour {
+    public class CameraVisibility : MonoBehaviour {
         public enum VisibilityMode { Default, HeadsetOnly, ThirdPersonOnly };
 
         public VisibilityMode visibilityMode;
@@ -16,7 +16,7 @@ namespace CustomFloorPlugin {
         private void Awake() {
             int layer = gameObject.layer;
 
-            switch(visibilityMode) {
+            switch (visibilityMode) {
                 case VisibilityMode.Default:
                     return;
                 case VisibilityMode.HeadsetOnly:
@@ -26,9 +26,10 @@ namespace CustomFloorPlugin {
                     layer = CameraVisibilityManager.OnlyInThirdPerson;
                     break;
             }
-            if(affectChildren) {
+            if (affectChildren) {
                 SetChildrenToLayer(gameObject, layer);
-            } else {
+            }
+            else {
                 gameObject.layer = layer;
             }
 
@@ -38,7 +39,7 @@ namespace CustomFloorPlugin {
         // Recursively set the layer of an object and all children in its hierarchy
         private void SetChildrenToLayer(GameObject gameObject, int layer) {
             gameObject.layer = layer;
-            foreach(Transform child in transform) {
+            foreach (Transform child in transform) {
                 SetChildrenToLayer(child.gameObject, layer);
             }
         }

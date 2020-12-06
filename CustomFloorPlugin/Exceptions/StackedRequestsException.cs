@@ -6,7 +6,7 @@ namespace CustomFloorPlugin.Exceptions {
     /// <summary>
     /// A previous request has not yet been consumed, confirm with <see cref="OverridePreviousRequest"/> if the override was intentional
     /// </summary>
-    public sealed class StackedRequestsException:Exception {
+    public sealed class StackedRequestsException : Exception {
 
 
         /// <summary>

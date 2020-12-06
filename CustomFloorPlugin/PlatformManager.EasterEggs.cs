@@ -16,7 +16,7 @@ namespace CustomFloorPlugin {
         /// Is a mod without easter eggs a real mod?
         /// </summary>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Build", "CA1812:Avoid unistantiated internal classes", Justification = "Instantiated by Unity")]
-        private class EasterEggs:MonoBehaviour {
+        private class EasterEggs : MonoBehaviour {
 
 
             /// <summary>
@@ -26,10 +26,10 @@ namespace CustomFloorPlugin {
             /// </summary>
             [System.Diagnostics.CodeAnalysis.SuppressMessage("Code Quality", "IDE0051:Remove unused private members", Justification = "Called by Unity")]
             private void Update() {
-                if(Input.GetKeyDown(KeyCode.Keypad0)) {
+                if (Input.GetKeyDown(KeyCode.Keypad0)) {
                     Log();
                     Heart.SetActive(false);
-                    Heart.GetComponent<LightWithId>().SetField("_lightManager", FindLightWithIdManager(GetCurrentEnvironment()));
+                    Heart.GetComponent<LightWithIdMonoBehaviour>().SetField("_lightManager", FindLightWithIdManager(GetCurrentEnvironment()));
                     Heart.SetActive(true);
                 }
             }

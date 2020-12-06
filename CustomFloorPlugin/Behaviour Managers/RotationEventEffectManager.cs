@@ -1,8 +1,8 @@
+using System.Collections.Generic;
+
 using BS_Utils.Utilities;
 
 using IPA.Utilities;
-
-using System.Collections.Generic;
 
 using UnityEngine;
 
@@ -14,7 +14,7 @@ namespace CustomFloorPlugin {
     /// Instantiable wrapper class for <see cref="RotationEventEffect"/>s, that handles registering and de-registering
     /// </summary>
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Build", "CA1812:Avoid unistantiated internal classes", Justification = "Instantiated by Unity")]
-    internal class RotationEventEffectManager:MonoBehaviour {
+    internal class RotationEventEffectManager : MonoBehaviour {
 
 
         /// <summary>
@@ -33,10 +33,10 @@ namespace CustomFloorPlugin {
         /// Registers all currently known <see cref="LightRotationEventEffect"/>s for Events.
         /// </summary>
         internal void RegisterForEvents() {
-            foreach(LightRotationEventEffect rotEffect in lightRotationEffects) {
+            foreach (LightRotationEventEffect rotEffect in lightRotationEffects) {
                 BSEvents.beatmapEvent += rotEffect.HandleBeatmapObjectCallbackControllerBeatmapEventDidTrigger;
             }
-            foreach(MultiRotationEventEffect.Actor effect in multiEffects) {
+            foreach (MultiRotationEventEffect.Actor effect in multiEffects) {
                 BSEvents.beatmapEvent += effect.EventCallback;
             }
         }
@@ -48,10 +48,10 @@ namespace CustomFloorPlugin {
         /// </summary>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Code Quality", "IDE0051:Remove unused private members", Justification = "Called by Unity")]
         private void OnDisable() {
-            foreach(LightRotationEventEffect rotEffect in lightRotationEffects) {
+            foreach (LightRotationEventEffect rotEffect in lightRotationEffects) {
                 BSEvents.beatmapEvent -= rotEffect.HandleBeatmapObjectCallbackControllerBeatmapEventDidTrigger;
             }
-            foreach(MultiRotationEventEffect.Actor effect in multiEffects) {
+            foreach (MultiRotationEventEffect.Actor effect in multiEffects) {
                 BSEvents.beatmapEvent -= effect.EventCallback;
             }
         }
@@ -66,9 +66,9 @@ namespace CustomFloorPlugin {
             lightRotationEffects = new List<LightRotationEventEffect>();
             multiEffects = new List<MultiRotationEventEffect.Actor>();
 
-            var effectDescriptors = currentPlatform.GetComponentsInChildren<RotationEventEffect>(true);
+            RotationEventEffect[] effectDescriptors = currentPlatform.GetComponentsInChildren<RotationEventEffect>(true);
 
-            foreach(RotationEventEffect effectDescriptor in effectDescriptors) {
+            foreach (RotationEventEffect effectDescriptor in effectDescriptors) {
                 LightRotationEventEffect rotEvent = effectDescriptor.gameObject.AddComponent<LightRotationEventEffect>();
                 PlatformManager.SpawnedComponents.Add(rotEvent);
                 rotEvent.SetField("_event", (BeatmapEventType)effectDescriptor.eventType);
@@ -77,8 +77,8 @@ namespace CustomFloorPlugin {
                 rotEvent.SetField("_startRotation", rotEvent.transform.rotation);
                 lightRotationEffects.Add(rotEvent);
             }
-            var effectDescriptors2 = currentPlatform.GetComponentsInChildren<MultiRotationEventEffect>(true);
-            foreach(MultiRotationEventEffect effectDescriptor in effectDescriptors2) {
+            MultiRotationEventEffect[] effectDescriptors2 = currentPlatform.GetComponentsInChildren<MultiRotationEventEffect>(true);
+            foreach (MultiRotationEventEffect effectDescriptor in effectDescriptors2) {
                 MultiRotationEventEffect.Actor rotEvent = effectDescriptor.Create();
                 PlatformManager.SpawnedComponents.Add(rotEvent);
                 multiEffects.Add(rotEvent);

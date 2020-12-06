@@ -1,9 +1,6 @@
-using BeatSaberMarkupLanguage.Attributes;
-
-using CustomFloorPlugin.Extensions;
-
 using System;
-using System.Collections.Generic;
+
+using BeatSaberMarkupLanguage.Attributes;
 
 using UnityEngine;
 
@@ -22,77 +19,27 @@ namespace CustomFloorPlugin.UI {
     /// Why is everything here public? I don't know... -.-
     /// </summary>
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Build", "CA1812:Avoid unistantiated internal classes", Justification = "Instantiated by Unity")]
-    internal class Settings:PersistentSingleton<Settings> {
+    internal class Settings : PersistentSingleton<Settings> {
 
 
         /// <summary>
-        /// The list of options the user can choose from for override modes
+        /// Hover hint of load-custom-scripts
         /// </summary>
-        [UIValue("env-ovs")]
-        public static readonly List<object> envOrs = new List<object>() {
-            EnvOverrideMode.Default,
-            EnvOverrideMode.Nice,
-            EnvOverrideMode.BigMirror,
-            EnvOverrideMode.Triangle,
-            EnvOverrideMode.KDA,
-            EnvOverrideMode.Monstercat
-        };
+        [UIValue("LoadingCustomScriptsText")]
+        public const string loadingCustomScriptsText = "Loading Custom Scripts \nUse this at your own risk! \nOnly use scripts of trusted sources!";
+
+        /// <summary>
+        /// Hover hint for use-in-360
+        /// </summary>
+        [UIValue("UseIn360Text")]
+        public const string useIn360Text = "Toggle if Custom Platforms is used in 360°-Levels \n!Not supported!";
 
 
         /// <summary>
-        /// The list of supported old environment configurations
+        /// Hover hint of use-in-multiplayer
         /// </summary>
-        [UIValue("env-arrs")]
-        public static readonly List<object> envArrs = EnvironmentArranger.RepositionModes().ToBoxedList();
-
-
-        /// <summary>
-        /// Override choice for platform base model/environment<br/>
-        /// Forwards the current choice to the UI, and the new choice to the plugin
-        /// </summary>
-        [UIValue("env-ov")]
-        public static EnvOverrideMode EnvOr {
-            get {
-                if(_EnvOr == null) {
-                    //Wrapping value because 'Off' no longer exists
-                    _EnvOr = (EnvOverrideMode)(CONFIG.GetInt("Settings", "EnvironmentOverrideMode", 0, true) % 6);
-                }
-                return _EnvOr.Value;
-            }
-            set {
-                if(value != _EnvOr.Value) {
-                    CONFIG.SetInt("Settings", "EnvironmentOverrideMode", (int)value);
-                    _EnvOr = value;
-                    EnvOrChanged(value);
-                }
-            }
-        }
-        private static EnvOverrideMode? _EnvOr;
-        internal static event Action<EnvOverrideMode> EnvOrChanged = delegate (EnvOverrideMode value) {
-            Log("EnvOr value changed. Notifying listeners.\nNew value: " + value);
-        };
-
-
-        /// <summary>
-        /// Override choice for platform base model/environment<br/>
-        /// Forwards the current choice to the UI, and the new choice to the plugin
-        /// </summary>
-        [UIValue("env-arr")]
-        public static EnvironmentArranger.EnvArrangement EnvArr {
-            get {
-                if(_EnvArr == null) {
-                    _EnvArr = (EnvironmentArranger.EnvArrangement)CONFIG.GetInt("Settings", "EnvironmentArrangement", 0, true);
-                }
-                return _EnvArr.Value;
-            }
-            set {
-                if(value != _EnvArr.Value) {
-                    CONFIG.SetInt("Settings", "EnvironmentArrangement", (int)value);
-                    _EnvArr = value;
-                }
-            }
-        }
-        private static EnvironmentArranger.EnvArrangement? _EnvArr;
+        [UIValue("UseInMultiplayerText")]
+        public const string useInMultiplayerText = "Toggle if Custom Platforms is used in Multiplayer \n!Not supported!";
 
 
         /// <summary>
@@ -102,13 +49,13 @@ namespace CustomFloorPlugin.UI {
         [UIValue("always-show-feet")]
         public static bool AlwaysShowFeet {
             get {
-                if(_AlwaysShowFeet == null) {
+                if (_AlwaysShowFeet == null) {
                     _AlwaysShowFeet = CONFIG.GetBool("Settings", "AlwaysShowFeet", false, true);
                 }
                 return _AlwaysShowFeet.Value;
             }
             set {
-                if(value != _AlwaysShowFeet.Value) {
+                if (value != _AlwaysShowFeet.Value) {
                     CONFIG.SetBool("Settings", "AlwaysShowFeet", value);
                     _AlwaysShowFeet = value;
                 }
@@ -124,13 +71,13 @@ namespace CustomFloorPlugin.UI {
         [UIValue("show-heart")]
         public static bool ShowHeart {
             get {
-                if(_ShowHeart == null) {
+                if (_ShowHeart == null) {
                     _ShowHeart = CONFIG.GetBool("Settings", "ShowHeart", true, true);
                 }
                 return _ShowHeart.Value;
             }
             set {
-                if(value != _ShowHeart.Value) {
+                if (value != _ShowHeart.Value) {
                     CONFIG.SetBool("Settings", "ShowHeart", value);
                     _ShowHeart = value;
                     ShowHeartChanged(value);
@@ -144,13 +91,80 @@ namespace CustomFloorPlugin.UI {
 
 
         /// <summary>
+        /// Should this Plugin load CustomScripts?
+        /// Forwards the current choice to the UI, and the new choice to the plugin
+        /// </summary>
+        [UIValue("load-custom-scripts")]
+        public static bool LoadCustomScripts {
+            get {
+                if (_LoadCustomScripts == null) {
+                    _LoadCustomScripts = CONFIG.GetBool("Settings", "LoadCustomScripts", false, true);
+                }
+                return _LoadCustomScripts.Value;
+            }
+            set {
+                if (value != _LoadCustomScripts.Value) {
+                    CONFIG.SetBool("Settings", "LoadCustomScripts", value);
+                    _LoadCustomScripts = value;
+                    PlatformManager.Reload();
+                }
+            }
+        }
+        private static bool? _LoadCustomScripts;
+
+
+        /// <summary>
+        /// Should this Plugin spawn a Custom Platform in 360°-Levels?
+        /// Forwards the current choice to the UI, and the new choice to the plugin
+        /// </summary>
+        [UIValue("use-in-360")]
+        public static bool UseIn360 {
+            get {
+                if (_UseIn360 == null) {
+                    _UseIn360 = CONFIG.GetBool("Settings", "UseIn360", false, true);
+                }
+                return _UseIn360.Value;
+            }
+            set {
+                if (value != _UseIn360.Value) {
+                    CONFIG.SetBool("Settings", "UseIn360", value);
+                    _UseIn360 = value;
+                }
+            }
+        }
+        private static bool? _UseIn360;
+
+
+        /// <summary>
+        /// Should this Plugin spawn a Custom Platform in Multiplayer?
+        /// Forwards the current choice to the UI, and the new choice to the plugin
+        /// </summary>
+        [UIValue("use-in-multiplayer")]
+        public static bool UseInMultiplayer {
+            get {
+                if (_UseInMultiplayer == null) {
+                    _UseInMultiplayer = CONFIG.GetBool("Settings", "UseInMultiplayer", false, true);
+                }
+                return _UseInMultiplayer.Value;
+            }
+            set {
+                if (value != _UseInMultiplayer.Value) {
+                    CONFIG.SetBool("Settings", "UseInMultiplayer", value);
+                    _UseInMultiplayer = value;
+                }
+            }
+        }
+        private static bool? _UseInMultiplayer;
+
+
+        /// <summary>
         /// This is a wrapper for Beat Saber's player data structure.<br/>
         /// </summary>
         internal static PlayerData PlayerData {
             get {
-                if(_PlayerData == null) {
+                if (_PlayerData == null) {
                     PlayerDataModel[] playerDataModels = Resources.FindObjectsOfTypeAll<PlayerDataModel>();
-                    if(playerDataModels.Length >= 1) {
+                    if (playerDataModels.Length >= 1) {
                         _PlayerData = Resources.FindObjectsOfTypeAll<PlayerDataModel>()[0].playerData;
                     }
                 }
@@ -158,5 +172,13 @@ namespace CustomFloorPlugin.UI {
             }
         }
         private static PlayerData _PlayerData;
+
+
+        /// <summary>
+        /// Call this Method before using <see cref="PlayerData"/> again to Update it
+        /// </summary>
+        internal static void UpdatePlayerData() {
+            _PlayerData = null;
+        }
     }
 }

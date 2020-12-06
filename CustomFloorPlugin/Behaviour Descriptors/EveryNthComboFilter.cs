@@ -5,7 +5,7 @@ namespace CustomFloorPlugin {
 
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1051:Do not declare visible instance fields", Justification = "Too old to change")]
-    public class EveryNthComboFilter:EventFilterBehaviour {
+    public class EveryNthComboFilter : EventFilterBehaviour {
         public int ComboStep = 50;
         public UnityEvent NthComboReached;
 
@@ -22,7 +22,7 @@ namespace CustomFloorPlugin {
         }
 
         private void OnComboStep(int combo) {
-            if(combo % ComboStep == 0 && combo != 0) {
+            if (combo % ComboStep == 0 && combo != 0) {
                 NthComboReached.Invoke();
             }
         }

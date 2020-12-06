@@ -1,6 +1,8 @@
 ﻿using BeatSaberMarkupLanguage;
+
+using CustomFloorPlugin.Utilities;
+
 using HMUI;
-using IPA.Utilities;
 
 namespace CustomFloorPlugin.UI {
 
@@ -9,7 +11,7 @@ namespace CustomFloorPlugin.UI {
     /// Instatiable custom <see cref="FlowCoordinator"/> used by BSML
     /// </summary>
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Build", "CA1812:Avoid unistantiated internal classes", Justification = "Instantiated by Unity")]
-    internal class PlatformListFlowCoordinator:FlowCoordinator {
+    internal class PlatformListFlowCoordinator : FlowCoordinator {
 
 
         /// <summary>
@@ -17,7 +19,7 @@ namespace CustomFloorPlugin.UI {
         /// </summary>
         private static PlatformsListView PlatformsListView {
             get {
-                if(_PlatformsListView == null) {
+                if (_PlatformsListView == null) {
                     _PlatformsListView = BeatSaberUI.CreateViewController<UI.PlatformsListView>();
                 }
                 return _PlatformsListView;
@@ -31,10 +33,9 @@ namespace CustomFloorPlugin.UI {
         /// [Called by Beat Saber]
         /// </summary>
         /// <param name="firstActivation">Was this the first activation?</param>
-        /// <param name="activationType">Was this call added to the hierachy.</param>
-        protected override void DidActivate(bool firstActivation, ActivationType activationType) {
-            if(firstActivation) {
-                title = "Custom Platforms";
+        protected override void DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling) {
+            if (firstActivation) {
+                SetTitle("Custom Platforms");
                 showBackButton = true;
                 ProvideInitialViewControllers(PlatformsListView);
             }
@@ -47,8 +48,9 @@ namespace CustomFloorPlugin.UI {
         /// </summary>
         /// <param name="ignored1"></param>
         protected override void BackButtonWasPressed(ViewController ignored1) {
-            Log("Selected Environment:" + PlatformManager.CurrentPlatform.platName);
-            BeatSaberUI.MainFlowCoordinator.InvokeMethod<object, MainFlowCoordinator>("DismissFlowCoordinator", this, null, false);
+            Logging.Log("Selected Environment: " + PlatformManager.CurrentPlatform.platName);
+            Logging.Log("Selected Override: " + PlatformsListView.EnvOr);
+            BeatSaberUI.MainFlowCoordinator.DismissFlowCoordinator(this, null, ViewController.AnimationDirection.Horizontal, false);
         }
     }
 }

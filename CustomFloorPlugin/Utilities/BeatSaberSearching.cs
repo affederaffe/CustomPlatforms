@@ -23,13 +23,13 @@ namespace CustomFloorPlugin.Utilities {
         internal static Scene GetCurrentEnvironment() {
             Scene scene = new Scene();
             Scene environmentScene = scene;
-            for(int i = 0; i < SceneManager.sceneCount; i++) {
+            for (int i = 0; i < SceneManager.sceneCount; i++) {
                 scene = SceneManager.GetSceneAt(i);
-                if(scene.name.EndsWith("Environment", STR_INV) && (!environmentScene.IsValid() || environmentScene.name.StartsWith("Menu", STR_INV))) {
+                if (scene.name.EndsWith("Environment", STR_INV) && (!environmentScene.IsValid() || environmentScene.name.StartsWith("Menu", STR_INV))) {
                     environmentScene = scene;
                 }
             }
-            if(environmentScene.IsValid()) {
+            if (environmentScene.IsValid()) {
                 return environmentScene;
             }
             throw new EnvironmentSceneNotFoundException();
@@ -45,23 +45,24 @@ namespace CustomFloorPlugin.Utilities {
         internal static LightWithIdManager FindLightWithIdManager(Scene environment) {
             LightWithIdManager manager = null;
             void RecursiveFindManager(Transform directParent) {
-                for(int i = 0; i < directParent.childCount; i++) {
+                for (int i = 0; i < directParent.childCount; i++) {
                     Transform child = directParent.GetChild(i);
-                    if(child.GetComponent<LightWithIdManager>() != null) {
+                    if (child.GetComponent<LightWithIdManager>() != null) {
                         manager = child.GetComponent<LightWithIdManager>();
                     }
-                    if(child.childCount != 0) {
+                    if (child.childCount != 0) {
                         RecursiveFindManager(child);
                     }
                 }
             }
             GameObject[] roots = environment.GetRootGameObjects();
-            foreach(GameObject root in roots) {
+            foreach (GameObject root in roots) {
                 RecursiveFindManager(root.transform);
             }
-            if(manager != null) {
+            if (manager != null) {
                 return manager;
-            } else {
+            }
+            else {
                 throw new ManagerNotFoundException();
             }
         }

@@ -1,7 +1,7 @@
-﻿using CustomFloorPlugin.Exceptions;
-
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Reflection;
+
+using CustomFloorPlugin.Exceptions;
 
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -23,10 +23,10 @@ namespace CustomFloorPlugin.Utilities {
         /// <exception cref="ComponentNotFoundException"></exception>
         /// <returns></returns>
         internal static T FindFirst<T>() {
-            for(int i = 0; i < SceneManager.sceneCount; i++) {
+            for (int i = 0; i < SceneManager.sceneCount; i++) {
                 Scene scene = SceneManager.GetSceneAt(i);
-                foreach(GameObject root in scene.GetRootGameObjects()) {
-                    if(InternalRecursiveFindFirst<T>(root.transform, out object component)) {
+                foreach (GameObject root in scene.GetRootGameObjects()) {
+                    if (InternalRecursiveFindFirst<T>(root.transform, out object component)) {
                         return (T)component;
                     }
                 }
@@ -43,8 +43,8 @@ namespace CustomFloorPlugin.Utilities {
         /// <exception cref="ComponentNotFoundException"></exception>
         /// <returns></returns>
         internal static T FindFirst<T>(Scene scene) {
-            foreach(GameObject root in scene.GetRootGameObjects()) {
-                if(InternalRecursiveFindFirst<T>(root.transform, out object component)) {
+            foreach (GameObject root in scene.GetRootGameObjects()) {
+                if (InternalRecursiveFindFirst<T>(root.transform, out object component)) {
                     return (T)component;
                 }
 
@@ -61,7 +61,7 @@ namespace CustomFloorPlugin.Utilities {
         /// <exception cref="ComponentNotFoundException"></exception>
         /// <returns></returns>
         internal static T FindFirst<T>(GameObject gameObject) {
-            if(InternalRecursiveFindFirst<T>(gameObject.transform, out object component)) {
+            if (InternalRecursiveFindFirst<T>(gameObject.transform, out object component)) {
                 return (T)component;
             }
             throw new ComponentNotFoundException(typeof(T).GetTypeInfo());
@@ -74,11 +74,12 @@ namespace CustomFloorPlugin.Utilities {
         /// </summary>
         private static bool InternalRecursiveFindFirst<T>(Transform transform, out object component) {
             component = transform.GetComponent<T>();
-            if(component != null) {
+            if (component != null) {
                 return true;
-            } else if(transform.childCount != 0) {
-                for(int i = 0; i < transform.childCount; i++) {
-                    if(InternalRecursiveFindFirst<T>(transform.GetChild(i), out component)) {
+            }
+            else if (transform.childCount != 0) {
+                for (int i = 0; i < transform.childCount; i++) {
+                    if (InternalRecursiveFindFirst<T>(transform.GetChild(i), out component)) {
                         return true;
                     }
                 }
@@ -95,13 +96,13 @@ namespace CustomFloorPlugin.Utilities {
         /// <returns></returns>
         public static List<T> FindAll<T>() {
             List<T> components = new List<T>();
-            for(int i = 0; i < SceneManager.sceneCount; i++) {
+            for (int i = 0; i < SceneManager.sceneCount; i++) {
                 Scene scene = SceneManager.GetSceneAt(i);
-                foreach(GameObject root in scene.GetRootGameObjects()) {
+                foreach (GameObject root in scene.GetRootGameObjects()) {
                     InternalRecursiveFindAll<T>(root.transform, ref components);
                 }
             }
-            if(components.Count == 0) {
+            if (components.Count == 0) {
                 throw new ComponentNotFoundException(typeof(T).GetTypeInfo());
             }
             return components;
@@ -117,10 +118,10 @@ namespace CustomFloorPlugin.Utilities {
         /// <returns></returns>
         public static List<T> FindAll<T>(Scene scene) {
             List<T> components = new List<T>();
-            foreach(GameObject root in scene.GetRootGameObjects()) {
+            foreach (GameObject root in scene.GetRootGameObjects()) {
                 InternalRecursiveFindAll<T>(root.transform, ref components);
             }
-            if(components.Count == 0) {
+            if (components.Count == 0) {
                 throw new ComponentNotFoundException(typeof(T).GetTypeInfo());
             }
             return components;
@@ -137,7 +138,7 @@ namespace CustomFloorPlugin.Utilities {
         public static List<T> FindAll<T>(GameObject gameObject) {
             List<T> components = new List<T>();
             InternalRecursiveFindAll<T>(gameObject.transform, ref components);
-            if(components.Count == 0) {
+            if (components.Count == 0) {
                 throw new ComponentNotFoundException(typeof(T).GetTypeInfo());
             }
             return components;
@@ -150,11 +151,30 @@ namespace CustomFloorPlugin.Utilities {
         /// </summary>
         private static void InternalRecursiveFindAll<T>(Transform transform, ref List<T> components) {
             components.AddRange(transform.GetComponents<T>());
-            if(transform.childCount != 0) {
-                for(int i = 0; i < transform.childCount; i++) {
+            if (transform.childCount != 0) {
+                for (int i = 0; i < transform.childCount; i++) {
                     InternalRecursiveFindAll<T>(transform.GetChild(i), ref components);
                 }
             }
+        }
+
+
+        /// <summary>
+        ///  Checks if a given <see cref="List{T}"/> is <see cref="null"/>, <see cref="0"/> or contains only <see cref="null"/>.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="list"></param>
+        /// <returns></returns>
+        public static bool IsNullZeroOrContainsNull<T>(List<T> list) {
+            if (list == null || list.Count == 0) {
+                return true;
+            }
+            foreach (T t in list) {
+                if (t.ToString() == "null") { // Why t.ToString()? Idk, t == null doesn't work.
+                    return true;
+                }
+            }
+            return false;
         }
     }
 }

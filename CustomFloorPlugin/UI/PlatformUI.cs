@@ -1,34 +1,44 @@
 ﻿using BeatSaberMarkupLanguage;
 using BeatSaberMarkupLanguage.MenuButtons;
 using BeatSaberMarkupLanguage.Settings;
-using BS_Utils.Utilities;
 
-namespace CustomFloorPlugin.UI
-{
+using HMUI;
+
+namespace CustomFloorPlugin.UI {
 
 
     /// <summary>
     /// Static, multifunctional, UI Class. Holds references to UI elements and provides UI relevant functions.
     /// </summary>
-    internal static class PlatformUI
-    {
+    internal static class PlatformUI {
 
 
         /// <summary>
         /// Static reference to the <see cref="PlatformListFlowCoordinator"/> singleton
         /// </summary>
-        private static PlatformListFlowCoordinator PlatformMenuFlowCoordinator
-        {
-            get
-            {
-                if (_PlatformMenuFlowCoordinator == null)
-                {
+        private static PlatformListFlowCoordinator PlatformMenuFlowCoordinator {
+            get {
+                if (_PlatformMenuFlowCoordinator == null) {
                     _PlatformMenuFlowCoordinator = BeatSaberUI.CreateFlowCoordinator<PlatformListFlowCoordinator>();
                 }
                 return _PlatformMenuFlowCoordinator;
             }
         }
         private static PlatformListFlowCoordinator _PlatformMenuFlowCoordinator;
+
+
+        /// <summary>
+        /// Static reference to the <see cref="NewScriptWarningFlowCoordinator"/> singleton
+        /// </summary>
+        internal static NewScriptWarningFlowCoordinator NewScriptWarningFlowCoordinator {
+            get {
+                if (_NewScriptWarningFlowCoordinator == null) {
+                    _NewScriptWarningFlowCoordinator = BeatSaberUI.CreateFlowCoordinator<NewScriptWarningFlowCoordinator>();
+                }
+                return _NewScriptWarningFlowCoordinator;
+            }
+        }
+        private static NewScriptWarningFlowCoordinator _NewScriptWarningFlowCoordinator;
 
 
         /// <summary>
@@ -40,10 +50,8 @@ namespace CustomFloorPlugin.UI
         /// <summary>
         /// Sets up the UI
         /// </summary>
-        internal static void SetupMenuButtons()
-        {
-            if (!runOnce)
-            {
+        internal static void SetupMenuButtons() {
+            if (!runOnce) {
                 runOnce = true;
                 MenuButtons.instance.RegisterButton(new MenuButton("Custom Platforms", "Change Custom Platforms Here!", CustomPlatformsMenuButtonPressed, true));
                 BSMLSettings.instance.AddSettingsMenu("Custom Platforms", "CustomFloorPlugin.UI.Settings.bsml", Settings.instance);
@@ -54,9 +62,8 @@ namespace CustomFloorPlugin.UI
         /// <summary>
         /// Transitions to the CustomPlatforms selection menu
         /// </summary>
-        private static void CustomPlatformsMenuButtonPressed()
-        {
-            BeatSaberUI.MainFlowCoordinator.InvokeMethod("PresentFlowCoordinator", PlatformMenuFlowCoordinator, null, false, false);
+        private static void CustomPlatformsMenuButtonPressed() {
+            BeatSaberUI.MainFlowCoordinator.PresentFlowCoordinator(PlatformMenuFlowCoordinator, null, ViewController.AnimationDirection.Horizontal, true, false);
         }
     }
 

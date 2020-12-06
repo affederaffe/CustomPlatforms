@@ -1,7 +1,7 @@
-﻿using BS_Utils.Utilities;
-
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Reflection;
+
+using BS_Utils.Utilities;
 
 using UnityEngine;
 
@@ -13,7 +13,7 @@ namespace CustomFloorPlugin {
     /// Instantiable wrapper class for a single <see cref="SongEventHandler"/> that handles registering and de-registering
     /// </summary>
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Build", "CA1812:Avoid unistantiated internal classes", Justification = "Instantiated by Unity")]
-    internal class SongEventManager:MonoBehaviour {
+    internal class SongEventManager : MonoBehaviour {
 
 
         /// <summary>
@@ -31,8 +31,8 @@ namespace CustomFloorPlugin {
         /// </summary>
         /// <param name="songEventData">Event to evaluate</param>
         internal void HandleSongEvent(BeatmapEventData songEventData) {
-            if(songEventData.type == (BeatmapEventType)_songEventHandler.eventType) {
-                if(songEventData.value == _songEventHandler.value || _songEventHandler.anyValue) {
+            if (songEventData.type == (BeatmapEventType)_songEventHandler.eventType) {
+                if (songEventData.value == _songEventHandler.value || _songEventHandler.anyValue) {
                     _songEventHandler.OnTrigger.Invoke();
                 }
             }
