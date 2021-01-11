@@ -4,12 +4,9 @@ using System.Linq;
 
 using BS_Utils.Utilities;
 
-using CustomFloorPlugin.Exceptions;
-
 using UnityEngine.SceneManagement;
 
-using static CustomFloorPlugin.Utilities.Logging;
-using static CustomFloorPlugin.Utilities.UnityObjectSearching;
+using CustomFloorPlugin.Extensions;
 
 
 namespace CustomFloorPlugin {
@@ -19,14 +16,6 @@ namespace CustomFloorPlugin {
     /// The <see cref="GlobalCollection"/> class holds global items that are logically not assignable to any one class, or do not belong to this assembly
     /// </summary>
     internal static class GlobalCollection {
-
-
-        /// <summary>
-        /// Config file/object for this Plugin
-        /// </summary>
-        internal static Config CONFIG = new Config("Custom Platforms");
-
-
 
         /// <summary>
         /// Beat Sabers <see cref="GameScenesManager"/>, available after loading.
@@ -43,24 +32,25 @@ namespace CustomFloorPlugin {
 
 
         /// <summary>
-        /// Beat Sabers <see cref="BeatmapObjectCallbackController"/> for the current level, available after loading into a level.
+        /// Beat Sabers <see cref="BeatmapObjectCallbackController"/> for the current level, available after loading into a level.<br></br> 
+        /// Referencec set by <see cref="HarmonyPatches.GetBOCC_Patch"/>
         /// </summary>
         internal static BeatmapObjectCallbackController BOCC {
             get {
                 if (_BOCC == null) {
-                    try {
-                        _BOCC = FindFirst<BeatmapObjectCallbackController>();
-                    }
-                    catch (ComponentNotFoundException e) {
-                        Log("Tried Referencing BOCC out of context, returning null!");
-                        Log(e);
-                    }
-
+                    _BOCC = UnityEngine.Resources.FindObjectsOfTypeAll<BeatmapObjectCallbackController>().First(x => x.GetFullPath().Contains("GameplayCore") || (x.GetFullPath().Contains("LocalActive") && x.GetFullPath().Contains("(Clone)")));
                 }
                 return _BOCC;
             }
         }
         private static BeatmapObjectCallbackController _BOCC;
+
+
+        /// <summary>
+        /// This is a wrapper for Beat Saber's player data structure.<br></br>
+        /// Installed by <see cref="Installers.OnMenuInstaller"/>
+        /// </summary>
+        internal static PlayerDataModel PDM;
 
 
         /// <summary>
@@ -90,7 +80,7 @@ namespace CustomFloorPlugin {
 
 
         /// <summary>
-        /// The folder path used by CustomPlatforms
+        /// The folder path used by CustomFloorPlugin
         /// </summary>
         internal const string FOLDER = "CustomPlatforms";
 
@@ -101,6 +91,9 @@ namespace CustomFloorPlugin {
         internal const string SCRIPT_FOLDER = "Scripts";
 
 
+        /// <summary>
+        /// The file name used to store CustomScript hashes.
+        /// </summary>
         internal const string SCRIPT_HASHES_FILENAME = "CustomScriptHashes.hashes";
     }
 }

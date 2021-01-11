@@ -10,7 +10,6 @@ namespace CustomFloorPlugin {
     /// <summary>
     /// Instantiable wrapper class for <see cref="SpectrogramAnimationState"/>s that handles registering and de-registering, as well setting up and updating visuals of the <see cref="Spectrogram"/>
     /// </summary>
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Build", "CA1812:Avoid unistantiated internal classes", Justification = "Instantiated by Unity")]
     internal class SpectrogramAnimationStateManager : MonoBehaviour {
 
 

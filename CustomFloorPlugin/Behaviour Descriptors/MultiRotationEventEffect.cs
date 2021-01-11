@@ -5,7 +5,6 @@ namespace CustomFloorPlugin {
 
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0044:Add readonly modifier", Justification = "Unity can't deserialize data onto readonly fields")]
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Build", "CA1812:Avoid unistantiated internal classes", Justification = "Instantiated by Unity")]
     public class MultiRotationEventEffect : MonoBehaviour {
         internal Actor Create() {
             Actor actor = gameObject.AddComponent<Actor>();
@@ -106,8 +105,8 @@ namespace CustomFloorPlugin {
                             _randomStartRotation = ((beatmapEventData.type == (BeatmapEventType)_eventL) ? frameCount : (-frameCount));
                         }
                         else {
-                            _randomDirection = ((UnityEngine.Random.value > 0.5f) ? 1f : -1f);
-                            _randomStartRotation = UnityEngine.Random.Range(0f, 360f);
+                            _randomDirection = (Random.value > 0.5f) ? 1f : -1f;
+                            _randomStartRotation = Random.Range(0f, 360f);
                         }
                         _randomGenerationFrameNum = Time.frameCount;
                     }

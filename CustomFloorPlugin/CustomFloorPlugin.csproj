@@ -63,10 +63,12 @@
     <Compile Include="Behaviour Descriptors\CameraVisibility.cs" />
     <Compile Include="Behaviour Descriptors\ComboReachedEvent.cs" />
     <Compile Include="Behaviour Descriptors\MultiRotationEventEffect.cs" />
+    <Compile Include="Configuration\PluginConfig.cs" />
     <Compile Include="Harmony Patches\EnvironmentOverride_Patch.cs" />
+    <Compile Include="Harmony Patches\LightWithIdManagerSetColors_Patch.cs" />
     <Compile Include="Harmony Patches\Multiplayer_Patch.cs" />
     <Compile Include="Harmony Patches\NewScriptWarning_Patch.cs" />
-    <Compile Include="NotifyOnEnableOrDisable.cs" />
+    <Compile Include="INotifyOnEnableOrDisable.cs" />
     <Compile Include="Behaviour Descriptors\PrefabLightmapData.cs" />
     <Compile Include="Behaviour Descriptors\SpectrogramAnimationState.cs" />
     <Compile Include="Behaviour Descriptors\SpectrogramMaterial.cs" />
@@ -76,10 +78,14 @@
     <Compile Include="Behaviours\SpectrogramColumns.cs" />
     <Compile Include="EnvOverrideMode.cs" />
     <Compile Include="Extensions\Extentions.cs" />
+    <Compile Include="Installers\OnGameInstaller.cs" />
+    <Compile Include="Installers\OnMenuInstaller.cs" />
     <Compile Include="PlatformManager.EasterEggs.cs" />
     <Compile Include="PlatformManager.PlatformLifeCycleManagement.cs" />
+    <Compile Include="UI\EnvironmentOverrideListView.cs" />
     <Compile Include="UI\NewScriptWarningFlowCoordinator.cs" />
     <Compile Include="UI\NewScriptWarningView.cs" />
+    <Compile Include="UI\ReloadPlatformsButtonView.cs" />
     <Compile Include="Utilities\BeatSaberSearching.cs" />
     <Compile Include="GlobalCollection.cs" />
     <Compile Include="Utilities\UnityObjectSearching.cs" />
@@ -102,7 +108,7 @@
     <Compile Include="Exceptions\StackedRequestsException.cs" />
     <Compile Include="UI\PlatformListFlowCoordinator.cs" />
     <Compile Include="UI\PlatformsListView.cs" />
-    <Compile Include="UI\PlatformUI.cs" />
+    <Compile Include="UI\MenuButtonManager.cs" />
     <Compile Include="Properties\Settings.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
@@ -135,8 +141,10 @@
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
-    <EmbeddedResource Include="UI\PlatformList.bsml" />
-    <EmbeddedResource Include="UI\Settings.bsml" />
+    <EmbeddedResource Include="Views\PlatformList.bsml" />
+    <EmbeddedResource Include="Views\Settings.bsml" />
+    <EmbeddedResource Include="Views\EnvironmentOverrideList.bsml" />
+    <EmbeddedResource Include="Views\PlatformReloadButton.bsml" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="0Harmony">
@@ -158,6 +166,10 @@
     </Reference>
     <Reference Include="BS_Utils">
       <HintPath>C:\Program Files (x86)\Steam\steamapps\common\Beat Saber\Plugins\BS_Utils.dll</HintPath>
+    </Reference>
+    <Reference Include="Colors, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Beat Saber\Beat Saber_Data\Managed\Colors.dll</HintPath>
     </Reference>
     <Reference Include="GameplayCore">
       <HintPath>C:\Program Files (x86)\Steam\steamapps\common\Beat Saber\Beat Saber_Data\Managed\GameplayCore.dll</HintPath>
@@ -226,6 +238,9 @@
     <Reference Include="Microsoft.VisualStudio.Validation, Version=15.3.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.VisualStudio.Validation.15.5.31\lib\netstandard2.0\Microsoft.VisualStudio.Validation.dll</HintPath>
     </Reference>
+    <Reference Include="SiraUtil">
+      <HintPath>..\..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Beat Saber\Plugins\SiraUtil.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Numerics" />
     <Reference Include="UnityEngine, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
@@ -266,10 +281,11 @@
     <Reference Include="WindowsBase" />
     <Reference Include="Zenject, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath Condition="Exists('D:\SteamLibrary\steamapps\common\Beat Saber\Beat Saber_Data\Managed\Zenject.dll')">D:\SteamLibrary\steamapps\common\Beat Saber\Beat Saber_Data\Managed\Zenject.dll</HintPath>
-      <HintPath Condition="Exists('S:\steamapps\common\Beat Saber\Beat Saber_Data\Managed\Zenject.dll')">S:\steamapps\common\Beat Saber\Beat Saber_Data\Managed\Zenject.dll</HintPath>
-      <HintPath Condition="Exists('C:\Program Files (x86)\Steam\steamapps\common\Beat Saber\Beat Saber_Data\Managed\Zenject.dll')">C:\Program Files (x86)\Steam\steamapps\common\Beat Saber\Beat Saber_Data\Managed\Zenject.dll</HintPath>
-      <HintPath Condition="Exists('..\..\..\..\..\Desktop\Games\Oculus\Software\hyperbolic-magnetism-beat-saber\Beat Saber_Data\Managed\Zenject.dll')">..\..\..\..\..\Desktop\Games\Oculus\Software\hyperbolic-magnetism-beat-saber\Beat Saber_Data\Managed\Zenject.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Beat Saber\Beat Saber_Data\Managed\Zenject.dll</HintPath>
+    </Reference>
+    <Reference Include="Zenject-usage, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Beat Saber\Beat Saber_Data\Managed\Zenject-usage.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -295,7 +311,7 @@
     -->
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="UI\NewScriptWarning.bsml" />
+    <EmbeddedResource Include="Views\NewScriptWarning.bsml" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="BuildTargets.targets" />

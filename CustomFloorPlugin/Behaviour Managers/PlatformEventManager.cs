@@ -9,7 +9,6 @@ namespace CustomFloorPlugin {
     /// <summary>
     /// Instantiable wrapper class for a single <see cref="EventManager"/> that handles registering and de-registering, as well as Light Event CallsBacks
     /// </summary>
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Build", "CA1812:Avoid unistantiated internal classes", Justification = "Instantiated by Unity")]
     internal class PlatformEventManager : MonoBehaviour {
 
 

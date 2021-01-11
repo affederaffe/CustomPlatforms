@@ -10,7 +10,6 @@ namespace CustomFloorPlugin {
     /// <summary>
     /// Instantiable manager class for <see cref="SpectrogramMaterial"/>s that handles updating their <see cref="BasicSpectrogramData"/> references
     /// </summary>
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Build", "CA1812:Avoid unistantiated internal classes", Justification = "Instantiated by Unity")]
     internal class SpectrogramMaterialManager : MonoBehaviour {
 
 

@@ -51,8 +51,9 @@ namespace CustomFloorPlugin {
         /// <param name="scene"><see cref="Scene"/> to search for <see cref="Renderer"/>s</param>
         internal static void ReplaceMaterials(Scene scene) {
             try {
+                ColorManager colorManager = GameObject.Find("ColorManager").GetComponent<ColorManager>();
                 foreach (Renderer renderer in FindAll<Renderer>(scene)) {
-                    ReplaceForRenderer(renderer);
+                    ReplaceForRenderer(renderer, colorManager);
                 }
             }
             catch (ComponentNotFoundException) {
@@ -67,8 +68,10 @@ namespace CustomFloorPlugin {
         /// <param name="gameObject"><see cref="GameObject"/> to search for <see cref="Renderer"/>s</param>
         internal static void ReplaceMaterials(GameObject gameObject) {
             try {
-                foreach (Renderer renderer in FindAll<Renderer>(gameObject)) {
-                    ReplaceForRenderer(renderer);
+                ColorManager colorManager = GameObject.Find("ColorManager").GetComponent<ColorManager>();
+                foreach (Renderer renderer in FindAll<Renderer>(gameObject))
+                {
+                    ReplaceForRenderer(renderer, colorManager);
                 }
             }
             catch (ComponentNotFoundException) {
@@ -81,7 +84,8 @@ namespace CustomFloorPlugin {
         /// Replaces all fake <see cref="Material"/>s on a given <see cref="Renderer"/>
         /// </summary>
         /// <param name="renderer">What <see cref="Renderer"/> to replace materials for</param>
-        private static void ReplaceForRenderer(Renderer renderer) {
+        /// <param name="colorManager">What <see cref="ColorManager"/> to use when coloring</param>
+        private static void ReplaceForRenderer(Renderer renderer, ColorManager colorManager) {
             Material[] materialsCopy = renderer.materials;
             bool materialsDidChange = false;
             for (int i = 0; i < materialsCopy.Length; i++) {
@@ -97,6 +101,24 @@ namespace CustomFloorPlugin {
                     else if (materialsCopy[i].name.Equals(fakeOpaqueGlowMatName, STR_INV)) {
                         materialsCopy[i] = opaqueGlow;
                         materialsDidChange = true;
+                    }
+                    // If the shader has a float named _UseLeftColor or _UseRightColor, swap them out with the proper ColorManger colors 
+                    if(materialsCopy[i].HasProperty("_UseLeftColor") && materialsCopy[i].GetFloat("_UseLeftColor") != 0)
+                    {
+                        materialsCopy[i].SetColor("_Color", colorManager.ColorForSaberType(SaberType.SaberA));
+                    }
+                    else if (materialsCopy[i].HasProperty("_UseRightColor") && materialsCopy[i].GetFloat("_UseRightColor") != 0)
+                    {
+                        materialsCopy[i].SetColor("_Color", colorManager.ColorForSaberType(SaberType.SaberB));
+                    }
+                    // If the shader has a color named _LeftPlatformColor or _RightPlatformColor, swap them out with the proper ColorManger colors 
+                    if (materialsCopy[i].HasProperty("_LeftPlatformColor"))
+                    {
+                        materialsCopy[i].SetColor("_LeftPlatformColor", colorManager.ColorForSaberType(SaberType.SaberA));
+                    }
+                    else if (materialsCopy[i].HasProperty("_RightPlatformColor"))
+                    {
+                        materialsCopy[i].SetColor("_RightPlatformColor", colorManager.ColorForSaberType(SaberType.SaberB));
                     }
                 }
             }

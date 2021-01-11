@@ -15,7 +15,6 @@ namespace CustomFloorPlugin {
         /// <summary>
         /// Is a mod without easter eggs a real mod?
         /// </summary>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Build", "CA1812:Avoid unistantiated internal classes", Justification = "Instantiated by Unity")]
         private class EasterEggs : MonoBehaviour {
 
 

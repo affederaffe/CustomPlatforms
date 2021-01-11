@@ -12,7 +12,7 @@ namespace CustomFloorPlugin.Utilities {
 
 
     /// <summary>
-    /// This is the logger class of CustomPlatforms<br/>
+    /// This is the logger class of CustomFloorPlugin<br/>
     /// It is designed to be included via <see langword="using static"/> and provides standard overloads for many types
     /// </summary>
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "This is a Logger, shut up Microsoft")]

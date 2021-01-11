@@ -1,6 +1,6 @@
-using CustomFloorPlugin;
-
 using UnityEngine;
+
+using CustomFloorPlugin;
 
 using static CustomFloorPlugin.Utilities.BeatSaberSearching;
 

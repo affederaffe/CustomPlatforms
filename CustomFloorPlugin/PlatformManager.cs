@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 
+using CustomFloorPlugin.Configuration;
 using CustomFloorPlugin.Exceptions;
 using CustomFloorPlugin.UI;
 
@@ -159,10 +160,9 @@ namespace CustomFloorPlugin {
             PlatformLoader.LoadScripts();
             AllPlatforms = PlatformLoader.CreateAllPlatforms(Anchor.transform);
             CurrentPlatform = AllPlatforms[0];
-            if (CONFIG.HasKey("Data", "CustomPlatformPath")) {
-                string savedPath = CONFIG.GetString("Data", "CustomPlatformPath");
+            if (PluginConfig.Instance.CustomPlatformPath != null) {
                 for (int i = 0; i < AllPlatforms.Count; i++) {
-                    if (savedPath == AllPlatforms[i].platName + AllPlatforms[i].platAuthor) {
+                    if (PluginConfig.Instance.CustomPlatformPath == AllPlatforms[i].platName + AllPlatforms[i].platAuthor) {
                         CurrentPlatform = AllPlatforms[i];
                         break;
                     }
@@ -196,14 +196,10 @@ namespace CustomFloorPlugin {
         private static void TransitionFinalize() {
             try {
                 Scene currentEvironment = GetCurrentEnvironment();
-                if (!currentEvironment.name.StartsWith("Menu", STR_INV) && MultiplayerCheck() && D360Check() && currentEvironment.name != "TutorialEnvironment") { //Excluding TutorialEnvironment for Counters+ to work properly
+                if (!currentEvironment.name.StartsWith("Menu", STR_INV) && MultiplayerCheck(currentEvironment) && D360Check(currentEvironment) /*&& !currentEvironment.name.StartsWith("Tutorial", STR_INV)*/) { //Excluding TutorialEnvironment for Counters+ to work properly
                     try {
-                        Settings.UpdatePlayerData();
-                        if (EnvironmentSceneOverrider.didOverrideEnvironment || (PlatformsListView.EnvOr == EnvOverrideMode.Song && !Settings.PlayerData.overrideEnvironmentSettings.overrideEnvironments) || currentEvironment.name.StartsWith("Multiplayer", STR_INV)) {
-                            if (!platformSpawned) {
-                                PlatformLifeCycleManagement.InternalChangeToPlatform();
-                                EnvironmentSceneOverrider.Revert();
-                            }
+                        if (!platformSpawned) {
+                            PlatformLifeCycleManagement.InternalChangeToPlatform();
                         }
                     }
                     catch (ManagerNotFoundException e) {
@@ -212,7 +208,7 @@ namespace CustomFloorPlugin {
                 }
                 else if (currentEvironment.name.StartsWith("Menu", STR_INV)) {
                     platformSpawned = false;
-                    Heart.SetActive(Settings.ShowHeart);
+                    Heart.SetActive(PluginConfig.Instance.ShowHeart);
                     Heart.GetComponent<LightWithIdMonoBehaviour>().ColorWasSet(Color.magenta);
                 }
             }
@@ -227,7 +223,7 @@ namespace CustomFloorPlugin {
         /// ">The index of the new platform in <see cref="AllPlatforms"/></param>
         internal static void SetPlatformAndShow(int index) {
             CurrentPlatform = AllPlatforms[index % AllPlatforms.Count];
-            CONFIG.SetString("Data", "CustomPlatformPath", CurrentPlatform.platName + CurrentPlatform.platAuthor);
+            PluginConfig.Instance.CustomPlatformPath = CurrentPlatform.platName + CurrentPlatform.platAuthor;
             PlatformLifeCycleManagement.InternalChangeToPlatform(index);
         }
 
@@ -422,24 +418,23 @@ namespace CustomFloorPlugin {
             }
         }
 
-        internal static bool MultiplayerCheck() {
-            Scene currentEvironment = GetCurrentEnvironment();
+        internal static bool MultiplayerCheck(Scene currentEvironment) {
             if (currentEvironment.name.StartsWith("Multiplayer", STR_INV)) {
-                return Settings.UseInMultiplayer;
+                return PluginConfig.Instance.UseInMultiplayer;
             }
             else {
                 return true;
             }
         }
 
-        internal static bool D360Check() {
+        internal static bool D360Check(Scene currentEnvironment) {
             string[] d360Environments = {
                 "GlassDesertEnvironment"
             };
-            Scene currentEnvironment = GetCurrentEnvironment();
+
             foreach (string environmentName in d360Environments) {
                 if (currentEnvironment.name == environmentName) {
-                    return Settings.UseIn360;
+                    return PluginConfig.Instance.UseInMultiplayer;
                 }
             }
             return true;

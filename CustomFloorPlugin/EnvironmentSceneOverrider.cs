@@ -1,9 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 
-using CustomFloorPlugin.UI;
-
-using UnityEngine;
+using BS_Utils.Utilities;
 
 using static CustomFloorPlugin.GlobalCollection;
 
@@ -19,7 +17,6 @@ namespace CustomFloorPlugin {
     internal static partial class EnvironmentSceneOverrider {
 
         private static readonly EnvironmentInfoSO[] allSceneInfos = GetAllEnvs();
-        private static readonly EnvironmentTypeSO environmentType = Resources.FindObjectsOfTypeAll<EnvironmentTypeSO>()[0]; // NormalEnvironemntTypeSO
         internal static readonly Dictionary<EnvOverrideMode, EnvironmentInfoSO> supportedEnvironmentInfos = new Dictionary<EnvOverrideMode, EnvironmentInfoSO>() {
             {EnvOverrideMode.Song, null},
             {EnvOverrideMode.Origins, EnvWithName("Origins")},
@@ -37,50 +34,19 @@ namespace CustomFloorPlugin {
             {EnvOverrideMode.Timbaland, EnvWithName("Timbaland")},
             {EnvOverrideMode.FitBeat, EnvWithName("FitBeat")},
             {EnvOverrideMode.LinkinPark, EnvWithName("LinkinPark")},
-            {EnvOverrideMode.BTS, EnvWithName("BTS")}
+            {EnvOverrideMode.BTS, EnvWithName("BTS")},
+            {EnvOverrideMode.GlassDesert, EnvWithName("GlassDesert")}
         };
-        private static EnvironmentInfoSO oldEnvironmentInfoSO;
-
-        internal static bool didOverrideEnvironment;
-
-
-        /// <summary>
-        /// Enables the <see cref="OverrideEnvironmentSettings"/> and changes it to the selected <see cref="EnvOverrideMode"/>
-        /// </summary>
-        /// <param name="mode">The environment to load when transitioning into play mode</param>
-        internal static void OverrideEnvironment(EnvOverrideMode mode) {
-            if (supportedEnvironmentInfos[mode] != null) {
-                Settings.PlayerData.overrideEnvironmentSettings.overrideEnvironments = true;
-                oldEnvironmentInfoSO = Settings.PlayerData.overrideEnvironmentSettings.GetOverrideEnvironmentInfoForType(environmentType);
-                Settings.PlayerData.overrideEnvironmentSettings.SetEnvironmentInfoForType(environmentType, supportedEnvironmentInfos[mode]);
-                didOverrideEnvironment = true;
-            }
-        }
-
-
-        /// <summary>
-        /// Reverts the changes to the <see cref="OverrideEnvironmentSettings"/>
-        /// </summary>
-        internal static void Revert() {
-            if (didOverrideEnvironment && oldEnvironmentInfoSO != null) {
-                Settings.PlayerData.overrideEnvironmentSettings.SetEnvironmentInfoForType(environmentType, oldEnvironmentInfoSO);
-                Settings.PlayerData.overrideEnvironmentSettings.overrideEnvironments = false;
-                didOverrideEnvironment = false;
-            }
-        }
-
 
         /// <summary>
         /// Gathers all <see cref="EnvironmentInfoSO"/>s in Beat Saber
         /// </summary>
         private static EnvironmentInfoSO[] GetAllEnvs() {
-            EnvironmentInfoSO[] environmentInfos = Resources.FindObjectsOfTypeAll<EnvironmentInfoSO>().Where(x =>
+            EnvironmentInfoSO[] environmentInfos = PDM.GetField< PlayerDataFileManagerSO>("_playerDataFileManager").GetField<EnvironmentsListSO>("_allEnvironmentInfos").environmentInfos.Where(x =>
                    !(
                        x.name.Contains("Menu")
                        ||
                        x.name.Contains("Tutorial")
-                       ||
-                       x.name.Contains("GlassDesert")
                        ||
                        x.name.Contains("Multiplayer")
                    )

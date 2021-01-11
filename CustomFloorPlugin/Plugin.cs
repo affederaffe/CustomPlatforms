@@ -1,9 +1,12 @@
 ﻿using BS_Utils.Utilities;
 
-using CustomFloorPlugin.HarmonyPatches;
-using CustomFloorPlugin.UI;
-
 using IPA;
+using IPA.Config.Stores;
+
+using SiraUtil.Zenject;
+
+using CustomFloorPlugin.HarmonyPatches;
+using CustomFloorPlugin.Installers;
 
 
 namespace CustomFloorPlugin {
@@ -13,7 +16,6 @@ namespace CustomFloorPlugin {
     /// Main Plugin executable, loaded and instantiated by BSIPA before the game starts<br/>
     /// Different callbacks will be notified throughout the games lifespan, and can be used as hooks.
     /// </summary>
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Build", "CA1812:Avoid unistantiated internal classes", Justification = "Instantiated by BSIPA")]
     [Plugin(RuntimeOptions.SingleStartInit)]
     internal class Plugin {
 
@@ -27,6 +29,17 @@ namespace CustomFloorPlugin {
             Utilities.Logger.logger = logger;
         }
 
+        [Init]
+        public void InitWithConfig(IPA.Config.Config conf) {
+            Configuration.PluginConfig.Instance = conf.Generated<Configuration.PluginConfig>();
+        }
+
+        [Init]
+        public void InitWithZenjector(Zenjector zenjector) {
+            zenjector.OnMenu<OnMenuInstaller>();
+            zenjector.OnGame<OnGameInstaller>();
+        }
+
 
         /// <summary>
         /// Performs initialization<br/>
@@ -37,14 +50,18 @@ namespace CustomFloorPlugin {
             BSEvents.OnLoad();
             BSEvents.lateMenuSceneLoadedFresh += InitAfterLoad;
             Patcher.Patch();
-            PlatformUI.SetupMenuButtons();
+        }
+
+        [OnExit]
+        public void OnApplicationExit() {
+            // Yes it is intentional ._.
         }
 
 
         /// <summary>
         /// Performs initialization steps after the game has loaded into the main menu for the first time
         /// </summary>
-        private void InitAfterLoad(ScenesTransitionSetupDataSO ignored1) {
+        private void InitAfterLoad(ScenesTransitionSetupDataSO ignored) {
             BSEvents.lateMenuSceneLoadedFresh -= InitAfterLoad;
             PlatformManager.Init();
         }

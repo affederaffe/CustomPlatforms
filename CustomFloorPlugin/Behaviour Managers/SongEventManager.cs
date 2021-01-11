@@ -12,7 +12,6 @@ namespace CustomFloorPlugin {
     /// <summary>
     /// Instantiable wrapper class for a single <see cref="SongEventHandler"/> that handles registering and de-registering
     /// </summary>
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Build", "CA1812:Avoid unistantiated internal classes", Justification = "Instantiated by Unity")]
     internal class SongEventManager : MonoBehaviour {
 
 

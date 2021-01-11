@@ -22,7 +22,7 @@ namespace CustomFloorPlugin.HarmonyPatches {
         /// </summary>
         internal static void Patch() {
             if (!runOnce) {
-                new Harmony("com.rolopogo.customplatforms").PatchAll(Assembly.GetExecutingAssembly());
+                new Harmony("com.rolopogo.CustomFloorPlugin").PatchAll(Assembly.GetExecutingAssembly());
                 runOnce = true;
             }
         }

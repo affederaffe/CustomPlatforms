@@ -4,17 +4,21 @@ using BeatSaberMarkupLanguage;
 using BeatSaberMarkupLanguage.Attributes;
 using BeatSaberMarkupLanguage.ViewControllers;
 
+using Zenject;
+
 namespace CustomFloorPlugin.UI {
 
 
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Build", "CA1812:Avoid unistantiated internal classes", Justification = "Instantiated by Unity")]
     internal class NewScriptWarningView : BSMLResourceViewController {
+
+        [Inject]
+        private readonly NewScriptWarningFlowCoordinator newScriptWarningFlowCoordinator;
 
 
         /// <summary>
         /// Path to the embedded resource
         /// </summary>
-        public override string ResourceName => "CustomFloorPlugin.UI.NewScriptWarning.bsml";
+        public override string ResourceName => "CustomFloorPlugin.Views.NewScriptWarning.bsml";
 
 
         [UIValue("warningText")]
@@ -22,19 +26,19 @@ namespace CustomFloorPlugin.UI {
 
 
         [UIAction("Continue")]
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Code Quality", "IDE0051:Remove unused private members", Justification = "Called by BSML")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("CodeQuality", "IDE0051:Remove unused private members", Justification = "Called by Unity")]
         private void Continue() {
-            BeatSaberUI.MainFlowCoordinator.DismissFlowCoordinator(PlatformUI.NewScriptWarningFlowCoordinator);
-            File.WriteAllLines(PlatformLoader.scriptHashesPath, PlatformLoader.scriptHashList.ToArray());
+            BeatSaberUI.MainFlowCoordinator.DismissFlowCoordinator(newScriptWarningFlowCoordinator);
+            File.WriteAllLines(PlatformLoader.ScriptHashesPath, PlatformLoader.scriptHashList.ToArray());
             PlatformManager.Reload();
         }
 
 
         [UIAction("Cancel")]
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Code Quality", "IDE0051:Remove unused private members", Justification = "Called by BSML")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("CodeQuality", "IDE0051:Remove unused private members", Justification = "Called by Unity")]
         private void Cancel() {
             PlatformLoader.newScriptsFound = false;
-            BeatSaberUI.MainFlowCoordinator.DismissFlowCoordinator(PlatformUI.NewScriptWarningFlowCoordinator);
+            BeatSaberUI.MainFlowCoordinator.DismissFlowCoordinator(newScriptWarningFlowCoordinator);
         }
     }
 }

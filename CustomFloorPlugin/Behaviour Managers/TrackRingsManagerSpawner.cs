@@ -5,8 +5,8 @@ using IPA.Utilities;
 
 using UnityEngine;
 
-using static CustomFloorPlugin.GlobalCollection;
 using static CustomFloorPlugin.Utilities.BeatSaberSearching;
+using static CustomFloorPlugin.GlobalCollection;
 
 
 namespace CustomFloorPlugin {
@@ -17,7 +17,6 @@ namespace CustomFloorPlugin {
     /// Handles spawning of multiple Components, relevant to track rings<br/>
     /// Handles reparenting of <see cref="TrackLaneRing"/>s after the game has spawned them<br/>
     /// </summary>
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Build", "CA1812:Avoid unistantiated internal classes", Justification = "Instantiated by Unity")]
     internal class TrackRingsManagerSpawner : MonoBehaviour {
 
 
@@ -105,7 +104,7 @@ namespace CustomFloorPlugin {
                     rotationSpawners.Add(rotationEffectSpawner);
                     PlatformManager.SpawnedComponents.Add(rotationEffectSpawner);
                     if (!GetCurrentEnvironment().name.StartsWith("Menu", STR_INV)) {
-                        rotationEffectSpawner.SetField("_beatmapObjectCallbackController", BOCC); //@TODO
+                        rotationEffectSpawner.SetField("_beatmapObjectCallbackController", BOCC);
                     }
 
                     rotationEffectSpawner.SetField("_beatmapEventType", (BeatmapEventType)trackRingDesc.rotationSongEventType);

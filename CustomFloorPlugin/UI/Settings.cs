@@ -2,9 +2,10 @@ using System;
 
 using BeatSaberMarkupLanguage.Attributes;
 
-using UnityEngine;
+using Zenject;
 
-using static CustomFloorPlugin.GlobalCollection;
+using CustomFloorPlugin.Configuration;
+
 using static CustomFloorPlugin.Utilities.Logging;
 
 
@@ -18,9 +19,7 @@ namespace CustomFloorPlugin.UI {
     /// Why does this need to be a <see cref="PersistentSingleton{T}"/>? I don't know.<br/>
     /// Why is everything here public? I don't know... -.-
     /// </summary>
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Build", "CA1812:Avoid unistantiated internal classes", Justification = "Instantiated by Unity")]
-    internal class Settings : PersistentSingleton<Settings> {
-
+    internal class Settings {
 
         /// <summary>
         /// Hover hint of load-custom-scripts
@@ -48,20 +47,9 @@ namespace CustomFloorPlugin.UI {
         /// </summary>
         [UIValue("always-show-feet")]
         public static bool AlwaysShowFeet {
-            get {
-                if (_AlwaysShowFeet == null) {
-                    _AlwaysShowFeet = CONFIG.GetBool("Settings", "AlwaysShowFeet", false, true);
-                }
-                return _AlwaysShowFeet.Value;
-            }
-            set {
-                if (value != _AlwaysShowFeet.Value) {
-                    CONFIG.SetBool("Settings", "AlwaysShowFeet", value);
-                    _AlwaysShowFeet = value;
-                }
-            }
+            get => PluginConfig.Instance.AlwaysShowFeet;
+            set => PluginConfig.Instance.AlwaysShowFeet = value;
         }
-        private static bool? _AlwaysShowFeet;
 
 
         /// <summary>
@@ -70,21 +58,9 @@ namespace CustomFloorPlugin.UI {
         /// </summary>
         [UIValue("show-heart")]
         public static bool ShowHeart {
-            get {
-                if (_ShowHeart == null) {
-                    _ShowHeart = CONFIG.GetBool("Settings", "ShowHeart", true, true);
-                }
-                return _ShowHeart.Value;
-            }
-            set {
-                if (value != _ShowHeart.Value) {
-                    CONFIG.SetBool("Settings", "ShowHeart", value);
-                    _ShowHeart = value;
-                    ShowHeartChanged(value);
-                }
-            }
+            get => PluginConfig.Instance.ShowHeart;
+            set => PluginConfig.Instance.ShowHeart = value;
         }
-        private static bool? _ShowHeart;
         internal static event Action<bool> ShowHeartChanged = delegate (bool value) {
             Log("ShowHeart value changed. Notifying listeners.\nNew value: " + value);
         };
@@ -96,43 +72,20 @@ namespace CustomFloorPlugin.UI {
         /// </summary>
         [UIValue("load-custom-scripts")]
         public static bool LoadCustomScripts {
-            get {
-                if (_LoadCustomScripts == null) {
-                    _LoadCustomScripts = CONFIG.GetBool("Settings", "LoadCustomScripts", false, true);
-                }
-                return _LoadCustomScripts.Value;
-            }
-            set {
-                if (value != _LoadCustomScripts.Value) {
-                    CONFIG.SetBool("Settings", "LoadCustomScripts", value);
-                    _LoadCustomScripts = value;
-                    PlatformManager.Reload();
-                }
-            }
+            get => PluginConfig.Instance.LoadCustomScripts;
+            set => PluginConfig.Instance.LoadCustomScripts = value;
         }
-        private static bool? _LoadCustomScripts;
 
 
-        /// <summary>
-        /// Should this Plugin spawn a Custom Platform in 360°-Levels?
-        /// Forwards the current choice to the UI, and the new choice to the plugin
-        /// </summary>
-        [UIValue("use-in-360")]
+            /// <summary>
+            /// Should this Plugin spawn a Custom Platform in 360°-Levels?
+            /// Forwards the current choice to the UI, and the new choice to the plugin
+            /// </summary>
+            [UIValue("use-in-360")]
         public static bool UseIn360 {
-            get {
-                if (_UseIn360 == null) {
-                    _UseIn360 = CONFIG.GetBool("Settings", "UseIn360", false, true);
-                }
-                return _UseIn360.Value;
-            }
-            set {
-                if (value != _UseIn360.Value) {
-                    CONFIG.SetBool("Settings", "UseIn360", value);
-                    _UseIn360 = value;
-                }
-            }
+            get => PluginConfig.Instance.UseIn360;
+            set => PluginConfig.Instance.UseIn360 = value;
         }
-        private static bool? _UseIn360;
 
 
         /// <summary>
@@ -141,44 +94,8 @@ namespace CustomFloorPlugin.UI {
         /// </summary>
         [UIValue("use-in-multiplayer")]
         public static bool UseInMultiplayer {
-            get {
-                if (_UseInMultiplayer == null) {
-                    _UseInMultiplayer = CONFIG.GetBool("Settings", "UseInMultiplayer", false, true);
-                }
-                return _UseInMultiplayer.Value;
-            }
-            set {
-                if (value != _UseInMultiplayer.Value) {
-                    CONFIG.SetBool("Settings", "UseInMultiplayer", value);
-                    _UseInMultiplayer = value;
-                }
-            }
-        }
-        private static bool? _UseInMultiplayer;
-
-
-        /// <summary>
-        /// This is a wrapper for Beat Saber's player data structure.<br/>
-        /// </summary>
-        internal static PlayerData PlayerData {
-            get {
-                if (_PlayerData == null) {
-                    PlayerDataModel[] playerDataModels = Resources.FindObjectsOfTypeAll<PlayerDataModel>();
-                    if (playerDataModels.Length >= 1) {
-                        _PlayerData = Resources.FindObjectsOfTypeAll<PlayerDataModel>()[0].playerData;
-                    }
-                }
-                return _PlayerData;
-            }
-        }
-        private static PlayerData _PlayerData;
-
-
-        /// <summary>
-        /// Call this Method before using <see cref="PlayerData"/> again to Update it
-        /// </summary>
-        internal static void UpdatePlayerData() {
-            _PlayerData = null;
+            get => PluginConfig.Instance.UseInMultiplayer;
+            set => PluginConfig.Instance.UseInMultiplayer = value;
         }
     }
 }

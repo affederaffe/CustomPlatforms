@@ -5,9 +5,9 @@ using System.Linq;
 using System.Reflection;
 using System.Security.Cryptography;
 
-using CustomFloorPlugin.Exceptions;
-
 using UnityEngine;
+
+using CustomFloorPlugin.Exceptions;
 
 using static CustomFloorPlugin.GlobalCollection;
 using static CustomFloorPlugin.Utilities.Logging;
@@ -18,7 +18,7 @@ namespace CustomFloorPlugin {
 
 
     /// <summary>
-    /// Loads AssetBundles containing CustomPlatforms
+    /// Loads AssetBundles containing CustomFloorPlugin
     /// </summary>
     internal static class PlatformLoader {
 
@@ -32,9 +32,19 @@ namespace CustomFloorPlugin {
         internal static bool newScriptsFound = false;
 
 
-        internal static readonly string customPlatformsFolderPath = Path.Combine(Environment.CurrentDirectory, FOLDER);
-        internal static readonly string customPlatformsScriptFolderPath = Path.Combine(customPlatformsFolderPath, SCRIPT_FOLDER);
-        internal static readonly string scriptHashesPath = Path.Combine(Environment.CurrentDirectory, "UserData", SCRIPT_HASHES_FILENAME);
+        internal static readonly string CustomFloorPluginFolderPath = Path.Combine(Environment.CurrentDirectory, FOLDER);
+        internal static readonly string CustomFloorPluginScriptFolderPath = Path.Combine(CustomFloorPluginFolderPath, SCRIPT_FOLDER);
+        internal static readonly string ScriptHashesPath = Path.Combine(Environment.CurrentDirectory, "UserData", SCRIPT_HASHES_FILENAME);
+
+        private static Sprite FeetIcon {
+            get {
+                if (_feetIcon == null) {
+                    _feetIcon = Resources.FindObjectsOfTypeAll<Sprite>().Where(x => x.name == "FeetIcon").FirstOrDefault();
+                }
+                return _feetIcon;
+            }
+        }
+        private static Sprite _feetIcon;
 
 
         /// <summary>
@@ -43,13 +53,13 @@ namespace CustomFloorPlugin {
         internal static List<CustomPlatform> CreateAllPlatforms(Transform parent) {
 
 
-            // Create the CustomPlatforms folder if it doesn't already exist
-            if (!Directory.Exists(customPlatformsFolderPath)) {
-                Directory.CreateDirectory(customPlatformsFolderPath);
+            // Create the CustomFloorPlugin folder if it doesn't already exist
+            if (!Directory.Exists(CustomFloorPluginFolderPath)) {
+                Directory.CreateDirectory(CustomFloorPluginFolderPath);
             }
 
-            // Find AssetBundles in our CustomPlatforms directory
-            string[] allBundlePaths = Directory.GetFiles(customPlatformsFolderPath, "*.plat");
+            // Find AssetBundles in our CustomFloorPlugin directory
+            string[] allBundlePaths = Directory.GetFiles(CustomFloorPluginFolderPath, "*.plat");
 
             List<CustomPlatform> platforms = new List<CustomPlatform>();
 
@@ -69,6 +79,7 @@ namespace CustomFloorPlugin {
                 CustomPlatform newPlatform = LoadPlatformBundle(allBundlePaths[i], parent);
                 if (newPlatform != null) {
                     platforms.Add(newPlatform);
+                    Log(newPlatform.platName + " by " + newPlatform.platAuthor);
                 }
             }
             Log("[END OF PLATFORM LOADING SPAM]---------------------------------------");
@@ -161,7 +172,7 @@ namespace CustomFloorPlugin {
             newPlatform.name = customPlatform.platName + " by " + customPlatform.platAuthor;
 
             if (customPlatform.icon == null) {
-                customPlatform.icon = Resources.FindObjectsOfTypeAll<Sprite>().Where(x => x.name == "FeetIcon").FirstOrDefault();
+                customPlatform.icon = FeetIcon;
             }
 
             newPlatform.SetActive(false);
@@ -178,18 +189,18 @@ namespace CustomFloorPlugin {
         /// </returns>
         internal static void LoadScripts() {
 
-            // Create the CustomPlatforms script folder if it doesn't already exist
-            if (!Directory.Exists(customPlatformsScriptFolderPath)) {
-                Directory.CreateDirectory(customPlatformsScriptFolderPath);
+            // Create the CustomFloorPlugin script folder if it doesn't already exist
+            if (!Directory.Exists(CustomFloorPluginScriptFolderPath)) {
+                Directory.CreateDirectory(CustomFloorPluginScriptFolderPath);
             }
 
             // Preventing Issue when a script exists but the option is first enabled in menu
-            if (!File.Exists(scriptHashesPath)) {
-                File.Create(scriptHashesPath).Close();
+            if (!File.Exists(ScriptHashesPath)) {
+                File.Create(ScriptHashesPath).Close();
             }
 
-            // Find Dlls in our CustomPlatformsScript directory
-            string[] allScriptPaths = Directory.GetFiles(customPlatformsScriptFolderPath, "*.dll");
+            // Find Dlls in our CustomFloorPluginScript directory
+            string[] allScriptPaths = Directory.GetFiles(CustomFloorPluginScriptFolderPath, "*.dll");
 
             // Checks if a new CustomScript is found, if not loads all Scripts
             if (UI.Settings.LoadCustomScripts) {
@@ -199,7 +210,7 @@ namespace CustomFloorPlugin {
                     scriptHashList.Add(hash);
                 }
 
-                string[] oldHashes = File.ReadAllLines(scriptHashesPath);
+                string[] oldHashes = File.ReadAllLines(ScriptHashesPath);
                 int i = 0;
                 if (scriptHashList.Count == oldHashes.Length) {
                     foreach (string hash1 in scriptHashList) {
@@ -221,7 +232,7 @@ namespace CustomFloorPlugin {
                 }
 
                 if (!newScriptsFound) {
-                    Log("No new CustomScripts found, loading all in directory " + customPlatformsScriptFolderPath);
+                    Log("No new CustomScripts found, loading all in directory " + CustomFloorPluginScriptFolderPath);
                     foreach (string path in allScriptPaths) {
                         Assembly.LoadFrom(path);
                     }
@@ -231,6 +242,7 @@ namespace CustomFloorPlugin {
                 }
             }
         }
+
 
 
         /// <summary>

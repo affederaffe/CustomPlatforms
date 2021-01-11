@@ -47,7 +47,6 @@ namespace CustomFloorPlugin.Utilities {
                 if (InternalRecursiveFindFirst<T>(root.transform, out object component)) {
                     return (T)component;
                 }
-
             }
             throw new ComponentNotFoundException(typeof(T).GetTypeInfo());
         }
@@ -170,7 +169,7 @@ namespace CustomFloorPlugin.Utilities {
                 return true;
             }
             foreach (T t in list) {
-                if (t.ToString() == "null") { // Why t.ToString()? Idk, t == null doesn't work.
+                if (t.Equals(null)) {
                     return true;
                 }
             }
