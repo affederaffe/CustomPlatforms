@@ -10,6 +10,7 @@ namespace CustomFloorPlugin {
     [RequireComponent(typeof(MeshRenderer))]
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1051:Do not declare visible instance fields", Justification = "Too old to change")]
     public class TubeLight : MonoBehaviour, INotifyOnEnableOrDisable {
+
         public enum LightsID {
             Static = 0,
             BackLights = 1,
@@ -48,15 +49,8 @@ namespace CustomFloorPlugin {
         }
 
 
-        private static TubeBloomPrePassLight _Prefab;
-        internal static TubeBloomPrePassLight Prefab {
-            get {
-                if (_Prefab == null) {
-                    _Prefab = PlatformManager.LightSource.GetComponent<TubeBloomPrePassLight>();
-                }
-                return _Prefab;
-            }
-        }
+        internal static TubeBloomPrePassLight Prefab;
+
         private TubeBloomPrePassLight tubeBloomLight;
         private GameObject iHeartBeatSaber;
 
@@ -102,8 +96,8 @@ namespace CustomFloorPlugin {
             }
             else {
                 // swap for <3
-                PlatformManager.InactiveHeart.SetActive(false);
-                iHeartBeatSaber = Instantiate(PlatformManager.InactiveHeart);
+                PlatformManager.Heart.SetActive(false);
+                iHeartBeatSaber = Instantiate(PlatformManager.Heart);
                 PlatformManager.SpawnedObjects.Add(iHeartBeatSaber);
                 iHeartBeatSaber.transform.parent = transform;
                 iHeartBeatSaber.transform.position = transform.position;

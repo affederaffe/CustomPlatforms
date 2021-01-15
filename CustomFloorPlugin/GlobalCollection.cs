@@ -4,9 +4,8 @@ using System.Linq;
 
 using BS_Utils.Utilities;
 
+using UnityEngine;
 using UnityEngine.SceneManagement;
-
-using CustomFloorPlugin.Extensions;
 
 
 namespace CustomFloorPlugin {
@@ -33,12 +32,11 @@ namespace CustomFloorPlugin {
 
         /// <summary>
         /// Beat Sabers <see cref="BeatmapObjectCallbackController"/> for the current level, available after loading into a level.<br></br> 
-        /// Referencec set by <see cref="HarmonyPatches.GetBOCC_Patch"/>
         /// </summary>
         internal static BeatmapObjectCallbackController BOCC {
             get {
                 if (_BOCC == null) {
-                    _BOCC = UnityEngine.Resources.FindObjectsOfTypeAll<BeatmapObjectCallbackController>().First(x => x.GetFullPath().Contains("GameplayCore") || (x.GetFullPath().Contains("LocalActive") && x.GetFullPath().Contains("(Clone)")));
+                    _BOCC = Resources.FindObjectsOfTypeAll<BeatmapObjectCallbackController>().FirstOrDefault();
                 }
                 return _BOCC;
             }
@@ -51,6 +49,13 @@ namespace CustomFloorPlugin {
         /// Installed by <see cref="Installers.OnMenuInstaller"/>
         /// </summary>
         internal static PlayerDataModel PDM;
+
+
+        /// <summary>
+        /// This is a SO containing all <see cref="EnvironmentInfoSO"/>s
+        /// Installed by <see cref="Installers.OnMenuInstaller"/>
+        /// </summary>
+        internal static EnvironmentsListSO ENVIRONMENTSLIST;
 
 
         /// <summary>

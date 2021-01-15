@@ -1,12 +1,11 @@
-﻿using System.Collections.Generic;
-
-using IPA.Utilities;
+﻿using IPA.Utilities;
 
 using UnityEngine;
 
 using static CustomFloorPlugin.GlobalCollection;
 using static CustomFloorPlugin.Utilities.BeatSaberSearching;
 using static CustomFloorPlugin.Utilities.Logging;
+
 
 namespace CustomFloorPlugin {
 
@@ -53,11 +52,6 @@ namespace CustomFloorPlugin {
                     AddManagers(activePlatform);
                     NotifyPlatform(activePlatform, NotifyType.Enable);
                     SpawnCustomObjects();
-                    SharedCoroutineStarter.instance.StartCoroutine(WaitAndReplaceMaterials()); //Waiting until the end of the Frame to prevent the Materials of Spectrograms not being replaced.
-                    static IEnumerator<WaitForEndOfFrame> WaitAndReplaceMaterials() {
-                        yield return new WaitForEndOfFrame();
-                        MaterialSwapper.ReplaceMaterials(activePlatform.gameObject);
-                    }
                 }
                 else {
                     activePlatform = null;
@@ -142,73 +136,67 @@ namespace CustomFloorPlugin {
             /// <param name="root">The root <see cref="GameObject"/> of the <see cref="CustomPlatform"/></param>
             private static void AddManagers(GameObject go, GameObject root) {
 
-                // Prevents Bugs with Counters+
-                if (!GetCurrentEnvironment().name.StartsWith("Tutorial", STR_INV)) {
-                    // Rotation effect manager
-                    if (go.GetComponentInChildren<RotationEventEffect>(true) != null || go.GetComponentInChildren<MultiRotationEventEffect>(true) != null) {
-                        RotationEventEffectManager rotManager = root.GetComponent<RotationEventEffectManager>();
-                        if (rotManager == null) {
-                            rotManager = root.AddComponent<RotationEventEffectManager>();
-                            SpawnedComponents.Add(rotManager);
-                            rotManager.CreateEffects(go);
-                            rotManager.RegisterForEvents();
-                        }
-                    }
-
-                    // Add a trackRing controller if there are track ring descriptors
-                    if (go.GetComponentInChildren<TrackRings>(true) != null) {
-                        foreach (TrackRings trackRings in go.GetComponentsInChildren<TrackRings>(true)) {
-                            GameObject ringPrefab = trackRings.trackLaneRingPrefab;
-
-                            // Add managers to prefabs (nesting)
-                            AddManagers(ringPrefab, root);
-                        }
-
-                        TrackRingsManagerSpawner trms = root.GetComponent<TrackRingsManagerSpawner>();
-                        if (trms == null) {
-                            trms = root.AddComponent<TrackRingsManagerSpawner>();
-                            SpawnedComponents.Add(trms);
-                        }
-                        trms.CreateTrackRings(go);
+                // Rotation effect manager
+                if (go.GetComponentInChildren<RotationEventEffect>(true) != null || go.GetComponentInChildren<MultiRotationEventEffect>(true) != null) {
+                    RotationEventEffectManager rotManager = root.GetComponent<RotationEventEffectManager>();
+                    if (rotManager == null) {
+                        rotManager = root.AddComponent<RotationEventEffectManager>();
+                        SpawnedComponents.Add(rotManager);
+                        rotManager.CreateEffects(go);
+                        rotManager.RegisterForEvents();
                     }
                 }
 
-                // Sometimes causes bugs in Multiplayer
-                if (!GetCurrentEnvironment().name.StartsWith("Multiplayer", STR_INV)) {
-                    // Add spectrogram manager
-                    if (go.GetComponentInChildren<Spectrogram>(true) != null) {
-                        foreach (Spectrogram spec in go.GetComponentsInChildren<Spectrogram>(true)) {
-                            GameObject colPrefab = spec.columnPrefab;
-                            AddManagers(colPrefab, root);
-                        }
+                // Add a trackRing controller if there are track ring descriptors
+                if (go.GetComponentInChildren<TrackRings>(true) != null) {
+                    foreach (TrackRings trackRings in go.GetComponentsInChildren<TrackRings>(true)) {
+                        GameObject ringPrefab = trackRings.trackLaneRingPrefab;
 
-                        SpectrogramColumnManager specManager = go.GetComponent<SpectrogramColumnManager>();
-                        if (specManager == null) {
-                            specManager = go.AddComponent<SpectrogramColumnManager>();
-                            SpawnedComponents.Add(specManager);
-                        }
-                        specManager.CreateColumns(go);
+                        // Add managers to prefabs (nesting)
+                        AddManagers(ringPrefab, root);
                     }
 
-                    if (go.GetComponentInChildren<SpectrogramMaterial>(true) != null) {
-                        // Add spectrogram materials manager
-                        SpectrogramMaterialManager specMatManager = go.GetComponent<SpectrogramMaterialManager>();
-                        if (specMatManager == null) {
-                            specMatManager = go.AddComponent<SpectrogramMaterialManager>();
-                            SpawnedComponents.Add(specMatManager);
-                        }
-                        specMatManager.UpdateMaterials(go);
+                    TrackRingsManagerSpawner trms = root.GetComponent<TrackRingsManagerSpawner>();
+                    if (trms == null) {
+                        trms = root.AddComponent<TrackRingsManagerSpawner>();
+                        SpawnedComponents.Add(trms);
+                    }
+                    trms.CreateTrackRings(go);
+                }
+
+                // Add spectrogram manager
+                if (go.GetComponentInChildren<Spectrogram>(true) != null) {
+                    foreach (Spectrogram spec in go.GetComponentsInChildren<Spectrogram>(true)) {
+                        GameObject colPrefab = spec.columnPrefab;
+                        AddManagers(colPrefab, root);
                     }
 
-                    if (go.GetComponentInChildren<SpectrogramAnimationState>(true) != null) {
-                        // Add spectrogram animation state manager
-                        SpectrogramAnimationStateManager specAnimManager = go.GetComponent<SpectrogramAnimationStateManager>();
-                        if (specAnimManager == null) {
-                            specAnimManager = go.AddComponent<SpectrogramAnimationStateManager>();
-                            SpawnedComponents.Add(specAnimManager);
-                        }
-                        specAnimManager.UpdateAnimationStates();
+                    SpectrogramColumnManager specManager = go.GetComponent<SpectrogramColumnManager>();
+                    if (specManager == null) {
+                        specManager = go.AddComponent<SpectrogramColumnManager>();
+                        SpawnedComponents.Add(specManager);
                     }
+                    specManager.CreateColumns(go);
+                }
+
+                if (go.GetComponentInChildren<SpectrogramMaterial>(true) != null) {
+                    // Add spectrogram materials manager
+                    SpectrogramMaterialManager specMatManager = go.GetComponent<SpectrogramMaterialManager>();
+                    if (specMatManager == null) {
+                        specMatManager = go.AddComponent<SpectrogramMaterialManager>();
+                        SpawnedComponents.Add(specMatManager);
+                    }
+                    specMatManager.UpdateMaterials(go);
+                }
+
+                if (go.GetComponentInChildren<SpectrogramAnimationState>(true) != null) {
+                    // Add spectrogram animation state manager
+                    SpectrogramAnimationStateManager specAnimManager = go.GetComponent<SpectrogramAnimationStateManager>();
+                    if (specAnimManager == null) {
+                        specAnimManager = go.AddComponent<SpectrogramAnimationStateManager>();
+                        SpawnedComponents.Add(specAnimManager);
+                    }
+                    specAnimManager.UpdateAnimationStates();
                 }
 
                 // Add Song event manager
@@ -223,7 +211,7 @@ namespace CustomFloorPlugin {
                 // Add EventManager 
                 if (go.GetComponentInChildren<EventManager>(true) != null) {
                     foreach (EventManager em in go.GetComponentsInChildren<EventManager>()) {
-                        PlatformEventManager pem = em.gameObject.AddComponent<PlatformEventManager>();
+                        PlatformEventManager pem = em.gameObject.AddComponent<PlatformEventManager>();  
                         SpawnedComponents.Add(pem);
                         pem._EventManager = em;
                     }

@@ -1,9 +1,9 @@
 ﻿using System.Linq;
 
-using CustomFloorPlugin.Exceptions;
-
 using UnityEngine;
 using UnityEngine.SceneManagement;
+
+using CustomFloorPlugin.Exceptions;
 
 using static CustomFloorPlugin.GlobalCollection;
 using static CustomFloorPlugin.Utilities.Logging;
@@ -19,6 +19,7 @@ namespace CustomFloorPlugin {
     /// Part of the documentation for this file is omited because it's a clusterfuck and under construction.
     /// </summary>
     internal static class MaterialSwapper {
+
         private static readonly Material dark;
         private static readonly Material glow;
         private static readonly Material opaqueGlow;

@@ -50,6 +50,8 @@ namespace CustomFloorPlugin {
                 SpectrogramColumns specCol = spec.gameObject.AddComponent<SpectrogramColumns>();
                 PlatformManager.SpawnedComponents.Add(specCol);
 
+                MaterialSwapper.ReplaceMaterials(spec.columnPrefab);
+
                 ReflectionUtil.SetPrivateField(specCol, "_columnPrefab", spec.columnPrefab);
                 ReflectionUtil.SetPrivateField(specCol, "_separator", spec.separator);
                 ReflectionUtil.SetPrivateField(specCol, "_minHeight", spec.minHeight);
@@ -69,7 +71,7 @@ namespace CustomFloorPlugin {
         internal void UpdateSpectrogramDataProvider() {
             BasicSpectrogramData[] datas = Resources.FindObjectsOfTypeAll<BasicSpectrogramData>();
             if (datas.Length != 0) {
-                BasicSpectrogramData spectrogramData = datas.FirstOrDefault();
+                BasicSpectrogramData spectrogramData = datas.FirstOrDefault(x => ((AudioSource)x.GetField("_audioSource")).clip != null);
                 if (spectrogramData != null) {
                     foreach (SpectrogramColumns specCol in spectrogramColumns) {
                         ReflectionUtil.SetPrivateField(specCol, "_spectrogramData", spectrogramData);

@@ -21,7 +21,6 @@
         Timbaland,
         FitBeat,
         LinkinPark,
-        BTS,
-        GlassDesert
+        BTS
     };
 }

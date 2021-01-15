@@ -29,15 +29,23 @@ namespace CustomFloorPlugin {
             Utilities.Logger.logger = logger;
         }
 
+        /// <summary>
+        /// Initializes the Plugin Config
+        /// </summary>
+        /// <param name="conf">The instance of the IPA config that BSIPA hands to plugins on initialization</param>
         [Init]
         public void InitWithConfig(IPA.Config.Config conf) {
             Configuration.PluginConfig.Instance = conf.Generated<Configuration.PluginConfig>();
         }
 
+        /// <summary>
+        /// Sets up the Zenjector from SiraUtil, used to install the installers.
+        /// Mainly used for the UI.
+        /// </summary>
+        /// <param name="zenjector">SiraUtil's Zenjector handed to the plugin</param>
         [Init]
         public void InitWithZenjector(Zenjector zenjector) {
             zenjector.OnMenu<OnMenuInstaller>();
-            zenjector.OnGame<OnGameInstaller>();
         }
 
 

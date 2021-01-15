@@ -6,6 +6,8 @@ using IPA.Utilities;
 
 using UnityEngine;
 
+using static CustomFloorPlugin.GlobalCollection;
+
 
 namespace CustomFloorPlugin {
 
@@ -74,6 +76,7 @@ namespace CustomFloorPlugin {
                 rotEvent.SetField("_rotationVector", effectDescriptor.rotationVector);
                 rotEvent.SetField("_transform", rotEvent.transform);
                 rotEvent.SetField("_startRotation", rotEvent.transform.rotation);
+                rotEvent.SetField("_beatmapObjectCallbackController", BOCC);
                 lightRotationEffects.Add(rotEvent);
             }
             MultiRotationEventEffect[] effectDescriptors2 = currentPlatform.GetComponentsInChildren<MultiRotationEventEffect>(true);

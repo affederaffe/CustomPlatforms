@@ -2,8 +2,6 @@ using System;
 
 using BeatSaberMarkupLanguage.Attributes;
 
-using Zenject;
-
 using CustomFloorPlugin.Configuration;
 
 using static CustomFloorPlugin.Utilities.Logging;
@@ -16,7 +14,6 @@ namespace CustomFloorPlugin.UI {
     /// Interface between the UI and the remainder of the plugin<br/>
     /// Abuses getters to inline showing values, and setters to perform relevant actions<br/>
     /// Not intended to hold extensive logic!<br/>
-    /// Why does this need to be a <see cref="PersistentSingleton{T}"/>? I don't know.<br/>
     /// Why is everything here public? I don't know... -.-
     /// </summary>
     internal class Settings {

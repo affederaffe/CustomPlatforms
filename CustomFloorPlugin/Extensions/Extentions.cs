@@ -2,6 +2,8 @@
 using System.Runtime.CompilerServices;
 using System.Text;
 
+using BS_Utils.Utilities;
+
 using UnityEngine;
 
 
@@ -57,6 +59,41 @@ namespace CustomFloorPlugin.Extensions {
                 convertedList.Add(thing);
             }
             return convertedList;
+        }
+
+
+        /// <summary>
+        /// Fills a <see cref="LightWithIdManager"/> with colors so Platforms' lights don't appear black
+        /// </summary>
+        /// <param name="manager">The <see cref="LightWithIdManager"/> to fill the colors in</param>
+        /// <param name="colors">What Colors to use</param>
+        internal static void FillManager(this LightWithIdManager manager, Color?[] colors = null) {
+            if (colors == null) {
+                ColorScheme scheme = GlobalCollection.PDM.playerData.colorSchemesSettings.GetOverrideColorScheme();
+                colors = new Color?[] {
+                    scheme.environmentColor0,
+                    scheme.environmentColor1,
+                    scheme.obstaclesColor,
+                    scheme.saberAColor,
+                    scheme.saberBColor,
+                    scheme.environmentColor0,
+                    scheme.environmentColor1,
+                    scheme.obstaclesColor,
+                    scheme.saberAColor,
+                    scheme.saberBColor,
+                    scheme.environmentColor0,
+                    scheme.environmentColor1,
+                    scheme.obstaclesColor,
+                    scheme.saberAColor,
+                    scheme.saberBColor,
+                    scheme.environmentColor0,
+                    scheme.environmentColor1,
+                    scheme.obstaclesColor,
+                    scheme.saberAColor,
+                    scheme.saberBColor,
+                };
+            }
+            manager.SetField("_colors", colors);
         }
     }
 }

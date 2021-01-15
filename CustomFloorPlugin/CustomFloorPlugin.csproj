@@ -65,7 +65,6 @@
     <Compile Include="Behaviour Descriptors\MultiRotationEventEffect.cs" />
     <Compile Include="Configuration\PluginConfig.cs" />
     <Compile Include="Harmony Patches\EnvironmentOverride_Patch.cs" />
-    <Compile Include="Harmony Patches\LightWithIdManagerSetColors_Patch.cs" />
     <Compile Include="Harmony Patches\Multiplayer_Patch.cs" />
     <Compile Include="Harmony Patches\NewScriptWarning_Patch.cs" />
     <Compile Include="INotifyOnEnableOrDisable.cs" />
@@ -78,7 +77,6 @@
     <Compile Include="Behaviours\SpectrogramColumns.cs" />
     <Compile Include="EnvOverrideMode.cs" />
     <Compile Include="Extensions\Extentions.cs" />
-    <Compile Include="Installers\OnGameInstaller.cs" />
     <Compile Include="Installers\OnMenuInstaller.cs" />
     <Compile Include="PlatformManager.EasterEggs.cs" />
     <Compile Include="PlatformManager.PlatformLifeCycleManagement.cs" />

@@ -103,9 +103,7 @@ namespace CustomFloorPlugin {
                     TrackLaneRingsRotationEffectSpawner rotationEffectSpawner = trackRingDesc.gameObject.AddComponent<TrackLaneRingsRotationEffectSpawner>();
                     rotationSpawners.Add(rotationEffectSpawner);
                     PlatformManager.SpawnedComponents.Add(rotationEffectSpawner);
-                    if (!GetCurrentEnvironment().name.StartsWith("Menu", STR_INV)) {
-                        rotationEffectSpawner.SetField("_beatmapObjectCallbackController", BOCC);
-                    }
+                    rotationEffectSpawner.SetField("_beatmapObjectCallbackController", BOCC);
 
                     rotationEffectSpawner.SetField("_beatmapEventType", (BeatmapEventType)trackRingDesc.rotationSongEventType);
                     rotationEffectSpawner.SetField("_rotationStep", trackRingDesc.rotationStep);
@@ -119,9 +117,7 @@ namespace CustomFloorPlugin {
                     TrackLaneRingsPositionStepEffectSpawner stepEffectSpawner = trackRingDesc.gameObject.AddComponent<TrackLaneRingsPositionStepEffectSpawner>();
                     stepSpawners.Add(stepEffectSpawner);
                     PlatformManager.SpawnedComponents.Add(stepEffectSpawner);
-                    if (!GetCurrentEnvironment().name.StartsWith("Menu", STR_INV)) {
-                        stepEffectSpawner.SetField("_beatmapObjectCallbackController", BOCC);
-                    }
+                    stepEffectSpawner.SetField("_beatmapObjectCallbackController", BOCC);
 
                     stepEffectSpawner.SetField("_trackLaneRingsManager", ringsManager);
                     stepEffectSpawner.SetField("_beatmapEventType", (BeatmapEventType)trackRingDesc.stepSongEventType);

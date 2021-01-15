@@ -1,16 +1,17 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
-
-using CustomFloorPlugin.Configuration;
-using CustomFloorPlugin.Exceptions;
-using CustomFloorPlugin.UI;
 
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
 using Zenject;
+
+using CustomFloorPlugin.Configuration;
+using CustomFloorPlugin.Exceptions;
+using CustomFloorPlugin.UI;
 
 using static CustomFloorPlugin.GlobalCollection;
 using static CustomFloorPlugin.Utilities.BeatSaberSearching;
@@ -90,24 +91,6 @@ namespace CustomFloorPlugin {
 
 
         /// <summary>
-        /// Real Prefab for lights, has to be Inactive to prevent NullReference spam
-        /// </summary>
-        internal static GameObject InactiveHeart {
-            get {
-                if (_InactiveHeart == null) {
-                    bool active = Heart.activeSelf;
-                    Heart.SetActive(false);
-                    _InactiveHeart = GameObject.Instantiate(Heart);
-                    Heart.SetActive(active);
-                    Heart.GetComponent<InstancedMaterialLightWithId>().ColorWasSet(Color.magenta);
-                }
-                return _InactiveHeart;
-            }
-        }
-        private static GameObject _InactiveHeart;
-
-
-        /// <summary>
         /// Used as a platform in Platform Preview if <see cref="CustomPlatform.hideDefaultPlatform"/> is false.
         /// </summary>
         internal static GameObject PlayersPlace;
@@ -152,8 +135,9 @@ namespace CustomFloorPlugin {
         internal static void Init() {
             Anchor.AddComponent<EasterEggs>();
             GSM.transitionDidStartEvent += (float ignored) => { TransitionPrep(); };
-            GSM.transitionDidFinishEvent += (ScenesTransitionSetupDataSO ignored1, DiContainer ignored2) => { TransitionFinalize(); };
+            GSM.transitionDidFinishEvent += (ScenesTransitionSetupDataSO setupData, DiContainer ignored1) => { TransitionFinalize(setupData); };
             Reload();
+            LoadAssets();
         }
 
         internal static void Reload() {
@@ -168,9 +152,6 @@ namespace CustomFloorPlugin {
                     }
                 }
             }
-
-            LoadHeartAndLightSource();
-            LoadDefaultPlatform();
         }
 
         /// <summary>
@@ -193,13 +174,14 @@ namespace CustomFloorPlugin {
         /// <summary>
         /// Finishes up scene transitions, spawning the selected <see cref="CustomPlatform"/> if needed
         /// </summary>
-        private static void TransitionFinalize() {
+        private static void TransitionFinalize(ScenesTransitionSetupDataSO setupData) {
             try {
                 Scene currentEvironment = GetCurrentEnvironment();
-                if (!currentEvironment.name.StartsWith("Menu", STR_INV) && MultiplayerCheck(currentEvironment) && D360Check(currentEvironment) /*&& !currentEvironment.name.StartsWith("Tutorial", STR_INV)*/) { //Excluding TutorialEnvironment for Counters+ to work properly
+                if (!currentEvironment.name.StartsWith("Menu", STR_INV) && MultiplayerCheck(currentEvironment) && D360Check(setupData)) {
                     try {
                         if (!platformSpawned) {
                             PlatformLifeCycleManagement.InternalChangeToPlatform();
+                            Heart.SetActive(false);
                         }
                     }
                     catch (ManagerNotFoundException e) {
@@ -332,10 +314,10 @@ namespace CustomFloorPlugin {
         /// <summary>
         /// Steals the heart from the GreenDayScene<br/>
         /// Then De-Serializes the data from the embedded resource heart.mesh onto the GreenDayHeart to make it more visually pleasing<br/>
-        /// Also adjusts it position and color.
-        /// Now Loads a Light Prefab since the one in the Menu is fucked.
+        /// Also adjusts it position and color.</br>
+        /// Gets the Non-Mesh LightSource and the PlayersPlace used in the Platform Preview too.
         /// </summary>
-        private static void LoadHeartAndLightSource() {
+        private static void LoadAssets() {
             Scene greenDay = SceneManager.LoadScene("GreenDayGrenadeEnvironment", new LoadSceneParameters(LoadSceneMode.Additive));
             SharedCoroutineStarter.instance.StartCoroutine(fuckUnity());
             IEnumerator<WaitUntil> fuckUnity() {//did you know loaded scenes are loaded asynchronously, regarless if you use async or not?
@@ -352,6 +334,13 @@ namespace CustomFloorPlugin {
                 LightSource.transform.SetParent(null);
                 LightSource.name = "LightSource";
                 SceneManager.MoveGameObjectToScene(LightSource, SCENE);
+                TubeLight.Prefab = LightSource.GetComponent<TubeBloomPrePassLight>();
+
+                PlayersPlace = root.transform.Find("PlayersPlace").gameObject;
+                PlayersPlace.SetActive(false);
+                PlayersPlace.transform.SetParent(null);
+                SceneManager.MoveGameObjectToScene(PlayersPlace, SCENE);
+
                 SceneManager.UnloadSceneAsync("GreenDayGrenadeEnvironment");
 
                 Settings.ShowHeartChanged += Heart.SetActive;
@@ -391,30 +380,10 @@ namespace CustomFloorPlugin {
                 Heart.transform.rotation = rotation;
                 Heart.transform.localScale = scale;
 
-                LightWithIdManager manager = FindLightWithIdManager(GetCurrentEnvironment());
-                InstancedMaterialLightWithId lightWithId = Heart.GetComponent<InstancedMaterialLightWithId>();
-                typeof(LightWithIdMonoBehaviour).GetField("_lightManager", BindingFlags.Instance | BindingFlags.NonPublic).SetValue(lightWithId, manager);
+                typeof(LightWithIdMonoBehaviour).GetField("_lightManager", BindingFlags.Instance | BindingFlags.NonPublic).SetValue(Heart.GetComponent<InstancedMaterialLightWithId>(), FindLightWithIdManager(GetCurrentEnvironment()));
 
                 Heart.SetActive(Settings.ShowHeart);
                 Heart.GetComponent<InstancedMaterialLightWithId>().ColorWasSet(Color.magenta);
-            }
-        }
-
-
-        /// <summary>
-        /// Steals the default Platform from the Default Environment to display it in Platform Preview.
-        /// </summary>
-        private static void LoadDefaultPlatform() {
-            Scene env = SceneManager.LoadScene("DefaultEnvironment", new LoadSceneParameters(LoadSceneMode.Additive));
-            SharedCoroutineStarter.instance.StartCoroutine(fuckUnity());
-            IEnumerator<WaitUntil> fuckUnity() {//did you know loaded scenes are loaded asynchronously, regarless if you use async or not?
-                yield return new WaitUntil(() => { return env.isLoaded; });
-                GameObject root = env.GetRootGameObjects()[0];
-                PlayersPlace = root.transform.Find("PlayersPlace").gameObject;
-                PlayersPlace.SetActive(false);
-                PlayersPlace.transform.SetParent(null);
-                SceneManager.MoveGameObjectToScene(PlayersPlace, SCENE);
-                SceneManager.UnloadSceneAsync("DefaultEnvironment");
             }
         }
 
@@ -422,19 +391,15 @@ namespace CustomFloorPlugin {
             if (currentEvironment.name.StartsWith("Multiplayer", STR_INV)) {
                 return PluginConfig.Instance.UseInMultiplayer;
             }
-            else {
-                return true;
-            }
+            return true;
         }
 
-        internal static bool D360Check(Scene currentEnvironment) {
-            string[] d360Environments = {
-                "GlassDesertEnvironment"
-            };
-
-            foreach (string environmentName in d360Environments) {
-                if (currentEnvironment.name == environmentName) {
-                    return PluginConfig.Instance.UseInMultiplayer;
+        internal static bool D360Check(ScenesTransitionSetupDataSO setupData) {
+            StandardGameplaySceneSetupData standardGameplayScene = (StandardGameplaySceneSetupData)setupData.sceneSetupDataArray?.FirstOrDefault(x => x?.GetType() == typeof(StandardGameplaySceneSetupData));
+            if (standardGameplayScene != null) {
+                if (standardGameplayScene.beatmapCharacteristic.containsRotationEvents) {
+                    HarmonyPatches.EnvironmentOverride_Patch.preventOverride = true;
+                    return PluginConfig.Instance.UseIn360;
                 }
             }
             return true;

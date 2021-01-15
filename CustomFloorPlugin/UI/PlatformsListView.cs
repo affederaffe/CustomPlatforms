@@ -4,9 +4,13 @@ using BeatSaberMarkupLanguage.Attributes;
 using BeatSaberMarkupLanguage.Components;
 using BeatSaberMarkupLanguage.ViewControllers;
 
+using CustomFloorPlugin.Extensions;
+
 using HMUI;
 
 using UnityEngine;
+
+using Zenject;
 
 
 namespace CustomFloorPlugin.UI {
@@ -27,6 +31,16 @@ namespace CustomFloorPlugin.UI {
 
 
         /// <summary>
+        /// Holds the old Color[] to switch back to when leaving the Preview.
+        /// </summary>
+        private Color?[] oldColors;
+
+
+        [Inject]
+        private readonly LightWithIdManager manager;
+
+
+        /// <summary>
         /// The table of currently loaded Platforms
         /// </summary>
         [UIComponent("PlatformsList")]
@@ -44,7 +58,11 @@ namespace CustomFloorPlugin.UI {
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Build", "CA1801:Review unused parameters", Justification = "BSML")]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "BSML")]
         private void PlatformSelect(TableView ignored1, int idx) {
+            if (idx == 0) manager.FillManager(oldColors);
+            else manager.FillManager();
             PlatformManager.SetPlatformAndShow(idx);
+            PlatformManager.Heart.SetActive(Configuration.PluginConfig.Instance.ShowHeart);
+            PlatformManager.Heart.GetComponent<InstancedMaterialLightWithId>().ColorWasSet(Color.magenta);
         }
 
 
@@ -53,6 +71,7 @@ namespace CustomFloorPlugin.UI {
         /// [Called by Beat Saber]
         /// </summary>
         protected override void DidDeactivate(bool removedFromHierarchy, bool screenSystemDisabling) {
+            manager.FillManager(oldColors);
             PlatformManager.ChangeToPlatform(0);
             base.DidDeactivate(removedFromHierarchy, screenSystemDisabling);
         }
@@ -63,6 +82,8 @@ namespace CustomFloorPlugin.UI {
         /// [Called by Beat Saber]
         /// </summary>
         protected override void DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling) {
+            oldColors = manager.colors;
+            if (PlatformManager.CurrentPlatformIndex != 0) manager.FillManager();
             PlatformManager.ChangeToPlatform();
             base.DidActivate(firstActivation, addedToHierarchy, screenSystemEnabling);
         }

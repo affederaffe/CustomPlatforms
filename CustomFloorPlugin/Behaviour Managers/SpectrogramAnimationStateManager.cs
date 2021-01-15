@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 
+using BS_Utils.Utilities;
+
 using UnityEngine;
 
 
@@ -35,7 +37,7 @@ namespace CustomFloorPlugin {
         internal void UpdateAnimationStates() {
             animationStates = new List<SpectrogramAnimationState>();
 
-            foreach (SpectrogramAnimationState spec in Resources.FindObjectsOfTypeAll(typeof(SpectrogramAnimationState))) {
+            foreach (SpectrogramAnimationState spec in Resources.FindObjectsOfTypeAll<SpectrogramAnimationState>()) {
                 animationStates.Add(spec);
             }
         }
@@ -47,9 +49,11 @@ namespace CustomFloorPlugin {
         internal void UpdateSpectrogramDataProvider() {
             BasicSpectrogramData[] datas = Resources.FindObjectsOfTypeAll<BasicSpectrogramData>();
             if (datas.Length != 0) {
-                BasicSpectrogramData spectrogramData = datas.First();
-                foreach (SpectrogramAnimationState specAnim in animationStates) {
-                    specAnim.SetData(spectrogramData);
+                BasicSpectrogramData spectrogramData = datas.FirstOrDefault(x => ((AudioSource)x.GetField("_audioSource")).clip != null);
+                if (spectrogramData != null) {
+                    foreach (SpectrogramAnimationState specAnim in animationStates) {
+                        specAnim.SetData(spectrogramData);
+                    }
                 }
             }
         }

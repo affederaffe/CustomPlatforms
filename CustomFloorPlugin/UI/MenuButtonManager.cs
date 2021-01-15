@@ -31,7 +31,7 @@ namespace CustomFloorPlugin.UI {
         }
 
         public void Dispose() {
-            MenuButtons.instance.UnregisterButton(_menuButton);
+            //MenuButtons.instance.UnregisterButton(_menuButton); Seems like the MenuButtons Singleton is already destroyed before this is called
             BSMLSettings.instance.RemoveSettingsMenu(_settings);
         }
 

@@ -1,13 +1,14 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 
-using UnityEngine;
-
 using CustomFloorPlugin.UI;
+
+using UnityEngine;
 
 using static CustomFloorPlugin.GlobalCollection;
 using static CustomFloorPlugin.Utilities.BeatSaberSearching;
 using static CustomFloorPlugin.Utilities.UnityObjectSearching;
+
 
 namespace CustomFloorPlugin {
 
@@ -134,11 +135,11 @@ namespace CustomFloorPlugin {
         private static void HandelEnvironment(CustomPlatform platform) {
             if (PlatformManager.PlayersPlace != null) {
                 string currentEnvironmentName = GetCurrentEnvironment().name;
-                if (PlatformManager.activePlatform != null && !platform.hideDefaultPlatform && (currentEnvironmentName.StartsWith("Menu", STR_INV) || currentEnvironmentName.StartsWith("Multiplayer", STR_INV))) {
+                if (PlatformManager.activePlatform != null && !platform.hideDefaultPlatform && currentEnvironmentName.StartsWith("Menu", STR_INV)) {
                     PlatformManager.PlayersPlace.SetActive(true); // Handles Platforms which would normally use the default Platform...
                 }
                 else {
-                    PlatformManager.PlayersPlace.SetActive(false); // Only in Menu and Multiplayer (since there is no default Platform)
+                    PlatformManager.PlayersPlace.SetActive(false); // Only in Menu
                 }
             }
 
@@ -204,6 +205,7 @@ namespace CustomFloorPlugin {
                 )) {
                 smallRings.Add(trackLaneRing.gameObject);
             }
+
             // KDA
             FindAddGameObject("Environment/TentacleLeft", smallRings);
             FindAddGameObject("Environment/TentacleRight", smallRings);
@@ -398,6 +400,7 @@ namespace CustomFloorPlugin {
             }
             FindAddGameObject("Environment/GradientBackground", backLasers);
             FindAddGameObject("Environment/StarHemisphere", backLasers);
+            FindAddGameObject("Environment/MagicDoorSprite", backColumns);
 
             // 360°
             //FindAddGameObject("Environment/SpawnRotationChevronManager", backLasers);
@@ -493,7 +496,7 @@ namespace CustomFloorPlugin {
                 FindAddGameObject($"Environment/TopLaser ({i})", trackLights);
             }
             FindAddGameObject("Environment/Cube", trackLights);
-            FindAddGameObject("Environment/Cube (82)", trackLights);
+            FindAddGameObject("Environment/Cube (1)", trackLights);
             for (int i = 82; i < 90; i++) {
                 FindAddGameObject($"Environment/Cube ({i})", trackLights);
             }
