@@ -1,9 +1,8 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
-
-using BS_Utils.Utilities;
 
 using UnityEngine;
+
+using Zenject;
 
 
 namespace CustomFloorPlugin {
@@ -14,6 +13,8 @@ namespace CustomFloorPlugin {
     /// </summary>
     internal class SpectrogramAnimationStateManager : MonoBehaviour {
 
+        [InjectOptional]
+        private readonly BasicSpectrogramData _basicSpectrogramData;
 
         /// <summary>
         /// <see cref="List{T}"/> of all known <see cref="SpectrogramAnimationState"/>s loaded in the game
@@ -47,13 +48,9 @@ namespace CustomFloorPlugin {
         /// Passes <see cref="BasicSpectrogramData"/> on to all <see cref="SpectrogramAnimationState"/>s
         /// </summary>
         internal void UpdateSpectrogramDataProvider() {
-            BasicSpectrogramData[] datas = Resources.FindObjectsOfTypeAll<BasicSpectrogramData>();
-            if (datas.Length != 0) {
-                BasicSpectrogramData spectrogramData = datas.FirstOrDefault(x => ((AudioSource)x.GetField("_audioSource")).clip != null);
-                if (spectrogramData != null) {
-                    foreach (SpectrogramAnimationState specAnim in animationStates) {
-                        specAnim.SetData(spectrogramData);
-                    }
+            if (_basicSpectrogramData != null) {
+                foreach (SpectrogramAnimationState specAnim in animationStates) {
+                    specAnim.SetData(_basicSpectrogramData);
                 }
             }
         }

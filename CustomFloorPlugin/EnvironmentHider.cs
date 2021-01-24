@@ -1,13 +1,13 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 
-using CustomFloorPlugin.UI;
+using CustomFloorPlugin.Configuration;
+using CustomFloorPlugin.Utilities;
 
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
-using static CustomFloorPlugin.GlobalCollection;
-using static CustomFloorPlugin.Utilities.BeatSaberSearching;
-using static CustomFloorPlugin.Utilities.UnityObjectSearching;
+using Zenject;
 
 
 namespace CustomFloorPlugin {
@@ -17,23 +17,28 @@ namespace CustomFloorPlugin {
     /// Activates and deactivates world geometry in the active scene as required by the chosen custom platform<br/>
     /// Most documentation on this file is omited because it is a giant clusterfuck and I hate it... with a passion.
     /// </summary>
-    internal static class EnvironmentHider {
+    internal class EnvironmentHider {
 
-        private static GameObject[] roots;
+        [Inject]
+        private readonly PluginConfig _config;
 
-        private static List<GameObject> menuEnvironment;
-        private static List<GameObject> playersPlace;
-        private static List<GameObject> feet;
-        private static List<GameObject> smallRings;
-        private static List<GameObject> bigRings;
-        private static List<GameObject> visualizer;
-        private static List<GameObject> towers;
-        private static List<GameObject> highway;
-        private static List<GameObject> backColumns;
-        private static List<GameObject> doubleColorLasers;
-        private static List<GameObject> backLasers;
-        private static List<GameObject> rotatingLasers;
-        private static List<GameObject> trackLights;
+        private string currentEnvironmentName;
+        private GameObject[] roots;
+
+        private List<GameObject> menuEnvironment;
+        private List<GameObject> multiplayerEnvironment;
+        private List<GameObject> playersPlace;
+        private List<GameObject> feet;
+        private List<GameObject> smallRings;
+        private List<GameObject> bigRings;
+        private List<GameObject> visualizer;
+        private List<GameObject> towers;
+        private List<GameObject> highway;
+        private List<GameObject> backColumns;
+        private List<GameObject> doubleColorLasers;
+        private List<GameObject> backLasers;
+        private List<GameObject> rotatingLasers;
+        private List<GameObject> trackLights;
 
 
         /// <summary>
@@ -41,7 +46,7 @@ namespace CustomFloorPlugin {
         /// Delayed by a frame because of order of operations after scene loading
         /// </summary>
         /// <param name="platform">A platform that defines which objects are to be hidden</param>
-        internal static void HideObjectsForPlatform(CustomPlatform platform) {
+        internal void HideObjectsForPlatform(CustomPlatform platform) {
             SharedCoroutineStarter.instance.StartCoroutine(InternalHideObjectsForPlatform(platform));
         }
 
@@ -51,12 +56,13 @@ namespace CustomFloorPlugin {
         /// It is not practical to call this directly
         /// </summary>
         /// <param name="platform">A platform that defines which objects are to be hidden</param>
-        private static IEnumerator<WaitForEndOfFrame> InternalHideObjectsForPlatform(CustomPlatform platform) {
+        private IEnumerator<WaitForEndOfFrame> InternalHideObjectsForPlatform(CustomPlatform platform) {
             yield return new WaitForEndOfFrame();
             FindEnvironment();
             HandelEnvironment(platform);
+            if (multiplayerEnvironment != null) SetCollectionHidden(multiplayerEnvironment, _config.UseInMultiplayer);
             if (playersPlace != null) SetCollectionHidden(playersPlace, platform.hideDefaultPlatform);
-            if (feet != null) SetCollectionHidden(feet, platform.hideDefaultPlatform && !Settings.AlwaysShowFeet);
+            if (feet != null) SetCollectionHidden(feet, platform.hideDefaultPlatform && !_config.AlwaysShowFeet);
             if (smallRings != null) SetCollectionHidden(smallRings, platform.hideSmallRings);
             if (bigRings != null) SetCollectionHidden(bigRings, platform.hideBigRings);
             if (visualizer != null) SetCollectionHidden(visualizer, platform.hideEQVisualizer);
@@ -73,9 +79,13 @@ namespace CustomFloorPlugin {
         /// <summary>
         /// Finds all GameObjects that make up the default environment and groups them into lists
         /// </summary>
-        private static void FindEnvironment() {
-            roots = GetCurrentEnvironment().GetRootGameObjects();
-            if (IsNullZeroOrContainsNull(menuEnvironment)) FindMenuEnvironmnet();
+        private void FindEnvironment() {
+            Scene currentEnvironment = Searching.GetCurrentEnvironment();
+            roots = currentEnvironment.GetRootGameObjects();
+            currentEnvironmentName = currentEnvironment.name;
+            if (menuEnvironment?.Count == 0 || menuEnvironment == null) FindMenuEnvironmnet();
+            FindMultiplayerEnvironment();
+            FindPlayersPlace();
             FindPlayersPlace();
             FindFeetIcon();
             FindSmallRings();
@@ -114,7 +124,7 @@ namespace CustomFloorPlugin {
         /// </summary>
         /// <param name="name">The name of the desired GameObject</param>
         /// <param name="list">The list to be added to</param>
-        private static bool FindAddGameObject(string name, List<GameObject> list, bool rename = false) {
+        private bool FindAddGameObject(string name, List<GameObject> list, bool rename = false) {
             GameObject go;
             foreach (GameObject root in roots) {
                 go = GameObject.Find(name);
@@ -132,15 +142,12 @@ namespace CustomFloorPlugin {
             return false;
         }
 
-        private static void HandelEnvironment(CustomPlatform platform) {
-            if (PlatformManager.PlayersPlace != null) {
-                string currentEnvironmentName = GetCurrentEnvironment().name;
-                if (PlatformManager.activePlatform != null && !platform.hideDefaultPlatform && currentEnvironmentName.StartsWith("Menu", STR_INV)) {
-                    PlatformManager.PlayersPlace.SetActive(true); // Handles Platforms which would normally use the default Platform...
-                }
-                else {
-                    PlatformManager.PlayersPlace.SetActive(false); // Only in Menu
-                }
+        private void HandelEnvironment(CustomPlatform platform) {
+            if (PlatformManager.activePlatform != null && !platform.hideDefaultPlatform && currentEnvironmentName.StartsWith("Menu")) {
+                PlatformManager.PlayersPlace.SetActive(true); // Handles Platforms which would normally use the default Platform...
+            }
+            else {
+                PlatformManager.PlayersPlace.SetActive(false); // Only in Menu
             }
 
             if (menuEnvironment != null && PlatformManager.activePlatform != null) {
@@ -151,34 +158,50 @@ namespace CustomFloorPlugin {
             }
         }
 
-        private static void FindMenuEnvironmnet() {
+        private void FindMenuEnvironmnet() {
             menuEnvironment = new List<GameObject>();
-            FindAddGameObject("MenuEnvironment/DefaultEnvironment/Laser (1)", menuEnvironment);
-            FindAddGameObject("MenuEnvironment/DefaultEnvironment/Laser (2)", menuEnvironment);
-            FindAddGameObject("MenuEnvironment/DefaultEnvironment/Laser (3)", menuEnvironment);
-            FindAddGameObject("MenuEnvironment/DefaultEnvironment/Laser (4)", menuEnvironment);
+            FindAddGameObject("MenuEnvironment/MenuCoreLighting/SkyGradient", menuEnvironment);
+            FindAddGameObject("MenuEnvironment/NearBuildingLeft", menuEnvironment);
+            FindAddGameObject("MenuEnvironment/NearBuildingRight", menuEnvironment);
+            FindAddGameObject("MenuEnvironment/NearBuildingLeft (1)", menuEnvironment);
+            FindAddGameObject("MenuEnvironment/NearBuildingRight (1)", menuEnvironment);
+            FindAddGameObject("MenuEnvironment/DefaultEnvironment/GroundCollider", menuEnvironment);
+            FindAddGameObject("MenuEnvironment/DefaultEnvironment/Ground", menuEnvironment);
+            FindAddGameObject("MenuEnvironment/DefaultEnvironment/PlayersPlace", menuEnvironment);
+            FindAddGameObject("MenuEnvironment/DefaultEnvironment/NotesBehindPlayer", menuEnvironment);
             FindAddGameObject("MenuEnvironment/DefaultEnvironment/NeonLights", menuEnvironment);
             FindAddGameObject("MenuEnvironment/DefaultEnvironment/Notes", menuEnvironment);
-            FindAddGameObject("MenuEnvironment/Note (18)", menuEnvironment);
-            FindAddGameObject("MenuEnvironment/Note (19)", menuEnvironment);
-            FindAddGameObject("MenuEnvironment/Shadow (2)", menuEnvironment);
-            FindAddGameObject("MenuEnvironment/Arrow", menuEnvironment);
-            FindAddGameObject("MenuEnvironment/Arrow (1)", menuEnvironment);
-            FindAddGameObject("MenuEnvironment/Arrow (2)", menuEnvironment);
-            FindAddGameObject("MenuEnvironment/Arrow (3)", menuEnvironment);
-            FindAddGameObject("MenuEnvironment/Ground", menuEnvironment);
-            FindAddGameObject("MenuEnvironment/GroundCollider", menuEnvironment);
         }
 
-        private static void FindPlayersPlace() {
+        private void FindMultiplayerEnvironment() {
+            multiplayerEnvironment = new List<GameObject>();
+            FindAddGameObject("MultiplayerDuelConnectedPlayerController(Clone)/Construction", multiplayerEnvironment);
+            FindAddGameObject("MultiplayerDuelConnectedPlayerController(Clone)/Lasers", multiplayerEnvironment);
+            FindAddGameObject("MultiplayerDuelLocalActivePlayerController(Clone)/IsActiveObjects/Construction/ConstructionL", multiplayerEnvironment);
+            FindAddGameObject("MultiplayerDuelLocalActivePlayerController(Clone)/IsActiveObjects/Construction/ConstructionR", multiplayerEnvironment);
+            FindAddGameObject("MultiplayerDuelLocalActivePlayerController(Clone)/IsActiveObjects/Lasers", multiplayerEnvironment);
+
+            FindAddGameObject("MultiplayerLocalActivePlayerController(Clone)/IsActiveObjects/Construction/ConstructionL", multiplayerEnvironment);
+            FindAddGameObject("MultiplayerLocalActivePlayerController(Clone)/IsActiveObjects/Construction/ConstructionR", multiplayerEnvironment);
+            FindAddGameObject("MultiplayerLocalActivePlayerController(Clone)/IsActiveObjects/Lasers", multiplayerEnvironment);
+            FindAddGameObject("MultiplayerLocalActivePlayerController(Clone)/IsActiveObjects/PlatformEnd", multiplayerEnvironment);
+            FindAddGameObject("MultiplayerLocalActivePlayerController(Clone)/IsActiveObjects/CenterRings", multiplayerEnvironment);
+            FindAddGameObject("MultiplayerLocalActivePlayerController(Clone)/IsActiveObjects/DirectionalLights", multiplayerEnvironment);
+        }
+
+        private void FindPlayersPlace() {
             playersPlace = new List<GameObject>();
             FindAddGameObject("Environment/PlayersPlace", playersPlace);
 
             // LinkinPark
             FindAddGameObject("Environment/PlayersPlaceShadow", playersPlace);
+
+            // Multiplayer
+            FindAddGameObject("MultiplayerDuelConnectedPlayerController(Clone)/Construction/PlayersPlace", playersPlace);
+            FindAddGameObject("MultiplayerLocalActivePlayerController(Clone)/IsActiveObjects/Construction/PlayersPlace", playersPlace);
         }
 
-        private static void FindFeetIcon() {
+        private void FindFeetIcon() {
             feet = new List<GameObject>();
             FindAddGameObject("MenuEnvironment/DefaultEnvironment/PlayersPlace/Feet", feet);
             FindAddGameObject("MenuEnvironment/DefaultEnvironment/PlayersPlace/Version", feet);
@@ -190,7 +213,7 @@ namespace CustomFloorPlugin {
             }
         }
 
-        private static void FindSmallRings() {
+        private void FindSmallRings() {
             smallRings = new List<GameObject>();
             FindAddGameObject("TrackLaneRing", smallRings);
             FindAddGameObject("Environment/SmallTrackLaneRings", smallRings);
@@ -211,7 +234,7 @@ namespace CustomFloorPlugin {
             FindAddGameObject("Environment/TentacleRight", smallRings);
         }
 
-        private static void FindBigRings() {
+        private void FindBigRings() {
             bigRings = new List<GameObject>();
             FindAddGameObject("Environment/BigTrackLaneRings", bigRings);
             FindAddGameObject("Environment/BigLightsTrackLaneRings", bigRings);
@@ -223,7 +246,7 @@ namespace CustomFloorPlugin {
             }
         }
 
-        private static void FindVisualizers() {
+        private void FindVisualizers() {
             visualizer = new List<GameObject>();
             FindAddGameObject("Environment/Spectrograms", visualizer);
             FindAddGameObject("Environment/PillarPair", visualizer);
@@ -234,7 +257,7 @@ namespace CustomFloorPlugin {
             }
         }
 
-        private static void FindTowers() {
+        private void FindTowers() {
             towers = new List<GameObject>();
             // Song Environments
             FindAddGameObject("Environment/Buildings", towers);
@@ -279,7 +302,7 @@ namespace CustomFloorPlugin {
             FindAddGameObject("Environment/PillarTrackLaneRingsR (1)", towers);
         }
 
-        private static void FindHighway() {
+        private void FindHighway() {
             highway = new List<GameObject>();
             FindAddGameObject("Environment/TrackConstruction", highway);
             FindAddGameObject("Environment/FloorConstruction", highway);
@@ -328,7 +351,7 @@ namespace CustomFloorPlugin {
             FindAddGameObject("Environment/Collider", highway);
         }
 
-        private static void FindBackColumns() {
+        private void FindBackColumns() {
             backColumns = new List<GameObject>();
             FindAddGameObject("Environment/BackColumns", backColumns);
 
@@ -338,7 +361,7 @@ namespace CustomFloorPlugin {
             }
         }
 
-        private static void FindRotatingLasers() {
+        private void FindRotatingLasers() {
             rotatingLasers = new List<GameObject>();
             // Default, BigMirror, Triangle, Rocket
             FindAddGameObject("Environment/RotatingLasersPair", rotatingLasers);
@@ -362,7 +385,7 @@ namespace CustomFloorPlugin {
             }
         }
 
-        private static void FindDoubleColorLasers() {
+        private void FindDoubleColorLasers() {
             doubleColorLasers = new List<GameObject>();
 
             // Default, BigMirror, Nice, Tutorial
@@ -377,7 +400,7 @@ namespace CustomFloorPlugin {
             }
         }
 
-        private static void FindBackLasers() {
+        private void FindBackLasers() {
             backLasers = new List<GameObject>();
             FindAddGameObject("Environment/FrontLights", backLasers);
 
@@ -406,7 +429,7 @@ namespace CustomFloorPlugin {
             //FindAddGameObject("Environment/SpawnRotationChevronManager", backLasers);
         }
 
-        private static void FindTrackLights() {
+        private void FindTrackLights() {
             trackLights = new List<GameObject>();
             FindAddGameObject("Environment/GlowLineR", trackLights);
             FindAddGameObject("Environment/GlowLineL", trackLights);

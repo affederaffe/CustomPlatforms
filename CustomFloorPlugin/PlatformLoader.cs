@@ -7,11 +7,7 @@ using System.Security.Cryptography;
 
 using UnityEngine;
 
-using CustomFloorPlugin.Exceptions;
-
-using static CustomFloorPlugin.GlobalCollection;
 using static CustomFloorPlugin.Utilities.Logging;
-using static CustomFloorPlugin.Utilities.UnityObjectSearching;
 
 
 namespace CustomFloorPlugin {
@@ -22,29 +18,15 @@ namespace CustomFloorPlugin {
     /// </summary>
     internal static class PlatformLoader {
 
+        internal static string customPlatformsFolderPath;
+        internal static string customPlatformsScriptFolderPath;
 
-        /// <summary>
-        /// <see cref="List{string}<"/> holding all Hashes of CustomScripts
-        /// </summary>
-        internal static List<string> scriptHashList;
+        private static Sprite feetIcon;
 
-
-        internal static bool newScriptsFound = false;
-
-
-        internal static readonly string CustomFloorPluginFolderPath = Path.Combine(Environment.CurrentDirectory, FOLDER);
-        internal static readonly string CustomFloorPluginScriptFolderPath = Path.Combine(CustomFloorPluginFolderPath, SCRIPT_FOLDER);
-        internal static readonly string ScriptHashesPath = Path.Combine(Environment.CurrentDirectory, "UserData", SCRIPT_HASHES_FILENAME);
-
-        private static Sprite FeetIcon {
-            get {
-                if (_feetIcon == null) {
-                    _feetIcon = Resources.FindObjectsOfTypeAll<Sprite>().Where(x => x.name == "FeetIcon").FirstOrDefault();
-                }
-                return _feetIcon;
-            }
+        static PlatformLoader() {
+            customPlatformsFolderPath = Path.Combine(Environment.CurrentDirectory, "CustomPlatforms");
+            customPlatformsScriptFolderPath = Path.Combine(customPlatformsFolderPath, "Scripts");
         }
-        private static Sprite _feetIcon;
 
 
         /// <summary>
@@ -54,12 +36,12 @@ namespace CustomFloorPlugin {
 
 
             // Create the CustomFloorPlugin folder if it doesn't already exist
-            if (!Directory.Exists(CustomFloorPluginFolderPath)) {
-                Directory.CreateDirectory(CustomFloorPluginFolderPath);
+            if (!Directory.Exists(customPlatformsFolderPath)) {
+                Directory.CreateDirectory(customPlatformsFolderPath);
             }
 
             // Find AssetBundles in our CustomFloorPlugin directory
-            string[] allBundlePaths = Directory.GetFiles(CustomFloorPluginFolderPath, "*.plat");
+            string[] allBundlePaths = Directory.GetFiles(customPlatformsFolderPath, "*.plat");
 
             List<CustomPlatform> platforms = new List<CustomPlatform>();
 
@@ -68,23 +50,20 @@ namespace CustomFloorPlugin {
             defaultPlatform.transform.parent = parent;
             defaultPlatform.platName = "Default Environment";
             defaultPlatform.platAuthor = "Beat Saber";
-            Texture2D texture = Resources.FindObjectsOfTypeAll<Texture2D>().First(x => x.name == "LvlInsaneCover");
+            Texture2D texture = Resources.FindObjectsOfTypeAll<Texture2D>().FirstOrDefault(x => x.name == "LvlInsaneCover");
             defaultPlatform.icon = Sprite.Create(texture, new Rect(0f, 0f, texture.width, texture.height), new Vector2(0.5f, 0.5f));
             platforms.Add(defaultPlatform);
             // Populate the platforms array
             Log("[START OF PLATFORM LOADING SPAM]-------------------------------------");
-            int j = 0;
             for (int i = 0; i < allBundlePaths.Length; i++) {
-                j++;
                 CustomPlatform newPlatform = LoadPlatformBundle(allBundlePaths[i], parent);
                 if (newPlatform != null) {
                     platforms.Add(newPlatform);
+                    MaterialSwapper.ReplaceMaterials(newPlatform.gameObject);
                     Log(newPlatform.platName + " by " + newPlatform.platAuthor);
                 }
             }
             Log("[END OF PLATFORM LOADING SPAM]---------------------------------------");
-            // Replace materials for all renderers
-            MaterialSwapper.ReplaceMaterials(SCENE);
 
             return platforms;
         }
@@ -96,9 +75,7 @@ namespace CustomFloorPlugin {
         /// </summary>
         /// <param name="bundlePath">The location of the <see cref="CustomPlatform"/>s <see cref="AssetBundle"/> file on disk</param>
         /// <param name="parent">The parent <see cref="Transform"/> for the new <see cref="CustomPlatform"/></param>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Security", "CA5351:Do Not Use Broken Cryptographic Algorithms", Justification = "MD5 Hash not used in security relevant context")]
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Globalization", "CA1308:Normalize strings to uppercase", Justification = "Too late now... that damage was done a year ago -.-")]
-        internal static CustomPlatform LoadPlatformBundle(string bundlePath, Transform parent) {
+        private static CustomPlatform LoadPlatformBundle(string bundlePath, Transform parent) {
 
             AssetBundle bundle = AssetBundle.LoadFromFile(bundlePath);
 
@@ -134,14 +111,10 @@ namespace CustomFloorPlugin {
 
             GameObject newPlatform = UnityEngine.Object.Instantiate(platformPrefab.gameObject);
 
-            try {
-                foreach (AudioListener al in FindAll<AudioListener>(newPlatform)) {
-                    UnityEngine.Object.DestroyImmediate(al);
-                }
+            foreach (AudioListener al in newPlatform.transform.GetComponentsInChildren<AudioListener>(true)) {
+                UnityEngine.Object.DestroyImmediate(al);
             }
-            catch (ComponentNotFoundException) {
 
-            }
 
             newPlatform.transform.parent = parent;
 
@@ -171,8 +144,12 @@ namespace CustomFloorPlugin {
 
             newPlatform.name = customPlatform.platName + " by " + customPlatform.platAuthor;
 
+            if (feetIcon == null) {
+                feetIcon = Resources.FindObjectsOfTypeAll<Sprite>().Where(x => x.name == "FeetIcon").FirstOrDefault();
+            }
+
             if (customPlatform.icon == null) {
-                customPlatform.icon = FeetIcon;
+                customPlatform.icon = feetIcon;
             }
 
             newPlatform.SetActive(false);
@@ -182,7 +159,7 @@ namespace CustomFloorPlugin {
 
 
         /// <summary>
-        ///  Tries to load all CustomScripts, but aborts when <see cref="UI.Settings.LoadCustomScripts"/> is false or a new Script is found
+        ///  Tries to load all CustomScripts, but aborts when <see cref="UI.SettingsView.LoadCustomScripts"/> is false
         /// </summary>
         /// <returns>
         /// <see cref="bool"/> newScriptsFound
@@ -190,73 +167,17 @@ namespace CustomFloorPlugin {
         internal static void LoadScripts() {
 
             // Create the CustomFloorPlugin script folder if it doesn't already exist
-            if (!Directory.Exists(CustomFloorPluginScriptFolderPath)) {
-                Directory.CreateDirectory(CustomFloorPluginScriptFolderPath);
-            }
-
-            // Preventing Issue when a script exists but the option is first enabled in menu
-            if (!File.Exists(ScriptHashesPath)) {
-                File.Create(ScriptHashesPath).Close();
+            if (!Directory.Exists(customPlatformsScriptFolderPath)) {
+                Directory.CreateDirectory(customPlatformsScriptFolderPath);
             }
 
             // Find Dlls in our CustomFloorPluginScript directory
-            string[] allScriptPaths = Directory.GetFiles(CustomFloorPluginScriptFolderPath, "*.dll");
+            string[] allScriptPaths = Directory.GetFiles(customPlatformsScriptFolderPath, "*.dll");
 
-            // Checks if a new CustomScript is found, if not loads all Scripts
-            if (UI.Settings.LoadCustomScripts) {
-                scriptHashList = new List<string>();
-                foreach (string path in allScriptPaths) {
-                    string hash = ComputeHashFromPath(path);
-                    scriptHashList.Add(hash);
-                }
-
-                string[] oldHashes = File.ReadAllLines(ScriptHashesPath);
-                int i = 0;
-                if (scriptHashList.Count == oldHashes.Length) {
-                    foreach (string hash1 in scriptHashList) {
-                        foreach (string hash2 in oldHashes) {
-                            if (hash1 == hash2) {
-                                i++;
-                            }
-                        }
-                    }
-                    if (scriptHashList.Count != i) {
-                        newScriptsFound = true;
-                    }
-                    else {
-                        newScriptsFound = false;
-                    }
-                }
-                else {
-                    newScriptsFound = true;
-                }
-
-                if (!newScriptsFound) {
-                    Log("No new CustomScripts found, loading all in directory " + CustomFloorPluginScriptFolderPath);
-                    foreach (string path in allScriptPaths) {
-                        Assembly.LoadFrom(path);
-                    }
-                }
-                else {
-                    Log("New CustomScripts found, loading aborted!");
-                }
+            // Loads all Scripts
+            foreach (string path in allScriptPaths) {
+                Assembly.LoadFrom(path);
             }
-        }
-
-
-
-        /// <summary>
-        /// Computes a MD5 Hash and converts it to Hex
-        /// </summary>
-        /// <param name="path">Path to the File the Hash should be created for</param>
-        /// <returns>The Hex Hash of the File</returns>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Security", "CA5351:Do Not Use Broken Cryptographic Algorithms", Justification = "MD5 Hash not used in security relevant context")]
-        private static string ComputeHashFromPath(string path) {
-            using MD5 md5 = MD5.Create();
-            using FileStream stream = File.OpenRead(path);
-            byte[] byteHash = md5.ComputeHash(stream);
-            string hash = BitConverter.ToString(byteHash).Replace("-", string.Empty).ToUpperInvariant();
-            return hash;
         }
     }
 }

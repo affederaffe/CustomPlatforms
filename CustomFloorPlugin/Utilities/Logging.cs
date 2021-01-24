@@ -15,7 +15,6 @@ namespace CustomFloorPlugin.Utilities {
     /// This is the logger class of CustomFloorPlugin<br/>
     /// It is designed to be included via <see langword="using static"/> and provides standard overloads for many types
     /// </summary>
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "This is a Logger, shut up Microsoft")]
     internal static class Logging {
 
 
@@ -34,7 +33,6 @@ namespace CustomFloorPlugin.Utilities {
         /// </summary>
         /// <param name="e">The exception to print</param>
         /// <param name="level">At what level the exception will be printed</param>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Globalization", "CA1303:Do not pass literals as localized parameters", Justification = "<Pending>")]
         internal static void Log(Exception e, Level level = Level.Notice) {
             Log("An error has been caught:\n" + e.GetType().Name + "\nAt:\n" + e.StackTrace + "\nWith message:\n" + e.Message, level);
             if (e.InnerException != null) {

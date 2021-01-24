@@ -2,6 +2,7 @@
 
 using HarmonyLib;
 
+
 namespace CustomFloorPlugin.HarmonyPatches {
 
 
@@ -10,11 +11,20 @@ namespace CustomFloorPlugin.HarmonyPatches {
     /// </summary>
     internal static class Patcher {
 
-
         /// <summary>
-        /// Tracks if the Patcher has run or not.
+        /// Tracks if the Patcher has run or not
         /// </summary>
         private static bool runOnce;
+
+        /// <summary>
+        /// The Harmony ID this Plugin uses
+        /// </summary>
+        private const string ID = "com.rolopogo.CustomFloorPlugin";
+
+        /// <summary>
+        /// The Harmony Instance for this Plugin
+        /// </summary>
+        private static Harmony Harmony;
 
 
         /// <summary>
@@ -22,9 +32,15 @@ namespace CustomFloorPlugin.HarmonyPatches {
         /// </summary>
         internal static void Patch() {
             if (!runOnce) {
-                new Harmony("com.rolopogo.CustomFloorPlugin").PatchAll(Assembly.GetExecutingAssembly());
+                Harmony = new Harmony(ID);
+                Harmony.PatchAll(Assembly.GetExecutingAssembly());
                 runOnce = true;
             }
+        }
+
+        internal static void Unpatch() {
+            Harmony.UnpatchAll(ID);
+            runOnce = false;
         }
     }
 }

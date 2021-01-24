@@ -1,10 +1,10 @@
 ﻿using BeatSaberMarkupLanguage;
 
+using CustomFloorPlugin.Utilities;
+
 using HMUI;
 
 using Zenject;
-
-using CustomFloorPlugin.Utilities;
 
 
 namespace CustomFloorPlugin.UI {
@@ -16,13 +16,13 @@ namespace CustomFloorPlugin.UI {
     internal class PlatformListFlowCoordinator : FlowCoordinator {
 
         [Inject]
-        private readonly PlatformsListView platformsListView;
+        private readonly PlatformManager _platformManager;
 
         [Inject]
-        private readonly EnvironmentOverrideListView environmentOverrideListView;
+        private readonly PlatformsListView _platformsListView;
 
         [Inject]
-        private readonly ReloadPlatformsButtonView reloadPlatformsButtonView;
+        private readonly SettingsView _settingsView;
 
 
         /// <summary>
@@ -34,7 +34,7 @@ namespace CustomFloorPlugin.UI {
             if (firstActivation) {
                 SetTitle("Custom Platforms");
                 showBackButton = true;
-                ProvideInitialViewControllers(platformsListView, environmentOverrideListView, null, reloadPlatformsButtonView);
+                ProvideInitialViewControllers(_platformsListView, null, _settingsView);
             }
         }
 
@@ -44,9 +44,8 @@ namespace CustomFloorPlugin.UI {
         /// [Called by Beat Saber]
         /// </summary>
         /// <param name="ignored1"></param>
-        protected override void BackButtonWasPressed(ViewController ignored1) {
-            Logging.Log("Selected Environment: " + PlatformManager.CurrentPlatform.platName);
-            Logging.Log("Selected Override: " + EnvironmentOverrideListView.EnvOr);
+        protected override void BackButtonWasPressed(ViewController _1) {
+            Logging.Log("Selected Platform: " + _platformManager.CurrentPlatform.platName);
             BeatSaberUI.MainFlowCoordinator.DismissFlowCoordinator(this, null, ViewController.AnimationDirection.Horizontal, false);
         }
     }

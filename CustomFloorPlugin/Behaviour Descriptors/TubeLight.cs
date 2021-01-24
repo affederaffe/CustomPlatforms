@@ -8,7 +8,6 @@ namespace CustomFloorPlugin {
 
     [RequireComponent(typeof(MeshFilter))]
     [RequireComponent(typeof(MeshRenderer))]
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1051:Do not declare visible instance fields", Justification = "Too old to change")]
     public class TubeLight : MonoBehaviour, INotifyOnEnableOrDisable {
 
         public enum LightsID {
@@ -39,8 +38,7 @@ namespace CustomFloorPlugin {
         public Color color = Color.white;
         public LightsID lightsID = LightsID.Static;
 
-
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Code Quality", "IDE0051:Remove unused private members", Justification = "Called by Unity")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("CodeQuality", "IDE0051:Remove unused private members", Justification = "Called by Unity")]
         private void OnDrawGizmos() {
             Gizmos.color = color;
             Gizmos.matrix = transform.localToWorldMatrix;
@@ -49,8 +47,6 @@ namespace CustomFloorPlugin {
         }
 
 
-        internal static TubeBloomPrePassLight Prefab;
-
         private TubeBloomPrePassLight tubeBloomLight;
         private GameObject iHeartBeatSaber;
 
@@ -58,7 +54,7 @@ namespace CustomFloorPlugin {
         internal void GameAwake(LightWithIdManager lightManager) {
             GetComponent<MeshRenderer>().enabled = false;
             if (GetComponent<MeshFilter>().mesh.vertexCount == 0) {
-                tubeBloomLight = Instantiate(Prefab);
+                tubeBloomLight = Instantiate(PlatformManager.LightSource.GetComponent<TubeBloomPrePassLight>());
                 tubeBloomLight.transform.parent = transform;
                 PlatformManager.SpawnedObjects.Add(tubeBloomLight.gameObject);
 
@@ -96,7 +92,6 @@ namespace CustomFloorPlugin {
             }
             else {
                 // swap for <3
-                PlatformManager.Heart.SetActive(false);
                 iHeartBeatSaber = Instantiate(PlatformManager.Heart);
                 PlatformManager.SpawnedObjects.Add(iHeartBeatSaber);
                 iHeartBeatSaber.transform.parent = transform;

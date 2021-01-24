@@ -1,12 +1,10 @@
 using System.Collections.Generic;
 
-using BS_Utils.Utilities;
-
 using IPA.Utilities;
 
 using UnityEngine;
 
-using static CustomFloorPlugin.GlobalCollection;
+using Zenject;
 
 
 namespace CustomFloorPlugin {
@@ -17,6 +15,8 @@ namespace CustomFloorPlugin {
     /// </summary>
     internal class RotationEventEffectManager : MonoBehaviour {
 
+        [InjectOptional]
+        private readonly BeatmapObjectCallbackController _beatmapObjectCallbackController;
 
         /// <summary>
         /// To be filled with spawned <see cref="LightRotationEventEffect"/>s
@@ -34,26 +34,32 @@ namespace CustomFloorPlugin {
         /// Registers all currently known <see cref="LightRotationEventEffect"/>s for Events.
         /// </summary>
         internal void RegisterForEvents() {
-            foreach (LightRotationEventEffect rotEffect in lightRotationEffects) {
-                BSEvents.beatmapEvent += rotEffect.HandleBeatmapObjectCallbackControllerBeatmapEventDidTrigger;
-            }
-            foreach (MultiRotationEventEffect.Actor effect in multiEffects) {
-                BSEvents.beatmapEvent += effect.EventCallback;
+            if (_beatmapObjectCallbackController != null) {
+                foreach (LightRotationEventEffect rotEffect in lightRotationEffects) {
+                    _beatmapObjectCallbackController.beatmapEventDidTriggerEvent += rotEffect.HandleBeatmapObjectCallbackControllerBeatmapEventDidTrigger;
+                }
+                foreach (MultiRotationEventEffect.Actor effect in multiEffects) {
+                    _beatmapObjectCallbackController.beatmapEventDidTriggerEvent += effect.EventCallback;
+                }
             }
         }
+
+
 
 
         /// <summary>
         /// De-Registers from lighting events<br/>
         /// [Unity calls this when the <see cref="MonoBehaviour"/> becomes inactive in the hierachy]
         /// </summary>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Code Quality", "IDE0051:Remove unused private members", Justification = "Called by Unity")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("CodeQuality", "IDE0051:Remove unused private members", Justification = "Called by Unity")]
         private void OnDisable() {
-            foreach (LightRotationEventEffect rotEffect in lightRotationEffects) {
-                BSEvents.beatmapEvent -= rotEffect.HandleBeatmapObjectCallbackControllerBeatmapEventDidTrigger;
-            }
-            foreach (MultiRotationEventEffect.Actor effect in multiEffects) {
-                BSEvents.beatmapEvent -= effect.EventCallback;
+            if (_beatmapObjectCallbackController != null) {
+                foreach (LightRotationEventEffect rotEffect in lightRotationEffects) {
+                    _beatmapObjectCallbackController.beatmapEventDidTriggerEvent -= rotEffect.HandleBeatmapObjectCallbackControllerBeatmapEventDidTrigger;
+                }
+                foreach (MultiRotationEventEffect.Actor effect in multiEffects) {
+                    _beatmapObjectCallbackController.beatmapEventDidTriggerEvent -= effect.EventCallback;
+                }
             }
         }
 
@@ -76,7 +82,7 @@ namespace CustomFloorPlugin {
                 rotEvent.SetField("_rotationVector", effectDescriptor.rotationVector);
                 rotEvent.SetField("_transform", rotEvent.transform);
                 rotEvent.SetField("_startRotation", rotEvent.transform.rotation);
-                rotEvent.SetField("_beatmapObjectCallbackController", BOCC);
+                rotEvent.SetField("_beatmapObjectCallbackController", _beatmapObjectCallbackController);
                 lightRotationEffects.Add(rotEvent);
             }
             MultiRotationEventEffect[] effectDescriptors2 = currentPlatform.GetComponentsInChildren<MultiRotationEventEffect>(true);

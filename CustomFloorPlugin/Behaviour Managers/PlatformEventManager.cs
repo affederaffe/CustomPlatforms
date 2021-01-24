@@ -2,6 +2,8 @@
 
 using UnityEngine;
 
+using Zenject;
+
 
 namespace CustomFloorPlugin {
 
@@ -11,12 +13,14 @@ namespace CustomFloorPlugin {
     /// </summary>
     internal class PlatformEventManager : MonoBehaviour {
 
+        [InjectOptional]
+        private readonly BeatmapObjectCallbackController _beatmapObjectCallbackController;
+
 
         /// <summary>
         /// Instance reference to a specific <see cref="CustomPlatform"/>s <see cref="EventManager"/>
         /// </summary>
         internal EventManager _EventManager;
-
 
 
         /// <summary>
@@ -52,7 +56,7 @@ namespace CustomFloorPlugin {
             BSEvents.sabersStartCollide += delegate (SaberType saber) { _EventManager.SaberStartColliding.Invoke(); };
             BSEvents.sabersEndCollide += delegate (SaberType saber) { _EventManager.SaberStopColliding.Invoke(); };
             BSEvents.levelFailed += delegate (StandardLevelScenesTransitionSetupDataSO transition, LevelCompletionResults results) { _EventManager.OnLevelFail.Invoke(); };
-            BSEvents.beatmapEvent += LightEventCallBack;
+            if (_beatmapObjectCallbackController != null) _beatmapObjectCallbackController.beatmapEventDidTriggerEvent += LightEventCallBack;
         }
 
 
@@ -60,15 +64,15 @@ namespace CustomFloorPlugin {
         /// Unsubscribes platform specific Actions from game Events
         /// </summary>
         private void UnsubscribeFromEvents() {
-            BSEvents.gameSceneLoaded -= delegate () { _EventManager.OnLevelStart.Invoke(); };
-            BSEvents.noteWasCut -= delegate (NoteData data, NoteCutInfo info, int multiplier) { if (info.allIsOK) { _EventManager.OnSlice.Invoke(); } };
-            BSEvents.comboDidBreak -= delegate () { _EventManager.OnComboBreak.Invoke(); };
-            BSEvents.multiplierDidIncrease -= delegate (int multiplier) { _EventManager.MultiplierUp.Invoke(); };
-            BSEvents.comboDidChange -= delegate (int combo) { _EventManager.OnComboChanged.Invoke(combo); };
-            BSEvents.sabersStartCollide -= delegate (SaberType saber) { _EventManager.SaberStartColliding.Invoke(); };
-            BSEvents.sabersEndCollide -= delegate (SaberType saber) { _EventManager.SaberStopColliding.Invoke(); };
-            BSEvents.levelFailed -= delegate (StandardLevelScenesTransitionSetupDataSO transition, LevelCompletionResults results) { _EventManager.OnLevelFail.Invoke(); };
-            BSEvents.beatmapEvent -= LightEventCallBack;
+                BSEvents.gameSceneLoaded -= delegate () { _EventManager.OnLevelStart.Invoke(); };
+                BSEvents.noteWasCut -= delegate (NoteData data, NoteCutInfo info, int multiplier) { if (info.allIsOK) { _EventManager.OnSlice.Invoke(); } };
+                BSEvents.comboDidBreak -= delegate () { _EventManager.OnComboBreak.Invoke(); };
+                BSEvents.multiplierDidIncrease -= delegate (int multiplier) { _EventManager.MultiplierUp.Invoke(); };
+                BSEvents.comboDidChange -= delegate (int combo) { _EventManager.OnComboChanged.Invoke(combo); };
+                BSEvents.sabersStartCollide -= delegate (SaberType saber) { _EventManager.SaberStartColliding.Invoke(); };
+                BSEvents.sabersEndCollide -= delegate (SaberType saber) { _EventManager.SaberStopColliding.Invoke(); };
+                BSEvents.levelFailed -= delegate (StandardLevelScenesTransitionSetupDataSO transition, LevelCompletionResults results) { _EventManager.OnLevelFail.Invoke(); };
+                if (_beatmapObjectCallbackController != null) _beatmapObjectCallbackController.beatmapEventDidTriggerEvent -= LightEventCallBack;
         }
 
 

@@ -1,5 +1,5 @@
-﻿<vertical>
-  <horizontal bg="panel-top">
+﻿<vertical vertical-fit="PreferredSize" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="https://monkeymanboy.github.io/BSML-Docs/ https://raw.githubusercontent.com/monkeymanboy/BSML-Docs/gh-pages/BSMLSchema.xsd">
+  <horizontal bg="panel-fade-gradient" bg-color="#db3eef">
     <label text="Custom Platform" align="Center" font-size="6"></label>
   </horizontal>
   <page-button event-click="PlatformsList#PageUp" direction="Up"></page-button>

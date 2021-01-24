@@ -1,37 +1,56 @@
-﻿using BS_Utils.Utilities;
+﻿using CustomFloorPlugin.UI;
 
 using SiraUtil;
 
-using Zenject;
+using UnityEngine;
 
-using CustomFloorPlugin.UI;
+using Zenject;
 
 
 namespace CustomFloorPlugin.Installers {
 
 
-    /// <summary>
-    /// Resolves all dependencies, mainly the UI.
-    /// </summary>
     internal class OnMenuInstaller : Installer {
 
 
         public override void InstallBindings() {
 
-            Container.Bind<EnvironmentOverrideListView>().FromNewComponentAsViewController().AsSingle();
-            Container.Bind<ReloadPlatformsButtonView>().FromNewComponentAsViewController().AsSingle();
-            Container.Bind<PlatformsListView>().FromNewComponentAsViewController().AsSingle();
-            Container.Bind<NewScriptWarningView>().FromNewComponentAsViewController().AsSingle();
-            Container.BindFlowCoordinator<PlatformListFlowCoordinator>();
-            Container.BindFlowCoordinator<NewScriptWarningFlowCoordinator>();
+            Container.BindInterfacesAndSelfTo<PlatformSpawner>().AsSingle().WithArguments(Container).NonLazy();
 
-            Container.BindInterfacesAndSelfTo<Settings>().AsSingle();
+            Container.Bind<PlatformsListView>().FromNewComponentAsViewController().AsSingle();
+            Container.Bind<SettingsView>().FromNewComponentAsViewController().AsSingle();
+            Container.BindFlowCoordinator<PlatformListFlowCoordinator>();
             Container.BindInterfacesTo<MenuButtonManager>().AsSingle();
 
-            HarmonyPatches.NewScriptWarning_Patch._newScriptWarningFlowCoordinator = Container.Resolve<NewScriptWarningFlowCoordinator>();
-            GlobalCollection.PDM = Container.Resolve<PlayerDataModel>();
+            ColorScheme scheme = Container.Resolve<PlayerDataModel>().playerData.colorSchemesSettings.GetSelectedColorScheme();
+            Color?[] colors = GetColors(scheme);
+            Container.Bind<Color?[]>().FromInstance(colors).AsSingle();
+        }
 
-            GlobalCollection.ENVIRONMENTSLIST = GlobalCollection.PDM.GetField<PlayerDataFileManagerSO>("_playerDataFileManager").GetField<EnvironmentsListSO>("_allEnvironmentInfos");
+        private Color?[] GetColors(ColorScheme scheme) {
+            Color?[] colors = new Color?[] {
+                    scheme.environmentColor0,
+                    scheme.environmentColor1,
+                    scheme.obstaclesColor,
+                    scheme.saberAColor,
+                    scheme.saberBColor,
+                    scheme.environmentColor0,
+                    scheme.environmentColor1,
+                    scheme.obstaclesColor,
+                    scheme.saberAColor,
+                    scheme.saberBColor,
+                    scheme.environmentColor0,
+                    scheme.environmentColor1,
+                    scheme.obstaclesColor,
+                    scheme.saberAColor,
+                    scheme.saberBColor,
+                    scheme.environmentColor0,
+                    scheme.environmentColor1,
+                    scheme.obstaclesColor,
+                    scheme.saberAColor,
+                    scheme.saberBColor,
+                };
+            return colors;
         }
     }
 }

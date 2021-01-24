@@ -2,11 +2,8 @@
 
 using UnityEngine;
 
-using static CustomFloorPlugin.Utilities.Logging;
-
 
 namespace CustomFloorPlugin {
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1051:Do not declare visible instance fields", Justification = "Too old to change")]
     public class PrefabLightmapData : MonoBehaviour {
 
         [SerializeField]
@@ -27,7 +24,6 @@ namespace CustomFloorPlugin {
             }
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "Can't debug it too make sure that it's redundant")]
         private void ApplyLightmaps() {
             try {
                 if (m_Renderers == null || m_LightmapOffsetScales == null || m_Lightmaps == null ||
@@ -52,7 +48,7 @@ namespace CustomFloorPlugin {
                 LightmapSettings.lightmaps = combinedLightmaps;
             }
             catch (Exception e) {
-                Log(e);
+                Utilities.Logging.Log(e);
             }
         }
 

@@ -1,12 +1,12 @@
-﻿using BS_Utils.Utilities;
+﻿using CustomFloorPlugin.HarmonyPatches;
+using CustomFloorPlugin.Installers;
 
 using IPA;
+using IPA.Config;
 using IPA.Config.Stores;
+using IPA.Logging;
 
 using SiraUtil.Zenject;
-
-using CustomFloorPlugin.HarmonyPatches;
-using CustomFloorPlugin.Installers;
 
 
 namespace CustomFloorPlugin {
@@ -21,31 +21,18 @@ namespace CustomFloorPlugin {
 
 
         /// <summary>
-        /// Initializes the Plugin, or in this case: Only the logger.
+        /// Initializes the Plugin and everything about it
         /// </summary>
         /// <param name="logger">The instance of the IPA logger that BSIPA hands to plugins on initialization</param>
+        /// <param name="config">The config BSIPA provides</param>
+        /// <param name="zenjector">The holy zenjector that SiraUtil passes to this plugin</param>
         [Init]
-        public void Init(IPA.Logging.Logger logger) {
+        public void Init(Logger logger, Config config, Zenjector zenjector) {
             Utilities.Logger.logger = logger;
-        }
-
-        /// <summary>
-        /// Initializes the Plugin Config
-        /// </summary>
-        /// <param name="conf">The instance of the IPA config that BSIPA hands to plugins on initialization</param>
-        [Init]
-        public void InitWithConfig(IPA.Config.Config conf) {
-            Configuration.PluginConfig.Instance = conf.Generated<Configuration.PluginConfig>();
-        }
-
-        /// <summary>
-        /// Sets up the Zenjector from SiraUtil, used to install the installers.
-        /// Mainly used for the UI.
-        /// </summary>
-        /// <param name="zenjector">SiraUtil's Zenjector handed to the plugin</param>
-        [Init]
-        public void InitWithZenjector(Zenjector zenjector) {
+            zenjector.OnApp<OnAppInstaller>().WithParameters(config.Generated<Configuration.PluginConfig>());
             zenjector.OnMenu<OnMenuInstaller>();
+            zenjector.OnMenu<OnMultiplayerMenuInstaller>().OnlyForMultiplayer();
+            zenjector.OnGame<OnGameInstaller>();
         }
 
 
@@ -55,23 +42,16 @@ namespace CustomFloorPlugin {
         /// </summary>
         [OnStart]
         public void OnApplicationStart() {
-            BSEvents.OnLoad();
-            BSEvents.lateMenuSceneLoadedFresh += InitAfterLoad;
             Patcher.Patch();
         }
 
+        /// <summary>
+        /// Performs teardown<br/>
+        /// [Called by BSIPA]
+        /// </summary>
         [OnExit]
         public void OnApplicationExit() {
-            // Yes it is intentional ._.
-        }
-
-
-        /// <summary>
-        /// Performs initialization steps after the game has loaded into the main menu for the first time
-        /// </summary>
-        private void InitAfterLoad(ScenesTransitionSetupDataSO ignored) {
-            BSEvents.lateMenuSceneLoadedFresh -= InitAfterLoad;
-            PlatformManager.Init();
+            Patcher.Unpatch();
         }
     }
 }

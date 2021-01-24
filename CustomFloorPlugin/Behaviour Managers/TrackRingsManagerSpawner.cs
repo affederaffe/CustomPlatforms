@@ -5,8 +5,7 @@ using IPA.Utilities;
 
 using UnityEngine;
 
-using static CustomFloorPlugin.Utilities.BeatSaberSearching;
-using static CustomFloorPlugin.GlobalCollection;
+using Zenject;
 
 
 namespace CustomFloorPlugin {
@@ -19,6 +18,11 @@ namespace CustomFloorPlugin {
     /// </summary>
     internal class TrackRingsManagerSpawner : MonoBehaviour {
 
+        [Inject]
+        private readonly LightWithIdManager _lightManager;
+
+        [InjectOptional]
+        private readonly BeatmapObjectCallbackController _beatmapObjectCallbackController;
 
         /// <summary>
         /// <see cref="List{T}"/> of all known <see cref="TrackRings"/> under a specific <see cref="GameObject"/>
@@ -44,11 +48,12 @@ namespace CustomFloorPlugin {
         private List<TrackLaneRingsPositionStepEffectSpawner> stepSpawners;
 
 
+
         /// <summary>
         /// Re-Parenting <see cref="TrackLaneRing"/>s, created by the game, to this <see cref="CustomPlatform"/><br/>
         /// [Unity calls this before any of this <see cref="MonoBehaviour"/>s Update functions are called for the first time]
         /// </summary>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Code Quality", "IDE0051:Remove unused private members", Justification = "Called by Unity")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("CodeQuality", "IDE0051:Remove unused private members", Justification = "Called by Unity")]
         private void Start() {
             foreach (TrackLaneRingsManager trackLaneRingsManager in trackLaneRingsManagers) {
                 TrackLaneRing[] rings = trackLaneRingsManager.GetField<TrackLaneRing[], TrackLaneRingsManager>("_rings");
@@ -57,7 +62,7 @@ namespace CustomFloorPlugin {
                     PlatformManager.SpawnedObjects.Add(ring.gameObject);
                     MaterialSwapper.ReplaceMaterials(ring.gameObject);
                     foreach (TubeLight tubeLight in ring.GetComponentsInChildren<TubeLight>()) {
-                        tubeLight.GameAwake(FindLightWithIdManager(GetCurrentEnvironment()));
+                        tubeLight.GameAwake(_lightManager);
                     }
                 }
             }
@@ -103,7 +108,7 @@ namespace CustomFloorPlugin {
                     TrackLaneRingsRotationEffectSpawner rotationEffectSpawner = trackRingDesc.gameObject.AddComponent<TrackLaneRingsRotationEffectSpawner>();
                     rotationSpawners.Add(rotationEffectSpawner);
                     PlatformManager.SpawnedComponents.Add(rotationEffectSpawner);
-                    rotationEffectSpawner.SetField("_beatmapObjectCallbackController", BOCC);
+                    rotationEffectSpawner.SetField("_beatmapObjectCallbackController", _beatmapObjectCallbackController);
 
                     rotationEffectSpawner.SetField("_beatmapEventType", (BeatmapEventType)trackRingDesc.rotationSongEventType);
                     rotationEffectSpawner.SetField("_rotationStep", trackRingDesc.rotationStep);
@@ -117,7 +122,7 @@ namespace CustomFloorPlugin {
                     TrackLaneRingsPositionStepEffectSpawner stepEffectSpawner = trackRingDesc.gameObject.AddComponent<TrackLaneRingsPositionStepEffectSpawner>();
                     stepSpawners.Add(stepEffectSpawner);
                     PlatformManager.SpawnedComponents.Add(stepEffectSpawner);
-                    stepEffectSpawner.SetField("_beatmapObjectCallbackController", BOCC);
+                    stepEffectSpawner.SetField("_beatmapObjectCallbackController", _beatmapObjectCallbackController);
 
                     stepEffectSpawner.SetField("_trackLaneRingsManager", ringsManager);
                     stepEffectSpawner.SetField("_beatmapEventType", (BeatmapEventType)trackRingDesc.stepSongEventType);

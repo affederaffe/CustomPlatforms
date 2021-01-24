@@ -1,9 +1,10 @@
 using System.Collections.Generic;
-using System.Linq;
 
-using BS_Utils.Utilities;
+using IPA.Utilities;
 
 using UnityEngine;
+
+using Zenject;
 
 
 namespace CustomFloorPlugin {
@@ -14,6 +15,8 @@ namespace CustomFloorPlugin {
     /// </summary>
     internal class SpectrogramColumnManager : MonoBehaviour {
 
+        [InjectOptional]
+        private readonly BasicSpectrogramData _basicSpectrogramData;
 
         /// <summary>
         /// <see cref="List{T}"/> of known <see cref="Spectrogram"/>s under a <see cref="CustomPlatform"/>
@@ -52,12 +55,13 @@ namespace CustomFloorPlugin {
 
                 MaterialSwapper.ReplaceMaterials(spec.columnPrefab);
 
-                ReflectionUtil.SetPrivateField(specCol, "_columnPrefab", spec.columnPrefab);
-                ReflectionUtil.SetPrivateField(specCol, "_separator", spec.separator);
-                ReflectionUtil.SetPrivateField(specCol, "_minHeight", spec.minHeight);
-                ReflectionUtil.SetPrivateField(specCol, "_maxHeight", spec.maxHeight);
-                ReflectionUtil.SetPrivateField(specCol, "_columnWidth", spec.columnWidth);
-                ReflectionUtil.SetPrivateField(specCol, "_columnDepth", spec.columnDepth);
+                specCol.SetField("_columnPrefab", spec.columnPrefab);
+                specCol.SetField("_separator", spec.separator);
+                specCol.SetField("_minHeight", spec.minHeight);
+                specCol.SetField("_maxHeight", spec.maxHeight);
+                specCol.SetField("_columnWidth", spec.columnWidth);
+                specCol.SetField("_columnDepth", spec.columnDepth);
+                specCol.SetField("_amount", spec.amount);
 
                 spectrogramColumns.Add(specCol);
                 columnDescriptors.Add(spec);
@@ -69,13 +73,9 @@ namespace CustomFloorPlugin {
         /// Passes <see cref="BasicSpectrogramData"/> on to all <see cref="SpectrogramColumns"/><br/>
         /// </summary>
         internal void UpdateSpectrogramDataProvider() {
-            BasicSpectrogramData[] datas = Resources.FindObjectsOfTypeAll<BasicSpectrogramData>();
-            if (datas.Length != 0) {
-                BasicSpectrogramData spectrogramData = datas.FirstOrDefault(x => ((AudioSource)x.GetField("_audioSource")).clip != null);
-                if (spectrogramData != null) {
-                    foreach (SpectrogramColumns specCol in spectrogramColumns) {
-                        ReflectionUtil.SetPrivateField(specCol, "_spectrogramData", spectrogramData);
-                    }
+            if (_basicSpectrogramData != null) {
+                foreach (SpectrogramColumns specCol in spectrogramColumns) {
+                    specCol.SetField("_spectrogramData", _basicSpectrogramData);
                 }
             }
         }

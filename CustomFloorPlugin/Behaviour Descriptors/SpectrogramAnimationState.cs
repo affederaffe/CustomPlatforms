@@ -8,7 +8,6 @@ using static CustomFloorPlugin.Utilities.Logging;
 namespace CustomFloorPlugin {
 
 
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1051:Do not declare visible instance fields", Justification = "Too old to change")]
     public class SpectrogramAnimationState : MonoBehaviour {
         public AnimationClip animationClip;
         [Header("0: Low Frequency, 63 High Frequency")]
@@ -25,7 +24,6 @@ namespace CustomFloorPlugin {
             spectrogramData = newData;
         }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Code Quality", "IDE0051:Remove unused private members", Justification = "Called by Unity")]
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "I don't have enough information on what COULD be thrown here to edit this catch block")]
         private void Update() {
             try {
                 if (animationClip != null) {

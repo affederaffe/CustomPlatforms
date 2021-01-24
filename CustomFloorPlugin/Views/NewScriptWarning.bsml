@@ -1,9 +1,0 @@
-﻿<bg>
-  <vertical vertical-fit="PreferredSize">
-    <label text="~warningText" font-size="6"></label>
-    <horizontal>
-      <button text="Cancel" on-click="Cancel" font-size="8"></button>
-      <button text="Continue" on-click="Continue" font-size="8"></button>
-    </horizontal>
-  </vertical>
-</bg>

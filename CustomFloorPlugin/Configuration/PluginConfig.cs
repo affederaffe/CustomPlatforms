@@ -9,9 +9,6 @@ namespace CustomFloorPlugin.Configuration {
 
     internal class PluginConfig {
 
-        public static PluginConfig Instance { get; set; }
-
-        public virtual EnvOverrideMode EnvOverrideMode { get; set; } = EnvOverrideMode.Song;
         public virtual bool AlwaysShowFeet { get; set; } = false;
         public virtual bool ShowHeart { get; set; } = true;
         public virtual bool LoadCustomScripts { get; set; } = false;

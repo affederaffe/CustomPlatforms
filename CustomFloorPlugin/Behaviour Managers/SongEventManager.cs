@@ -1,9 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Reflection;
 
-using BS_Utils.Utilities;
-
 using UnityEngine;
+
+using Zenject;
 
 
 namespace CustomFloorPlugin {
@@ -13,6 +13,9 @@ namespace CustomFloorPlugin {
     /// Instantiable wrapper class for a single <see cref="SongEventHandler"/> that handles registering and de-registering
     /// </summary>
     internal class SongEventManager : MonoBehaviour {
+
+        [InjectOptional]
+        private readonly BeatmapObjectCallbackController _beatmapObjectCallbackController;
 
 
         /// <summary>
@@ -44,7 +47,9 @@ namespace CustomFloorPlugin {
         /// </summary>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Code Quality", "IDE0051:Remove unused private members", Justification = "Called by Unity")]
         private void OnEnable() {
-            BSEvents.beatmapEvent += HandleSongEvent;
+            if (_beatmapObjectCallbackController != null) {
+                _beatmapObjectCallbackController.beatmapEventDidTriggerEvent += HandleSongEvent;
+            }
         }
 
 
@@ -54,7 +59,9 @@ namespace CustomFloorPlugin {
         /// </summary>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Code Quality", "IDE0051:Remove unused private members", Justification = "Called by Unity")]
         private void OnDisable() {
-            BSEvents.beatmapEvent -= HandleSongEvent;
+            if (_beatmapObjectCallbackController != null) {
+                _beatmapObjectCallbackController.beatmapEventDidTriggerEvent -= HandleSongEvent;
+            }
         }
     }
 }
