@@ -15,9 +15,8 @@ namespace CustomFloorPlugin.Installers {
         private readonly PluginConfig _config;
         private readonly Logger _logger;
 
-        public OnAppInstaller(PluginConfig config, Logger logger) {
+        public OnAppInstaller(PluginConfig config) {
             _config = config;
-            _logger = logger;
         }
 
         public override void InstallBindings() {
