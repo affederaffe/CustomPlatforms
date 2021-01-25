@@ -29,15 +29,13 @@ Your Beat Saber folder should then look like this:
 ## Controls
 
 Visit the ModSettings page ingame to access important settings, like:
-* Always show feet, to mark the center of the room,
+* Always show feet, to mark the center of the room
 * Hide the :heart: that CustomPlatforms uses as a cloneable light source
+* Show your selected Platform in the menu
 * Load Custom Scripts, only use this option if all Scripts are from a trusted source!
 * Use in 360- and 90° Levels, not recommended.
 * Use in Multiplayer, not recommended.
 * etc.
-
-You can press Numpad0 (while playing songs) to toggle the heart on and have it react to light events.
-To disable the Mod, turn on "Override Environment" in the Gameplay Setup
 
 ## Adding More Platforms
 
