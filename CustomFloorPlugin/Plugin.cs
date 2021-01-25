@@ -1,5 +1,4 @@
-﻿using CustomFloorPlugin.HarmonyPatches;
-using CustomFloorPlugin.Installers;
+﻿using CustomFloorPlugin.Installers;
 
 using IPA;
 using IPA.Config;
@@ -31,8 +30,9 @@ namespace CustomFloorPlugin {
             Utilities.Logger.logger = logger;
             zenjector.OnApp<OnAppInstaller>().WithParameters(config.Generated<Configuration.PluginConfig>());
             zenjector.OnMenu<OnMenuInstaller>();
-            zenjector.OnMenu<OnMultiplayerMenuInstaller>().OnlyForMultiplayer();
-            zenjector.OnGame<OnGameInstaller>();
+            zenjector.OnGame<OnGameInstaller>();//.ShortCircuitFor("MultiplayerConnectedPlayerInstaller");
+            zenjector.On("LobbyDataModelInstaller").Register<OnMultiplayerMenuInstaller>();
+            //zenjector.On("MultiplayerConnectedPlayerInstaller").Register<OnGameInstaller>();
         }
 
 
@@ -42,7 +42,7 @@ namespace CustomFloorPlugin {
         /// </summary>
         [OnStart]
         public void OnApplicationStart() {
-            Patcher.Patch();
+            
         }
 
         /// <summary>
@@ -51,7 +51,7 @@ namespace CustomFloorPlugin {
         /// </summary>
         [OnExit]
         public void OnApplicationExit() {
-            Patcher.Unpatch();
+            
         }
     }
 }

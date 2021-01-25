@@ -26,7 +26,6 @@ namespace CustomFloorPlugin {
         private GameObject[] roots;
 
         private List<GameObject> menuEnvironment;
-        private List<GameObject> multiplayerEnvironment;
         private List<GameObject> playersPlace;
         private List<GameObject> feet;
         private List<GameObject> smallRings;
@@ -60,7 +59,6 @@ namespace CustomFloorPlugin {
             yield return new WaitForEndOfFrame();
             FindEnvironment();
             HandelEnvironment(platform);
-            if (multiplayerEnvironment != null) SetCollectionHidden(multiplayerEnvironment, _config.UseInMultiplayer);
             if (playersPlace != null) SetCollectionHidden(playersPlace, platform.hideDefaultPlatform);
             if (feet != null) SetCollectionHidden(feet, platform.hideDefaultPlatform && !_config.AlwaysShowFeet);
             if (smallRings != null) SetCollectionHidden(smallRings, platform.hideSmallRings);
@@ -84,7 +82,6 @@ namespace CustomFloorPlugin {
             roots = currentEnvironment.GetRootGameObjects();
             currentEnvironmentName = currentEnvironment.name;
             if (menuEnvironment?.Count == 0 || menuEnvironment == null) FindMenuEnvironmnet();
-            FindMultiplayerEnvironment();
             FindPlayersPlace();
             FindPlayersPlace();
             FindFeetIcon();
@@ -173,32 +170,12 @@ namespace CustomFloorPlugin {
             FindAddGameObject("MenuEnvironment/DefaultEnvironment/Notes", menuEnvironment);
         }
 
-        private void FindMultiplayerEnvironment() {
-            multiplayerEnvironment = new List<GameObject>();
-            FindAddGameObject("MultiplayerDuelConnectedPlayerController(Clone)/Construction", multiplayerEnvironment);
-            FindAddGameObject("MultiplayerDuelConnectedPlayerController(Clone)/Lasers", multiplayerEnvironment);
-            FindAddGameObject("MultiplayerDuelLocalActivePlayerController(Clone)/IsActiveObjects/Construction/ConstructionL", multiplayerEnvironment);
-            FindAddGameObject("MultiplayerDuelLocalActivePlayerController(Clone)/IsActiveObjects/Construction/ConstructionR", multiplayerEnvironment);
-            FindAddGameObject("MultiplayerDuelLocalActivePlayerController(Clone)/IsActiveObjects/Lasers", multiplayerEnvironment);
-
-            FindAddGameObject("MultiplayerLocalActivePlayerController(Clone)/IsActiveObjects/Construction/ConstructionL", multiplayerEnvironment);
-            FindAddGameObject("MultiplayerLocalActivePlayerController(Clone)/IsActiveObjects/Construction/ConstructionR", multiplayerEnvironment);
-            FindAddGameObject("MultiplayerLocalActivePlayerController(Clone)/IsActiveObjects/Lasers", multiplayerEnvironment);
-            FindAddGameObject("MultiplayerLocalActivePlayerController(Clone)/IsActiveObjects/PlatformEnd", multiplayerEnvironment);
-            FindAddGameObject("MultiplayerLocalActivePlayerController(Clone)/IsActiveObjects/CenterRings", multiplayerEnvironment);
-            FindAddGameObject("MultiplayerLocalActivePlayerController(Clone)/IsActiveObjects/DirectionalLights", multiplayerEnvironment);
-        }
-
         private void FindPlayersPlace() {
             playersPlace = new List<GameObject>();
             FindAddGameObject("Environment/PlayersPlace", playersPlace);
 
             // LinkinPark
             FindAddGameObject("Environment/PlayersPlaceShadow", playersPlace);
-
-            // Multiplayer
-            FindAddGameObject("MultiplayerDuelConnectedPlayerController(Clone)/Construction/PlayersPlace", playersPlace);
-            FindAddGameObject("MultiplayerLocalActivePlayerController(Clone)/IsActiveObjects/Construction/PlayersPlace", playersPlace);
         }
 
         private void FindFeetIcon() {

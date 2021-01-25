@@ -57,6 +57,7 @@
     <Compile Include="Behaviour Descriptors\CameraVisibility.cs" />
     <Compile Include="Behaviour Descriptors\ComboReachedEvent.cs" />
     <Compile Include="Behaviour Descriptors\MultiRotationEventEffect.cs" />
+    <Compile Include="BSEvents.cs" />
     <Compile Include="Installers\OnMultiplayerMenuInstaller.cs" />
     <Compile Include="PlatformMultiplayerHandler.cs" />
     <Compile Include="PlatformSpawner.cs" />
@@ -75,6 +76,9 @@
     <Compile Include="Installers\OnGameInstaller.cs" />
     <Compile Include="Installers\OnMenuInstaller.cs" />
     <Compile Include="PlatformManager.cs" />
+    <Compile Include="PlatformSpawnerGame.cs" />
+    <Compile Include="PlatformSpawnerMenu.cs" />
+    <Compile Include="UI\ChangelogView.cs" />
     <Compile Include="Utilities\Searching.cs" />
     <EmbeddedResource Include="manifest.json" />
     <Compile Include="Harmony Patches\Patcher.cs" />
@@ -121,6 +125,7 @@
     </None>
     <EmbeddedResource Include="Views\PlatformList.bsml" />
     <EmbeddedResource Include="Views\Settings.bsml" />
+    <EmbeddedResource Include="Views\Changelog.bsml" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="0Harmony">
@@ -140,8 +145,9 @@
     <Reference Include="BSML">
       <HintPath>C:\Program Files (x86)\Steam\steamapps\common\Beat Saber\Plugins\BSML.dll</HintPath>
     </Reference>
-    <Reference Include="BS_Utils">
-      <HintPath>C:\Program Files (x86)\Steam\steamapps\common\Beat Saber\Plugins\BS_Utils.dll</HintPath>
+    <Reference Include="BS_Utils, Version=1.7.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Beat Saber\Plugins\BS_Utils.dll</HintPath>
     </Reference>
     <Reference Include="Colors, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>

@@ -8,28 +8,33 @@ using Zenject;
 namespace CustomFloorPlugin {
 
 
-    internal class PlatformMultiplayerHandler : MonoBehaviour {
+    internal class PlatformMultiplayerHandler : IInitializable {
 
         [Inject]
         private readonly PluginConfig _config;
 
         [Inject]
+        private readonly PlatformSpawnerMenu _platformSpawner;
+
+        [Inject]
         private readonly IMultiplayerSessionManager _multiplayerSessionManager;
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("CodeQuality", "IDE0051:Remove unused private members", Justification = "Called by Unity")]
-        private void Start() {
+        public void Initialize() {
             _multiplayerSessionManager.connectedEvent += HandleConnected;
             _multiplayerSessionManager.disconnectedEvent += HandleDisconnected;
         }
 
         private void HandleConnected() {
+            _platformSpawner.ChangeToPlatform(0);
             PlatformManager.Heart.SetActive(false);
         }
 
         private void HandleDisconnected(DisconnectedReason reason) {
             PlatformManager.Heart.SetActive(_config.ShowHeart);
             PlatformManager.Heart.GetComponent<InstancedMaterialLightWithId>().ColorWasSet(Color.magenta);
-            Destroy(this);
+            if (_config.ShowInMenu) {
+                _platformSpawner.ChangeToPlatform();
+            }
         }
     }
 }

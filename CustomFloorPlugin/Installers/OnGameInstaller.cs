@@ -7,7 +7,7 @@ namespace CustomFloorPlugin.Installers {
     internal class OnGameInstaller : Installer {
 
         public override void InstallBindings() {
-            Container.BindInterfacesAndSelfTo<PlatformSpawner>().AsSingle().WithArguments(Container).NonLazy();
+            Container.BindInterfacesAndSelfTo<PlatformSpawnerGame>().AsSingle().WithArguments(Container).NonLazy();
         }
     }
 }

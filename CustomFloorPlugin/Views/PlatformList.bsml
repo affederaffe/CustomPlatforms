@@ -1,8 +1,13 @@
-﻿<vertical vertical-fit="PreferredSize" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="https://monkeymanboy.github.io/BSML-Docs/ https://raw.githubusercontent.com/monkeymanboy/BSML-Docs/gh-pages/BSMLSchema.xsd">
-  <horizontal bg="panel-fade-gradient" bg-color="#db3eef">
+﻿<vertical xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="https://monkeymanboy.github.io/BSML-Docs/ https://raw.githubusercontent.com/monkeymanboy/BSML-Docs/gh-pages/BSMLSchema.xsd">
+  <horizontal bg="panel-fade-gradient" bg-color="#db3eef" pref-width="100">
     <label text="Custom Platform" align="Center" font-size="6"></label>
   </horizontal>
-  <page-button event-click="PlatformsList#PageUp" direction="Up"></page-button>
-  <list id="PlatformsList" expand-cell="true" select-cell="PlatformSelect"></list>
-  <page-button event-click="PlatformsList#PageDown" direction="Down"></page-button>
+
+  <horizontal>
+    <vertical>
+      <page-button event-click="PlatformsList#PageUp" direction="Up"></page-button>
+      <list id="PlatformsList" expand-cell="true" select-cell="PlatformSelect"></list>
+      <page-button event-click="PlatformsList#PageDown" direction="Down"></page-button>
+    </vertical>
+  </horizontal>
 </vertical>

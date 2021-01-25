@@ -15,19 +15,15 @@ namespace CustomFloorPlugin.Installers {
 
         public override void InstallBindings() {
 
-            Container.BindInterfacesAndSelfTo<PlatformSpawner>().AsSingle().WithArguments(Container).NonLazy();
+            Container.BindInterfacesAndSelfTo<PlatformSpawnerMenu>().AsSingle().WithArguments(Container).NonLazy();
 
             Container.Bind<PlatformsListView>().FromNewComponentAsViewController().AsSingle();
+            Container.Bind<ChangelogView>().FromNewComponentAsViewController().AsSingle();
             Container.Bind<SettingsView>().FromNewComponentAsViewController().AsSingle();
             Container.BindFlowCoordinator<PlatformListFlowCoordinator>();
             Container.BindInterfacesTo<MenuButtonManager>().AsSingle();
 
             ColorScheme scheme = Container.Resolve<PlayerDataModel>().playerData.colorSchemesSettings.GetSelectedColorScheme();
-            Color?[] colors = GetColors(scheme);
-            Container.Bind<Color?[]>().FromInstance(colors).AsSingle();
-        }
-
-        private Color?[] GetColors(ColorScheme scheme) {
             Color?[] colors = new Color?[] {
                     scheme.environmentColor0,
                     scheme.environmentColor1,
@@ -49,8 +45,9 @@ namespace CustomFloorPlugin.Installers {
                     scheme.obstaclesColor,
                     scheme.saberAColor,
                     scheme.saberBColor,
+                    scheme.environmentColor0
                 };
-            return colors;
+            Container.Bind<Color?[]>().FromInstance(colors).AsSingle();
         }
     }
 }

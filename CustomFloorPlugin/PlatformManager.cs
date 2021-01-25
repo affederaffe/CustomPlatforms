@@ -105,11 +105,16 @@ namespace CustomFloorPlugin {
         /// Initializes the <see cref="PlatformManager"/>
         /// </summary>
         public void Start() {
-            LoadAssets();
-            Reload();
+            StartCoroutine(IHateUnity());
+            IEnumerator<WaitForEndOfFrame> IHateUnity() {
+                yield return new WaitForEndOfFrame();
+                LoadAssets();
+                Reload();
+            }
         }
 
         internal void Reload() {
+            Logging.Log("Loading Platforms");
             if (_config.LoadCustomScripts) PlatformLoader.LoadScripts();
             AllPlatforms = PlatformLoader.CreateAllPlatforms(transform);
             CurrentPlatform = AllPlatforms[0];
@@ -131,7 +136,7 @@ namespace CustomFloorPlugin {
         /// </summary>
         private void LoadAssets() {
             Scene greenDay = SceneManager.LoadScene("GreenDayGrenadeEnvironment", new LoadSceneParameters(LoadSceneMode.Additive));
-            SharedCoroutineStarter.instance.StartCoroutine(fuckUnity());
+            StartCoroutine(fuckUnity());
             IEnumerator<WaitUntil> fuckUnity() {//did you know loaded scenes are loaded asynchronously, regarless if you use async or not?
                 yield return new WaitUntil(() => { return greenDay.isLoaded; });
                 GameObject root = greenDay.GetRootGameObjects()[0];

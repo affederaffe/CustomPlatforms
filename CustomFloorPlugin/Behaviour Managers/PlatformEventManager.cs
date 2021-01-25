@@ -2,8 +2,6 @@
 
 using UnityEngine;
 
-using Zenject;
-
 
 namespace CustomFloorPlugin {
 
@@ -12,9 +10,6 @@ namespace CustomFloorPlugin {
     /// Instantiable wrapper class for a single <see cref="EventManager"/> that handles registering and de-registering, as well as Light Event CallsBacks
     /// </summary>
     internal class PlatformEventManager : MonoBehaviour {
-
-        [InjectOptional]
-        private readonly BeatmapObjectCallbackController _beatmapObjectCallbackController;
 
 
         /// <summary>
@@ -56,7 +51,7 @@ namespace CustomFloorPlugin {
             BSEvents.sabersStartCollide += delegate (SaberType saber) { _EventManager.SaberStartColliding.Invoke(); };
             BSEvents.sabersEndCollide += delegate (SaberType saber) { _EventManager.SaberStopColliding.Invoke(); };
             BSEvents.levelFailed += delegate (StandardLevelScenesTransitionSetupDataSO transition, LevelCompletionResults results) { _EventManager.OnLevelFail.Invoke(); };
-            if (_beatmapObjectCallbackController != null) _beatmapObjectCallbackController.beatmapEventDidTriggerEvent += LightEventCallBack;
+            BSEvents.beatmapEvent += LightEventCallBack;
         }
 
 
@@ -72,7 +67,7 @@ namespace CustomFloorPlugin {
                 BSEvents.sabersStartCollide -= delegate (SaberType saber) { _EventManager.SaberStartColliding.Invoke(); };
                 BSEvents.sabersEndCollide -= delegate (SaberType saber) { _EventManager.SaberStopColliding.Invoke(); };
                 BSEvents.levelFailed -= delegate (StandardLevelScenesTransitionSetupDataSO transition, LevelCompletionResults results) { _EventManager.OnLevelFail.Invoke(); };
-                if (_beatmapObjectCallbackController != null) _beatmapObjectCallbackController.beatmapEventDidTriggerEvent -= LightEventCallBack;
+                BSEvents.beatmapEvent -= LightEventCallBack;
         }
 
 

@@ -1,6 +1,4 @@
-﻿using System;
-
-using BeatSaberMarkupLanguage;
+﻿using BeatSaberMarkupLanguage;
 using BeatSaberMarkupLanguage.MenuButtons;
 
 using Zenject;
@@ -12,7 +10,7 @@ namespace CustomFloorPlugin.UI {
     /// <summary>
     /// UI Class, sets up MenuButton and Settings Section
     /// </summary>
-    internal class MenuButtonManager : IInitializable, IDisposable {
+    internal class MenuButtonManager : IInitializable {
 
         private readonly MenuButton _menuButton;
         private readonly PlatformListFlowCoordinator _platformListFlowCoordinator;
@@ -24,10 +22,6 @@ namespace CustomFloorPlugin.UI {
 
         public void Initialize() {
             MenuButtons.instance.RegisterButton(_menuButton);
-        }
-
-        public void Dispose() {
-            MenuButtons.instance.UnregisterButton(_menuButton);
         }
 
         private void SummonFlowCoordinator() {

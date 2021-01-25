@@ -1,0 +1,9 @@
+﻿<vertical child-align="UpperCenter" child-control-height="false" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="https://monkeymanboy.github.io/BSML-Docs/ https://raw.githubusercontent.com/monkeymanboy/BSML-Docs/gh-pages/BSMLSchema.xsd">
+  <horizontal bg="panel-fade-gradient" bg-color="#db3eef" pref-width="100">
+    <label text="Changelog" align="Center" font-size="6"></label>
+  </horizontal>
+  
+  <horizontal preferred-height="80">
+    <text-page size-delta-y="80" text="~changelog-text" rich-text="true" word-wrapping="true"></text-page>
+  </horizontal>
+</vertical>

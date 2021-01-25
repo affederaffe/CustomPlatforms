@@ -1,6 +1,4 @@
-﻿using System;
-
-using CustomFloorPlugin.Configuration;
+﻿using CustomFloorPlugin.Configuration;
 using CustomFloorPlugin.Utilities;
 
 using IPA.Utilities;
@@ -13,47 +11,21 @@ using Zenject;
 namespace CustomFloorPlugin {
 
 
-    internal class PlatformSpawner : IInitializable, IDisposable {
+    internal abstract class PlatformSpawner {
 
         [Inject]
-        private readonly PluginConfig _config;
+        protected readonly PluginConfig _config;
 
         [Inject]
-        private readonly EnvironmentHider _hider;
+        protected readonly EnvironmentHider _hider;
 
         [Inject]
-        private readonly PlatformManager _platformManager;
+        protected readonly PlatformManager _platformManager;
 
         [Inject]
-        private readonly LightWithIdManager _lightManager;
+        protected readonly LightWithIdManager _lightManager;
 
-        [Inject]
-        private readonly Color?[] _colors;
-
-        private readonly DiContainer _container;
-
-        public PlatformSpawner(DiContainer container) {
-            _container = container;
-        }
-
-        public void Initialize() {
-            string currentEnvironmentName = Searching.GetCurrentEnvironment().name;
-            if (!currentEnvironmentName.StartsWith("Menu")) {
-                if (currentEnvironmentName.StartsWith("Multiplayer")) {
-                    for (int i = 0; i < _colors.Length; i++) {
-                        _lightManager.SetColorForId(i, _colors[i].Value);
-                    }
-                }
-                ChangeToPlatform();
-                PlatformManager.Heart.SetActive(false);
-            }
-        }
-
-        public void Dispose() {
-            ChangeToPlatform(0);
-            PlatformManager.Heart.SetActive(_config.ShowHeart);
-            PlatformManager.Heart.GetComponent<InstancedMaterialLightWithId>().ColorWasSet(Color.magenta);
-        }
+        protected DiContainer _container;
 
         internal void SetPlatformAndShow(int index) {
             _platformManager.CurrentPlatform = _platformManager.AllPlatforms[index % _platformManager.AllPlatforms.Count];

@@ -22,6 +22,9 @@ namespace CustomFloorPlugin.UI {
         private readonly PlatformsListView _platformsListView;
 
         [Inject]
+        private readonly ChangelogView _changelogView;
+
+        [Inject]
         private readonly SettingsView _settingsView;
 
 
@@ -34,7 +37,7 @@ namespace CustomFloorPlugin.UI {
             if (firstActivation) {
                 SetTitle("Custom Platforms");
                 showBackButton = true;
-                ProvideInitialViewControllers(_platformsListView, null, _settingsView);
+                ProvideInitialViewControllers(_platformsListView, _changelogView, _settingsView);
             }
         }
 
@@ -43,7 +46,7 @@ namespace CustomFloorPlugin.UI {
         /// Transitions back to the main <see cref="FlowCoordinator"/><br/>
         /// [Called by Beat Saber]
         /// </summary>
-        /// <param name="ignored1"></param>
+        /// <param name="_1"></param>
         protected override void BackButtonWasPressed(ViewController _1) {
             Logging.Log("Selected Platform: " + _platformManager.CurrentPlatform.platName);
             BeatSaberUI.MainFlowCoordinator.DismissFlowCoordinator(this, null, ViewController.AnimationDirection.Horizontal, false);
