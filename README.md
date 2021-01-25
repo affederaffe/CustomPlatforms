@@ -30,11 +30,11 @@ Your Beat Saber folder should then look like this:
 
 Visit the Platforms Menu page ingame to do things like:
 * Change your platform
-* View the Changelog
+* View the changelog
 * Always show feet, to mark the center of the room
 * Hide the :heart: that CustomPlatforms uses as a cloneable light source
-* Show your selected Platform in the menu
-* Load Custom Scripts, only use this option if all Scripts are from a trusted source!
+* Show your selected platform in the menu
+* Load CustomScripts, only use this option if all scripts are from a trusted source!
 * Use in 360- and 90° Levels, not recommended.
 * Use in Multiplayer, not recommended.
 * etc.
