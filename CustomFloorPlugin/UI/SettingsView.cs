@@ -28,6 +28,9 @@ namespace CustomFloorPlugin.UI {
         private readonly PlatformManager _platformManager;
 
         [Inject]
+        private readonly EnvironmentHider _hider;
+
+        [Inject]
         private readonly PlatformsListView _platformsListView;
 
         /// <summary>
@@ -44,7 +47,10 @@ namespace CustomFloorPlugin.UI {
         [UIValue("always-show-feet")]
         public bool AlwaysShowFeet {
             get => _config.AlwaysShowFeet;
-            set => _config.AlwaysShowFeet = value;
+            set {
+                _config.AlwaysShowFeet = value;
+                _hider.SetCollectionHidden(_hider.feet, _platformManager.CurrentPlatform.hideDefaultPlatform && !value);
+            }
         }
 
 

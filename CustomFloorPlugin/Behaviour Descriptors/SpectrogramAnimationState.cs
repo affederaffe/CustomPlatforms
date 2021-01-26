@@ -2,8 +2,6 @@ using System;
 
 using UnityEngine;
 
-using static CustomFloorPlugin.Utilities.Logging;
-
 
 namespace CustomFloorPlugin {
 
@@ -57,7 +55,7 @@ namespace CustomFloorPlugin {
                 }
             }
             catch (Exception e) {
-                Log(e);
+                Utilities.Logging.Log(e);
             }
         }
     }

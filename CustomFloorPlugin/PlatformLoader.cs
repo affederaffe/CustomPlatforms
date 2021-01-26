@@ -7,8 +7,6 @@ using System.Security.Cryptography;
 
 using UnityEngine;
 
-using static CustomFloorPlugin.Utilities.Logging;
-
 
 namespace CustomFloorPlugin {
 
@@ -54,16 +52,16 @@ namespace CustomFloorPlugin {
             defaultPlatform.icon = Sprite.Create(texture, new Rect(0f, 0f, texture.width, texture.height), new Vector2(0.5f, 0.5f));
             platforms.Add(defaultPlatform);
             // Populate the platforms array
-            Log("[START OF PLATFORM LOADING SPAM]-------------------------------------");
+            Utilities.Logging.Log("[START OF PLATFORM LOADING SPAM]-------------------------------------");
             for (int i = 0; i < allBundlePaths.Length; i++) {
                 CustomPlatform newPlatform = LoadPlatformBundle(allBundlePaths[i], parent);
                 if (newPlatform != null) {
                     platforms.Add(newPlatform);
                     MaterialSwapper.ReplaceMaterials(newPlatform.gameObject);
-                    Log(newPlatform.platName + " by " + newPlatform.platAuthor);
+                    Utilities.Logging.Log(newPlatform.platName + " by " + newPlatform.platAuthor);
                 }
             }
-            Log("[END OF PLATFORM LOADING SPAM]---------------------------------------");
+            Utilities.Logging.Log("[END OF PLATFORM LOADING SPAM]---------------------------------------");
 
             return platforms;
         }

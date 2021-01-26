@@ -4,6 +4,6 @@
   </horizontal>
   
   <horizontal preferred-height="80">
-    <text-page size-delta-y="80" text="~changelog-text" rich-text="true" word-wrapping="true"></text-page>
+    <text-page size-delta-y="80" text="~changelog-text" rich-text="true" word-wrapping="true" overflow-mode="Page"></text-page>
   </horizontal>
 </vertical>

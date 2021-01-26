@@ -58,11 +58,10 @@
     <Compile Include="Behaviour Descriptors\ComboReachedEvent.cs" />
     <Compile Include="Behaviour Descriptors\MultiRotationEventEffect.cs" />
     <Compile Include="BSEvents.cs" />
-    <Compile Include="Installers\OnMultiplayerMenuInstaller.cs" />
-    <Compile Include="PlatformMultiplayerHandler.cs" />
+    <Compile Include="Installers\OnLobbyInstaller.cs" />
+    <Compile Include="PlatformLobbyHandler.cs" />
     <Compile Include="PlatformSpawner.cs" />
     <Compile Include="Configuration\PluginConfig.cs" />
-    <Compile Include="Harmony Patches\Multiplayer_Patch.cs" />
     <Compile Include="INotifyOnEnableOrDisable.cs" />
     <Compile Include="Behaviour Descriptors\PrefabLightmapData.cs" />
     <Compile Include="Behaviour Descriptors\SpectrogramAnimationState.cs" />
@@ -70,7 +69,7 @@
     <Compile Include="Behaviour Managers\CameraVisibilityManager.cs" />
     <Compile Include="Behaviour Managers\SpectrogramAnimationStateManager.cs" />
     <Compile Include="Behaviour Managers\SpectrogramMaterialManager.cs" />
-    <Compile Include="Behaviours\SpectrogramColumns.cs" />
+    <Compile Include="Behaviour Descriptors\SpectrogramColumns.cs" />
     <Compile Include="Extensions\Extentions.cs" />
     <Compile Include="Installers\OnAppInstaller.cs" />
     <Compile Include="Installers\OnGameInstaller.cs" />
@@ -81,7 +80,6 @@
     <Compile Include="UI\ChangelogView.cs" />
     <Compile Include="Utilities\Searching.cs" />
     <EmbeddedResource Include="manifest.json" />
-    <Compile Include="Harmony Patches\Patcher.cs" />
     <Compile Include="Legacy Behaviours\CustomPlatformLegacy.cs" />
     <Compile Include="EnvironmentHider.cs" />
     <Compile Include="Utilities\Logging.cs" />
@@ -128,12 +126,6 @@
     <EmbeddedResource Include="Views\Changelog.bsml" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="0Harmony">
-      <HintPath Condition="Exists('D:\SteamLibrary\steamapps\common\Beat Saber\Libs\0Harmony.dll')">D:\SteamLibrary\steamapps\common\Beat Saber\Libs\0Harmony.dll</HintPath>
-      <HintPath Condition="Exists('S:\steamapps\common\Beat Saber\Libs\0Harmony.dll')">S:\steamapps\common\Beat Saber\Libs\0Harmony.dll</HintPath>
-      <HintPath Condition="Exists('C:\Program Files (x86)\Steam\steamapps\common\Beat Saber\Libs\0Harmony.dll')">C:\Program Files (x86)\Steam\steamapps\common\Beat Saber\Libs\0Harmony.dll</HintPath>
-      <HintPath Condition="Exists('..\..\..\..\..\Desktop\Games\Oculus\Software\hyperbolic-magnetism-beat-saber\Libs\0Harmony.dll')">..\..\..\..\..\Desktop\Games\Oculus\Software\hyperbolic-magnetism-beat-saber\Libs\0Harmony.dll</HintPath>
-    </Reference>
     <Reference Include="BeatmapCore, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>C:\Program Files (x86)\Steam\steamapps\common\Beat Saber\Beat Saber_Data\Managed\BeatmapCore.dll</HintPath>
@@ -267,12 +259,6 @@
       <HintPath Condition="Exists('S:\steamapps\common\Beat Saber\Beat Saber_Data\Managed\UnityEngine.CoreModule.dll')">S:\steamapps\common\Beat Saber\Beat Saber_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
       <HintPath Condition="Exists('C:\Program Files (x86)\Steam\steamapps\common\Beat Saber\Beat Saber_Data\Managed\UnityEngine.CoreModule.dll')">C:\Program Files (x86)\Steam\steamapps\common\Beat Saber\Beat Saber_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
       <HintPath Condition="Exists('..\..\..\..\..\Desktop\Games\Oculus\Software\hyperbolic-magnetism-beat-saber\Beat Saber_Data\Managed\UnityEngine.CoreModule.dll')">..\..\..\..\..\Desktop\Games\Oculus\Software\hyperbolic-magnetism-beat-saber\Beat Saber_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.InputLegacyModule">
-      <HintPath Condition="Exists('D:\SteamLibrary\steamapps\common\Beat Saber\Beat Saber_Data\Managed\UnityEngine.InputLegacyModule.dll')">D:\SteamLibrary\steamapps\common\Beat Saber\Beat Saber_Data\Managed\UnityEngine.InputLegacyModule.dll</HintPath>
-      <HintPath Condition="Exists('S:\steamapps\common\Beat Saber\Beat Saber_Data\Managed\UnityEngine.InputLegacyModule.dll')">S:\steamapps\common\Beat Saber\Beat Saber_Data\Managed\UnityEngine.InputLegacyModule.dll</HintPath>
-      <HintPath Condition="Exists('C:\Program Files (x86)\Steam\steamapps\common\Beat Saber\Beat Saber_Data\Managed\UnityEngine.InputLegacyModule.dll')">C:\Program Files (x86)\Steam\steamapps\common\Beat Saber\Beat Saber_Data\Managed\UnityEngine.InputLegacyModule.dll</HintPath>
-      <HintPath Condition="Exists('..\..\..\..\..\Desktop\Games\Oculus\Software\hyperbolic-magnetism-beat-saber\Beat Saber_Data\Managed\UnityEngine.InputLegacyModule.dll')">..\..\..\..\..\Desktop\Games\Oculus\Software\hyperbolic-magnetism-beat-saber\Beat Saber_Data\Managed\UnityEngine.InputLegacyModule.dll</HintPath>
     </Reference>
     <Reference Include="WindowsBase" />
     <Reference Include="Zenject, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">

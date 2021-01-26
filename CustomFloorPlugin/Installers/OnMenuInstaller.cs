@@ -20,7 +20,7 @@ namespace CustomFloorPlugin.Installers {
             Container.Bind<PlatformsListView>().FromNewComponentAsViewController().AsSingle();
             Container.Bind<ChangelogView>().FromNewComponentAsViewController().AsSingle();
             Container.Bind<SettingsView>().FromNewComponentAsViewController().AsSingle();
-            Container.BindFlowCoordinator<PlatformListFlowCoordinator>();
+            Container.Bind<PlatformListFlowCoordinator>().FromNewComponentOnNewGameObject().AsSingle();
             Container.BindInterfacesTo<MenuButtonManager>().AsSingle();
 
             ColorScheme scheme = Container.Resolve<PlayerDataModel>().playerData.colorSchemesSettings.GetSelectedColorScheme();
@@ -30,22 +30,6 @@ namespace CustomFloorPlugin.Installers {
                     scheme.obstaclesColor,
                     scheme.saberAColor,
                     scheme.saberBColor,
-                    scheme.environmentColor0,
-                    scheme.environmentColor1,
-                    scheme.obstaclesColor,
-                    scheme.saberAColor,
-                    scheme.saberBColor,
-                    scheme.environmentColor0,
-                    scheme.environmentColor1,
-                    scheme.obstaclesColor,
-                    scheme.saberAColor,
-                    scheme.saberBColor,
-                    scheme.environmentColor0,
-                    scheme.environmentColor1,
-                    scheme.obstaclesColor,
-                    scheme.saberAColor,
-                    scheme.saberBColor,
-                    scheme.environmentColor0
                 };
             Container.Bind<Color?[]>().FromInstance(colors).AsSingle();
         }

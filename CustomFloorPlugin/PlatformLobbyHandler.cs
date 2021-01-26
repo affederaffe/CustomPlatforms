@@ -8,7 +8,7 @@ using Zenject;
 namespace CustomFloorPlugin {
 
 
-    internal class PlatformMultiplayerHandler : IInitializable {
+    internal class PlatformLobbyHandler : IInitializable {
 
         [Inject]
         private readonly PluginConfig _config;

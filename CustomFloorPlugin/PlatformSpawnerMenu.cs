@@ -1,4 +1,6 @@
-﻿using Zenject;
+﻿using System;
+
+using Zenject;
 
 
 namespace CustomFloorPlugin {
@@ -21,7 +23,13 @@ namespace CustomFloorPlugin {
         }
 
         private void HandleTransitionDidStart(float _1) {
-            ChangeToPlatform(0);
+            try {
+                // On game restart, Unity will throw a NullReferenceException in UnityEngine.Object.get_name () and I have no idea why
+                ChangeToPlatform(0);
+            }
+            catch (NullReferenceException e) {
+                Utilities.Logging.Log(e);
+            }
         }
     }
 }

@@ -114,7 +114,6 @@ namespace CustomFloorPlugin {
         }
 
         internal void Reload() {
-            Logging.Log("Loading Platforms");
             if (_config.LoadCustomScripts) PlatformLoader.LoadScripts();
             AllPlatforms = PlatformLoader.CreateAllPlatforms(transform);
             CurrentPlatform = AllPlatforms[0];

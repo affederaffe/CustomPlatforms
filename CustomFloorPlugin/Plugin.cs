@@ -30,28 +30,8 @@ namespace CustomFloorPlugin {
             Utilities.Logger.logger = logger;
             zenjector.OnApp<OnAppInstaller>().WithParameters(config.Generated<Configuration.PluginConfig>());
             zenjector.OnMenu<OnMenuInstaller>();
-            zenjector.OnGame<OnGameInstaller>();//.ShortCircuitFor("MultiplayerConnectedPlayerInstaller");
-            zenjector.On("LobbyDataModelInstaller").Register<OnMultiplayerMenuInstaller>();
-            //zenjector.On("MultiplayerConnectedPlayerInstaller").Register<OnGameInstaller>();
-        }
-
-
-        /// <summary>
-        /// Performs initialization<br/>
-        /// [Called by BSIPA]
-        /// </summary>
-        [OnStart]
-        public void OnApplicationStart() {
-            
-        }
-
-        /// <summary>
-        /// Performs teardown<br/>
-        /// [Called by BSIPA]
-        /// </summary>
-        [OnExit]
-        public void OnApplicationExit() {
-            
+            zenjector.On(typeof(LobbyDataModelInstaller).FullName).Register<OnLobbyInstaller>();
+            zenjector.On(typeof(GameplayCoreInstaller).FullName).Register<OnGameInstaller>();
         }
     }
 }
