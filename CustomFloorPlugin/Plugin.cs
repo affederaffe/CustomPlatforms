@@ -30,8 +30,9 @@ namespace CustomFloorPlugin {
             Utilities.Logger.logger = logger;
             zenjector.OnApp<OnAppInstaller>().WithParameters(config.Generated<Configuration.PluginConfig>());
             zenjector.OnMenu<OnMenuInstaller>();
+            zenjector.OnGame<OnGameInstaller>(false);
+            zenjector.OnGame<OnGameInstaller>(true).ShortCircuitForCampaign().ShortCircuitForMultiplayer().ShortCircuitForStandard(); // Counters+...
             zenjector.On(typeof(LobbyDataModelInstaller).FullName).Register<OnLobbyInstaller>();
-            zenjector.On(typeof(GameplayCoreInstaller).FullName).Register<OnGameInstaller>();
         }
     }
 }

@@ -3,7 +3,11 @@
     <label text="Changelog" align="Center" font-size="6"></label>
   </horizontal>
   
-  <horizontal preferred-height="80">
-    <text-page size-delta-y="80" text="~changelog-text" rich-text="true" word-wrapping="true" overflow-mode="Page"></text-page>
+  <horizontal preferred-height="35">
+    <text-page size-delta-y="35" text="~changelog-text" rich-text="true" word-wrapping="true" overflow-mode="Page"></text-page>
+  </horizontal>
+
+  <horizontal preferred-height="25">
+    <text-page size-delta-y="25" text="~credits-text" rich-text="true" word-wrapping="true" overflow-mode="Page"></text-page>
   </horizontal>
 </vertical>

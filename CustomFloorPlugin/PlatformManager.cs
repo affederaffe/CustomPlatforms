@@ -84,6 +84,11 @@ namespace CustomFloorPlugin {
         internal static GameObject LightSource;
 
         /// <summary>
+        /// Used as a prefab for light effects in multiplayer
+        /// </summary>
+        internal static GameObject LightEffects;
+
+        /// <summary>
         /// Keeps track of all spawned custom <see cref="GameObject"/>s, whichs lifetime ends on any scene transition
         /// </summary>
         internal static List<GameObject> SpawnedObjects = new List<GameObject>();
@@ -145,14 +150,18 @@ namespace CustomFloorPlugin {
                 Heart.transform.SetParent(transform);
                 Heart.name = "<3";
 
+                PlayersPlace = root.transform.Find("PlayersPlace").gameObject;
+                PlayersPlace.SetActive(false);
+                PlayersPlace.transform.SetParent(transform);
+
                 LightSource = root.transform.Find("GlowLineL (2)").gameObject;
                 LightSource.SetActive(false);
                 LightSource.transform.SetParent(transform);
                 LightSource.name = "LightSource";
 
-                PlayersPlace = root.transform.Find("PlayersPlace").gameObject;
-                PlayersPlace.SetActive(false);
-                PlayersPlace.transform.SetParent(transform);
+                LightEffects = root.transform.Find("LightEffects").gameObject;
+                LightEffects.SetActive(false);
+                LightEffects.transform.SetParent(transform);
 
                 SceneManager.UnloadSceneAsync("GreenDayGrenadeEnvironment");
 

@@ -2,8 +2,6 @@
 
 using SiraUtil;
 
-using UnityEngine;
-
 using Zenject;
 
 
@@ -22,16 +20,6 @@ namespace CustomFloorPlugin.Installers {
             Container.Bind<SettingsView>().FromNewComponentAsViewController().AsSingle();
             Container.Bind<PlatformListFlowCoordinator>().FromNewComponentOnNewGameObject().AsSingle();
             Container.BindInterfacesTo<MenuButtonManager>().AsSingle();
-
-            ColorScheme scheme = Container.Resolve<PlayerDataModel>().playerData.colorSchemesSettings.GetSelectedColorScheme();
-            Color?[] colors = new Color?[] {
-                    scheme.environmentColor0,
-                    scheme.environmentColor1,
-                    scheme.obstaclesColor,
-                    scheme.saberAColor,
-                    scheme.saberBColor,
-                };
-            Container.Bind<Color?[]>().FromInstance(colors).AsSingle();
         }
     }
 }

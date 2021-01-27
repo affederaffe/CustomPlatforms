@@ -14,13 +14,19 @@ namespace CustomFloorPlugin.UI {
     internal class ChangelogView : BSMLAutomaticViewController {
 
         [UIValue("changelog-text")]
-        public string Changelog => 
-    @"<size=150%><color=#888888>Version 6.0.0</color></size>
-    - Basicly a complete rewrite of the Plugin and updated for 1.13.2
-       It now uses Zenject, thank you so much Auros for making SiraUtil <3
-    - CustomPlatforms can now be used in the menu
-    - Redesigned menu, moved settings section here and added a changelog
-    - Removed Environment Override Setting because it's implemented in 
-       the base game itself";
+        public string Changelog =>
+        @"<size=150%><color=#888888>Version 6.0.0</color></size>
+        - Basicly a complete rewrite of the Plugin and updated for 1.13.2
+        - CustomPlatforms can now be used in the menu
+        - Redesigned menu, moved settings section here and added a changelog
+        - Removed Environment Override Setting because it's implemented in 
+           the base game itself";
+
+        [UIValue("credits-text")]
+        public string Credits =>
+        @"<size=150%><color=#888888>Credits</color></size>
+        - Huge shoutout to boulders2000 for all the bug reports
+        - Thanks to Auros for making SiraUtil (Zenject <3)
+        - everyone in #pc-mod-dev, thanks for all the help";
     }
 }
