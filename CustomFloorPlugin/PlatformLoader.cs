@@ -5,7 +5,11 @@ using System.Linq;
 using System.Reflection;
 using System.Security.Cryptography;
 
+using CustomFloorPlugin.Configuration;
+
 using UnityEngine;
+
+using Zenject;
 
 
 namespace CustomFloorPlugin {
@@ -14,23 +18,24 @@ namespace CustomFloorPlugin {
     /// <summary>
     /// Loads AssetBundles containing CustomFloorPlugin
     /// </summary>
-    internal static class PlatformLoader {
+    internal class PlatformLoader : IInitializable {
 
-        internal static string customPlatformsFolderPath;
-        internal static string customPlatformsScriptFolderPath;
+        [Inject]
+        private readonly PluginConfig _config;
 
-        private static Sprite feetIcon;
+        private string customPlatformsFolderPath;
 
-        static PlatformLoader() {
+        private Sprite feetIcon;
+
+        public void Initialize() {
             customPlatformsFolderPath = Path.Combine(Environment.CurrentDirectory, "CustomPlatforms");
-            customPlatformsScriptFolderPath = Path.Combine(customPlatformsFolderPath, "Scripts");
         }
 
 
         /// <summary>
         /// Loads AssetBundles and populates the platforms array with CustomPlatform objects
         /// </summary>
-        internal static List<CustomPlatform> CreateAllPlatforms(Transform parent) {
+        internal List<CustomPlatform> CreateAllPlatforms(Transform parent) {
 
 
             // Create the CustomFloorPlugin folder if it doesn't already exist
@@ -73,7 +78,7 @@ namespace CustomFloorPlugin {
         /// </summary>
         /// <param name="bundlePath">The location of the <see cref="CustomPlatform"/>s <see cref="AssetBundle"/> file on disk</param>
         /// <param name="parent">The parent <see cref="Transform"/> for the new <see cref="CustomPlatform"/></param>
-        private static CustomPlatform LoadPlatformBundle(string bundlePath, Transform parent) {
+        private CustomPlatform LoadPlatformBundle(string bundlePath, Transform parent) {
 
             AssetBundle bundle = AssetBundle.LoadFromFile(bundlePath);
 
@@ -99,10 +104,14 @@ namespace CustomFloorPlugin {
         /// <param name="bundle">An AssetBundle containing a CustomPlatform</param>
         /// <param name="parent">The <see cref="Transform"/> under which this <paramref name="bundle"/> will be instantiated</param>
         /// <returns></returns>
-        private static CustomPlatform LoadPlatform(AssetBundle bundle, Transform parent) {
+        private CustomPlatform LoadPlatform(AssetBundle bundle, Transform parent) {
+
+            TextAsset scriptsAsset = bundle.LoadAsset<TextAsset>("_Scripts.dll");
+            if (scriptsAsset != null && _config.LoadCustomScripts) {
+                Assembly.Load(scriptsAsset.bytes);
+            }
 
             GameObject platformPrefab = bundle.LoadAsset<GameObject>("_CustomPlatform");
-
             if (platformPrefab == null) {
                 return null;
             }
@@ -153,29 +162,6 @@ namespace CustomFloorPlugin {
             newPlatform.SetActive(false);
 
             return customPlatform;
-        }
-
-
-        /// <summary>
-        ///  Tries to load all CustomScripts, but aborts when <see cref="UI.SettingsView.LoadCustomScripts"/> is false
-        /// </summary>
-        /// <returns>
-        /// <see cref="bool"/> newScriptsFound
-        /// </returns>
-        internal static void LoadScripts() {
-
-            // Create the CustomFloorPlugin script folder if it doesn't already exist
-            if (!Directory.Exists(customPlatformsScriptFolderPath)) {
-                Directory.CreateDirectory(customPlatformsScriptFolderPath);
-            }
-
-            // Find Dlls in our CustomFloorPluginScript directory
-            string[] allScriptPaths = Directory.GetFiles(customPlatformsScriptFolderPath, "*.dll");
-
-            // Loads all Scripts
-            foreach (string path in allScriptPaths) {
-                Assembly.LoadFrom(path);
-            }
         }
     }
 }

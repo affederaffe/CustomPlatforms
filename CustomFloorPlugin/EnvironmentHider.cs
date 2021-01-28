@@ -186,14 +186,21 @@ namespace CustomFloorPlugin {
 
         private void FindFeetIcon() {
             feet = new List<GameObject>();
+            // Menu
             FindAddGameObject("DefaultEnvironment/PlayersPlace/Feet", feet);
             FindAddGameObject("DefaultEnvironment/PlayersPlace/Version", feet);
+
+            // Song
+            FindAddGameObject("PlayersPlace/Feet", feet);
+
+            // Multiplayer
             FindAddGameObject("IsActiveObjects/Construction/PlayersPlace/feet", feet);
+
             FindAddGameObject("Feet", feet);
             FindAddGameObject("Version", feet);
 
             foreach (GameObject feet in feet) {
-                feet.transform.SetParent(null); // remove from original platform 
+                feet?.transform.SetParent(null); // remove from original platform 
             }
         }
 
@@ -472,11 +479,20 @@ namespace CustomFloorPlugin {
                     FindAddGameObject($"Laser ({i})", trackLights);
                 }
             }
+
             if (FindAddGameObject("GlowTopLine", trackLights)) {
-                for (int i = 1; i < 12; i++) {
+                for (int i = 1; i < 5; i++) {
                     FindAddGameObject($"GlowTopLine ({i})", trackLights);
                 }
             }
+
+            // Dragons
+            if(FindAddGameObject("GlowTopLine (5)", trackLights)) {
+                for (int i = 6; i < 12; i++) {
+                    FindAddGameObject($"GlowTopLine ({i})", trackLights);
+                }
+            }
+
             FindAddGameObject("GlowLineR (1)", trackLights);
             FindAddGameObject("GlowLineR (2)", trackLights);
             if (FindAddGameObject($"GlowLineL (1)", trackLights)) {

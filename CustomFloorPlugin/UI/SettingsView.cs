@@ -49,7 +49,7 @@ namespace CustomFloorPlugin.UI {
             get => _config.AlwaysShowFeet;
             set {
                 _config.AlwaysShowFeet = value;
-                _hider.SetCollectionHidden(_hider.feet, _platformManager.CurrentPlatform.hideDefaultPlatform && !value);
+                _hider.SetCollectionHidden(_hider.feet, (_platformManager.CurrentPlatform?.hideDefaultPlatform).GetValueOrDefault() && !value);
             }
         }
 

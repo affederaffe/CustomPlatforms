@@ -24,6 +24,9 @@ namespace CustomFloorPlugin {
         [Inject]
         private readonly PluginConfig _config;
 
+        [Inject]
+        private readonly PlatformLoader _loader;
+
         /// <summary>
         /// List of all loaded Platforms, publicly editable. For no good reason.
         /// </summary>
@@ -119,8 +122,7 @@ namespace CustomFloorPlugin {
         }
 
         internal void Reload() {
-            if (_config.LoadCustomScripts) PlatformLoader.LoadScripts();
-            AllPlatforms = PlatformLoader.CreateAllPlatforms(transform);
+            AllPlatforms = _loader.CreateAllPlatforms(transform);
             CurrentPlatform = AllPlatforms[0];
             if (_config.CustomPlatformPath != null) {
                 for (int i = 0; i < AllPlatforms.Count; i++) {
