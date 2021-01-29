@@ -2,6 +2,8 @@ using System;
 
 using UnityEngine;
 
+using Zenject;
+
 
 namespace CustomFloorPlugin {
 

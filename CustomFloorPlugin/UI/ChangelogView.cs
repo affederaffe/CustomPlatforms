@@ -25,7 +25,7 @@ namespace CustomFloorPlugin.UI {
         [UIValue("credits-text")]
         public string Credits =>
         @"<size=150%><color=#888888>Credits</color></size>
-        - Huge shoutout to boulders2000 for all the bug reports
+        - Huge shoutout to boulders2000, thank you so much for all the testing
         - Thanks to Auros for making SiraUtil (Zenject <3)
         - everyone in #pc-mod-dev, thanks for all the help";
     }

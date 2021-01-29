@@ -27,31 +27,42 @@ namespace CustomFloorPlugin {
 
         protected DiContainer _container;
 
+        /// <summary>
+        /// Changes to a specific <see cref="CustomPlatform"/> and saves the choice
+        /// </summary>
+        /// <param name="index">The index of the new <see cref="CustomPlatform"/> in the list <see cref="AllPlatforms"/></param>
         internal void SetPlatformAndShow(int index) {
             _platformManager.CurrentPlatform = _platformManager.AllPlatforms[index % _platformManager.AllPlatforms.Count];
             _config.CustomPlatformPath = _platformManager.CurrentPlatform.platName + _platformManager.CurrentPlatform.platAuthor;
             ChangeToPlatform(index);
         }
 
+        /// <summary>
+        /// Changes to the currently selected <see cref="CustomPlatform"/>
+        /// </summary>
         internal void ChangeToPlatform() {
             ChangeToPlatform(_platformManager.CurrentPlatformIndex);
         }
 
+        /// <summary>
+        /// Changes to a specific <see cref="CustomPlatform"/>
+        /// </summary>
+        /// <param name="index">The index of the new <see cref="CustomPlatform"/> in the list <see cref="AllPlatforms"/></param>
         internal void ChangeToPlatform(int index) {
             Logging.Log("Switching to " + _platformManager.AllPlatforms[index].name);
-            PlatformManager.activePlatform?.gameObject.SetActive(false);
-            NotifyPlatform(PlatformManager.activePlatform, NotifyType.Disable);
+            _platformManager.activePlatform?.gameObject.SetActive(false);
+            NotifyPlatform(_platformManager.activePlatform, NotifyType.Disable);
             DestroyCustomObjects();
 
             if (index != 0) {
-                PlatformManager.activePlatform = _platformManager.AllPlatforms[index % _platformManager.AllPlatforms.Count];
-                PlatformManager.activePlatform.gameObject.SetActive(true);
-                AddManagers(PlatformManager.activePlatform);
-                NotifyPlatform(PlatformManager.activePlatform, NotifyType.Enable);
+                _platformManager.activePlatform = _platformManager.AllPlatforms[index % _platformManager.AllPlatforms.Count];
+                _platformManager.activePlatform.gameObject.SetActive(true);
+                AddManagers(_platformManager.activePlatform);
+                NotifyPlatform(_platformManager.activePlatform, NotifyType.Enable);
                 SpawnCustomObjects();
             }
             else {
-                PlatformManager.activePlatform = null;
+                _platformManager.activePlatform = null;
             }
             _hider.HideObjectsForPlatform(_platformManager.AllPlatforms[index]);
         }

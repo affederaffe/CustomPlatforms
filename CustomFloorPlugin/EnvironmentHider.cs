@@ -22,23 +22,26 @@ namespace CustomFloorPlugin {
         [Inject]
         private readonly PluginConfig _config;
 
+        [Inject]
+        private readonly PlatformManager _platformManager;
+
         Scene currentEnvironment;
         private GameObject[] roots;
 
-        internal List<GameObject> menuEnvironment;
-        internal List<GameObject> multiplayerEnvironment;
-        internal List<GameObject> playersPlace;
-        internal List<GameObject> feet;
-        internal List<GameObject> smallRings;
-        internal List<GameObject> bigRings;
-        internal List<GameObject> visualizer;
-        internal List<GameObject> towers;
-        internal List<GameObject> highway;
-        internal List<GameObject> backColumns;
-        internal List<GameObject> doubleColorLasers;
-        internal List<GameObject> backLasers;
-        internal List<GameObject> rotatingLasers;
-        internal List<GameObject> trackLights;
+        private List<GameObject> menuEnvironment;
+        private List<GameObject> multiplayerEnvironment;
+        private List<GameObject> playersPlace;
+        private List<GameObject> feet;
+        private List<GameObject> smallRings;
+        private List<GameObject> bigRings;
+        private List<GameObject> visualizer;
+        private List<GameObject> towers;
+        private List<GameObject> highway;
+        private List<GameObject> backColumns;
+        private List<GameObject> doubleColorLasers;
+        private List<GameObject> backLasers;
+        private List<GameObject> rotatingLasers;
+        private List<GameObject> trackLights;
 
 
         /// <summary>
@@ -59,10 +62,10 @@ namespace CustomFloorPlugin {
         private IEnumerator<WaitForEndOfFrame> InternalHideObjectsForPlatform(CustomPlatform platform) {
             yield return new WaitForEndOfFrame();
             FindEnvironment();
-            if (menuEnvironment != null) SetCollectionHidden(menuEnvironment, PlatformManager.activePlatform != null);
+            if (menuEnvironment != null) SetCollectionHidden(menuEnvironment, _platformManager.activePlatform != null);
             if (multiplayerEnvironment != null) SetCollectionHidden(multiplayerEnvironment, _config.UseInMultiplayer);
-            if (playersPlace != null) SetCollectionHidden(playersPlace, platform.hideDefaultPlatform);
             if (feet != null) SetCollectionHidden(feet, platform.hideDefaultPlatform && !_config.AlwaysShowFeet);
+            if (playersPlace != null) SetCollectionHidden(playersPlace, platform.hideDefaultPlatform);
             if (smallRings != null) SetCollectionHidden(smallRings, platform.hideSmallRings);
             if (bigRings != null) SetCollectionHidden(bigRings, platform.hideBigRings);
             if (visualizer != null) SetCollectionHidden(visualizer, platform.hideEQVisualizer);
@@ -73,8 +76,9 @@ namespace CustomFloorPlugin {
             if (doubleColorLasers != null) SetCollectionHidden(doubleColorLasers, platform.hideDoubleColorLasers);
             if (rotatingLasers != null) SetCollectionHidden(rotatingLasers, platform.hideRotatingLasers);
             if (trackLights != null) SetCollectionHidden(trackLights, platform.hideTrackLights);
-            bool showDefaultPlatform = PlatformManager.activePlatform != null && !platform.hideDefaultPlatform && currentEnvironment.name.StartsWith("Menu");
+            bool showDefaultPlatform = _platformManager.activePlatform != null && !platform.hideDefaultPlatform && currentEnvironment.name.StartsWith("Menu");
             PlatformManager.PlayersPlace.SetActive(showDefaultPlatform);
+            PlatformManager.Feet.SetActive(_config.AlwaysShowFeet);
         }
 
 
@@ -84,7 +88,7 @@ namespace CustomFloorPlugin {
         private void FindEnvironment() {
             currentEnvironment = Searching.GetCurrentEnvironment();
             roots = currentEnvironment.GetRootGameObjects();
-            FindMenuEnvironmnet();
+            FindMenuEnvironmnetAndFeet();
             FindMultiplayerEnvironment();
             FindFeetIcon();
             FindPlayersPlace();
@@ -106,7 +110,7 @@ namespace CustomFloorPlugin {
         /// </summary>
         /// <param name="list">A <see cref="List{T}"/> of GameObjects</param>
         /// <param name="hidden">A boolean describing the desired hidden state</param>
-        internal void SetCollectionHidden(List<GameObject> list, bool hidden) {
+        private void SetCollectionHidden(List<GameObject> list, bool hidden) {
             if (list == null) {
                 return;
             }
@@ -140,7 +144,7 @@ namespace CustomFloorPlugin {
             return false;
         }
 
-        private void FindMenuEnvironmnet() {
+        private void FindMenuEnvironmnetAndFeet() {
             if (menuEnvironment == null || menuEnvironment?.Count == 0) {
                 menuEnvironment = new List<GameObject>();
                 FindAddGameObject("MenuCoreLighting/SkyGradient", menuEnvironment);
@@ -154,6 +158,17 @@ namespace CustomFloorPlugin {
                 FindAddGameObject("DefaultEnvironment/NotesBehindPlayer", menuEnvironment);
                 FindAddGameObject("DefaultEnvironment/NeonLights", menuEnvironment);
                 FindAddGameObject("DefaultEnvironment/Notes", menuEnvironment);
+
+                // Find the feet icon in the menu, only the first time, and reparent it, otherwise it's destroyed on scene change
+                feet = new List<GameObject>();
+                FindAddGameObject("DefaultEnvironment/PlayersPlace/Feet", feet);
+                FindAddGameObject("DefaultEnvironment/PlayersPlace/Version", feet);
+
+                PlatformManager.Feet = new GameObject("Feet");
+                foreach (GameObject feet in feet) {
+                    feet.transform.SetParent(PlatformManager.Feet.transform);
+                }
+                feet = null;
             }
         }
 
@@ -163,7 +178,7 @@ namespace CustomFloorPlugin {
             FindAddGameObject("IsActiveObjects/Construction/ConstructionR", multiplayerEnvironment);
             FindAddGameObject("IsActiveObjects/Lasers", multiplayerEnvironment);
 
-            // Nromal Layout, if it's not found => Duel Layout, otherwise a construction of another player will be hidden
+            // Normal Layout, if it's not found => Duel Layout, otherwise a construction of another player will be hidden
             if (FindAddGameObject("IsActiveObjects/PlatformEnd", multiplayerEnvironment)) {
                 FindAddGameObject("IsActiveObjects/CenterRings", multiplayerEnvironment);
             }
@@ -186,18 +201,12 @@ namespace CustomFloorPlugin {
 
         private void FindFeetIcon() {
             feet = new List<GameObject>();
-            // Menu
-            FindAddGameObject("DefaultEnvironment/PlayersPlace/Feet", feet);
-            FindAddGameObject("DefaultEnvironment/PlayersPlace/Version", feet);
 
             // Song
             FindAddGameObject("PlayersPlace/Feet", feet);
 
             // Multiplayer
-            FindAddGameObject("IsActiveObjects/Construction/PlayersPlace/feet", feet);
-
-            FindAddGameObject("Feet", feet);
-            FindAddGameObject("Version", feet);
+            FindAddGameObject("IsActiveObjects/Construction/PlayersPlace/Feet", feet);
 
             foreach (GameObject feet in feet) {
                 feet?.transform.SetParent(null); // remove from original platform 
@@ -476,6 +485,13 @@ namespace CustomFloorPlugin {
             // KDA, Monstercat, CrabRave, GreenDayGrenade
             if (FindAddGameObject("Laser", trackLights)) {
                 for (int i = 1; i < 20; i++) {
+                    FindAddGameObject($"Laser ({i})", trackLights);
+                }
+            }
+
+            // Monstercat
+            if (FindAddGameObject("Laser (4)", trackLights)) {
+                for (int i = 5; i < 13; i++) {
                     FindAddGameObject($"Laser ({i})", trackLights);
                 }
             }

@@ -5,7 +5,6 @@ using System.IO;
 using System.Reflection;
 
 using CustomFloorPlugin.Configuration;
-using CustomFloorPlugin.Utilities;
 
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -57,15 +56,12 @@ namespace CustomFloorPlugin {
         /// <summary>
         /// Keeps track of the currently selected <see cref="CustomPlatform"/>
         /// </summary>
-        public CustomPlatform CurrentPlatform {
-            get;
-            internal set;
-        }
+        internal CustomPlatform CurrentPlatform;
 
         /// <summary>
         /// Keeps track of the currently active <see cref="CustomPlatform"/>
         /// </summary>
-        internal static CustomPlatform activePlatform;
+        internal CustomPlatform activePlatform;
 
         /// <summary>
         /// Acts as a prefab for custom light sources that require meshes...<br/>
@@ -77,9 +73,15 @@ namespace CustomFloorPlugin {
         internal static GameObject Heart;
 
         /// <summary>
-        /// Used as a platform in Platform Preview if <see cref="CustomPlatform.hideDefaultPlatform"/> is false.
+        /// Used as a platform in Platform Preview if <see cref="CustomPlatform.hideDefaultPlatform"/> is false
         /// </summary>
         internal static GameObject PlayersPlace;
+
+        /// <summary>
+        /// GameObject used when AlwaysShowFeet is true
+        /// Reference set in the <see cref="EnvironmentHider"/>
+        /// </summary>
+        internal static GameObject Feet;
 
         /// <summary>
         /// The Light Source used for Non-Mesh Lights
@@ -105,9 +107,7 @@ namespace CustomFloorPlugin {
         /// This <see cref="Action"/> <see langword="delegate"/> is called whenever a platform is activated,<br/>
         /// after all instantiated objects implementing <see cref="INotifyOnEnableOrDisable"/> have been notified.
         /// </summary>
-        internal static Action<LightWithIdManager> SpawnQueue = delegate {
-            Logging.Log("Spawning Lights");
-        };
+        internal static Action<LightWithIdManager> SpawnQueue = delegate { };
 
         /// <summary>
         /// Initializes the <see cref="PlatformManager"/>

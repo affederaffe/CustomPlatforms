@@ -1,4 +1,5 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Text;
 
 using UnityEngine;
@@ -42,6 +43,23 @@ namespace CustomFloorPlugin.Extensions {
             StringBuilder path = new StringBuilder(component.gameObject.GetFullPath());
             path.Append("/" + component.GetType().Name);
             return path.ToString();
+        }
+
+        internal static float GetLastNoteTime(this BeatmapData beatmapData) {
+            float lastTime = 0f;
+            IReadOnlyList<IReadonlyBeatmapLineData> beatmapLinesData = beatmapData.beatmapLinesData;
+            foreach (BeatmapLineData beatMapLineData in beatmapLinesData) {
+                IReadOnlyList<BeatmapObjectData> beatmapObjectsData = beatMapLineData.beatmapObjectsData;
+                for (int i = beatmapObjectsData.Count - 1; i >= 0; i--) {
+                    BeatmapObjectData beatmapObjectData = beatmapObjectsData[i];
+                    if (beatmapObjectData.beatmapObjectType == BeatmapObjectType.Note && ((NoteData)beatmapObjectData).colorType != ColorType.None) {
+                        if (beatmapObjectData.time > lastTime) {
+                            lastTime = beatmapObjectData.time;
+                        }
+                    }
+                }
+            }
+            return lastTime;
         }
     }
 }

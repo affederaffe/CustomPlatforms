@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Security.Cryptography;
 
 using CustomFloorPlugin.Configuration;
+using CustomFloorPlugin.Utilities;
 
 using UnityEngine;
 
@@ -63,10 +64,10 @@ namespace CustomFloorPlugin {
                 if (newPlatform != null) {
                     platforms.Add(newPlatform);
                     MaterialSwapper.ReplaceMaterials(newPlatform.gameObject);
-                    Utilities.Logging.Log(newPlatform.platName + " by " + newPlatform.platAuthor);
+                    Logging.Log(newPlatform.platName + " by " + newPlatform.platAuthor);
                 }
             }
-            Utilities.Logging.Log("[END OF PLATFORM LOADING SPAM]---------------------------------------");
+            Logging.Log("[END OF PLATFORM LOADING SPAM]---------------------------------------");
 
             return platforms;
         }
@@ -106,6 +107,7 @@ namespace CustomFloorPlugin {
         /// <returns></returns>
         private CustomPlatform LoadPlatform(AssetBundle bundle, Transform parent) {
 
+            // CustomScripts are now integrated into the AssetBundle (finally)
             TextAsset scriptsAsset = bundle.LoadAsset<TextAsset>("_Scripts.dll");
             if (scriptsAsset != null && _config.LoadCustomScripts) {
                 Assembly.Load(scriptsAsset.bytes);
@@ -119,7 +121,7 @@ namespace CustomFloorPlugin {
             GameObject newPlatform = UnityEngine.Object.Instantiate(platformPrefab.gameObject);
 
             foreach (AudioListener al in newPlatform.transform.GetComponentsInChildren<AudioListener>(true)) {
-                UnityEngine.Object.DestroyImmediate(al);
+                GameObject.DestroyImmediate(al);
             }
 
 

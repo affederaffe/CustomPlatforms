@@ -16,11 +16,12 @@ namespace CustomFloorPlugin.Installers {
 
         public override void InstallBindings() {
             Container.BindInstance(_config).AsSingle();
-            Container.BindInterfacesAndSelfTo<EnvironmentHider>().AsSingle();
             Container.BindInterfacesAndSelfTo<PlatformLoader>().AsSingle();
 
             PlatformManager manager = Container.InstantiateComponentOnNewGameObject<PlatformManager>("CustomPlatforms");
             Container.BindInstance(manager);
+
+            Container.BindInterfacesAndSelfTo<EnvironmentHider>().AsSingle();
         }
     }
 }
