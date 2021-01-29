@@ -27,7 +27,7 @@ namespace CustomFloorPlugin {
 
         [Inject]
         private readonly ScoreController _scoreController;
-        
+
         [Inject(Id = "LastNoteId")]
         private float _lastNoteTime;
 

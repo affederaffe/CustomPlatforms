@@ -20,7 +20,10 @@ namespace CustomFloorPlugin.UI {
         - CustomPlatforms can now be used in the menu
         - Redesigned menu, moved settings section here and added a changelog
         - Removed Environment Override Setting because it's implemented in 
-           the base game itself";
+           the base game itself
+        - Added LightEffects in Multiplayer
+        - Removed BS Utils as a dependency
+        - Drasticly simplified CustomScripts";
 
         [UIValue("credits-text")]
         public string Credits =>

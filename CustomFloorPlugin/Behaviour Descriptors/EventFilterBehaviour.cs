@@ -14,7 +14,6 @@ namespace CustomFloorPlugin {
                 return _eventManager;
             }
         }
-
         private EventManager _eventManager;
     }
 }

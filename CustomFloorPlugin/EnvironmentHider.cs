@@ -24,8 +24,7 @@ namespace CustomFloorPlugin {
 
         [Inject]
         private readonly PlatformManager _platformManager;
-
-        Scene currentEnvironment;
+        private Scene currentEnvironment;
         private GameObject[] roots;
 
         private List<GameObject> menuEnvironment;
@@ -503,7 +502,7 @@ namespace CustomFloorPlugin {
             }
 
             // Dragons
-            if(FindAddGameObject("GlowTopLine (5)", trackLights)) {
+            if (FindAddGameObject("GlowTopLine (5)", trackLights)) {
                 for (int i = 6; i < 12; i++) {
                     FindAddGameObject($"GlowTopLine ({i})", trackLights);
                 }

@@ -41,8 +41,8 @@ namespace CustomFloorPlugin {
         public int CurrentPlatformIndex {
             get {
                 int idx = -1;
-                if (CurrentPlatform != null) {
-                    idx = AllPlatforms.IndexOf(CurrentPlatform);
+                if (currentPlatform != null) {
+                    idx = AllPlatforms.IndexOf(currentPlatform);
                 }
                 if (idx != -1) {
                     return idx;
@@ -56,7 +56,7 @@ namespace CustomFloorPlugin {
         /// <summary>
         /// Keeps track of the currently selected <see cref="CustomPlatform"/>
         /// </summary>
-        internal CustomPlatform CurrentPlatform;
+        internal CustomPlatform currentPlatform;
 
         /// <summary>
         /// Keeps track of the currently active <see cref="CustomPlatform"/>
@@ -123,11 +123,11 @@ namespace CustomFloorPlugin {
 
         internal void Reload() {
             AllPlatforms = _loader.CreateAllPlatforms(transform);
-            CurrentPlatform = AllPlatforms[0];
+            currentPlatform = AllPlatforms[0];
             if (_config.CustomPlatformPath != null) {
                 for (int i = 0; i < AllPlatforms.Count; i++) {
                     if (_config.CustomPlatformPath == AllPlatforms[i].platName + AllPlatforms[i].platAuthor) {
-                        CurrentPlatform = AllPlatforms[i];
+                        currentPlatform = AllPlatforms[i];
                         break;
                     }
                 }

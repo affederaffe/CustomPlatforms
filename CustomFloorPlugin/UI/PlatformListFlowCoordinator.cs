@@ -48,7 +48,7 @@ namespace CustomFloorPlugin.UI {
         /// </summary>
         /// <param name="_1"></param>
         protected override void BackButtonWasPressed(ViewController _1) {
-            Logging.Log("Selected Platform: " + _platformManager.CurrentPlatform.platName);
+            Logging.Log("Selected Platform: " + _platformManager.currentPlatform.platName);
             BeatSaberUI.MainFlowCoordinator.DismissFlowCoordinator(this, null, ViewController.AnimationDirection.Horizontal, false);
         }
     }

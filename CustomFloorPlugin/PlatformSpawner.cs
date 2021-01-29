@@ -32,8 +32,8 @@ namespace CustomFloorPlugin {
         /// </summary>
         /// <param name="index">The index of the new <see cref="CustomPlatform"/> in the list <see cref="AllPlatforms"/></param>
         internal void SetPlatformAndShow(int index) {
-            _platformManager.CurrentPlatform = _platformManager.AllPlatforms[index % _platformManager.AllPlatforms.Count];
-            _config.CustomPlatformPath = _platformManager.CurrentPlatform.platName + _platformManager.CurrentPlatform.platAuthor;
+            _platformManager.currentPlatform = _platformManager.AllPlatforms[index % _platformManager.AllPlatforms.Count];
+            _config.CustomPlatformPath = _platformManager.currentPlatform.platName + _platformManager.currentPlatform.platAuthor;
             ChangeToPlatform(index);
         }
 
