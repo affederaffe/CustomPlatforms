@@ -47,7 +47,6 @@ Your installed platforms will be available upon relaunching the game.
 ## Creating New Platforms
 
 There's a comprehensive guide at https://bsmg.wiki/models/platforms-guide.html written by Emma.
-For a guide about how to create Custom Scripts use the guide at https://affederaffe.github.io/CustomPlatformsUnityProject/.
 The following are the basic steps:
 
 1. Download the Unity project from https://github.com/affederaffe/CustomPlatformsUnityProject, unzip it.
