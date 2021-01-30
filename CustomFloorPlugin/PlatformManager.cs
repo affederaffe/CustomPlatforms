@@ -2,11 +2,15 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 
 using CustomFloorPlugin.Configuration;
 
+using Newtonsoft.Json;
+
 using UnityEngine;
+using UnityEngine.Networking;
 using UnityEngine.SceneManagement;
 
 using Zenject;
@@ -71,6 +75,16 @@ namespace CustomFloorPlugin {
                 }
             }
         }
+
+        /// <summary>
+        /// Stores the index of an API requested <see cref="CustomPlatform"/>
+        /// </summary>
+        public int apiRequestIndex = -1;
+
+        /// <summary>
+        /// Stores the BeatmapLevel the Platform was requested for
+        /// </summary>
+        public string apiRequestedLevelId;
 
         /// <summary>
         /// Keeps track of the currently selected <see cref="PlatformType"/>
@@ -147,6 +161,7 @@ namespace CustomFloorPlugin {
                 yield return new WaitForEndOfFrame();
                 LoadAssets();
                 Reload();
+                SongCore.Plugin.CustomSongPlatformSelectionDidChange += (bool usePlatform, string name, string hash, IPreviewBeatmapLevel level) => StartCoroutine(HandleSongSelected(usePlatform, name, hash, level));
             }
         }
 
@@ -172,11 +187,94 @@ namespace CustomFloorPlugin {
             }
         }
 
+        [Serializable]
+        private class PlatformDownloadData {
+            public string[] tags;
+            public string type;
+            public string name;
+            public string author;
+            public string image;
+            public string hash;
+            public string bsaber;
+            public string download;
+            public string install_link;
+            public string date;
+        }
+
+        private IEnumerator<UnityWebRequestAsyncOperation> HandleSongSelected(bool usePlatform, string name, string hash, IPreviewBeatmapLevel level) {
+
+            // No platform is requested, abort
+            if (!usePlatform) {
+                apiRequestIndex = -1;
+                apiRequestedLevelId = null;
+                yield break;
+            }
+
+            apiRequestedLevelId = level.levelID;
+
+            // Test if the requested platform is already downloaded
+            for (int i = 0; i < AllPlatforms.Count; i++) {
+                if (AllPlatforms[i].platHash == hash || AllPlatforms[i].platName.StartsWith(name)) {
+                    apiRequestIndex = i;
+                    yield break;
+                }
+            }
+
+            if (hash != null) {
+                using UnityWebRequest www = UnityWebRequest.Get("https://modelsaber.com/api/v1/platform/get.php?filter=hash:" + hash);
+                yield return www.SendWebRequest();
+
+                if (www.isNetworkError || www.isHttpError) {
+                    Utilities.Logging.Log("Error downloading a platform: \n" + www.error, IPA.Logging.Logger.Level.Error);
+                }
+                else {
+                    Dictionary<string, PlatformDownloadData> downloadData = JsonConvert.DeserializeObject<Dictionary<string, PlatformDownloadData>>(www.downloadHandler.text);
+                    PlatformDownloadData data = downloadData.FirstOrDefault().Value;
+                    if (data != null) {
+                        StartCoroutine(DownloadSaveAndAddPlatform(data));
+                    }
+                }
+            }
+
+            else if (name != null) {
+                using UnityWebRequest www = UnityWebRequest.Get("https://modelsaber.com/api/v1/platform/get.php?filter=name:" + name);
+                yield return www.SendWebRequest();
+
+                if (www.isNetworkError || www.isHttpError) {
+                    Utilities.Logging.Log("Error downloading a platform: \n" + www.error, IPA.Logging.Logger.Level.Error);
+                }
+                else {
+                    Dictionary<string, PlatformDownloadData> downloadData = JsonConvert.DeserializeObject<Dictionary<string, PlatformDownloadData>>(www.downloadHandler.text);
+                    PlatformDownloadData data = downloadData.FirstOrDefault().Value;
+                    if (data != null) {
+                        StartCoroutine(DownloadSaveAndAddPlatform(data));
+                    }
+                }
+            }
+        }
+
+        private IEnumerator<UnityWebRequestAsyncOperation> DownloadSaveAndAddPlatform(PlatformDownloadData data) {
+            using UnityWebRequest www = UnityWebRequest.Get(data.download);
+            yield return www.SendWebRequest();
+
+            if (www.isNetworkError || www.isHttpError) {
+                Utilities.Logging.Log("Error downloading a platform: \n" + www.error, IPA.Logging.Logger.Level.Error);
+            }
+            else {
+                string destination = Path.Combine(_loader.customPlatformsFolderPath, data.name + ".plat");
+                File.WriteAllBytes(destination, www.downloadHandler.data);
+                CustomPlatform newPlatform = _loader.LoadPlatformBundle(destination, transform);
+                AllPlatforms.Add(newPlatform);
+                apiRequestIndex = AllPlatforms.IndexOf(newPlatform);
+            }
+        }
+
         /// <summary>
         /// Steals the heart from the GreenDayScene<br/>
-        /// Then De-Serializes the data from the embedded resource heart.mesh onto the GreenDayHeart to make it more visually pleasing<br/>
-        /// Also adjusts it position and color.</br>
-        /// Gets the Non-Mesh LightSource and the PlayersPlace used in the Platform Preview too.
+        /// Then De-Serializes the data from the embedded resource heart.mesh onto the GreenDayHeart to make it more visually pleasing<br></br>
+        /// Also adjusts it position and color.<br></br>
+        /// Gets the Non-Mesh LightSource and the PlayersPlace used in the Platform Preview too.<br></br>
+        /// Now also steals the LightEffects for multiplayer, this scene is really useful
         /// </summary>
         private void LoadAssets() {
             Scene greenDay = SceneManager.LoadScene("GreenDayGrenadeEnvironment", new LoadSceneParameters(LoadSceneMode.Additive));

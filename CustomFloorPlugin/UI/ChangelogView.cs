@@ -24,6 +24,7 @@ namespace CustomFloorPlugin.UI {
         - Added light effects in Multiplayer
         - Removed BS Utils as a dependency
         - Drasticly simplified CustomScripts
-        - You can now select platforms for multi- and singleplayer seperately";
+        - You can now select platforms for multi- and singleplayer seperately
+        - Revived the API, mappers can specify a platform to use in the song";
     }
 }

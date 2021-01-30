@@ -1,10 +1,10 @@
 ﻿<vertical xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="https://monkeymanboy.github.io/BSML-Docs/ https://raw.githubusercontent.com/monkeymanboy/BSML-Docs/gh-pages/BSMLSchema.xsd">
   <horizontal pref-width="100" pref-height="10">
-    <tab-selector page-count="2" tab-tag="platform-lists" select-cell="select-cell" size-delta-x="100"></tab-selector>
+    <tab-selector page-count="2" tab-tag="platform-lists" select-cell="select-cell" size-delta-x="100" hover-hint="Select different platforms for multi- and singleplayer"></tab-selector>
   </horizontal>
 
   <horizontal vertical-fit='PreferredSize' pref-width="100" pref-height="70">
-    <tab tab-name="Singleplayer" tags="platform-lists" hover-hint="Select which platform is used in singleplayer/ the menu">
+    <tab tab-name="Singleplayer" tags="platform-lists" hover-hint="Select which platform is used in singleplayer | the menu">
       <vertical pref-width="65" pref-height="70">
         <page-button event-click="singleplayerPlatformList#PageUp" direction="Up"></page-button>
         <list id="singleplayerPlatformList" expand-cell="true" select-cell="SingleplayerSelect"></list>

@@ -39,10 +39,13 @@ namespace CustomFloorPlugin {
                     _multiplayerPlayersManager.activeLocalPlayerFacade?.introAnimator.StopAllCoroutines();
                     _multiplayerPlayersManager.inactivePlayerFacade?.introAnimator.StopAllCoroutines();
                     SpawnLightEffects();
+                    return;
                 }
-                else {
-                    ChangeToPlatform(PlatformType.Singleplayer);
+                else if (_platformManager.apiRequestIndex != -1 && _platformManager.apiRequestedLevelId == _difficultyBeatmap.level.levelID) {
+                    ChangeToPlatform(_platformManager.apiRequestIndex);
+                    return;
                 }
+                ChangeToPlatform(PlatformType.Singleplayer);
             }
         }
 
@@ -52,6 +55,9 @@ namespace CustomFloorPlugin {
                 PlatformManager.Heart.GetComponent<InstancedMaterialLightWithId>().ColorWasSet(Color.magenta);
                 if (_config.ShowInMenu) {
                     ChangeToPlatform(PlatformType.Singleplayer);
+                }
+                else {
+                    ChangeToPlatform(0);
                 }
             }
         }

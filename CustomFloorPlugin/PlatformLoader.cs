@@ -24,7 +24,7 @@ namespace CustomFloorPlugin {
         [Inject]
         private readonly PluginConfig _config;
 
-        private string customPlatformsFolderPath;
+        internal string customPlatformsFolderPath;
 
         private Sprite feetIcon;
 
@@ -63,8 +63,6 @@ namespace CustomFloorPlugin {
                 CustomPlatform newPlatform = LoadPlatformBundle(allBundlePaths[i], parent);
                 if (newPlatform != null) {
                     platforms.Add(newPlatform);
-                    MaterialSwapper.ReplaceMaterials(newPlatform.gameObject);
-                    Logging.Log(newPlatform.platName + " by " + newPlatform.platAuthor);
                 }
             }
             Logging.Log("[END OF PLATFORM LOADING SPAM]---------------------------------------");
@@ -79,7 +77,7 @@ namespace CustomFloorPlugin {
         /// </summary>
         /// <param name="bundlePath">The location of the <see cref="CustomPlatform"/>s <see cref="AssetBundle"/> file on disk</param>
         /// <param name="parent">The parent <see cref="Transform"/> for the new <see cref="CustomPlatform"/></param>
-        private CustomPlatform LoadPlatformBundle(string bundlePath, Transform parent) {
+        internal CustomPlatform LoadPlatformBundle(string bundlePath, Transform parent) {
 
             AssetBundle bundle = AssetBundle.LoadFromFile(bundlePath);
 
@@ -94,6 +92,9 @@ namespace CustomFloorPlugin {
 
             byte[] hash = md5.ComputeHash(stream);
             newPlatform.platHash = BitConverter.ToString(hash).Replace("-", string.Empty).ToLowerInvariant();
+
+            MaterialSwapper.ReplaceMaterials(newPlatform.gameObject);
+            Logging.Log(newPlatform.platName + " by " + newPlatform.platAuthor);
 
             return newPlatform;
         }
