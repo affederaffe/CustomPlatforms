@@ -61,7 +61,8 @@ Add an icon for your platform by importing an image, settings it to Sprite/UI in
 
 4. Create your custom platform as a child of this root object
 You can use most of the built in Unity components, custom shaders and materials, custom meshes, animators, etc.
-You can only attach your own custom scripts to these objects that are made like in this guide: https://affederaffe.github.io/CustomPlatformsUnityProject/
+If you want to use your own scripts, place them in the "_Scripts" folder and press "Compile Scripts" on the root gameObject
+Only attach the scripts of the new .dll to your gameObjects, otherwise it won't work.
 
 5. When you are finished, select the root object you attached the "Custom Platform" component to.
 In the inspector, click "Export". Navigate to your CustomPlatforms folder, and press save.
