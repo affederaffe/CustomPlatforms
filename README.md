@@ -83,3 +83,6 @@ In the inspector, click "Export". Navigate to your CustomPlatforms folder, and p
  
 #### Boulders2000 - (Bug Hunter)
   - Stopped counting how many bugreports he sent.
+  
+#### Kyle1413 - (SongCore)
+  - Helped me rewriting the API and updated SongCore for it
