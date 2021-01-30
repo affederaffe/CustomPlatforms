@@ -41,7 +41,7 @@ Visit the Platforms Menu page ingame to do things like:
 
 ## Adding More Platforms
 
-Extract the Platforms' .zip file in the Beat Saber directory.
+Place platforms (.plat) files in the "BeatSaber\CustomPlatforms" folder. 
 Your installed platforms will be available upon relaunching the game.
 
 ## Creating New Platforms
