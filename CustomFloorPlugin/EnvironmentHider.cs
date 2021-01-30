@@ -87,20 +87,27 @@ namespace CustomFloorPlugin {
         private void FindEnvironment() {
             currentEnvironment = Searching.GetCurrentEnvironment();
             roots = currentEnvironment.GetRootGameObjects();
-            FindMenuEnvironmnetAndFeet();
-            FindMultiplayerEnvironment();
-            FindFeetIcon();
-            FindPlayersPlace();
-            FindSmallRings();
-            FindBigRings();
-            FindVisualizers();
-            FindTowers();
-            FindHighway();
-            FindBackColumns();
-            FindBackLasers();
-            FindRotatingLasers();
-            FindDoubleColorLasers();
-            FindTrackLights();
+            if (currentEnvironment.name == "MenuEnvironment") {
+                FindMenuEnvironmnetAndFeet();
+            }
+            if (currentEnvironment.name == "GameCore") {
+                FindMultiplayerEnvironment();
+                FindPlayersPlace();
+            }
+            else {
+                FindFeetIcon();
+                FindPlayersPlace();
+                FindSmallRings();
+                FindBigRings();
+                FindVisualizers();
+                FindTowers();
+                FindHighway();
+                FindBackColumns();
+                FindBackLasers();
+                FindRotatingLasers();
+                FindDoubleColorLasers();
+                FindTrackLights();
+            }
         }
 
 
@@ -177,7 +184,6 @@ namespace CustomFloorPlugin {
             FindAddGameObject("IsActiveObjects/Construction/ConstructionR", multiplayerEnvironment);
             FindAddGameObject("IsActiveObjects/Lasers", multiplayerEnvironment);
 
-            // Normal Layout, if it's not found => Duel Layout, otherwise a construction of another player will be hidden
             if (FindAddGameObject("IsActiveObjects/PlatformEnd", multiplayerEnvironment)) {
                 FindAddGameObject("IsActiveObjects/CenterRings", multiplayerEnvironment);
             }

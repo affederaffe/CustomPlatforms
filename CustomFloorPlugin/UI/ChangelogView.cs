@@ -18,18 +18,12 @@ namespace CustomFloorPlugin.UI {
         @"<size=150%><color=#888888>Version 6.0.0</color></size>
         - Basicly a complete rewrite of the Plugin and updated for 1.13.2
         - CustomPlatforms can now be used in the menu
-        - Redesigned menu, moved settings section here and added a changelog
+         - Redesigned menu, moved settings section here and added a changelog
         - Removed Environment Override Setting because it's implemented in 
            the base game itself
-        - Added LightEffects in Multiplayer
+        - Added light effects in Multiplayer
         - Removed BS Utils as a dependency
-        - Drasticly simplified CustomScripts";
-
-        [UIValue("credits-text")]
-        public string Credits =>
-        @"<size=150%><color=#888888>Credits</color></size>
-        - Huge shoutout to boulders2000, thank you so much for all the testing
-        - Thanks to Auros for making SiraUtil (Zenject <3)
-        - everyone in #pc-mod-dev, thanks for all the help";
+        - Drasticly simplified CustomScripts
+        - You can now select platforms for multi- and singleplayer seperately";
     }
 }

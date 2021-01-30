@@ -33,13 +33,15 @@ namespace CustomFloorPlugin {
             a360 = (_difficultyBeatmap?.parentDifficultyBeatmapSet.beatmapCharacteristic.requires360Movement).GetValueOrDefault();
             multiplayer = _multiplayerPlayersManager ? true : false;
             if ((a360 && _config.UseIn360) || (multiplayer && _config.UseInMultiplayer) || (!a360 && !multiplayer)) {
-                ChangeToPlatform();
                 if (multiplayer) {
+                    ChangeToPlatform(PlatformType.Multiplayer);
                     _multiplayerPlayersManager.playerDidFinishEvent += HandlePlayerDidFinishEvent;
                     _multiplayerPlayersManager.activeLocalPlayerFacade?.introAnimator.StopAllCoroutines();
                     _multiplayerPlayersManager.inactivePlayerFacade?.introAnimator.StopAllCoroutines();
                     SpawnLightEffects();
-
+                }
+                else {
+                    ChangeToPlatform(PlatformType.Singleplayer);
                 }
             }
         }
@@ -49,7 +51,7 @@ namespace CustomFloorPlugin {
                 PlatformManager.Heart.SetActive(_config.ShowHeart);
                 PlatformManager.Heart.GetComponent<InstancedMaterialLightWithId>().ColorWasSet(Color.magenta);
                 if (_config.ShowInMenu) {
-                    ChangeToPlatform();
+                    ChangeToPlatform(PlatformType.Singleplayer);
                 }
             }
         }

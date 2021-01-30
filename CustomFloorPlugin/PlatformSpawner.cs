@@ -1,4 +1,6 @@
-﻿using CustomFloorPlugin.Configuration;
+﻿using System.Collections.Generic;
+
+using CustomFloorPlugin.Configuration;
 using CustomFloorPlugin.Utilities;
 
 using IPA.Utilities;
@@ -31,17 +33,29 @@ namespace CustomFloorPlugin {
         /// Changes to a specific <see cref="CustomPlatform"/> and saves the choice
         /// </summary>
         /// <param name="index">The index of the new <see cref="CustomPlatform"/> in the list <see cref="AllPlatforms"/></param>
-        internal void SetPlatformAndShow(int index) {
-            _platformManager.currentPlatform = _platformManager.AllPlatforms[index % _platformManager.AllPlatforms.Count];
-            _config.CustomPlatformPath = _platformManager.currentPlatform.platName + _platformManager.currentPlatform.platAuthor;
-            ChangeToPlatform(index);
+        internal void SetPlatformAndShow(int index, PlatformType platformType) {
+            if (platformType == PlatformType.Singleplayer) {
+                _platformManager.currentSingleplayerPlatform = _platformManager.AllPlatforms[index % _platformManager.AllPlatforms.Count];
+                _config.SingleplayerPlatformPath = _platformManager.currentSingleplayerPlatform.platName + _platformManager.currentSingleplayerPlatform.platAuthor;
+                ChangeToPlatform(index);
+            }
+            else {
+                _platformManager.currentMultiplayerPlatform = _platformManager.AllPlatforms[index % _platformManager.AllPlatforms.Count];
+                _config.MultiplayerPlatformPath = _platformManager.currentMultiplayerPlatform.platName + _platformManager.currentMultiplayerPlatform.platAuthor;
+                ChangeToPlatform(index);
+            }
         }
 
         /// <summary>
         /// Changes to the currently selected <see cref="CustomPlatform"/>
         /// </summary>
-        internal void ChangeToPlatform() {
-            ChangeToPlatform(_platformManager.CurrentPlatformIndex);
+        internal void ChangeToPlatform(PlatformType platformType) {
+            if (platformType == PlatformType.Singleplayer) {
+                ChangeToPlatform(_platformManager.CurrentSingleplayerPlatformIndex);
+            }
+            else {
+                ChangeToPlatform(_platformManager.CurrentMultiplayerPlatformIndex);
+            }
         }
 
         /// <summary>
@@ -54,17 +68,22 @@ namespace CustomFloorPlugin {
             NotifyPlatform(_platformManager.activePlatform, NotifyType.Disable);
             DestroyCustomObjects();
 
-            if (index != 0) {
-                _platformManager.activePlatform = _platformManager.AllPlatforms[index % _platformManager.AllPlatforms.Count];
-                _platformManager.activePlatform.gameObject.SetActive(true);
-                AddManagers(_platformManager.activePlatform);
-                NotifyPlatform(_platformManager.activePlatform, NotifyType.Enable);
-                SpawnCustomObjects();
+            SharedCoroutineStarter.instance.StartCoroutine(WaitAndSpawn());
+
+            IEnumerator<WaitForEndOfFrame> WaitAndSpawn() {
+                yield return new WaitForEndOfFrame();
+                if (index != 0) {
+                    _platformManager.activePlatform = _platformManager.AllPlatforms[index % _platformManager.AllPlatforms.Count];
+                    _platformManager.activePlatform.gameObject.SetActive(true);
+                    AddManagers(_platformManager.activePlatform);
+                    NotifyPlatform(_platformManager.activePlatform, NotifyType.Enable);
+                    SpawnCustomObjects();
+                }
+                else {
+                    _platformManager.activePlatform = null;
+                }
+                _hider.HideObjectsForPlatform(_platformManager.AllPlatforms[index]);
             }
-            else {
-                _platformManager.activePlatform = null;
-            }
-            _hider.HideObjectsForPlatform(_platformManager.AllPlatforms[index]);
         }
 
         /// <summary>

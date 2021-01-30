@@ -15,6 +15,7 @@ namespace CustomFloorPlugin.Configuration {
         public virtual bool LoadCustomScripts { get; set; } = false;
         public virtual bool UseIn360 { get; set; } = false;
         public virtual bool UseInMultiplayer { get; set; } = false;
-        public virtual string CustomPlatformPath { get; set; }
+        public virtual string SingleplayerPlatformPath { get; set; }
+        public virtual string MultiplayerPlatformPath { get; set; }
     }
 }

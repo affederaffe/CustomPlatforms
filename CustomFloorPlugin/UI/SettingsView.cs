@@ -28,7 +28,7 @@ namespace CustomFloorPlugin.UI {
         private readonly PlatformManager _platformManager;
 
         [Inject]
-        private readonly PlatformsListView _platformsListView;
+        private readonly PlatformListsView _platformsListView;
 
         /// <summary>
         /// Hover hint of load-custom-scripts
@@ -114,7 +114,7 @@ namespace CustomFloorPlugin.UI {
         [System.Diagnostics.CodeAnalysis.SuppressMessage("CodeQuality", "IDE0051:Remove unused private members", Justification = "Called by BSML")]
         private void ReloadButtonPressed() {
             _platformManager.Reload();
-            _platformsListView.SetupPlatformsList();
+            _platformsListView.SetupPlatformLists();
         }
     }
 }

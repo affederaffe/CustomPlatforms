@@ -15,7 +15,7 @@ namespace CustomFloorPlugin.Installers {
 
             Container.BindInterfacesAndSelfTo<PlatformSpawnerMenu>().AsSingle().WithArguments(Container).NonLazy();
 
-            Container.Bind<PlatformsListView>().FromNewComponentAsViewController().AsSingle();
+            Container.Bind<PlatformListsView>().FromNewComponentAsViewController().AsSingle();
             Container.Bind<ChangelogView>().FromNewComponentAsViewController().AsSingle();
             Container.Bind<SettingsView>().FromNewComponentAsViewController().AsSingle();
             Container.Bind<PlatformListFlowCoordinator>().FromNewComponentOnNewGameObject().AsSingle();

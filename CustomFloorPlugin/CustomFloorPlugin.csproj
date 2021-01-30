@@ -32,7 +32,7 @@
   <ItemGroup>
     <EmbeddedResource Include="heart.mesh" />
     <EmbeddedResource Include="manifest.json" />
-    <EmbeddedResource Include="Views\PlatformList.bsml" />
+    <EmbeddedResource Include="Views\PlatformLists.bsml" />
     <EmbeddedResource Include="Views\Settings.bsml" />
     <EmbeddedResource Include="Views\Changelog.bsml" />
   </ItemGroup>

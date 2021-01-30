@@ -19,7 +19,7 @@ namespace CustomFloorPlugin.UI {
         private readonly PlatformManager _platformManager;
 
         [Inject]
-        private readonly PlatformsListView _platformsListView;
+        private readonly PlatformListsView _platformsListView;
 
         [Inject]
         private readonly ChangelogView _changelogView;
@@ -48,7 +48,8 @@ namespace CustomFloorPlugin.UI {
         /// </summary>
         /// <param name="_1"></param>
         protected override void BackButtonWasPressed(ViewController _1) {
-            Logging.Log("Selected Platform: " + _platformManager.currentPlatform.platName);
+            Logging.Log("Selected Singleplayer Platform: " + _platformManager.currentSingleplayerPlatform.platName);
+            Logging.Log("Selected Multiplayer Platform: " + _platformManager.currentMultiplayerPlatform.platName);
             BeatSaberUI.MainFlowCoordinator.DismissFlowCoordinator(this, null, ViewController.AnimationDirection.Horizontal, false);
         }
     }

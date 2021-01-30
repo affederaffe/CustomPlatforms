@@ -33,7 +33,7 @@ namespace CustomFloorPlugin {
             PlatformManager.Heart.SetActive(_config.ShowHeart);
             PlatformManager.Heart.GetComponent<InstancedMaterialLightWithId>().ColorWasSet(Color.magenta);
             if (_config.ShowInMenu) {
-                _platformSpawner.ChangeToPlatform();
+                _platformSpawner.ChangeToPlatform(PlatformType.Singleplayer);
             }
         }
     }

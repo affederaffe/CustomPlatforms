@@ -35,14 +35,14 @@ namespace CustomFloorPlugin {
         }
 
         /// <summary>
-        /// The index of the currently selected <see cref="CustomPlatform"/><br/>
+        /// The index of the currently selected <see cref="CustomPlatform"/> for singleplayer<br/>
         /// Returns 0 if the selection goes AWOL...
         /// </summary>
-        public int CurrentPlatformIndex {
+        public int CurrentSingleplayerPlatformIndex {
             get {
                 int idx = -1;
-                if (currentPlatform != null) {
-                    idx = AllPlatforms.IndexOf(currentPlatform);
+                if (currentSingleplayerPlatform != null) {
+                    idx = AllPlatforms.IndexOf(currentSingleplayerPlatform);
                 }
                 if (idx != -1) {
                     return idx;
@@ -54,9 +54,38 @@ namespace CustomFloorPlugin {
         }
 
         /// <summary>
+        /// The index of the currently selected <see cref="CustomPlatform"/> for multiplayer<br/>
+        /// Returns 0 if the selection goes AWOL...
+        /// </summary>
+        public int CurrentMultiplayerPlatformIndex {
+            get {
+                int idx = -1;
+                if (currentMultiplayerPlatform != null) {
+                    idx = AllPlatforms.IndexOf(currentMultiplayerPlatform);
+                }
+                if (idx != -1) {
+                    return idx;
+                }
+                else {
+                    return 0;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Keeps track of the currently selected <see cref="PlatformType"/>
+        /// </summary>
+        internal PlatformType currentPlatformType = PlatformType.Singleplayer;
+
+        /// <summary>
         /// Keeps track of the currently selected <see cref="CustomPlatform"/>
         /// </summary>
-        internal CustomPlatform currentPlatform;
+        internal CustomPlatform currentSingleplayerPlatform;
+
+        /// <summary>
+        /// Keeps track of the currently selected <see cref="CustomPlatform"/>
+        /// </summary>
+        internal CustomPlatform currentMultiplayerPlatform;
 
         /// <summary>
         /// Keeps track of the currently active <see cref="CustomPlatform"/>
@@ -123,11 +152,20 @@ namespace CustomFloorPlugin {
 
         internal void Reload() {
             AllPlatforms = _loader.CreateAllPlatforms(transform);
-            currentPlatform = AllPlatforms[0];
-            if (_config.CustomPlatformPath != null) {
+            currentSingleplayerPlatform = AllPlatforms[0];
+            currentMultiplayerPlatform = AllPlatforms[0];
+            if (_config.SingleplayerPlatformPath != null) {
                 for (int i = 0; i < AllPlatforms.Count; i++) {
-                    if (_config.CustomPlatformPath == AllPlatforms[i].platName + AllPlatforms[i].platAuthor) {
-                        currentPlatform = AllPlatforms[i];
+                    if (_config.SingleplayerPlatformPath == AllPlatforms[i].platName + AllPlatforms[i].platAuthor) {
+                        currentSingleplayerPlatform = AllPlatforms[i];
+                        break;
+                    }
+                }
+            }
+            if (_config.MultiplayerPlatformPath != null) {
+                for (int i = 0; i < AllPlatforms.Count; i++) {
+                    if (_config.MultiplayerPlatformPath == AllPlatforms[i].platName + AllPlatforms[i].platAuthor) {
+                        currentMultiplayerPlatform = AllPlatforms[i];
                         break;
                     }
                 }
