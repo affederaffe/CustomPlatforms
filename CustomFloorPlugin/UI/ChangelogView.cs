@@ -29,6 +29,8 @@ namespace CustomFloorPlugin.UI {
         - Drasticly simplified custom scripts
         - You can now select platforms for multi- and singleplayer seperately
         - Revived the API, mappers can specify a platform for their songs again
+         - Compatibility with Cinema: When a video is played, the default platform 
+           will be used, if not configured otherwise
         - Fixed so many bugs I can't even count them";
     }
 }

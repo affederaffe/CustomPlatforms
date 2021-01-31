@@ -139,5 +139,9 @@
      <HintPath>$(BeatSaberDir)\Plugins\SongCore.dll</HintPath>
      <Private>False</Private>
    </Reference>
+   <Reference Include="BeatSaberCinema">
+     <HintPath>$(BeatSaberDir)\Plugins\BeatSaberCinema.dll</HintPath>
+     <Private>False</Private>
+   </Reference>
   </ItemGroup>
 </Project>

@@ -48,15 +48,15 @@ namespace CustomFloorPlugin {
         /// </summary>
         private void SubscribeToEvents() {
             if (_events != null) {
-                _events.GameSceneLoaded += delegate (ScenesTransitionSetupDataSO setupData, DiContainer container) { _EventManager.OnLevelStart.Invoke(); };
+                _events.GameSceneLoadedEvent += delegate (ScenesTransitionSetupDataSO setupData, DiContainer container) { _EventManager.OnLevelStart.Invoke(); };
                 _events.NoteWasCutEvent += delegate (NoteController controller, NoteCutInfo info) { if (info.allIsOK) { _EventManager.OnSlice.Invoke(); } };
-                _events.ComboDidBreak += delegate () { _EventManager.OnComboBreak.Invoke(); };
-                _events.MultiplierDidIncrease += delegate (int multiplier) { _EventManager.MultiplierUp.Invoke(); };
-                _events.ComboDidChange += delegate (int combo) { _EventManager.OnComboChanged.Invoke(combo); };
-                _events.SabersStartCollide += delegate (SaberType saber) { _EventManager.SaberStartColliding.Invoke(); };
-                _events.SabersEndCollide += delegate (SaberType saber) { _EventManager.SaberStopColliding.Invoke(); };
-                _events.LevelFailed += delegate { _EventManager.OnLevelFail.Invoke(); };
-                _events.BeatmapEvent += LightEventCallBack;
+                _events.ComboDidBreakEvent += delegate () { _EventManager.OnComboBreak.Invoke(); };
+                _events.MultiplierDidIncreaseEvent += delegate (int multiplier) { _EventManager.MultiplierUp.Invoke(); };
+                _events.ComboDidChangeEvent += delegate (int combo) { _EventManager.OnComboChanged.Invoke(combo); };
+                _events.SabersStartCollideEvent += delegate (SaberType saber) { _EventManager.SaberStartColliding.Invoke(); };
+                _events.SabersEndCollideEvent += delegate (SaberType saber) { _EventManager.SaberStopColliding.Invoke(); };
+                _events.LevelFailedEvent += delegate { _EventManager.OnLevelFail.Invoke(); };
+                _events.BeatmapEventDidTriggerEvent += LightEventCallBack;
             }
         }
 
@@ -66,15 +66,15 @@ namespace CustomFloorPlugin {
         /// </summary>
         private void UnsubscribeFromEvents() {
             if (_events != null) {
-                _events.GameSceneLoaded -= delegate (ScenesTransitionSetupDataSO setupData, DiContainer container) { _EventManager.OnLevelStart.Invoke(); };
+                _events.GameSceneLoadedEvent -= delegate (ScenesTransitionSetupDataSO setupData, DiContainer container) { _EventManager.OnLevelStart.Invoke(); };
                 _events.NoteWasCutEvent -= delegate (NoteController controller, NoteCutInfo info) { if (info.allIsOK) { _EventManager.OnSlice.Invoke(); } };
-                _events.ComboDidBreak -= delegate () { _EventManager.OnComboBreak.Invoke(); };
-                _events.MultiplierDidIncrease -= delegate (int multiplier) { _EventManager.MultiplierUp.Invoke(); };
-                _events.ComboDidChange -= delegate (int combo) { _EventManager.OnComboChanged.Invoke(combo); };
-                _events.SabersStartCollide -= delegate (SaberType saber) { _EventManager.SaberStartColliding.Invoke(); };
-                _events.SabersEndCollide -= delegate (SaberType saber) { _EventManager.SaberStopColliding.Invoke(); };
-                _events.LevelFailed -= delegate { _EventManager.OnLevelFail.Invoke(); };
-                _events.BeatmapEvent -= LightEventCallBack;
+                _events.ComboDidBreakEvent -= delegate () { _EventManager.OnComboBreak.Invoke(); };
+                _events.MultiplierDidIncreaseEvent -= delegate (int multiplier) { _EventManager.MultiplierUp.Invoke(); };
+                _events.ComboDidChangeEvent -= delegate (int combo) { _EventManager.OnComboChanged.Invoke(combo); };
+                _events.SabersStartCollideEvent -= delegate (SaberType saber) { _EventManager.SaberStartColliding.Invoke(); };
+                _events.SabersEndCollideEvent -= delegate (SaberType saber) { _EventManager.SaberStopColliding.Invoke(); };
+                _events.LevelFailedEvent -= delegate { _EventManager.OnLevelFail.Invoke(); };
+                _events.BeatmapEventDidTriggerEvent -= LightEventCallBack;
             }
         }
 

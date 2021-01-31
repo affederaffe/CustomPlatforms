@@ -24,6 +24,7 @@ namespace CustomFloorPlugin {
 
         [Inject]
         private readonly PlatformManager _platformManager;
+
         private Scene currentEnvironment;
         private GameObject[] roots;
 

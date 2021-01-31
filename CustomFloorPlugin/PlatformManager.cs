@@ -2,15 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
-using System.Linq;
 using System.Reflection;
 
 using CustomFloorPlugin.Configuration;
 
-using Newtonsoft.Json;
-
 using UnityEngine;
-using UnityEngine.Networking;
 using UnityEngine.SceneManagement;
 
 using Zenject;
@@ -28,7 +24,7 @@ namespace CustomFloorPlugin {
         private readonly PluginConfig _config;
 
         [Inject]
-        private readonly PlatformLoader _loader;
+        private readonly PlatformLoader _platformLoader;
 
         /// <summary>
         /// List of all loaded Platforms
@@ -159,7 +155,6 @@ namespace CustomFloorPlugin {
                 yield return new WaitForEndOfFrame();
                 LoadAssets();
                 Reload();
-                SongCore.Plugin.CustomSongPlatformSelectionDidChange += (bool usePlatform, string name, string hash, IPreviewBeatmapLevel level) => StartCoroutine(HandleSongSelected(usePlatform, name, hash, level));
             }
         }
 
@@ -167,7 +162,7 @@ namespace CustomFloorPlugin {
         /// Reloads all <see cref="CustomPlatform"/>s and selects the last selected before the game was closed from the <see cref="PluginConfig"/>
         /// </summary>
         internal void Reload() {
-            AllPlatforms = _loader.CreateAllPlatforms(transform);
+            AllPlatforms = _platformLoader.CreateAllPlatforms(transform);
             currentSingleplayerPlatform = AllPlatforms[0];
             currentMultiplayerPlatform = AllPlatforms[0];
             if (_config.SingleplayerPlatformPath != null) {
@@ -185,104 +180,6 @@ namespace CustomFloorPlugin {
                         break;
                     }
                 }
-            }
-        }
-
-        /// <summary>
-        /// The class the API response of modelsaber is deserialized on
-        /// </summary>
-        [Serializable]
-        private class PlatformDownloadData {
-            public string[] tags;
-            public string type;
-            public string name;
-            public string author;
-            public string image;
-            public string hash;
-            public string bsaber;
-            public string download;
-            public string install_link;
-            public string date;
-        }
-
-        /// <summary>
-        /// Handles when a song is selected, downloading a <see cref="CustomPlatform"/> from modelsaber if needed
-        /// </summary>
-        /// <param name="usePlatform">Wether the selected song requests a platform or not</param>
-        /// <param name="name">The name of the requested platform</param>
-        /// <param name="hash">The hash of the requested platform</param>
-        /// <param name="level">The song the platform was requested for</param>
-        /// <returns></returns>
-        private IEnumerator<UnityWebRequestAsyncOperation> HandleSongSelected(bool usePlatform, string name, string hash, IPreviewBeatmapLevel level) {
-
-            // No platform is requested, abort
-            if (!usePlatform) {
-                apiRequestIndex = -1;
-                apiRequestedLevelId = null;
-                yield break;
-            }
-
-            apiRequestedLevelId = level.levelID;
-
-            // Test if the requested platform is already downloaded
-            for (int i = 0; i < AllPlatforms.Count; i++) {
-                if (AllPlatforms[i].platHash == hash || AllPlatforms[i].platName.StartsWith(name)) {
-                    apiRequestIndex = i;
-                    yield break;
-                }
-            }
-
-            if (hash != null) {
-                using UnityWebRequest www = UnityWebRequest.Get("https://modelsaber.com/api/v1/platform/get.php?filter=hash:" + hash);
-                yield return www.SendWebRequest();
-
-                if (www.isNetworkError || www.isHttpError) {
-                    Utilities.Logging.Log("Error downloading a platform: \n" + www.error, IPA.Logging.Logger.Level.Error);
-                }
-                else {
-                    Dictionary<string, PlatformDownloadData> downloadData = JsonConvert.DeserializeObject<Dictionary<string, PlatformDownloadData>>(www.downloadHandler.text);
-                    PlatformDownloadData data = downloadData.FirstOrDefault().Value;
-                    if (data != null) {
-                        StartCoroutine(DownloadSaveAndAddPlatform(data));
-                    }
-                }
-            }
-
-            else if (name != null) {
-                using UnityWebRequest www = UnityWebRequest.Get("https://modelsaber.com/api/v1/platform/get.php?filter=name:" + name);
-                yield return www.SendWebRequest();
-
-                if (www.isNetworkError || www.isHttpError) {
-                    Utilities.Logging.Log("Error downloading a platform: \n" + www.error, IPA.Logging.Logger.Level.Error);
-                }
-                else {
-                    Dictionary<string, PlatformDownloadData> downloadData = JsonConvert.DeserializeObject<Dictionary<string, PlatformDownloadData>>(www.downloadHandler.text);
-                    PlatformDownloadData data = downloadData.FirstOrDefault().Value;
-                    if (data != null) {
-                        StartCoroutine(DownloadSaveAndAddPlatform(data));
-                    }
-                }
-            }
-        }
-
-        /// <summary>
-        /// Downloads the .plat file from modelsaber, then saves it in the CustomPlatforms directory and loads it
-        /// </summary>
-        /// <param name="data">The API deserialized API response containing the download link to the .plat file</param>
-        /// <returns></returns>
-        private IEnumerator<UnityWebRequestAsyncOperation> DownloadSaveAndAddPlatform(PlatformDownloadData data) {
-            using UnityWebRequest www = UnityWebRequest.Get(data.download);
-            yield return www.SendWebRequest();
-
-            if (www.isNetworkError || www.isHttpError) {
-                Utilities.Logging.Log("Error downloading a platform: \n" + www.error, IPA.Logging.Logger.Level.Error);
-            }
-            else {
-                string destination = Path.Combine(_loader.customPlatformsFolderPath, data.name + ".plat");
-                File.WriteAllBytes(destination, www.downloadHandler.data);
-                CustomPlatform newPlatform = _loader.LoadPlatformBundle(destination, transform);
-                AllPlatforms.Add(newPlatform);
-                apiRequestIndex = AllPlatforms.IndexOf(newPlatform);
             }
         }
 

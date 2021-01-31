@@ -48,7 +48,7 @@ namespace CustomFloorPlugin.UI {
 
         [UIAction("Select-cell")]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("CodeQuality", "IDE0051:Remove unused private members", Justification = "Called by BSML")]
-        private void TabSelect(SegmentedControl segmentedControl, int idx) {
+        private void TabSelect(SegmentedControl segmentedControl, int _1) {
             if (segmentedControl.selectedCellNumber == 0) {
                 singleplayerPlatformListTable.tableView.ScrollToCellWithIdx(_platformManager.CurrentSingleplayerPlatformIndex, TableViewScroller.ScrollPositionType.Beginning, false);
                 _platformSpawner.ChangeToPlatform(PlatformType.Singleplayer);

@@ -41,7 +41,7 @@ namespace CustomFloorPlugin {
                     SpawnLightEffects();
                     return;
                 }
-                else if (_platformManager.apiRequestIndex != -1 && _platformManager.apiRequestedLevelId == _difficultyBeatmap.level.levelID) {
+                else if (_platformManager.apiRequestIndex != -1 && (_platformManager.apiRequestedLevelId == _difficultyBeatmap.level.levelID || _platformManager.apiRequestIndex == 0)) {
                     ChangeToPlatform(_platformManager.apiRequestIndex);
                     return;
                 }
@@ -58,6 +58,9 @@ namespace CustomFloorPlugin {
                 }
                 else {
                     ChangeToPlatform(0);
+                }
+                if (_platformManager.apiRequestIndex == 0) { // If a mod requests to disable the platform for the song, reset it when the level is finished
+                    _platformManager.apiRequestIndex = -1;
                 }
             }
         }
