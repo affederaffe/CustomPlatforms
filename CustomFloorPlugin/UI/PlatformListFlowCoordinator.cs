@@ -27,6 +27,9 @@ namespace CustomFloorPlugin.UI {
         [Inject]
         private readonly SettingsView _settingsView;
 
+        [Inject]
+        private readonly MainFlowCoordinator _mainFlowCoordinator;
+
 
         /// <summary>
         /// Set the window properties on first activation<br/>
@@ -50,7 +53,7 @@ namespace CustomFloorPlugin.UI {
         protected override void BackButtonWasPressed(ViewController _1) {
             Logging.Log("Selected Singleplayer Platform: " + _platformManager.currentSingleplayerPlatform.platName);
             Logging.Log("Selected Multiplayer Platform: " + _platformManager.currentMultiplayerPlatform.platName);
-            BeatSaberUI.MainFlowCoordinator.DismissFlowCoordinator(this, null, ViewController.AnimationDirection.Horizontal, false);
+            _mainFlowCoordinator.DismissFlowCoordinator(this, null, ViewController.AnimationDirection.Horizontal, false);
         }
     }
 }

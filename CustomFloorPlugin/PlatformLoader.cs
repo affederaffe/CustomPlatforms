@@ -19,18 +19,14 @@ namespace CustomFloorPlugin {
     /// <summary>
     /// Loads AssetBundles containing CustomFloorPlugin
     /// </summary>
-    internal class PlatformLoader : IInitializable {
+    internal class PlatformLoader {
 
         [Inject]
         private readonly PluginConfig _config;
 
-        internal string customPlatformsFolderPath;
+        internal string customPlatformsFolderPath = Path.Combine(Environment.CurrentDirectory, "CustomPlatforms");
 
         private Sprite feetIcon;
-
-        public void Initialize() {
-            customPlatformsFolderPath = Path.Combine(Environment.CurrentDirectory, "CustomPlatforms");
-        }
 
 
         /// <summary>

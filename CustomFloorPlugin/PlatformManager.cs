@@ -31,18 +31,16 @@ namespace CustomFloorPlugin {
         private readonly PlatformLoader _loader;
 
         /// <summary>
-        /// List of all loaded Platforms, publicly editable. For no good reason.
+        /// List of all loaded Platforms
         /// </summary>
-        public List<CustomPlatform> AllPlatforms {
-            get;
-            private set;
-        }
+        internal List<CustomPlatform> AllPlatforms;
 
         /// <summary>
         /// The index of the currently selected <see cref="CustomPlatform"/> for singleplayer<br/>
         /// Returns 0 if the selection goes AWOL...
         /// </summary>
-        public int CurrentSingleplayerPlatformIndex {
+        
+        internal int CurrentSingleplayerPlatformIndex {
             get {
                 int idx = -1;
                 if (currentSingleplayerPlatform != null) {
@@ -61,7 +59,7 @@ namespace CustomFloorPlugin {
         /// The index of the currently selected <see cref="CustomPlatform"/> for multiplayer<br/>
         /// Returns 0 if the selection goes AWOL...
         /// </summary>
-        public int CurrentMultiplayerPlatformIndex {
+        internal int CurrentMultiplayerPlatformIndex {
             get {
                 int idx = -1;
                 if (currentMultiplayerPlatform != null) {
@@ -82,7 +80,7 @@ namespace CustomFloorPlugin {
         public int apiRequestIndex = -1;
 
         /// <summary>
-        /// Stores the BeatmapLevel the Platform was requested for
+        /// Stores the BeatmapLevel the platform was requested for
         /// </summary>
         public string apiRequestedLevelId;
 
@@ -116,7 +114,7 @@ namespace CustomFloorPlugin {
         internal static GameObject Heart;
 
         /// <summary>
-        /// Used as a platform in Platform Preview if <see cref="CustomPlatform.hideDefaultPlatform"/> is false
+        /// Used as a platform in platform preview if <see cref="CustomPlatform.hideDefaultPlatform"/> is false
         /// </summary>
         internal static GameObject PlayersPlace;
 
@@ -127,7 +125,7 @@ namespace CustomFloorPlugin {
         internal static GameObject Feet;
 
         /// <summary>
-        /// The Light Source used for Non-Mesh Lights
+        /// The Light Source used for non-mesh lights
         /// </summary>
         internal static GameObject LightSource;
 
@@ -165,6 +163,9 @@ namespace CustomFloorPlugin {
             }
         }
 
+        /// <summary>
+        /// Reloads all <see cref="CustomPlatform"/>s and selects the last selected before the game was closed from the <see cref="PluginConfig"/>
+        /// </summary>
         internal void Reload() {
             AllPlatforms = _loader.CreateAllPlatforms(transform);
             currentSingleplayerPlatform = AllPlatforms[0];
@@ -187,6 +188,9 @@ namespace CustomFloorPlugin {
             }
         }
 
+        /// <summary>
+        /// The class the API response of modelsaber is deserialized on
+        /// </summary>
         [Serializable]
         private class PlatformDownloadData {
             public string[] tags;
@@ -201,6 +205,14 @@ namespace CustomFloorPlugin {
             public string date;
         }
 
+        /// <summary>
+        /// Handles when a song is selected, downloading a <see cref="CustomPlatform"/> from modelsaber if needed
+        /// </summary>
+        /// <param name="usePlatform">Wether the selected song requests a platform or not</param>
+        /// <param name="name">The name of the requested platform</param>
+        /// <param name="hash">The hash of the requested platform</param>
+        /// <param name="level">The song the platform was requested for</param>
+        /// <returns></returns>
         private IEnumerator<UnityWebRequestAsyncOperation> HandleSongSelected(bool usePlatform, string name, string hash, IPreviewBeatmapLevel level) {
 
             // No platform is requested, abort
@@ -253,6 +265,11 @@ namespace CustomFloorPlugin {
             }
         }
 
+        /// <summary>
+        /// Downloads the .plat file from modelsaber, then saves it in the CustomPlatforms directory and loads it
+        /// </summary>
+        /// <param name="data">The API deserialized API response containing the download link to the .plat file</param>
+        /// <returns></returns>
         private IEnumerator<UnityWebRequestAsyncOperation> DownloadSaveAndAddPlatform(PlatformDownloadData data) {
             using UnityWebRequest www = UnityWebRequest.Get(data.download);
             yield return www.SendWebRequest();

@@ -10,7 +10,7 @@ namespace CustomFloorPlugin.UI {
 
 
     /// <summary>
-    /// UI Class, sets up MenuButton and Settings Section
+    /// UI Class, sets up the menu button and everything about it
     /// </summary>
     internal class MenuButtonManager : IInitializable, IDisposable {
 
@@ -29,7 +29,7 @@ namespace CustomFloorPlugin.UI {
         }
 
         public void Dispose() {
-            if (MenuButtons.IsSingletonAvailable && BSMLParser.IsSingletonAvailable) {
+            if (MenuButtons.IsSingletonAvailable) {
                 MenuButtons.instance.UnregisterButton(_menuButton);
             }
         }

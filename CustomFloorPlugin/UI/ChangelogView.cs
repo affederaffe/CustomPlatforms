@@ -13,18 +13,22 @@ namespace CustomFloorPlugin.UI {
     [ViewDefinition("CustomFloorPlugin.Views.Changelog.bsml")]
     internal class ChangelogView : BSMLAutomaticViewController {
 
+        /// <summary>
+        /// The string displayed in the changelog
+        /// </summary>
         [UIValue("changelog-text")]
         public string Changelog =>
         @"<size=150%><color=#888888>Version 6.0.0</color></size>
-        - Basicly a complete rewrite of the Plugin and updated for 1.13.2
-        - CustomPlatforms can now be used in the menu
+        - Basicly a complete rewrite of the plugin and updated for 1.13.2
+        - Platforms can now be used in the menu
          - Redesigned menu, moved settings section here and added a changelog
-        - Removed Environment Override Setting because it's implemented in 
+        - Removed environment override setting because it's implemented in 
            the base game itself
-        - Added light effects in Multiplayer
+        - Added light effects in multiplayer
         - Removed BS Utils as a dependency
-        - Drasticly simplified CustomScripts
+        - Drasticly simplified custom scripts
         - You can now select platforms for multi- and singleplayer seperately
-        - Revived the API, mappers can specify a platform to use in the song";
+        - Revived the API, mappers can specify a platform for their songs again
+        - Fixed so many bugs I can't even count them";
     }
 }

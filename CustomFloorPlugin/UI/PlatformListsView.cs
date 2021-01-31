@@ -46,16 +46,16 @@ namespace CustomFloorPlugin.UI {
         public CustomListTableData multiplayerPlatformListTable = null;
 
 
-        [UIAction("select-cell")]
+        [UIAction("Select-cell")]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("CodeQuality", "IDE0051:Remove unused private members", Justification = "Called by BSML")]
         private void TabSelect(SegmentedControl segmentedControl, int idx) {
             if (segmentedControl.selectedCellNumber == 0) {
-                singleplayerPlatformListTable.tableView.ScrollToCellWithIdx(idx, TableViewScroller.ScrollPositionType.Beginning, false);
+                singleplayerPlatformListTable.tableView.ScrollToCellWithIdx(_platformManager.CurrentSingleplayerPlatformIndex, TableViewScroller.ScrollPositionType.Beginning, false);
                 _platformSpawner.ChangeToPlatform(PlatformType.Singleplayer);
                 _platformManager.currentPlatformType = PlatformType.Singleplayer;
             }
             else {
-                multiplayerPlatformListTable.tableView.ScrollToCellWithIdx(idx, TableViewScroller.ScrollPositionType.Beginning, false);
+                multiplayerPlatformListTable.tableView.ScrollToCellWithIdx(_platformManager.CurrentMultiplayerPlatformIndex, TableViewScroller.ScrollPositionType.Beginning, false);
                 _platformSpawner.ChangeToPlatform(PlatformType.Multiplayer);
                 _platformManager.currentPlatformType = PlatformType.Multiplayer;
             }
@@ -124,6 +124,11 @@ namespace CustomFloorPlugin.UI {
         }
 
 
+        /// <summary>
+        /// (Re-)Loads a given <see cref="CustomListTableData"/> and fills it with all currently available platforms
+        /// </summary>
+        /// <param name="listTable">The list to reload</param>
+        /// <param name="platformType">The <see cref="PlatformType"/> the list should be set up for</param>
         private void SetupList(CustomListTableData listTable, PlatformType platformType) {
             listTable.data.Clear();
             foreach (CustomPlatform platform in _platformManager.AllPlatforms) {

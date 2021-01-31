@@ -45,6 +45,13 @@ namespace CustomFloorPlugin.Extensions {
             return path.ToString();
         }
 
+
+        /// <summary>
+        /// Gets the time of the song the last note is spawned<br></br>
+        /// (stolen from SaberFactory)
+        /// </summary>
+        /// <param name="beatmapData"></param>
+        /// <returns></returns>
         internal static float GetLastNoteTime(this BeatmapData beatmapData) {
             float lastTime = 0f;
             IReadOnlyList<IReadonlyBeatmapLineData> beatmapLinesData = beatmapData.beatmapLinesData;

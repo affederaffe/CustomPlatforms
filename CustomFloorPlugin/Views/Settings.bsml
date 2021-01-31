@@ -9,7 +9,7 @@
       <bool-setting text="Show heart" value="show-heart" apply-on-change="true" hover-hint="Makes the heart, that Custom Platforms uses to generate most lights, visible in the menu"></bool-setting>
       <bool-setting text="Show platform in menu" value="show-in-menu" apply-on-change="true" hover-hint="Show the selected platform in menu"></bool-setting>
       <bool-setting text="Load CustomScripts" value="load-custom-scripts" apply-on-change="true" hover-hint="~LoadingCustomScriptsText"></bool-setting>
-      <bool-setting text="Use in 360°-levels" value="use-in-360" apply-on-change="true" hover-hint="Toggle if Custom Platforms are used are 360°-levels"></bool-setting>
+      <bool-setting text="Use in 360°-levels" value="use-in-360" apply-on-change="true" hover-hint="Toggle if Custom Platforms are used in 360°-levels"></bool-setting>
       <bool-setting text="Use in multiplayer" value="use-in-multiplayer" apply-on-change="true" hover-hint="Toggle if Custom Platforms are used in multiplayer"></bool-setting>
       <button text="Reload all platforms" on-click="ReloadPlatforms" font-size="6"/>
     </vertical>

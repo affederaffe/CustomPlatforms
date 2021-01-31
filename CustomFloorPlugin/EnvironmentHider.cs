@@ -135,7 +135,7 @@ namespace CustomFloorPlugin {
         private bool FindAddGameObject(string name, List<GameObject> list, bool rename = false) {
             GameObject go;
             foreach (GameObject root in roots) {
-                go = root.transform.Find(name)?.gameObject;
+                go = root?.transform.Find(name)?.gameObject;
                 if (go != null) {
                     list.Add(go);
                     if (rename) {
@@ -143,7 +143,7 @@ namespace CustomFloorPlugin {
                     }
                     return true;
                 }
-                else if (root.name == name) {
+                else if (root?.name == name) {
                     list.Add(root);
                 }
             }
