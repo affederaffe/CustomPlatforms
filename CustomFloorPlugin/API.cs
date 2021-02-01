@@ -96,7 +96,7 @@ namespace CustomFloorPlugin {
             }
 
             if (hash != null) {
-                using UnityWebRequest www = UnityWebRequest.Get("https://modelsaber.com/api/v1/platform/get.php?filter=hash:" + hash);
+                using UnityWebRequest www = UnityWebRequest.Get("https://modelsaber.com/api/v2/get.php?type=platform&filter=hash:" + hash);
                 yield return www.SendWebRequest();
 
                 if (www.isNetworkError || www.isHttpError) {
@@ -112,7 +112,7 @@ namespace CustomFloorPlugin {
             }
 
             else if (name != null) {
-                using UnityWebRequest www = UnityWebRequest.Get("https://modelsaber.com/api/v1/platform/get.php?filter=name:" + name);
+                using UnityWebRequest www = UnityWebRequest.Get("https://modelsaber.com/api/v2/get.php?type=platform&filter=name:" + name);
                 yield return www.SendWebRequest();
 
                 if (www.isNetworkError || www.isHttpError) {

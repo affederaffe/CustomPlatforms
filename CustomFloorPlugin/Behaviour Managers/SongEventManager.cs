@@ -15,7 +15,7 @@ namespace CustomFloorPlugin {
     internal class SongEventManager : MonoBehaviour {
 
         [InjectOptional]
-        private readonly BeatmapObjectCallbackController _beatmapObjectCallbackController;
+        private readonly BSEvents _events;
 
 
         /// <summary>
@@ -47,8 +47,8 @@ namespace CustomFloorPlugin {
         /// </summary>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Code Quality", "IDE0051:Remove unused private members", Justification = "Called by Unity")]
         private void OnEnable() {
-            if (_beatmapObjectCallbackController != null) {
-                _beatmapObjectCallbackController.beatmapEventDidTriggerEvent += HandleSongEvent;
+            if (_events != null) {
+                _events.BeatmapEventDidTriggerEvent += HandleSongEvent;
             }
         }
 
@@ -59,8 +59,8 @@ namespace CustomFloorPlugin {
         /// </summary>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Code Quality", "IDE0051:Remove unused private members", Justification = "Called by Unity")]
         private void OnDisable() {
-            if (_beatmapObjectCallbackController != null) {
-                _beatmapObjectCallbackController.beatmapEventDidTriggerEvent -= HandleSongEvent;
+            if (_events != null) {
+                _events.BeatmapEventDidTriggerEvent -= HandleSongEvent;
             }
         }
     }

@@ -31,16 +31,16 @@ namespace CustomFloorPlugin {
         [Inject(Id = "LastNoteId")]
         private float _lastNoteTime;
 
-        public event Action<ScenesTransitionSetupDataSO, DiContainer> GameSceneLoadedEvent = delegate { };
+        public event Action GameSceneLoadedEvent = delegate { };
         public event Action LevelFinishedEvent = delegate { };
         public event Action LevelFailedEvent = delegate { };
-        public event Action<NoteController, NoteCutInfo> NoteWasCutEvent = delegate { };
+        public event Action NoteWasCutEvent = delegate { };
         public event Action<NoteController> NoteWasMissedEvent = delegate { };
         public event Action ComboDidBreakEvent = delegate { };
-        public event Action<int> MultiplierDidIncreaseEvent = delegate { };
+        public event Action MultiplierDidIncreaseEvent = delegate { };
         public event Action<int> ComboDidChangeEvent = delegate { };
-        public event Action<SaberType> SabersStartCollideEvent = delegate { };
-        public event Action<SaberType> SabersEndCollideEvent = delegate { };
+        public event Action SabersStartCollideEvent = delegate { };
+        public event Action SabersEndCollideEvent = delegate { };
         public event Action<BeatmapEventData> BeatmapEventDidTriggerEvent = delegate { };
 
         public void Initialize() {
@@ -73,7 +73,9 @@ namespace CustomFloorPlugin {
         }
 
         private void NoteWasCut(NoteController noteController, NoteCutInfo noteCutInfo) {
-            NoteWasCutEvent(noteController, noteCutInfo);
+            if (noteCutInfo.allIsOK) {
+                NoteWasCutEvent();
+            }
             if (Mathf.Approximately(noteController.noteData.time, _lastNoteTime)) {
                 _lastNoteTime = 0f;
                 LevelFinishedEvent();
@@ -93,15 +95,15 @@ namespace CustomFloorPlugin {
         }
 
         private void GameSceneLoaded(ScenesTransitionSetupDataSO setupData, DiContainer container) {
-            GameSceneLoadedEvent(setupData, container);
+            GameSceneLoadedEvent();
         }
 
         private void SabersStartCollide(SaberType saberType) {
-            SabersStartCollideEvent(saberType);
+            SabersStartCollideEvent();
         }
 
         private void SabersEndCollide(SaberType saberType) {
-            SabersEndCollideEvent(saberType);
+            SabersEndCollideEvent();
         }
 
         private void ComboDidChange(int combo) {
@@ -114,7 +116,7 @@ namespace CustomFloorPlugin {
 
         private void MultiplierDidChange(int multiplier, float progress) {
             if (multiplier > 1 && progress < 0.1f) {
-                MultiplierDidIncreaseEvent(multiplier);
+                MultiplierDidIncreaseEvent();
             }
         }
     }

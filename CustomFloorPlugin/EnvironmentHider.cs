@@ -185,8 +185,9 @@ namespace CustomFloorPlugin {
             FindAddGameObject("IsActiveObjects/Construction/ConstructionR", multiplayerEnvironment);
             FindAddGameObject("IsActiveObjects/Lasers", multiplayerEnvironment);
 
-            if (FindAddGameObject("IsActiveObjects/PlatformEnd", multiplayerEnvironment)) {
-                FindAddGameObject("IsActiveObjects/CenterRings", multiplayerEnvironment);
+            // Only hide the other's construction when in duel layout
+            if (FindAddGameObject("IsActiveObjects/CenterRings", multiplayerEnvironment)) {
+                FindAddGameObject("IsActiveObjects/PlatformEnd", multiplayerEnvironment);
             }
             else {
                 FindAddGameObject("Construction", multiplayerEnvironment);

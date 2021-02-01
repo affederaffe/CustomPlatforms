@@ -240,7 +240,7 @@ namespace CustomFloorPlugin {
                 foreach (EventManager em in go.GetComponentsInChildren<EventManager>()) {
                     PlatformEventManager pem = _container.InstantiateComponent<PlatformEventManager>(em.gameObject);
                     PlatformManager.SpawnedComponents.Add(pem);
-                    pem._EventManager = em;
+                    pem._eventManager = em;
                 }
             }
         }
