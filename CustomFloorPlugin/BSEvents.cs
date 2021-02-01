@@ -28,7 +28,7 @@ namespace CustomFloorPlugin {
         [Inject]
         private readonly ScoreController _scoreController;
 
-        [Inject(Id = "LastNoteId")]
+        [Inject(Id = "LastNoteTime")]
         private float _lastNoteTime;
 
         public event Action GameSceneLoadedEvent = delegate { };
