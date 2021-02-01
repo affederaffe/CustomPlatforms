@@ -19,8 +19,6 @@ Your Beat Saber folder should then look like this:
     | CustomPlatforms.dll             <-- 
   | CustomPlatforms		      <--
     | <.plat files>		      <--
-    | Scripts                         <--
-      | <.dll Custom Script files>    <--
   | IPA
   | Beat Saber.exe
   | (other files and folders)
