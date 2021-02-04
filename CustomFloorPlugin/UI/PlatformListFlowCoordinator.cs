@@ -1,4 +1,5 @@
 ﻿using BeatSaberMarkupLanguage;
+using BeatSaberMarkupLanguage.Parser;
 
 using CustomFloorPlugin.Utilities;
 

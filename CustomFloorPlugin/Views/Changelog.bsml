@@ -3,7 +3,19 @@
     <label text="Changelog" align="Center" font-size="6"></label>
   </horizontal>
 
-  <horizontal preferred-height="65">
-    <text-page size-delta-y="65" text="~changelog-text" rich-text="true" word-wrapping="true" overflow-mode="Page"></text-page>
+  <horizontal preferred-height="60">
+    <text-page size-delta-y="60" text="~changelog-text" rich-text="true" word-wrapping="true" overflow-mode="Page"></text-page>
   </horizontal>
+
+  <horizontal>
+    <button-with-icon icon="CustomFloorPlugin.heart.png" click-event="open-credits" hover-hint="Credits" pref-height="12" pref-width="12"></button-with-icon>
+  </horizontal>
+  
+  <modal id="credits-modal" show-event="open-credits" clickerino-offerino-closerino="true" move-to-center="true">
+    <horizontal>
+      <vertical bg="round-rect-panel" >
+        <text text="~credits-text" rich-text="true"></text>
+      </vertical>
+    </horizontal>
+  </modal>
 </vertical>

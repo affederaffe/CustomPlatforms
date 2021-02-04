@@ -26,14 +26,10 @@ namespace CustomFloorPlugin {
 
         internal string customPlatformsFolderPath = Path.Combine(Environment.CurrentDirectory, "CustomPlatforms");
 
-        private Sprite feetIcon;
+        private Sprite lvlInsaneCover;
+        private Sprite fallbackCover;
 
-
-        /// <summary>
-        /// Loads AssetBundles and populates the platforms array with CustomPlatform objects
-        /// </summary>
         internal List<CustomPlatform> CreateAllPlatforms(Transform parent) {
-
 
             // Create the CustomFloorPlugin folder if it doesn't already exist
             if (!Directory.Exists(customPlatformsFolderPath)) {
@@ -45,84 +41,40 @@ namespace CustomFloorPlugin {
 
             List<CustomPlatform> platforms = new List<CustomPlatform>();
 
+            Sprite[] allSprites = Resources.FindObjectsOfTypeAll<Sprite>();
+            lvlInsaneCover = allSprites.First(x => x.name == "LvlInsaneCover");
+            fallbackCover = allSprites.First(x => x.name == "FeetIcon");
+
             // Create a dummy CustomPlatform for the original platform
             CustomPlatform defaultPlatform = new GameObject("Default Platform").AddComponent<CustomPlatform>();
             defaultPlatform.transform.parent = parent;
             defaultPlatform.platName = "Default Environment";
             defaultPlatform.platAuthor = "Beat Saber";
-            Texture2D texture = Resources.FindObjectsOfTypeAll<Texture2D>().FirstOrDefault(x => x.name == "LvlInsaneCover");
-            defaultPlatform.icon = Sprite.Create(texture, new Rect(0f, 0f, texture.width, texture.height), new Vector2(0.5f, 0.5f));
+            defaultPlatform.icon = lvlInsaneCover;
             platforms.Add(defaultPlatform);
-            // Populate the platforms array
-            Logging.Log("[START OF PLATFORM LOADING SPAM]-------------------------------------");
-            for (int i = 0; i < allBundlePaths.Length; i++) {
-                CustomPlatform newPlatform = LoadPlatformBundle(allBundlePaths[i], parent);
-                if (newPlatform != null) {
-                    platforms.Add(newPlatform);
-                }
+
+            foreach (string path in allBundlePaths) {
+                CustomPlatform newPlatform = LoadPlatformBundle(path, parent);
+                if (newPlatform != null) platforms.Add(newPlatform);
             }
-            Logging.Log("[END OF PLATFORM LOADING SPAM]---------------------------------------");
 
             return platforms;
         }
 
-
-        /// <summary>
-        /// Loads a <see cref="CustomPlatform"/> from disk into memory and instantiates it.<br/>
-        /// Part of this logic has been moved to a different function, for no apparent reason.
-        /// </summary>
-        /// <param name="bundlePath">The location of the <see cref="CustomPlatform"/>s <see cref="AssetBundle"/> file on disk</param>
-        /// <param name="parent">The parent <see cref="Transform"/> for the new <see cref="CustomPlatform"/></param>
         internal CustomPlatform LoadPlatformBundle(string bundlePath, Transform parent) {
 
             AssetBundle bundle = AssetBundle.LoadFromFile(bundlePath);
+            if (bundle == null) return null;
 
-            if (bundle == null) {
-                return null;
-            }
-
-            CustomPlatform newPlatform = LoadPlatform(bundle, parent);
-
-            using MD5 md5 = MD5.Create();
-            using FileStream stream = File.OpenRead(bundlePath);
-
-            byte[] hash = md5.ComputeHash(stream);
-            newPlatform.platHash = BitConverter.ToString(hash).Replace("-", string.Empty).ToLowerInvariant();
-
-            MaterialSwapper.ReplaceMaterials(newPlatform.gameObject);
-            Logging.Log(newPlatform.platName + " by " + newPlatform.platAuthor);
-
-            return newPlatform;
-        }
-
-
-        /// <summary>
-        /// Instantiates a platform from an assetbundle.
-        /// </summary>
-        /// <param name="bundle">An AssetBundle containing a CustomPlatform</param>
-        /// <param name="parent">The <see cref="Transform"/> under which this <paramref name="bundle"/> will be instantiated</param>
-        /// <returns></returns>
-        private CustomPlatform LoadPlatform(AssetBundle bundle, Transform parent) {
-
-            // CustomScripts are now integrated into the AssetBundle (finally)
-            TextAsset scriptsAsset = bundle.LoadAsset<TextAsset>("_Scripts.dll");
-            if (scriptsAsset != null && _config.LoadCustomScripts) {
-                Assembly.Load(scriptsAsset.bytes);
+            TextAsset scripts = bundle.LoadAsset<TextAsset>("_Scripts.dll");
+            if (scripts != null && _config.LoadCustomScripts) {
+                Assembly.Load(scripts.bytes);
             }
 
             GameObject platformPrefab = bundle.LoadAsset<GameObject>("_CustomPlatform");
-            if (platformPrefab == null) {
-                return null;
-            }
+            if (platformPrefab == null) return null;
 
-            GameObject newPlatform = UnityEngine.Object.Instantiate(platformPrefab.gameObject);
-
-            foreach (AudioListener al in newPlatform.transform.GetComponentsInChildren<AudioListener>(true)) {
-                GameObject.DestroyImmediate(al);
-            }
-
-
-            newPlatform.transform.parent = parent;
+            GameObject newPlatform = GameObject.Instantiate(platformPrefab, parent);
 
             bundle.Unload(false);
 
@@ -148,17 +100,18 @@ namespace CustomFloorPlugin {
                 }
             }
 
-            newPlatform.name = customPlatform.platName + " by " + customPlatform.platAuthor;
+            customPlatform.name = customPlatform.platName + " by " + customPlatform.platAuthor;
 
-            if (feetIcon == null) {
-                feetIcon = Resources.FindObjectsOfTypeAll<Sprite>().Where(x => x.name == "FeetIcon").FirstOrDefault();
-            }
+            platformPrefab.SetActive(false);
 
-            if (customPlatform.icon == null) {
-                customPlatform.icon = feetIcon;
-            }
+            using MD5 md5 = MD5.Create();
+            using FileStream fileStream = File.OpenRead(bundlePath);
+            byte[] hash = md5.ComputeHash(fileStream);
+            customPlatform.platHash = BitConverter.ToString(hash).Replace("-", string.Empty).ToLowerInvariant();
 
-            newPlatform.SetActive(false);
+            if (customPlatform.icon == null) customPlatform.icon = fallbackCover;
+
+            MaterialSwapper.ReplaceMaterials(newPlatform);
 
             return customPlatform;
         }

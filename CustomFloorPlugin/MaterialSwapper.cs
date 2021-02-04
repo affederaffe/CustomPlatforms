@@ -42,10 +42,9 @@ namespace CustomFloorPlugin {
         /// </summary>
         /// <param name="gameObject"><see cref="GameObject"/> to search for <see cref="Renderer"/>s</param>
         internal static void ReplaceMaterials(GameObject gameObject) {
-            //ColorManager colorManager = GameObject.Find("ColorManager").GetComponent<ColorManager>();
             Renderer[] renderers = gameObject.GetComponents<Renderer>().Concat(gameObject.GetComponentsInChildren<Renderer>(true)).ToArray();
             foreach (Renderer renderer in renderers) {
-                ReplaceForRenderer(renderer/*, colorManager*/);
+                ReplaceForRenderer(renderer);
             }
         }
 
@@ -55,7 +54,7 @@ namespace CustomFloorPlugin {
         /// </summary>
         /// <param name="renderer">What <see cref="Renderer"/> to replace materials for</param>
         /// <param name="colorManager">What <see cref="ColorManager"/> to use when coloring</param>
-        private static void ReplaceForRenderer(Renderer renderer/*, ColorManager colorManager*/) {
+        private static void ReplaceForRenderer(Renderer renderer) {
             Material[] materialsCopy = renderer.materials;
             bool materialsDidChange = false;
             for (int i = 0; i < materialsCopy.Length; i++) {
@@ -72,25 +71,6 @@ namespace CustomFloorPlugin {
                         materialsCopy[i] = opaqueGlow;
                         materialsDidChange = true;
                     }
-                    // I'm very sorry, but this has to be removed since the ColorManager does not exists when the platforms are created
-                    /*// If the shader has a float named _UseLeftColor or _UseRightColor, swap them out with the proper ColorManger colors 
-                    if(materialsCopy[i].HasProperty("_UseLeftColor") && materialsCopy[i].GetFloat("_UseLeftColor") != 0)
-                    {
-                        materialsCopy[i].SetColor("_Color", colorManager.ColorForSaberType(SaberType.SaberA));
-                    }
-                    else if (materialsCopy[i].HasProperty("_UseRightColor") && materialsCopy[i].GetFloat("_UseRightColor") != 0)
-                    {
-                        materialsCopy[i].SetColor("_Color", colorManager.ColorForSaberType(SaberType.SaberB));
-                    }
-                    // If the shader has a color named _LeftPlatformColor or _RightPlatformColor, swap them out with the proper ColorManger colors 
-                    if (materialsCopy[i].HasProperty("_LeftPlatformColor"))
-                    {
-                        materialsCopy[i].SetColor("_LeftPlatformColor", colorManager.ColorForSaberType(SaberType.SaberA));
-                    }
-                    else if (materialsCopy[i].HasProperty("_RightPlatformColor"))
-                    {
-                        materialsCopy[i].SetColor("_RightPlatformColor", colorManager.ColorForSaberType(SaberType.SaberB));
-                    }*/
                 }
             }
             if (materialsDidChange) {

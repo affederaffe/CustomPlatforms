@@ -154,6 +154,7 @@ namespace CustomFloorPlugin {
             IEnumerator<WaitForEndOfFrame> IHateUnity() {
                 yield return new WaitForEndOfFrame();
                 LoadAssets();
+                yield return new WaitForEndOfFrame();
                 Reload();
             }
         }

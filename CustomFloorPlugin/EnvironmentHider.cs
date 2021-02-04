@@ -43,6 +43,8 @@ namespace CustomFloorPlugin {
         private List<GameObject> rotatingLasers;
         private List<GameObject> trackLights;
 
+        private List<GameObject> renamedObjects;
+
 
         /// <summary>
         /// Hide and unhide world objects as required by a platform<br/>
@@ -88,8 +90,9 @@ namespace CustomFloorPlugin {
         private void FindEnvironment() {
             currentEnvironment = Searching.GetCurrentEnvironment();
             roots = currentEnvironment.GetRootGameObjects();
+            renamedObjects = new List<GameObject>();
             if (currentEnvironment.name == "MenuEnvironment") {
-                FindMenuEnvironmnetAndFeet();
+                FindMenuEnvironmnet();
             }
             if (currentEnvironment.name == "GameCore") {
                 FindMultiplayerEnvironment();
@@ -109,6 +112,9 @@ namespace CustomFloorPlugin {
                 FindDoubleColorLasers();
                 FindTrackLights();
             }
+            foreach (GameObject go in renamedObjects) {
+                go.name = go.name.PadRight(7);
+            }
         }
 
 
@@ -123,7 +129,7 @@ namespace CustomFloorPlugin {
             }
 
             foreach (GameObject go in list) {
-                go?.SetActive(!hidden);
+                if (go != null) go.SetActive(!hidden);
             }
         }
 
@@ -141,6 +147,7 @@ namespace CustomFloorPlugin {
                     list.Add(go);
                     if (rename) {
                         go.name += "renamed";
+                        renamedObjects.Add(go);
                     }
                     return true;
                 }
@@ -151,7 +158,7 @@ namespace CustomFloorPlugin {
             return false;
         }
 
-        private void FindMenuEnvironmnetAndFeet() {
+        private void FindMenuEnvironmnet() {
             if (menuEnvironment == null || menuEnvironment?.Count == 0) {
                 menuEnvironment = new List<GameObject>();
                 FindAddGameObject("MenuCoreLighting/SkyGradient", menuEnvironment);

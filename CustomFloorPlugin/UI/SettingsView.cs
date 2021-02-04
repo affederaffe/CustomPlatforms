@@ -33,8 +33,8 @@ namespace CustomFloorPlugin.UI {
         /// <summary>
         /// Hover hint of load-custom-scripts
         /// </summary>
-        [UIValue("LoadingCustomScriptsText")]
-        public const string loadingCustomScriptsText = "Loading Custom Scripts \nUse this at your own risk! \nOnly use scripts of trusted sources!";
+        [UIValue("LoadCustomScripts")]
+        public const string loadingCustomScriptsText = "Loads custom scripts which allows further features for platforms\nThese scripts could potentially contain maleware\nUse this option at your own risk!";
 
 
         /// <summary>

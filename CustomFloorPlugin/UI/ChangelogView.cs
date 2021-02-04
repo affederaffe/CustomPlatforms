@@ -1,4 +1,6 @@
-﻿using BeatSaberMarkupLanguage.Attributes;
+﻿using HMUI;
+
+using BeatSaberMarkupLanguage.Attributes;
 using BeatSaberMarkupLanguage.ViewControllers;
 
 
@@ -13,8 +15,11 @@ namespace CustomFloorPlugin.UI {
     [ViewDefinition("CustomFloorPlugin.Views.Changelog.bsml")]
     internal class ChangelogView : BSMLAutomaticViewController {
 
+        [UIComponent("credits-modal")]
+        private ModalView creditsModal;
+
         /// <summary>
-        /// The string displayed in the changelog
+        /// The string displayed in the changelog   
         /// </summary>
         [UIValue("changelog-text")]
         public string Changelog =>
@@ -32,5 +37,22 @@ namespace CustomFloorPlugin.UI {
          - Compatibility with Cinema: When a video is played, the default platform 
            will be used, if not configured otherwise
         - Fixed so many bugs I can't even count them";
+
+        /// <summary>
+        /// The string displayed in the credits
+        /// </summary>
+        [UIValue("credits-text")]
+        public string Credits =>
+        @"<size=150%><color=#888888>Credits</color></size>
+        boulders2000: I don't know what to write here...
+                                      This guy is just awesome.
+        Kyle 1413: Helped me rewrite the API and updated SongCore for it
+        Dakari: Compatibility with Cinema
+
+        <size=125%>CustomPlatforms developed by affederaffe</size>";
+
+        protected override void DidDeactivate(bool removedFromHierarchy, bool screenSystemDisabling) {
+            creditsModal.gameObject.SetActive(false);
+        }
     }
 }
