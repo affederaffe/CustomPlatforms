@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -29,6 +30,8 @@ namespace CustomFloorPlugin {
         private Sprite fallbackCover;
 
         internal List<CustomPlatform> CreateAllPlatforms(Transform parent) {
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
 
             // Create the CustomFloorPlugin folder if it doesn't already exist
             if (!Directory.Exists(customPlatformsFolderPath)) {
@@ -56,6 +59,9 @@ namespace CustomFloorPlugin {
                 CustomPlatform newPlatform = LoadPlatformBundle(path, parent);
                 if (newPlatform != null) platforms.Add(newPlatform);
             }
+
+            sw.Stop();
+            Utilities.Logging.Log($"Loaded {allBundlePaths.Length} platforms in {sw.Elapsed.TotalSeconds} seconds");
 
             return platforms;
         }

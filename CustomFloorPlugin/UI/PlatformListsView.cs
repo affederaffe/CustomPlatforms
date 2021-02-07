@@ -53,7 +53,10 @@ namespace CustomFloorPlugin.UI {
         public CustomListTableData a360PlatformListTable;
 
 
-        private CustomListTableData[] allListTables;
+        /// <summary>
+        /// An <see cref="System.Array"/> holding all <see cref="CustomListTableData"/>s
+        /// </summary>
+        internal CustomListTableData[] allListTables;
 
 
         [UIAction("Select-cell")]
@@ -132,35 +135,20 @@ namespace CustomFloorPlugin.UI {
 
 
         /// <summary>
-        /// (Re-)Loading the table for the ListView of available platforms and environments to override.<br/>
+        /// (Re-)Loading the tables for the ListView of available platforms.<br/>
         /// [Called by BSML]
         /// </summary>
         [UIAction("#post-parse")]
-        internal void SetupPlatformLists() {
-            allListTables = new CustomListTableData[] { singleplayerPlatformListTable, multiplayerPlatformListTable, a360PlatformListTable };
-            SetupLists();
-        }
-
-
-        internal void AddPlatformToLists(CustomPlatform platform) {
-            foreach (CustomListTableData listTable in allListTables) {
-                listTable.data.Add(new CustomListTableData.CustomCellInfo(platform.platName, platform.platAuthor, platform.icon));
-                listTable.tableView.ReloadData();
-            }
-        }
-
-
-        /// <summary>
-        /// (Re-)Loads a given <see cref="CustomListTableData"/> and fills it with all currently available platforms
-        /// </summary>
-        /// <param name="listTable">The list to reload</param>
-        /// <param name="platformType">The <see cref="PlatformType"/> the list should be set up for</param>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("CodeQuality", "IDE0051:Remove unused private members", Justification = "Called by BSML")]
         private void SetupLists() {
-            for (int i = 0; i < allListTables.Length; i++) {
-                allListTables[i].data.Clear();
-                foreach (CustomPlatform platform in _platformManager.AllPlatforms) {
-                    allListTables[i].data.Add(new CustomListTableData.CustomCellInfo(platform.platName, platform.platAuthor, platform.icon));
+            allListTables = new CustomListTableData[] { singleplayerPlatformListTable, multiplayerPlatformListTable, a360PlatformListTable };
+            foreach (CustomPlatform platform in _platformManager.AllPlatforms) {
+                CustomListTableData.CustomCellInfo cell = new CustomListTableData.CustomCellInfo(platform.platName, platform.platAuthor, platform.icon);
+                foreach (CustomListTableData listTable in allListTables) {
+                    listTable.data.Add(cell);
                 }
+            }
+            for (int i = 0; i < allListTables.Length; i++) {
                 allListTables[i].tableView.ReloadData();
                 int idx = _platformManager.GetIndexForType((PlatformType)i);
                 if (!allListTables[i].tableView.visibleCells.Any(x => x.selected)) {

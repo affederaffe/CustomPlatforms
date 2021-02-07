@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Reflection;
@@ -162,6 +163,8 @@ namespace CustomFloorPlugin {
         /// Now also steals the LightEffects for multiplayer, this scene is really useful
         /// </summary>
         private void LoadAssets() {
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
             Scene greenDay = SceneManager.LoadScene("GreenDayGrenadeEnvironment", new LoadSceneParameters(LoadSceneMode.Additive));
             StartCoroutine(fuckUnity());
             IEnumerator<WaitUntil> fuckUnity() {//did you know loaded scenes are loaded asynchronously, regarless if you use async or not?
@@ -186,7 +189,8 @@ namespace CustomFloorPlugin {
                 LightEffects.SetActive(false);
                 LightEffects.transform.SetParent(transform);
 
-                SceneManager.UnloadSceneAsync("GreenDayGrenadeEnvironment");
+                AsyncOperation unloadSceneOperation = SceneManager.UnloadSceneAsync("GreenDayGrenadeEnvironment");
+                yield return new WaitUntil(() => { return unloadSceneOperation.isDone; });
 
                 using Stream manifestResourceStream = Assembly.GetExecutingAssembly().GetManifestResourceStream("CustomFloorPlugin.heart.mesh");
                 using StreamReader streamReader = new StreamReader(manifestResourceStream);
@@ -225,6 +229,9 @@ namespace CustomFloorPlugin {
 
                 Heart.SetActive(_config.ShowHeart);
                 Heart.GetComponent<InstancedMaterialLightWithId>().ColorWasSet(Color.magenta);
+
+                sw.Stop();
+                Utilities.Logging.Log($"Loaded assets in {sw.Elapsed.TotalSeconds} seconds");
             }
         }
     }

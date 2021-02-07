@@ -3,12 +3,15 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
+using BeatSaberMarkupLanguage.Components;
+
 using CustomFloorPlugin.UI;
 
 using IPA.Loader;
 
 using Newtonsoft.Json;
 
+using UnityEngine;
 using UnityEngine.Networking;
 
 using Zenject;
@@ -19,8 +22,9 @@ namespace CustomFloorPlugin {
 
     /// <summary>
     /// A class that handles all interaction with outside plugins, atm just SongCore and Cinema
+    /// Also detects changes in the platforms directory and loads added platforms automaticly
     /// </summary>
-    internal class API : IInitializable {
+    internal class API : IInitializable, IDisposable {
 
         [Inject]
         private readonly PlatformLoader _platformLoader;
@@ -31,12 +35,44 @@ namespace CustomFloorPlugin {
         [Inject]
         private readonly PlatformListsView _platformListsView;
 
+        private FileSystemWatcher _fileSystemWatcher;
+
+        private bool apiRequest;
+
         public void Initialize() {
+            _fileSystemWatcher = new FileSystemWatcher(_platformLoader.customPlatformsFolderPath, "*.plat");
+            _fileSystemWatcher.Created += (object sender, FileSystemEventArgs e) => SharedCoroutineStarter.instance.StartCoroutine(OnFileCreated(sender, e));
+            _fileSystemWatcher.EnableRaisingEvents = true;
             if (PluginManager.GetPlugin("SongCore") != null) {
                 SubscribeToSongCoreEvent();
             }
             if (PluginManager.GetPlugin("Cinema") != null) {
                 SubscribeToCinemaEvent();
+            }
+        }
+
+        public void Dispose() {
+            _fileSystemWatcher.Created -= (object sender, FileSystemEventArgs e) => SharedCoroutineStarter.instance.StartCoroutine(OnFileCreated(sender, e));
+            _fileSystemWatcher.Dispose();
+        }
+
+        private IEnumerator<WaitForEndOfFrame> OnFileCreated(object sender, FileSystemEventArgs e) {
+            yield return new WaitForEndOfFrame();
+            CustomPlatform newPlatform = _platformLoader.LoadPlatformBundle(e.FullPath, _platformManager.transform);
+            if (newPlatform == null) yield break;
+            _platformManager.AllPlatforms.Add(newPlatform);
+            CustomListTableData.CustomCellInfo cell = new CustomListTableData.CustomCellInfo(newPlatform.platName, newPlatform.platAuthor, newPlatform.icon);
+
+            if (_platformListsView.allListTables != null) {
+                foreach (CustomListTableData listTable in _platformListsView.allListTables) {
+                    listTable.data.Add(cell);
+                    listTable.tableView.ReloadData();
+                }
+            }
+
+            if (apiRequest) {
+                _platformManager.apiRequestIndex = _platformManager.AllPlatforms.IndexOf(newPlatform);
+                apiRequest = false;
             }
         }
 
@@ -111,7 +147,7 @@ namespace CustomFloorPlugin {
                     Dictionary<string, PlatformDownloadData> downloadData = JsonConvert.DeserializeObject<Dictionary<string, PlatformDownloadData>>(www.downloadHandler.text);
                     PlatformDownloadData data = downloadData.FirstOrDefault().Value;
                     if (data != null) {
-                        SharedCoroutineStarter.instance.StartCoroutine(DownloadSaveAndAddPlatform(data));
+                        SharedCoroutineStarter.instance.StartCoroutine(DownloadSavePlatform(data));
                     }
                 }
             }
@@ -127,7 +163,7 @@ namespace CustomFloorPlugin {
                     Dictionary<string, PlatformDownloadData> downloadData = JsonConvert.DeserializeObject<Dictionary<string, PlatformDownloadData>>(www.downloadHandler.text);
                     PlatformDownloadData data = downloadData.FirstOrDefault().Value;
                     if (data != null) {
-                        SharedCoroutineStarter.instance.StartCoroutine(DownloadSaveAndAddPlatform(data));
+                        SharedCoroutineStarter.instance.StartCoroutine(DownloadSavePlatform(data));
                     }
                 }
             }
@@ -138,7 +174,7 @@ namespace CustomFloorPlugin {
         /// </summary>
         /// <param name="data">The API deserialized API response containing the download link to the .plat file</param>
         /// <returns></returns>
-        private IEnumerator<UnityWebRequestAsyncOperation> DownloadSaveAndAddPlatform(PlatformDownloadData data) {
+        private IEnumerator<UnityWebRequestAsyncOperation> DownloadSavePlatform(PlatformDownloadData data) {
             using UnityWebRequest www = UnityWebRequest.Get(data.download);
             yield return www.SendWebRequest();
 
@@ -148,10 +184,7 @@ namespace CustomFloorPlugin {
             else {
                 string destination = Path.Combine(_platformLoader.customPlatformsFolderPath, data.name + ".plat");
                 File.WriteAllBytes(destination, www.downloadHandler.data);
-                CustomPlatform newPlatform = _platformLoader.LoadPlatformBundle(destination, _platformManager.transform);
-                _platformManager.AllPlatforms.Add(newPlatform);
-                _platformManager.apiRequestIndex = _platformManager.AllPlatforms.IndexOf(newPlatform);
-                _platformListsView.AddPlatformToLists(newPlatform);
+                apiRequest = true;
             }
         }
     }
