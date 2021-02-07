@@ -37,6 +37,8 @@ namespace CustomFloorPlugin.UI {
         - Revived the API, mappers can specify a platform for their songs again
          - Compatibility with Cinema: When a video is played, the default platform 
            will be used, if not configured otherwise
+        - Platforms installed while the game is running 
+           are automaticly loaded now
         - Fixed so many bugs I can't even count them";
 
         /// <summary>
