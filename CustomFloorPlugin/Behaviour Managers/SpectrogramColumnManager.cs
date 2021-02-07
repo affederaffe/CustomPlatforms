@@ -15,6 +15,9 @@ namespace CustomFloorPlugin {
     /// </summary>
     internal class SpectrogramColumnManager : MonoBehaviour {
 
+        [Inject]
+        private readonly LightWithIdManager _lightWithIdManager;
+
         [InjectOptional]
         private readonly BasicSpectrogramData _basicSpectrogramData;
 
@@ -61,7 +64,6 @@ namespace CustomFloorPlugin {
                 specCol.SetField("_maxHeight", spec.maxHeight);
                 specCol.SetField("_columnWidth", spec.columnWidth);
                 specCol.SetField("_columnDepth", spec.columnDepth);
-                specCol.SetField("_amount", spec.amount);
 
                 spectrogramColumns.Add(specCol);
                 columnDescriptors.Add(spec);
@@ -70,13 +72,16 @@ namespace CustomFloorPlugin {
 
 
         /// <summary>
-        /// Passes <see cref="BasicSpectrogramData"/> on to all <see cref="SpectrogramColumns"/><br/>
+        /// Passes <see cref="BasicSpectrogramData"/> and <see cref="LightWithIdManager"/> on to all <see cref="SpectrogramColumns"/><br/>
         /// </summary>
         internal void UpdateSpectrogramDataProvider() {
             if (_basicSpectrogramData != null) {
                 foreach (SpectrogramColumns specCol in spectrogramColumns) {
                     specCol.SetField("_spectrogramData", _basicSpectrogramData);
                 }
+            }
+            foreach (SpectrogramColumns specCol in spectrogramColumns) {
+                specCol.SetField("_lightWithIdManager", _lightWithIdManager);
             }
         }
     }

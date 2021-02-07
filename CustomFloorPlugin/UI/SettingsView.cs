@@ -88,28 +88,6 @@ namespace CustomFloorPlugin.UI {
         }
 
 
-        /// <summary>
-        /// Should this Plugin spawn a Custom Platform in 360°-Levels?
-        /// Forwards the current choice to the UI, and the new choice to the plugin
-        /// </summary>
-        [UIValue("use-in-360")]
-        public bool UseIn360 {
-            get => _config.UseIn360;
-            set => _config.UseIn360 = value;
-        }
-
-
-        /// <summary>
-        /// Should this Plugin spawn a Custom Platform in Multiplayer?
-        /// Forwards the current choice to the UI, and the new choice to the plugin
-        /// </summary>
-        [UIValue("use-in-multiplayer")]
-        public bool UseInMultiplayer {
-            get => _config.UseInMultiplayer;
-            set => _config.UseInMultiplayer = value;
-        }
-
-
         [UIAction("ReloadPlatforms")]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("CodeQuality", "IDE0051:Remove unused private members", Justification = "Called by BSML")]
         private void ReloadButtonPressed() {

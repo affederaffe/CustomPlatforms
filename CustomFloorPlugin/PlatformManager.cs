@@ -32,45 +32,6 @@ namespace CustomFloorPlugin {
         internal List<CustomPlatform> AllPlatforms;
 
         /// <summary>
-        /// The index of the currently selected <see cref="CustomPlatform"/> for singleplayer<br/>
-        /// Returns 0 if the selection goes AWOL...
-        /// </summary>
-        
-        internal int CurrentSingleplayerPlatformIndex {
-            get {
-                int idx = -1;
-                if (currentSingleplayerPlatform != null) {
-                    idx = AllPlatforms.IndexOf(currentSingleplayerPlatform);
-                }
-                if (idx != -1) {
-                    return idx;
-                }
-                else {
-                    return 0;
-                }
-            }
-        }
-
-        /// <summary>
-        /// The index of the currently selected <see cref="CustomPlatform"/> for multiplayer<br/>
-        /// Returns 0 if the selection goes AWOL...
-        /// </summary>
-        internal int CurrentMultiplayerPlatformIndex {
-            get {
-                int idx = -1;
-                if (currentMultiplayerPlatform != null) {
-                    idx = AllPlatforms.IndexOf(currentMultiplayerPlatform);
-                }
-                if (idx != -1) {
-                    return idx;
-                }
-                else {
-                    return 0;
-                }
-            }
-        }
-
-        /// <summary>
         /// Stores the index of an API requested <see cref="CustomPlatform"/>
         /// </summary>
         public int apiRequestIndex = -1;
@@ -94,6 +55,11 @@ namespace CustomFloorPlugin {
         /// Keeps track of the currently selected <see cref="CustomPlatform"/>
         /// </summary>
         internal CustomPlatform currentMultiplayerPlatform;
+
+        /// <summary>
+        /// Keeps track of the currently selected <see cref="CustomPlatform"/>
+        /// </summary>
+        internal CustomPlatform currentA360Platform;
 
         /// <summary>
         /// Keeps track of the currently active <see cref="CustomPlatform"/>
@@ -164,24 +130,28 @@ namespace CustomFloorPlugin {
         /// </summary>
         internal void Reload() {
             AllPlatforms = _platformLoader.CreateAllPlatforms(transform);
-            currentSingleplayerPlatform = AllPlatforms[0];
-            currentMultiplayerPlatform = AllPlatforms[0];
-            if (_config.SingleplayerPlatformPath != null) {
-                for (int i = 0; i < AllPlatforms.Count; i++) {
-                    if (_config.SingleplayerPlatformPath == AllPlatforms[i].platName + AllPlatforms[i].platAuthor) {
-                        currentSingleplayerPlatform = AllPlatforms[i];
-                        break;
-                    }
+            currentSingleplayerPlatform = GetLastSelectedPlatform(_config.SingleplayerPlatformPath);
+            currentMultiplayerPlatform = GetLastSelectedPlatform(_config.MultiplayerPlatformPath);
+            currentA360Platform = GetLastSelectedPlatform(_config.A360PlatformPath);
+        }
+
+        internal int GetIndexForType(PlatformType platformType) {
+            int index = platformType switch {
+                PlatformType.Singleplayer => AllPlatforms.IndexOf(currentSingleplayerPlatform),
+                PlatformType.Multiplayer => AllPlatforms.IndexOf(currentMultiplayerPlatform),
+                PlatformType.A360 => AllPlatforms.IndexOf(currentA360Platform),
+                _ => 0
+            };
+            return index != -1 ? index : 0;
+        }
+
+        private CustomPlatform GetLastSelectedPlatform(string path) {
+            for (int i = 0; i < AllPlatforms.Count; i++) {
+                if (path == AllPlatforms[i].platName + AllPlatforms[i].platAuthor) {
+                    return AllPlatforms[i];
                 }
             }
-            if (_config.MultiplayerPlatformPath != null) {
-                for (int i = 0; i < AllPlatforms.Count; i++) {
-                    if (_config.MultiplayerPlatformPath == AllPlatforms[i].platName + AllPlatforms[i].platAuthor) {
-                        currentMultiplayerPlatform = AllPlatforms[i];
-                        break;
-                    }
-                }
-            }
+            return AllPlatforms[0];
         }
 
         /// <summary>

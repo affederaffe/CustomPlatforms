@@ -2,6 +2,7 @@
 
     public enum PlatformType {
         Singleplayer,
-        Multiplayer
+        Multiplayer,
+        A360
     }
 }

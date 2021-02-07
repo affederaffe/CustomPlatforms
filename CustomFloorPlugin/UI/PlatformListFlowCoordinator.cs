@@ -1,5 +1,4 @@
 ﻿using BeatSaberMarkupLanguage;
-using BeatSaberMarkupLanguage.Parser;
 
 using CustomFloorPlugin.Utilities;
 
@@ -54,6 +53,7 @@ namespace CustomFloorPlugin.UI {
         protected override void BackButtonWasPressed(ViewController _1) {
             Logging.Log("Selected Singleplayer Platform: " + _platformManager.currentSingleplayerPlatform.platName);
             Logging.Log("Selected Multiplayer Platform: " + _platformManager.currentMultiplayerPlatform.platName);
+            Logging.Log("Selected 360 Platform: " + _platformManager.currentA360Platform.platName);
             _mainFlowCoordinator.DismissFlowCoordinator(this, null, ViewController.AnimationDirection.Horizontal, false);
         }
     }

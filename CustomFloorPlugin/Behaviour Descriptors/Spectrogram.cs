@@ -12,10 +12,6 @@ namespace CustomFloorPlugin {
         public float columnWidth = 1f;
         public float columnDepth = 1f;
 
-        [Range(1, 64)]
-        [Tooltip("The amount of Columns created in each direction")]
-        public int amount = 64;
-
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Code Quality", "IDE0051:Remove unused private members", Justification = "Called by Unity")]
         private void OnDrawGizmos() {
@@ -23,7 +19,7 @@ namespace CustomFloorPlugin {
             Gizmos.color = Color.green;
             Vector3 zOffset;
 
-            for (int i = -amount; i < amount; i++) {
+            for (int i = -64; i < 64; i++) {
                 zOffset = i * separator;
                 if (columnPrefab != null) {
                     foreach (Renderer r in columnPrefab.GetComponentsInChildren<Renderer>()) {

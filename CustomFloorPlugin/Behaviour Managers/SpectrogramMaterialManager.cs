@@ -1,7 +1,8 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 
 using UnityEngine;
+
+using Zenject;
 
 
 namespace CustomFloorPlugin {
@@ -12,6 +13,8 @@ namespace CustomFloorPlugin {
     /// </summary>
     internal class SpectrogramMaterialManager : MonoBehaviour {
 
+        [InjectOptional]
+        private readonly BasicSpectrogramData _basicSpectrogramData;
 
         /// <summary>
         /// <see cref="List{T}"/> of all known <see cref="SpectrogramMaterial"/>s under the gameObject this script is attached to.
@@ -45,13 +48,9 @@ namespace CustomFloorPlugin {
         /// Passes <see cref="BasicSpectrogramData"/> on to all <see cref="SpectrogramMaterial"/>s<br/>
         /// </summary>
         internal void UpdateSpectrogramDataProvider() {
-            BasicSpectrogramData[] datas = Resources.FindObjectsOfTypeAll<BasicSpectrogramData>();
-            if (datas.Length != 0) {
-                BasicSpectrogramData spectrogramData = datas.FirstOrDefault();
-                if (spectrogramData != null) {
-                    foreach (SpectrogramMaterial specMat in spectrogramMaterials) {
-                        specMat.SetData(spectrogramData);
-                    }
+            if (_basicSpectrogramData != null) {
+                foreach (SpectrogramMaterial specMat in spectrogramMaterials) {
+                    specMat.SetData(_basicSpectrogramData);
                 }
             }
         }

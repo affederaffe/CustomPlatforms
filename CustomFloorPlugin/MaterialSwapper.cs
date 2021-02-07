@@ -53,7 +53,6 @@ namespace CustomFloorPlugin {
         /// Replaces all fake <see cref="Material"/>s on a given <see cref="Renderer"/>
         /// </summary>
         /// <param name="renderer">What <see cref="Renderer"/> to replace materials for</param>
-        /// <param name="colorManager">What <see cref="ColorManager"/> to use when coloring</param>
         private static void ReplaceForRenderer(Renderer renderer) {
             Material[] materialsCopy = renderer.materials;
             bool materialsDidChange = false;

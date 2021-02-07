@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
+using CustomFloorPlugin.UI;
+
 using IPA.Loader;
 
 using Newtonsoft.Json;
@@ -25,6 +27,9 @@ namespace CustomFloorPlugin {
 
         [Inject]
         private readonly PlatformManager _platformManager;
+
+        [Inject]
+        private readonly PlatformListsView _platformListsView;
 
         public void Initialize() {
             if (PluginManager.GetPlugin("SongCore") != null) {
@@ -146,6 +151,7 @@ namespace CustomFloorPlugin {
                 CustomPlatform newPlatform = _platformLoader.LoadPlatformBundle(destination, _platformManager.transform);
                 _platformManager.AllPlatforms.Add(newPlatform);
                 _platformManager.apiRequestIndex = _platformManager.AllPlatforms.IndexOf(newPlatform);
+                _platformListsView.AddPlatformToLists(newPlatform);
             }
         }
     }

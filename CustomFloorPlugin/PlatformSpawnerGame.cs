@@ -32,20 +32,27 @@ namespace CustomFloorPlugin {
             PlatformManager.Heart.SetActive(false);
             a360 = (_difficultyBeatmap?.parentDifficultyBeatmapSet.beatmapCharacteristic.requires360Movement).GetValueOrDefault();
             multiplayer = _multiplayerPlayersManager ? true : false;
-            if ((a360 && _config.UseIn360) || (multiplayer && _config.UseInMultiplayer) || (!a360 && !multiplayer)) {
-                if (multiplayer) {
+
+            if (multiplayer) {
+                if (_platformManager.GetIndexForType(PlatformType.Multiplayer) != 0) {
                     ChangeToPlatform(PlatformType.Multiplayer);
                     _multiplayerPlayersManager.playerDidFinishEvent += HandlePlayerDidFinishEvent;
                     _multiplayerPlayersManager.activeLocalPlayerFacade?.introAnimator.StopAllCoroutines();
                     _multiplayerPlayersManager.inactivePlayerFacade?.introAnimator.StopAllCoroutines();
                     SpawnLightEffects();
-                    return;
                 }
-                else if (_platformManager.apiRequestIndex != -1 && (_platformManager.apiRequestedLevelId == _difficultyBeatmap.level.levelID || _platformManager.apiRequestIndex == 0)) {
-                    ChangeToPlatform(_platformManager.apiRequestIndex);
-                    return;
-                }
+            }
+            else if (_platformManager.apiRequestIndex != -1 && (_platformManager.apiRequestedLevelId == _difficultyBeatmap.level.levelID || _platformManager.apiRequestIndex == 0)) {
+                ChangeToPlatform(_platformManager.apiRequestIndex);
+            }
+            else if (a360) {
+                ChangeToPlatform(PlatformType.A360);
+            }
+            else if (!a360 && !multiplayer) {
                 ChangeToPlatform(PlatformType.Singleplayer);
+            }
+            else {
+                ChangeToPlatform(0);
             }
         }
 

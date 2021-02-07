@@ -16,7 +16,7 @@ namespace CustomFloorPlugin.UI {
     internal class ChangelogView : BSMLAutomaticViewController {
 
         [UIComponent("credits-modal")]
-        private ModalView creditsModal;
+        private readonly ModalView creditsModal;
 
         /// <summary>
         /// The string displayed in the changelog   
@@ -32,7 +32,8 @@ namespace CustomFloorPlugin.UI {
         - Added light effects in multiplayer
         - Removed BS Utils as a dependency
         - Drasticly simplified custom scripts
-        - You can now select platforms for multi- and singleplayer seperately
+        - You can now select platforms for multi-, singleplayer and 
+           360°-levels seperately
         - Revived the API, mappers can specify a platform for their songs again
          - Compatibility with Cinema: When a video is played, the default platform 
            will be used, if not configured otherwise

@@ -65,7 +65,7 @@ namespace CustomFloorPlugin {
             yield return new WaitForEndOfFrame();
             FindEnvironment();
             if (menuEnvironment != null) SetCollectionHidden(menuEnvironment, _platformManager.activePlatform != null);
-            if (multiplayerEnvironment != null) SetCollectionHidden(multiplayerEnvironment, _config.UseInMultiplayer);
+            if (multiplayerEnvironment != null) SetCollectionHidden(multiplayerEnvironment, true);
             if (feet != null) SetCollectionHidden(feet, platform.hideDefaultPlatform && !_config.AlwaysShowFeet);
             if (playersPlace != null) SetCollectionHidden(playersPlace, platform.hideDefaultPlatform);
             if (smallRings != null) SetCollectionHidden(smallRings, platform.hideSmallRings);
@@ -113,7 +113,7 @@ namespace CustomFloorPlugin {
                 FindTrackLights();
             }
             foreach (GameObject go in renamedObjects) {
-                go.name = go.name.PadRight(7);
+                go.name = go.name.Remove(go.name.Length - 7);
             }
         }
 
@@ -594,7 +594,7 @@ namespace CustomFloorPlugin {
                     FindAddGameObject($"TopLaser ({i})", trackLights);
                 }
             }
-            if (FindAddGameObject("Cube", trackLights) && FindAddGameObject("Cube (1)", trackLights)) {
+            if (FindAddGameObject("Cube", trackLights)) {
                 for (int i = 82; i < 90; i++) {
                     FindAddGameObject($"Cube ({i})", trackLights);
                 }

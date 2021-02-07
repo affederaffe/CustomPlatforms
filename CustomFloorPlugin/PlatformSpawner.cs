@@ -34,28 +34,29 @@ namespace CustomFloorPlugin {
         /// </summary>
         /// <param name="index">The index of the new <see cref="CustomPlatform"/> in the list <see cref="AllPlatforms"/></param>
         internal void SetPlatformAndShow(int index, PlatformType platformType) {
-            if (platformType == PlatformType.Singleplayer) {
-                _platformManager.currentSingleplayerPlatform = _platformManager.AllPlatforms[index % _platformManager.AllPlatforms.Count];
-                _config.SingleplayerPlatformPath = _platformManager.currentSingleplayerPlatform.platName + _platformManager.currentSingleplayerPlatform.platAuthor;
-                ChangeToPlatform(index);
+            switch (platformType) {
+                case PlatformType.Singleplayer:
+                    _platformManager.currentSingleplayerPlatform = _platformManager.AllPlatforms[index % _platformManager.AllPlatforms.Count];
+                    _config.SingleplayerPlatformPath = _platformManager.currentSingleplayerPlatform.platName + _platformManager.currentSingleplayerPlatform.platAuthor;
+                    break;
+                case PlatformType.Multiplayer:
+                    _platformManager.currentMultiplayerPlatform = _platformManager.AllPlatforms[index % _platformManager.AllPlatforms.Count];
+                    _config.MultiplayerPlatformPath = _platformManager.currentMultiplayerPlatform.platName + _platformManager.currentMultiplayerPlatform.platAuthor;
+                    break;
+                case PlatformType.A360:
+                    _platformManager.currentA360Platform = _platformManager.AllPlatforms[index % _platformManager.AllPlatforms.Count];
+                    _config.A360PlatformPath = _platformManager.currentA360Platform.platName + _platformManager.currentA360Platform.platAuthor;
+                    break;
             }
-            else {
-                _platformManager.currentMultiplayerPlatform = _platformManager.AllPlatforms[index % _platformManager.AllPlatforms.Count];
-                _config.MultiplayerPlatformPath = _platformManager.currentMultiplayerPlatform.platName + _platformManager.currentMultiplayerPlatform.platAuthor;
-                ChangeToPlatform(index);
-            }
+            ChangeToPlatform(index);
         }
 
         /// <summary>
         /// Changes to the currently selected <see cref="CustomPlatform"/>
         /// </summary>
         internal void ChangeToPlatform(PlatformType platformType) {
-            if (platformType == PlatformType.Singleplayer) {
-                ChangeToPlatform(_platformManager.CurrentSingleplayerPlatformIndex);
-            }
-            else {
-                ChangeToPlatform(_platformManager.CurrentMultiplayerPlatformIndex);
-            }
+            int index = _platformManager.GetIndexForType(platformType);
+            ChangeToPlatform(index);
         }
 
         /// <summary>
