@@ -99,13 +99,15 @@ namespace CustomFloorPlugin {
             // Since the texture isn't instantiable, this clusterfuck is needed. Just Unity things ._.
             customPlatform = GameObject.Instantiate(customPlatform);
             if (customPlatform.icon != null) {
-                RenderTexture renderTex = RenderTexture.GetTemporary((int)customPlatform.icon.rect.width, (int)customPlatform.icon.rect.height, 0, RenderTextureFormat.Default, RenderTextureReadWrite.Linear);
+                int width = Mathf.Max((int)customPlatform.icon.rect.width, 128);
+                int height = Mathf.Max((int)customPlatform.icon.rect.height, 128);
+                RenderTexture renderTex = RenderTexture.GetTemporary(width, height, 0, RenderTextureFormat.Default, RenderTextureReadWrite.Linear);
                 Graphics.Blit(customPlatform.icon.texture, renderTex);
-                Texture2D clonedTex = new Texture2D((int)customPlatform.icon.rect.width, (int)customPlatform.icon.rect.height);
-                clonedTex.ReadPixels(new Rect(0, 0, renderTex.width, renderTex.height), 0, 0);
+                Texture2D clonedTex = new Texture2D(width, height);
+                clonedTex.ReadPixels(new Rect(0, 0, width, height), 0, 0);
                 clonedTex.Apply();
                 RenderTexture.ReleaseTemporary(renderTex);
-                customPlatform.icon = Sprite.Create(clonedTex, customPlatform.icon.rect, customPlatform.icon.pivot);
+                customPlatform.icon = Sprite.Create(clonedTex, new Rect(Vector2.zero, new Vector2(width, height)), Vector2.zero);
             }
             else {
                 customPlatform.icon = fallbackCover;
