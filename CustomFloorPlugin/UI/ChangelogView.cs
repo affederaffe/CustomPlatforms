@@ -31,7 +31,7 @@ namespace CustomFloorPlugin.UI {
            the base game itself
         - Added light effects in multiplayer
         - Removed BS Utils as a dependency
-        - Drasticly simplified custom scripts
+        - Simplified custom scripts
         - You can now select platforms for multi-, singleplayer and 
            360°-levels seperately
         - Revived the API, mappers can specify a platform for their songs again
@@ -39,6 +39,8 @@ namespace CustomFloorPlugin.UI {
            will be used, if not configured otherwise
         - Platforms installed while the game is running 
            are automaticly loaded now
+        - Also platforms are now loaded lazily, that means the startup time
+           decreased drasticly
         - Fixed so many bugs I can't even count them";
 
         /// <summary>

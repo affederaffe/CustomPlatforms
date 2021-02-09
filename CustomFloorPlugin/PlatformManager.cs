@@ -30,7 +30,7 @@ namespace CustomFloorPlugin {
         /// <summary>
         /// List of all loaded Platforms
         /// </summary>
-        internal List<CustomPlatform> AllPlatforms;
+        internal List<CustomPlatform> allPlatforms;
 
         /// <summary>
         /// Stores the index of an API requested <see cref="CustomPlatform"/>
@@ -130,29 +130,22 @@ namespace CustomFloorPlugin {
         /// Reloads all <see cref="CustomPlatform"/>s and selects the last selected before the game was closed from the <see cref="PluginConfig"/>
         /// </summary>
         internal void Reload() {
-            AllPlatforms = _platformLoader.CreateAllPlatforms(transform);
-            currentSingleplayerPlatform = GetLastSelectedPlatform(_config.SingleplayerPlatformPath);
-            currentMultiplayerPlatform = GetLastSelectedPlatform(_config.MultiplayerPlatformPath);
-            currentA360Platform = GetLastSelectedPlatform(_config.A360PlatformPath);
+            allPlatforms = _platformLoader.CreateAllPlatforms(transform);
+            foreach (var platform in allPlatforms) {
+                if (_config.SingleplayerPlatformPath == platform.platName + platform.platAuthor) currentSingleplayerPlatform = platform;
+                if (_config.MultiplayerPlatformPath == platform.platName + platform.platAuthor) currentMultiplayerPlatform = platform;
+                if (_config.A360PlatformPath == platform.platName + platform.platAuthor) currentA360Platform = platform;
+            }
         }
 
         internal int GetIndexForType(PlatformType platformType) {
             int index = platformType switch {
-                PlatformType.Singleplayer => AllPlatforms.IndexOf(currentSingleplayerPlatform),
-                PlatformType.Multiplayer => AllPlatforms.IndexOf(currentMultiplayerPlatform),
-                PlatformType.A360 => AllPlatforms.IndexOf(currentA360Platform),
+                PlatformType.Singleplayer => allPlatforms.IndexOf(currentSingleplayerPlatform),
+                PlatformType.Multiplayer => allPlatforms.IndexOf(currentMultiplayerPlatform),
+                PlatformType.A360 => allPlatforms.IndexOf(currentA360Platform),
                 _ => 0
             };
             return index != -1 ? index : 0;
-        }
-
-        private CustomPlatform GetLastSelectedPlatform(string path) {
-            for (int i = 0; i < AllPlatforms.Count; i++) {
-                if (path == AllPlatforms[i].platName + AllPlatforms[i].platAuthor) {
-                    return AllPlatforms[i];
-                }
-            }
-            return AllPlatforms[0];
         }
 
         /// <summary>

@@ -22,6 +22,9 @@ namespace CustomFloorPlugin {
         protected readonly EnvironmentHider _hider;
 
         [Inject]
+        protected readonly PlatformLoader _platformLoader;
+
+        [Inject]
         protected readonly PlatformManager _platformManager;
 
         [Inject]
@@ -36,15 +39,15 @@ namespace CustomFloorPlugin {
         internal void SetPlatformAndShow(int index, PlatformType platformType) {
             switch (platformType) {
                 case PlatformType.Singleplayer:
-                    _platformManager.currentSingleplayerPlatform = _platformManager.AllPlatforms[index % _platformManager.AllPlatforms.Count];
+                    _platformManager.currentSingleplayerPlatform = _platformManager.allPlatforms[index % _platformManager.allPlatforms.Count];
                     _config.SingleplayerPlatformPath = _platformManager.currentSingleplayerPlatform.platName + _platformManager.currentSingleplayerPlatform.platAuthor;
                     break;
                 case PlatformType.Multiplayer:
-                    _platformManager.currentMultiplayerPlatform = _platformManager.AllPlatforms[index % _platformManager.AllPlatforms.Count];
+                    _platformManager.currentMultiplayerPlatform = _platformManager.allPlatforms[index % _platformManager.allPlatforms.Count];
                     _config.MultiplayerPlatformPath = _platformManager.currentMultiplayerPlatform.platName + _platformManager.currentMultiplayerPlatform.platAuthor;
                     break;
                 case PlatformType.A360:
-                    _platformManager.currentA360Platform = _platformManager.AllPlatforms[index % _platformManager.AllPlatforms.Count];
+                    _platformManager.currentA360Platform = _platformManager.allPlatforms[index % _platformManager.allPlatforms.Count];
                     _config.A360PlatformPath = _platformManager.currentA360Platform.platName + _platformManager.currentA360Platform.platAuthor;
                     break;
             }
@@ -64,17 +67,27 @@ namespace CustomFloorPlugin {
         /// </summary>
         /// <param name="index">The index of the new <see cref="CustomPlatform"/> in the list <see cref="AllPlatforms"/></param>
         internal void ChangeToPlatform(int index) {
-            Logging.Log("Switching to " + _platformManager.AllPlatforms[index].name);
+            Logging.Log("Switching to " + _platformManager.allPlatforms[index].name);
             _platformManager.activePlatform?.gameObject.SetActive(false);
             NotifyPlatform(_platformManager.activePlatform, NotifyType.Disable);
             DestroyCustomObjects();
+            _platformManager.activePlatform = _platformManager.allPlatforms[index];
 
+            // if the active platform is only a descriptor, load the real one and replace all references
+            if (_platformManager.activePlatform.transform.childCount == 0 && index != 0) {
+                string path = _platformLoader.customPlatformPaths[_platformManager.activePlatform];
+                CustomPlatform realPlatform = _platformLoader.LoadPlatformBundle(path, _platformManager.transform);
+                if (_platformManager.currentSingleplayerPlatform == _platformManager.activePlatform) _platformManager.currentSingleplayerPlatform = realPlatform;
+                if (_platformManager.currentMultiplayerPlatform == _platformManager.activePlatform) _platformManager.currentMultiplayerPlatform = realPlatform;
+                if (_platformManager.currentA360Platform == _platformManager.activePlatform) _platformManager.currentA360Platform = realPlatform;
+                GameObject.Destroy(_platformManager.activePlatform.gameObject);
+                _platformManager.allPlatforms[index] = realPlatform;
+                _platformManager.activePlatform = realPlatform;
+            }
             SharedCoroutineStarter.instance.StartCoroutine(WaitAndSpawn());
-
             IEnumerator<WaitForEndOfFrame> WaitAndSpawn() {
                 yield return new WaitForEndOfFrame();
                 if (index != 0) {
-                    _platformManager.activePlatform = _platformManager.AllPlatforms[index % _platformManager.AllPlatforms.Count];
                     _platformManager.activePlatform.gameObject.SetActive(true);
                     AddManagers(_platformManager.activePlatform);
                     NotifyPlatform(_platformManager.activePlatform, NotifyType.Enable);
@@ -83,7 +96,7 @@ namespace CustomFloorPlugin {
                 else {
                     _platformManager.activePlatform = null;
                 }
-                _hider.HideObjectsForPlatform(_platformManager.AllPlatforms[index]);
+                _hider.HideObjectsForPlatform(_platformManager.allPlatforms[index]);
             }
         }
 

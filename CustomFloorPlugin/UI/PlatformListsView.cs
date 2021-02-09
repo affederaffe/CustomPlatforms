@@ -142,7 +142,7 @@ namespace CustomFloorPlugin.UI {
         [System.Diagnostics.CodeAnalysis.SuppressMessage("CodeQuality", "IDE0051:Remove unused private members", Justification = "Called by BSML")]
         private void SetupLists() {
             allListTables = new CustomListTableData[] { singleplayerPlatformListTable, multiplayerPlatformListTable, a360PlatformListTable };
-            foreach (CustomPlatform platform in _platformManager.AllPlatforms) {
+            foreach (CustomPlatform platform in _platformManager.allPlatforms) {
                 CustomListTableData.CustomCellInfo cell = new CustomListTableData.CustomCellInfo(platform.platName, platform.platAuthor, platform.icon);
                 foreach (CustomListTableData listTable in allListTables) {
                     listTable.data.Add(cell);

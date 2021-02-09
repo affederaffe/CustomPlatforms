@@ -58,9 +58,9 @@ namespace CustomFloorPlugin {
 
         private IEnumerator<WaitForEndOfFrame> OnFileCreated(object sender, FileSystemEventArgs e) {
             yield return new WaitForEndOfFrame();
-            CustomPlatform newPlatform = _platformLoader.LoadPlatformBundle(e.FullPath, _platformManager.transform);
+            CustomPlatform newPlatform = _platformLoader.GetPlatformInfo(e.FullPath);
             if (newPlatform == null) yield break;
-            _platformManager.AllPlatforms.Add(newPlatform);
+            _platformManager.allPlatforms.Add(newPlatform);
             CustomListTableData.CustomCellInfo cell = new CustomListTableData.CustomCellInfo(newPlatform.platName, newPlatform.platAuthor, newPlatform.icon);
 
             if (_platformListsView.allListTables != null) {
@@ -71,7 +71,7 @@ namespace CustomFloorPlugin {
             }
 
             if (apiRequest) {
-                _platformManager.apiRequestIndex = _platformManager.AllPlatforms.IndexOf(newPlatform);
+                _platformManager.apiRequestIndex = _platformManager.allPlatforms.IndexOf(newPlatform);
                 apiRequest = false;
             }
         }
@@ -129,8 +129,8 @@ namespace CustomFloorPlugin {
             _platformManager.apiRequestedLevelId = level.levelID;
 
             // Test if the requested platform is already downloaded
-            for (int i = 0; i < _platformManager.AllPlatforms.Count; i++) {
-                if (_platformManager.AllPlatforms[i].platHash == hash || _platformManager.AllPlatforms[i].platName.StartsWith(name)) {
+            for (int i = 0; i < _platformManager.allPlatforms.Count; i++) {
+                if (_platformManager.allPlatforms[i].platHash == hash || _platformManager.allPlatforms[i].platName.StartsWith(name)) {
                     _platformManager.apiRequestIndex = i;
                     yield break;
                 }
