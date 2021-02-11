@@ -130,12 +130,18 @@ namespace CustomFloorPlugin {
         /// Reloads all <see cref="CustomPlatform"/>s and selects the last selected before the game was closed from the <see cref="PluginConfig"/>
         /// </summary>
         internal void Reload() {
-            allPlatforms = _platformLoader.CreateAllPlatforms(transform);
-            foreach (var platform in allPlatforms) {
-                if (_config.SingleplayerPlatformPath == platform.platName + platform.platAuthor) currentSingleplayerPlatform = platform;
-                if (_config.MultiplayerPlatformPath == platform.platName + platform.platAuthor) currentMultiplayerPlatform = platform;
-                if (_config.A360PlatformPath == platform.platName + platform.platAuthor) currentA360Platform = platform;
-            }
+            allPlatforms = new List<CustomPlatform>();
+            _platformLoader.CreateAllDescriptors((CustomPlatform platform) =>
+            {
+                platform.transform.SetParent(transform);
+                allPlatforms.Add(platform);
+                if (_config.SingleplayerPlatformPath == platform.platName + platform.platAuthor)
+                    currentSingleplayerPlatform = platform;
+                if (_config.MultiplayerPlatformPath == platform.platName + platform.platAuthor)
+                    currentMultiplayerPlatform = platform;
+                if (_config.A360PlatformPath == platform.platName + platform.platAuthor)
+                    currentA360Platform = platform;
+            });
         }
 
         internal int GetIndexForType(PlatformType platformType) {

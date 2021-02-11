@@ -116,6 +116,11 @@ namespace CustomFloorPlugin.UI {
         protected override void DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling) {
             base.DidActivate(firstActivation, addedToHierarchy, screenSystemEnabling);
             _platformSpawner.ChangeToPlatform(_platformManager.currentPlatformType);
+            for (int i = 0; i < allListTables.Length; i++) {
+                PlatformType type = (PlatformType)i;
+                int index = _platformManager.GetIndexForType(type);
+                allListTables[i].tableView.ScrollToCellWithIdx(index, TableViewScroller.ScrollPositionType.Beginning, false);
+            }
         }
 
 

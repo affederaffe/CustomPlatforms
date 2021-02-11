@@ -41,7 +41,7 @@ namespace CustomFloorPlugin.UI {
             get => _config.AlwaysShowFeet;
             set {
                 _config.AlwaysShowFeet = value;
-                PlatformManager.Feet.SetActive(value);
+                if (PlatformManager.Feet != null) PlatformManager.Feet.SetActive(value);
             }
         }
 
@@ -55,8 +55,10 @@ namespace CustomFloorPlugin.UI {
             get => _config.ShowHeart;
             set {
                 _config.ShowHeart = value;
-                PlatformManager.Heart.SetActive(value);
-                PlatformManager.Heart.GetComponent<InstancedMaterialLightWithId>().ColorWasSet(Color.magenta);
+                if (PlatformManager.Heart !=null) {
+                    PlatformManager.Heart.SetActive(value);
+                    PlatformManager.Heart.GetComponent<InstancedMaterialLightWithId>().ColorWasSet(Color.magenta);
+                }
             }
         }
 

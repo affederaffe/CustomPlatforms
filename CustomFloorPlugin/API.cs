@@ -33,6 +33,9 @@ namespace CustomFloorPlugin {
         private readonly PlatformManager _platformManager;
 
         [Inject]
+        private readonly PlatformSpawnerMenu _platformSpawner;
+
+        [Inject]
         private readonly PlatformListsView _platformListsView;
 
         private FileSystemWatcher _fileSystemWatcher;
@@ -42,6 +45,7 @@ namespace CustomFloorPlugin {
         public void Initialize() {
             _fileSystemWatcher = new FileSystemWatcher(_platformLoader.customPlatformsFolderPath, "*.plat");
             _fileSystemWatcher.Created += (object sender, FileSystemEventArgs e) => SharedCoroutineStarter.instance.StartCoroutine(OnFileCreated(sender, e));
+            _fileSystemWatcher.Deleted += (object sender, FileSystemEventArgs e) => SharedCoroutineStarter.instance.StartCoroutine(OnFileDeleted(sender, e));
             _fileSystemWatcher.EnableRaisingEvents = true;
             if (PluginManager.GetPlugin("SongCore") != null) {
                 SubscribeToSongCoreEvent();
@@ -53,26 +57,76 @@ namespace CustomFloorPlugin {
 
         public void Dispose() {
             _fileSystemWatcher.Created -= (object sender, FileSystemEventArgs e) => SharedCoroutineStarter.instance.StartCoroutine(OnFileCreated(sender, e));
+            _fileSystemWatcher.Deleted -= (object sender, FileSystemEventArgs e) => SharedCoroutineStarter.instance.StartCoroutine(OnFileDeleted(sender, e));
             _fileSystemWatcher.Dispose();
         }
 
         private IEnumerator<WaitForEndOfFrame> OnFileCreated(object sender, FileSystemEventArgs e) {
             yield return new WaitForEndOfFrame();
-            CustomPlatform newPlatform = _platformLoader.GetPlatformInfo(e.FullPath);
-            if (newPlatform == null) yield break;
-            _platformManager.allPlatforms.Add(newPlatform);
-            CustomListTableData.CustomCellInfo cell = new CustomListTableData.CustomCellInfo(newPlatform.platName, newPlatform.platAuthor, newPlatform.icon);
+            SharedCoroutineStarter.instance.StartCoroutine(_platformLoader.GetPlatformInfo(e.FullPath, (CustomPlatform newPlatform) =>
+            {
+                _platformLoader.customPlatformPaths.Add(newPlatform, e.FullPath);
+                _platformManager.allPlatforms.Add(newPlatform);
 
-            if (_platformListsView.allListTables != null) {
-                foreach (CustomListTableData listTable in _platformListsView.allListTables) {
-                    listTable.data.Add(cell);
-                    listTable.tableView.ReloadData();
+                if (_platformListsView.allListTables != null)
+                {
+                    CustomListTableData.CustomCellInfo cell = new CustomListTableData.CustomCellInfo(newPlatform.platName, newPlatform.platAuthor, newPlatform.icon);
+                    foreach (CustomListTableData listTable in _platformListsView.allListTables)
+                    {
+                        listTable.data.Add(cell);
+                        listTable.tableView.ReloadData();
+                    }
                 }
-            }
 
-            if (apiRequest) {
-                _platformManager.apiRequestIndex = _platformManager.allPlatforms.IndexOf(newPlatform);
-                apiRequest = false;
+                if (apiRequest)
+                {
+                    _platformManager.apiRequestIndex = _platformManager.allPlatforms.IndexOf(newPlatform);
+                    apiRequest = false;
+                }
+            }));
+        }
+
+        /// <summary>
+        /// Destroy the platform and remove all references
+        /// </summary>
+        private IEnumerator<WaitForEndOfFrame> OnFileDeleted(object sender, FileSystemEventArgs e) {
+            yield return new WaitForEndOfFrame();
+            if (_platformLoader.customPlatformPaths.ContainsValue(e.FullPath)) {
+                var deletedPlatformPair = _platformLoader.customPlatformPaths.First(x => x.Value == e.FullPath);
+                _platformLoader.customPlatformPaths.Remove(deletedPlatformPair.Key);
+                _platformManager.allPlatforms.Remove(deletedPlatformPair.Key);
+                if (_platformListsView.allListTables != null) {
+                    foreach (CustomListTableData listTable in _platformListsView.allListTables) {
+                        var deletedPlatformCell = listTable.data.Find(x => x.text == deletedPlatformPair.Key.platName && x.subtext == deletedPlatformPair.Key.platAuthor);
+                        listTable.data.Remove(deletedPlatformCell);
+                        listTable.tableView.ReloadData();
+                    }
+                }
+                if (_platformManager.currentSingleplayerPlatform == deletedPlatformPair.Key) {
+                    _platformManager.currentSingleplayerPlatform = _platformManager.allPlatforms[0];
+                    if (_platformListsView.singleplayerPlatformListTable != null) {
+                        _platformListsView.singleplayerPlatformListTable.tableView.SelectCellWithIdx(0);
+                        _platformListsView.singleplayerPlatformListTable.tableView.ScrollToCellWithIdx(0, HMUI.TableViewScroller.ScrollPositionType.End, true);
+                        if (_platformManager.currentPlatformType == PlatformType.Singleplayer) _platformSpawner.ChangeToPlatform(0);
+                    }
+                }
+                if (_platformManager.currentMultiplayerPlatform == deletedPlatformPair.Key) {
+                    _platformManager.currentMultiplayerPlatform = _platformManager.allPlatforms[0];
+                    if (_platformListsView.multiplayerPlatformListTable != null) {
+                        _platformListsView.multiplayerPlatformListTable.tableView.SelectCellWithIdx(0);
+                        _platformListsView.multiplayerPlatformListTable.tableView.ScrollToCellWithIdx(0, HMUI.TableViewScroller.ScrollPositionType.End, true);
+                        if (_platformManager.currentPlatformType == PlatformType.Multiplayer) _platformSpawner.ChangeToPlatform(0);
+                    }
+                }
+                if (_platformManager.currentA360Platform == deletedPlatformPair.Key) {
+                    _platformManager.currentA360Platform = _platformManager.allPlatforms[0];
+                    if (_platformListsView.a360PlatformListTable != null) {
+                        _platformListsView.a360PlatformListTable.tableView.SelectCellWithIdx(0);
+                        _platformListsView.a360PlatformListTable.tableView.ScrollToCellWithIdx(0, HMUI.TableViewScroller.ScrollPositionType.End, true);
+                        if (_platformManager.currentPlatformType == PlatformType.A360) _platformSpawner.ChangeToPlatform(0);
+                    }
+                }
+                GameObject.Destroy(deletedPlatformPair.Key.gameObject);
             }
         }
 

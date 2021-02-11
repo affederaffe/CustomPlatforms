@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
 
 using CustomFloorPlugin.Configuration;
 using CustomFloorPlugin.Utilities;
@@ -72,21 +72,33 @@ namespace CustomFloorPlugin {
             NotifyPlatform(_platformManager.activePlatform, NotifyType.Disable);
             DestroyCustomObjects();
             _platformManager.activePlatform = _platformManager.allPlatforms[index];
+            bool runningCoroutine = false;
 
             // if the active platform is only a descriptor, load the real one and replace all references
             if (_platformManager.activePlatform.transform.childCount == 0 && index != 0) {
                 string path = _platformLoader.customPlatformPaths[_platformManager.activePlatform];
-                CustomPlatform realPlatform = _platformLoader.LoadPlatformBundle(path, _platformManager.transform);
-                if (_platformManager.currentSingleplayerPlatform == _platformManager.activePlatform) _platformManager.currentSingleplayerPlatform = realPlatform;
-                if (_platformManager.currentMultiplayerPlatform == _platformManager.activePlatform) _platformManager.currentMultiplayerPlatform = realPlatform;
-                if (_platformManager.currentA360Platform == _platformManager.activePlatform) _platformManager.currentA360Platform = realPlatform;
-                GameObject.Destroy(_platformManager.activePlatform.gameObject);
-                _platformManager.allPlatforms[index] = realPlatform;
-                _platformManager.activePlatform = realPlatform;
+                runningCoroutine = true;
+                SharedCoroutineStarter.instance.StartCoroutine(_platformLoader.LoadPlatformBundle(_platformManager.activePlatform, (CustomPlatform realPlatform) =>
+                {
+                    if (_platformManager.currentSingleplayerPlatform == _platformManager.activePlatform)
+                        _platformManager.currentSingleplayerPlatform = realPlatform;
+                    if (_platformManager.currentMultiplayerPlatform == _platformManager.activePlatform)
+                        _platformManager.currentMultiplayerPlatform = realPlatform;
+                    if (_platformManager.currentA360Platform == _platformManager.activePlatform)
+                        _platformManager.currentA360Platform = realPlatform;
+                    _platformLoader.customPlatformPaths.Remove(_platformManager.activePlatform);
+                    _platformLoader.customPlatformPaths.Add(realPlatform, path);
+                    GameObject.Destroy(_platformManager.activePlatform.gameObject);
+                    _platformManager.allPlatforms[index] = realPlatform;
+                    _platformManager.activePlatform = realPlatform;
+                    runningCoroutine = false;
+                }));
             }
             SharedCoroutineStarter.instance.StartCoroutine(WaitAndSpawn());
-            IEnumerator<WaitForEndOfFrame> WaitAndSpawn() {
+            IEnumerator WaitAndSpawn() {
                 yield return new WaitForEndOfFrame();
+                if (runningCoroutine)
+                    yield return new WaitUntil(() => { return !runningCoroutine; });
                 if (index != 0) {
                     _platformManager.activePlatform.gameObject.SetActive(true);
                     AddManagers(_platformManager.activePlatform);

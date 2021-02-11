@@ -30,7 +30,7 @@ namespace CustomFloorPlugin {
         private Sprite lvlInsaneCover;
         private Sprite fallbackCover;
 
-        internal List<CustomPlatform> CreateAllPlatforms(Transform parent) {
+        internal void CreateAllDescriptors(Action<CustomPlatform> callback) {
 
             // Create the CustomFloorPlugin folder if it doesn't already exist
             if (!Directory.Exists(customPlatformsFolderPath)) {
@@ -48,30 +48,32 @@ namespace CustomFloorPlugin {
 
             // Create a dummy CustomPlatform for the original platform
             CustomPlatform defaultPlatform = new GameObject("Default Platform").AddComponent<CustomPlatform>();
-            defaultPlatform.transform.parent = parent;
             defaultPlatform.platName = "Default Environment";
             defaultPlatform.platAuthor = "Beat Saber";
             defaultPlatform.icon = lvlInsaneCover;
-            platforms.Add(defaultPlatform);
+            callback(defaultPlatform);
 
             foreach (string path in allBundlePaths) {
-                CustomPlatform newPlatform = GetPlatformInfo(path);
-                if (newPlatform != null) {
-                    platforms.Add(newPlatform);
-                    customPlatformPaths.Add(newPlatform, path);
-                }
+                SharedCoroutineStarter.instance.StartCoroutine(GetPlatformInfo(path, callback));
             }
-
-            return platforms;
         }
 
-        internal CustomPlatform GetPlatformInfo(string bundlePath) {
+        internal IEnumerator<AsyncOperation> GetPlatformInfo(string bundlePath, Action<CustomPlatform> callback) {
 
-            AssetBundle bundle = AssetBundle.LoadFromFile(bundlePath);
-            if (bundle == null) return null;
+            AssetBundleCreateRequest assetBundleCreateRequest = AssetBundle.LoadFromFileAsync(bundlePath);
+            yield return assetBundleCreateRequest;
+            if (!assetBundleCreateRequest.isDone || !assetBundleCreateRequest.assetBundle)
+                throw new FileLoadException("Could not load AssetBundle!", bundlePath);
 
-            GameObject platformPrefab = bundle.LoadAsset<GameObject>("_CustomPlatform");
-            if (platformPrefab == null) return null;
+            AssetBundleRequest platformBundleRequest = assetBundleCreateRequest.assetBundle.LoadAssetAsync<GameObject>("_CustomPlatform");
+            yield return platformBundleRequest;
+            if (!platformBundleRequest.isDone || !platformBundleRequest.asset)
+            {
+                assetBundleCreateRequest.assetBundle.Unload(true);
+                throw new FileLoadException("Could not load AssetBundle!", bundlePath);
+            }
+
+            GameObject platformPrefab = (GameObject)platformBundleRequest.asset;
             platformPrefab.transform.DetachChildren();
 
             CustomPlatform customPlatform = platformPrefab.GetComponent<CustomPlatform>();
@@ -91,7 +93,7 @@ namespace CustomFloorPlugin {
                 else {
                     // no customplatform component, abort
                     GameObject.Destroy(platformPrefab);
-                    return null;
+                    yield break;
                 }
             }
 
@@ -112,30 +114,46 @@ namespace CustomFloorPlugin {
             else {
                 customPlatform.icon = fallbackCover;
             }
+            customPlatformPaths.Add(customPlatform, bundlePath);
 
-            bundle.Unload(true);
+            assetBundleCreateRequest.assetBundle.Unload(true);
 
             customPlatform.name = customPlatform.platName + " by " + customPlatform.platAuthor;
-
-            return customPlatform;
+            callback(customPlatform);
         }
 
-        internal CustomPlatform LoadPlatformBundle(string bundlePath, Transform parent) {
+        internal IEnumerator<AsyncOperation> LoadPlatformBundle(CustomPlatform descriptor, Action<CustomPlatform> callback) {
 
-            AssetBundle bundle = AssetBundle.LoadFromFile(bundlePath);
-            if (bundle == null) return null;
+            string fullPath;
+            if (customPlatformPaths.ContainsKey(descriptor))
+                fullPath = customPlatformPaths[descriptor];
+            else
+                yield break;
+            AssetBundleCreateRequest assetBundleCreateRequest = AssetBundle.LoadFromFileAsync(fullPath);
+            yield return assetBundleCreateRequest;
+            if (!assetBundleCreateRequest.isDone || !assetBundleCreateRequest.assetBundle)
+                throw new FileLoadException("Could not load AssetBundle!", fullPath);
 
-            TextAsset scripts = bundle.LoadAsset<TextAsset>("_Scripts.dll");
-            if (scripts != null && _config.LoadCustomScripts) {
-                Assembly.Load(scripts.bytes);
+            if (_config.LoadCustomScripts)
+            {
+                AssetBundleRequest scriptBundleRequest = assetBundleCreateRequest.assetBundle.LoadAssetAsync<TextAsset>("_Scripts.dll");
+                yield return scriptBundleRequest;
+                if (!scriptBundleRequest.isDone || !scriptBundleRequest.asset)
+                    assetBundleCreateRequest.assetBundle.Unload(true);
+                else
+                    Assembly.Load(((TextAsset)scriptBundleRequest.asset).bytes);
             }
 
-            GameObject platformPrefab = bundle.LoadAsset<GameObject>("_CustomPlatform");
-            if (platformPrefab == null) return null;
+            AssetBundleRequest platformBundleRequest = assetBundleCreateRequest.assetBundle.LoadAssetAsync<GameObject>("_CustomPlatform");
+            yield return platformBundleRequest;
+            if (!platformBundleRequest.isDone || !platformBundleRequest.asset)
+            {
+                assetBundleCreateRequest.assetBundle.Unload(true);
+                throw new FileLoadException("Could not load AssetBundle!", fullPath);
+            }
+            GameObject newPlatform = GameObject.Instantiate((GameObject)platformBundleRequest.asset);
 
-            GameObject newPlatform = GameObject.Instantiate(platformPrefab, parent);
-
-            bundle.Unload(false);
+            //assetBundleCreateRequest.assetBundle.Unload(false);
 
             // Collect author and name
             CustomPlatform customPlatform = newPlatform.GetComponent<CustomPlatform>();
@@ -155,22 +173,20 @@ namespace CustomFloorPlugin {
                 else {
                     // no customplatform component, abort
                     GameObject.Destroy(newPlatform);
-                    return null;
+                    yield break;
                 }
             }
 
             customPlatform.name = customPlatform.platName + " by " + customPlatform.platAuthor;
 
-            platformPrefab.SetActive(false);
-
             using MD5 md5 = MD5.Create();
-            using FileStream fileStream = File.OpenRead(bundlePath);
+            using FileStream fileStream = File.OpenRead(fullPath);
             byte[] hash = md5.ComputeHash(fileStream);
             customPlatform.platHash = BitConverter.ToString(hash).Replace("-", string.Empty).ToLowerInvariant();
 
             MaterialSwapper.ReplaceMaterials(newPlatform);
 
-            return customPlatform;
+            callback(customPlatform);
         }
     }
 }
