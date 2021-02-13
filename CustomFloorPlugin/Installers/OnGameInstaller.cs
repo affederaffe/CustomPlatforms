@@ -3,13 +3,14 @@
 using Zenject;
 
 
-namespace CustomFloorPlugin.Installers {
-
-
-    internal class OnGameInstaller : Installer {
-
-        public override void InstallBindings() {
-            if (Container.HasBinding<GameplayCoreSceneSetupData>()) {
+namespace CustomFloorPlugin.Installers
+{
+    internal class OnGameInstaller : Installer
+    {
+        public override void InstallBindings()
+        {
+            if (Container.HasBinding<GameplayCoreSceneSetupData>())
+            {
                 GameplayCoreSceneSetupData sceneSetupData = Container.Resolve<GameplayCoreSceneSetupData>();
                 float lastNoteTime = sceneSetupData.difficultyBeatmap.beatmapData.GetLastNoteTime();
                 Container.Bind<float>().WithId("LastNoteTime").FromInstance(lastNoteTime).AsSingle();

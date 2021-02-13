@@ -1,6 +1,7 @@
-﻿namespace CustomFloorPlugin {
-
-    public enum PlatformType {
+﻿namespace CustomFloorPlugin
+{
+    public enum PlatformType
+    {
         Singleplayer,
         Multiplayer,
         A360

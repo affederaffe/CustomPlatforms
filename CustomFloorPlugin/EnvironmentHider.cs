@@ -10,15 +10,14 @@ using UnityEngine.SceneManagement;
 using Zenject;
 
 
-namespace CustomFloorPlugin {
-
-
+namespace CustomFloorPlugin
+{
     /// <summary> 
     /// Activates and deactivates world geometry in the active scene as required by the chosen custom platform<br/>
     /// Most documentation on this file is omited because it is a giant clusterfuck and I hate it... with a passion.
     /// </summary>
-    internal class EnvironmentHider {
-
+    internal class EnvironmentHider
+    {
         [Inject]
         private readonly PluginConfig _config;
 
@@ -45,23 +44,23 @@ namespace CustomFloorPlugin {
 
         private List<GameObject> renamedObjects;
 
-
         /// <summary>
         /// Hide and unhide world objects as required by a platform<br/>
         /// Delayed by a frame because of order of operations after scene loading
         /// </summary>
         /// <param name="platform">A platform that defines which objects are to be hidden</param>
-        internal void HideObjectsForPlatform(CustomPlatform platform) {
+        internal void HideObjectsForPlatform(CustomPlatform platform)
+        {
             SharedCoroutineStarter.instance.StartCoroutine(InternalHideObjectsForPlatform(platform));
         }
-
 
         /// <summary>
         /// Hide and unhide world objects as required by a platform<br/>
         /// It is not practical to call this directly
         /// </summary>
         /// <param name="platform">A platform that defines which objects are to be hidden</param>
-        private IEnumerator<WaitForEndOfFrame> InternalHideObjectsForPlatform(CustomPlatform platform) {
+        private IEnumerator<WaitForEndOfFrame> InternalHideObjectsForPlatform(CustomPlatform platform)
+        {
             yield return new WaitForEndOfFrame();
             FindEnvironment();
             if (menuEnvironment != null) SetCollectionHidden(menuEnvironment, _platformManager.activePlatform != null);
@@ -83,22 +82,25 @@ namespace CustomFloorPlugin {
             PlatformManager.Feet.SetActive(_config.AlwaysShowFeet);
         }
 
-
         /// <summary>
         /// Finds all GameObjects that make up the default environment and groups them into lists
         /// </summary>
-        private void FindEnvironment() {
+        private void FindEnvironment()
+        {
             currentEnvironment = Searching.GetCurrentEnvironment();
             roots = currentEnvironment.GetRootGameObjects();
             renamedObjects = new List<GameObject>();
-            if (currentEnvironment.name == "MenuEnvironment") {
+            if (currentEnvironment.name == "MenuEnvironment")
+            {
                 FindMenuEnvironmnet();
             }
-            if (currentEnvironment.name == "GameCore") {
+            else if (currentEnvironment.name == "GameCore")
+            {
                 FindMultiplayerEnvironment();
                 FindPlayersPlace();
             }
-            else {
+            else if (_platformManager.activePlatform != _platformManager.allPlatforms[0])
+            {
                 FindFeetIcon();
                 FindPlayersPlace();
                 FindSmallRings();
@@ -112,54 +114,63 @@ namespace CustomFloorPlugin {
                 FindDoubleColorLasers();
                 FindTrackLights();
             }
-            foreach (GameObject go in renamedObjects) {
+            foreach (GameObject go in renamedObjects)
+            {
                 go.name = go.name.Remove(go.name.Length - 7);
             }
         }
-
 
         /// <summary>
         /// Set the active state of a Collection of GameObjects
         /// </summary>
         /// <param name="list">A <see cref="List{T}"/> of GameObjects</param>
         /// <param name="hidden">A boolean describing the desired hidden state</param>
-        private void SetCollectionHidden(List<GameObject> list, bool hidden) {
-            if (list == null) {
+        private void SetCollectionHidden(List<GameObject> list, bool hidden)
+        {
+            if (list == null)
+            {
                 return;
             }
 
-            foreach (GameObject go in list) {
+            foreach (GameObject go in list)
+            {
                 if (go != null) go.SetActive(!hidden);
             }
         }
-
 
         /// <summary>
         /// Finds a GameObject by name and adds it to the provided list
         /// </summary>
         /// <param name="name">The name of the desired GameObject</param>
         /// <param name="list">The list to be added to</param>
-        private bool FindAddGameObject(string name, List<GameObject> list, bool rename = false) {
+        private bool FindAddGameObject(string name, List<GameObject> list, bool rename = false)
+        {
             GameObject go;
-            foreach (GameObject root in roots) {
+            foreach (GameObject root in roots)
+            {
                 go = root?.transform.Find(name)?.gameObject;
-                if (go != null) {
+                if (go != null)
+                {
                     list.Add(go);
-                    if (rename) {
+                    if (rename)
+                    {
                         go.name += "renamed";
                         renamedObjects.Add(go);
                     }
                     return true;
                 }
-                else if (root?.name == name) {
+                else if (root?.name == name)
+                {
                     list.Add(root);
                 }
             }
             return false;
         }
 
-        private void FindMenuEnvironmnet() {
-            if (menuEnvironment == null || menuEnvironment?.Count == 0) {
+        private void FindMenuEnvironmnet()
+        {
+            if (menuEnvironment == null || menuEnvironment?.Count == 0)
+            {
                 menuEnvironment = new List<GameObject>();
                 FindAddGameObject("MenuCoreLighting/SkyGradient", menuEnvironment);
                 FindAddGameObject("NearBuildingLeft", menuEnvironment);
@@ -179,30 +190,35 @@ namespace CustomFloorPlugin {
                 FindAddGameObject("DefaultEnvironment/PlayersPlace/Version", feet);
 
                 PlatformManager.Feet = new GameObject("Feet");
-                foreach (GameObject feet in feet) {
+                foreach (GameObject feet in feet)
+                {
                     feet.transform.SetParent(PlatformManager.Feet.transform);
                 }
                 feet = null;
             }
         }
 
-        private void FindMultiplayerEnvironment() {
+        private void FindMultiplayerEnvironment()
+        {
             multiplayerEnvironment = new List<GameObject>();
             FindAddGameObject("IsActiveObjects/Construction/ConstructionL", multiplayerEnvironment);
             FindAddGameObject("IsActiveObjects/Construction/ConstructionR", multiplayerEnvironment);
             FindAddGameObject("IsActiveObjects/Lasers", multiplayerEnvironment);
 
             // Only hide the other's construction when in duel layout
-            if (FindAddGameObject("IsActiveObjects/CenterRings", multiplayerEnvironment)) {
+            if (FindAddGameObject("IsActiveObjects/CenterRings", multiplayerEnvironment))
+            {
                 FindAddGameObject("IsActiveObjects/PlatformEnd", multiplayerEnvironment);
             }
-            else {
+            else
+            {
                 FindAddGameObject("Construction", multiplayerEnvironment);
                 FindAddGameObject("Lasers", multiplayerEnvironment);
             }
         }
 
-        private void FindPlayersPlace() {
+        private void FindPlayersPlace()
+        {
             playersPlace = new List<GameObject>();
             FindAddGameObject("PlayersPlace", playersPlace);
 
@@ -213,7 +229,8 @@ namespace CustomFloorPlugin {
             FindAddGameObject("IsActiveObjects/Construction/PlayersPlace", playersPlace);
         }
 
-        private void FindFeetIcon() {
+        private void FindFeetIcon()
+        {
             feet = new List<GameObject>();
 
             // Song
@@ -222,12 +239,14 @@ namespace CustomFloorPlugin {
             // Multiplayer
             FindAddGameObject("IsActiveObjects/Construction/PlayersPlace/Feet", feet);
 
-            foreach (GameObject feet in feet) {
+            foreach (GameObject feet in feet)
+            {
                 feet?.transform.SetParent(null); // remove from original platform 
             }
         }
 
-        private void FindSmallRings() {
+        private void FindSmallRings()
+        {
             smallRings = new List<GameObject>();
             FindAddGameObject("SmallTrackLaneRings", smallRings);
             FindAddGameObject("TrackLaneRing", smallRings);
@@ -243,7 +262,8 @@ namespace CustomFloorPlugin {
                 x.name == "Panels4TrackLaneRing(Clone)" ||
                 x.name == "PairLaserTrackLaneRing(Clone)" ||
                 x.name == "PanelLightTrackLaneRing(Clone)"
-                )) {
+                ))
+            {
                 smallRings.Add(trackLaneRing.gameObject);
             }
 
@@ -252,7 +272,8 @@ namespace CustomFloorPlugin {
             FindAddGameObject("TentacleRight", smallRings);
         }
 
-        private void FindBigRings() {
+        private void FindBigRings()
+        {
             bigRings = new List<GameObject>();
             FindAddGameObject("BigTrackLaneRings", bigRings);
             FindAddGameObject("BigLightsTrackLaneRings", bigRings);
@@ -263,24 +284,29 @@ namespace CustomFloorPlugin {
                 x.name == "BigTrackLaneRing(Clone)" ||
                 x.name == "BigCenterLightTrackLaneRing(Clone)" ||
                 x.name == "LightsTrackLaneRing(Clone)"
-                )) {
+                ))
+            {
                 bigRings.Add(trackLaneRing.gameObject);
             }
         }
 
-        private void FindVisualizers() {
+        private void FindVisualizers()
+        {
             visualizer = new List<GameObject>();
             FindAddGameObject("Spectrograms", visualizer);
             FindAddGameObject("PillarPair", visualizer);
-            if (FindAddGameObject("SmallPillarPair", visualizer)) {
-                for (int i = 1; i < 5; i++) {
+            if (FindAddGameObject("SmallPillarPair", visualizer))
+            {
+                for (int i = 1; i < 5; i++)
+                {
                     FindAddGameObject($"PillarPair ({i})", visualizer);
                     FindAddGameObject($"SmallPillarPair ({i})", visualizer);
                 }
             }
         }
 
-        private void FindTowers() {
+        private void FindTowers()
+        {
             towers = new List<GameObject>();
             // Song Environments
             FindAddGameObject("Buildings", towers);
@@ -298,8 +324,10 @@ namespace CustomFloorPlugin {
             // KDA
             FindAddGameObject("FloorL", towers);
             FindAddGameObject("FloorR", towers);
-            if (FindAddGameObject($"GlowLine", towers)) {
-                for (int i = 0; i < 100; i++) {
+            if (FindAddGameObject($"GlowLine", towers))
+            {
+                for (int i = 0; i < 100; i++)
+                {
                     FindAddGameObject($"GlowLine ({i})", towers);
                 }
             }
@@ -315,8 +343,10 @@ namespace CustomFloorPlugin {
             // Timbaland
             FindAddGameObject("MainStructure", towers);
             FindAddGameObject("TopStructure", towers);
-            if (FindAddGameObject("TimbalandLogo", towers)) {
-                for (int i = 0; i < 4; i++) {
+            if (FindAddGameObject("TimbalandLogo", towers))
+            {
+                for (int i = 0; i < 4; i++)
+                {
                     FindAddGameObject($"TimbalandLogo ({i})", towers);
                 }
             }
@@ -326,7 +356,8 @@ namespace CustomFloorPlugin {
             FindAddGameObject("PillarTrackLaneRingsR (1)", towers);
         }
 
-        private void FindHighway() {
+        private void FindHighway()
+        {
             highway = new List<GameObject>();
             FindAddGameObject("TrackConstruction", highway);
             FindAddGameObject("FloorConstruction", highway);
@@ -358,7 +389,8 @@ namespace CustomFloorPlugin {
             // LinkinPark
             FindAddGameObject("Tunnel", highway);
             FindAddGameObject("TunnelRing", highway);
-            for (int i = 1; i < 7; i++) {
+            for (int i = 1; i < 7; i++)
+            {
                 FindAddGameObject($"TunnelRing ({i})", highway);
             }
             FindAddGameObject("TunnelRingShadow", highway);
@@ -375,74 +407,93 @@ namespace CustomFloorPlugin {
             FindAddGameObject("Collider", highway);
         }
 
-        private void FindBackColumns() {
+        private void FindBackColumns()
+        {
             backColumns = new List<GameObject>();
             FindAddGameObject("BackColumns", backColumns);
 
             // 360°
-            for (int i = 2; i < 24; i++) {
+            for (int i = 2; i < 24; i++)
+            {
                 FindAddGameObject($"GameObject ({i})", backColumns);
             }
         }
 
-        private void FindRotatingLasers() {
+        private void FindRotatingLasers()
+        {
             rotatingLasers = new List<GameObject>();
             // Default, BigMirror, Triangle, Rocket
-            if (FindAddGameObject("RotatingLasersPair", rotatingLasers)) {
-                for (int i = 1; i < 19; i++) {
+            if (FindAddGameObject("RotatingLasersPair", rotatingLasers))
+            {
+                for (int i = 1; i < 19; i++)
+                {
                     FindAddGameObject($"RotatingLasersPair ({i})", rotatingLasers);
                 }
             }
 
             // KDA
-            if (FindAddGameObject("RotatingLasersPair (3)", rotatingLasers)) {
-                for (int i = 4; i < 7; i++) {
+            if (FindAddGameObject("RotatingLasersPair (3)", rotatingLasers))
+            {
+                for (int i = 4; i < 7; i++)
+                {
                     FindAddGameObject($"RotatingLasersPair ({i})", rotatingLasers);
                 }
             }
 
             // Nice Env
-            if (FindAddGameObject("RotatingLaserLeft0", rotatingLasers) && FindAddGameObject("RotatingLaserRight0", rotatingLasers)) {
-                for (int i = 1; i < 4; i++) {
+            if (FindAddGameObject("RotatingLaserLeft0", rotatingLasers) && FindAddGameObject("RotatingLaserRight0", rotatingLasers))
+            {
+                for (int i = 1; i < 4; i++)
+                {
                     FindAddGameObject($"RotatingLaserLeft{i}", rotatingLasers);
                     FindAddGameObject($"RotatingLaserRight{i}", rotatingLasers);
                 }
             }
 
             // 360°
-            if (FindAddGameObject("LightPillar (9)", rotatingLasers)) {
-                for (int i = 10; i < 19; i++) {
+            if (FindAddGameObject("LightPillar (9)", rotatingLasers))
+            {
+                for (int i = 10; i < 19; i++)
+                {
                     FindAddGameObject($"LightPillar ({i})", rotatingLasers);
                 }
             }
         }
 
-        private void FindDoubleColorLasers() {
+        private void FindDoubleColorLasers()
+        {
             doubleColorLasers = new List<GameObject>();
 
             // Default, BigMirror, Nice
-            if (FindAddGameObject("DoubleColorLaser", doubleColorLasers)) {
-                for (int i = 1; i < 10; i++) {
+            if (FindAddGameObject("DoubleColorLaser", doubleColorLasers))
+            {
+                for (int i = 1; i < 10; i++)
+                {
                     FindAddGameObject($"DoubleColorLaser ({i})", doubleColorLasers);
                 }
             }
 
             // Tutorial
-            if (FindAddGameObject("DoubleColorLaser (10)", doubleColorLasers)) {
-                for (int i = 11; i < 20; i++) {
+            if (FindAddGameObject("DoubleColorLaser (10)", doubleColorLasers))
+            {
+                for (int i = 11; i < 20; i++)
+                {
                     FindAddGameObject($"DoubleColorLaser ({i})", doubleColorLasers);
                 }
             }
 
             // 360°
-            if (FindAddGameObject("DownLaser (4)", doubleColorLasers)) {
-                for (int i = 5; i < 13; i++) {
+            if (FindAddGameObject("DownLaser (4)", doubleColorLasers))
+            {
+                for (int i = 5; i < 13; i++)
+                {
                     FindAddGameObject($"DownLaser ({i})", doubleColorLasers);
                 }
             }
         }
 
-        private void FindBackLasers() {
+        private void FindBackLasers()
+        {
             backLasers = new List<GameObject>();
             FindAddGameObject("FrontLights", backLasers);
 
@@ -454,15 +505,19 @@ namespace CustomFloorPlugin {
             FindAddGameObject("Logo", backLasers);
 
             // Timbaland
-            if (FindAddGameObject("Light (4)", backLasers)) {
-                for (int i = 5; i < 8; i++) {
+            if (FindAddGameObject("Light (4)", backLasers))
+            {
+                for (int i = 5; i < 8; i++)
+                {
                     FindAddGameObject($"Light {i}", backLasers);
                 }
             }
 
             // BTS
-            if (FindAddGameObject("SideLaser", backLasers, true)) {
-                for (int i = 0; i < 3; i++) {
+            if (FindAddGameObject("SideLaser", backLasers, true))
+            {
+                for (int i = 0; i < 3; i++)
+                {
                     FindAddGameObject("SideLaser", backLasers, true);
                 }
             }
@@ -474,7 +529,8 @@ namespace CustomFloorPlugin {
             //FindAddGameObject("SpawnRotationChevronManager", backLasers);
         }
 
-        private void FindTrackLights() {
+        private void FindTrackLights()
+        {
             trackLights = new List<GameObject>();
             FindAddGameObject("GlowLineR", trackLights);
             FindAddGameObject("GlowLineL", trackLights);
@@ -497,36 +553,46 @@ namespace CustomFloorPlugin {
             FindAddGameObject("GlowLineRVisible", trackLights);
 
             // KDA, Monstercat, CrabRave, GreenDayGrenade
-            if (FindAddGameObject("Laser", trackLights)) {
-                for (int i = 1; i < 20; i++) {
+            if (FindAddGameObject("Laser", trackLights))
+            {
+                for (int i = 1; i < 20; i++)
+                {
                     FindAddGameObject($"Laser ({i})", trackLights);
                 }
             }
 
             // Monstercat
-            if (FindAddGameObject("Laser (4)", trackLights)) {
-                for (int i = 5; i < 13; i++) {
+            if (FindAddGameObject("Laser (4)", trackLights))
+            {
+                for (int i = 5; i < 13; i++)
+                {
                     FindAddGameObject($"Laser ({i})", trackLights);
                 }
             }
 
-            if (FindAddGameObject("GlowTopLine", trackLights)) {
-                for (int i = 1; i < 5; i++) {
+            if (FindAddGameObject("GlowTopLine", trackLights))
+            {
+                for (int i = 1; i < 5; i++)
+                {
                     FindAddGameObject($"GlowTopLine ({i})", trackLights);
                 }
             }
 
             // Dragons
-            if (FindAddGameObject("GlowTopLine (5)", trackLights)) {
-                for (int i = 6; i < 12; i++) {
+            if (FindAddGameObject("GlowTopLine (5)", trackLights))
+            {
+                for (int i = 6; i < 12; i++)
+                {
                     FindAddGameObject($"GlowTopLine ({i})", trackLights);
                 }
             }
 
             FindAddGameObject("GlowLineR (1)", trackLights);
             FindAddGameObject("GlowLineR (2)", trackLights);
-            if (FindAddGameObject($"GlowLineL (1)", trackLights)) {
-                for (int i = 2; i < 25; i++) {
+            if (FindAddGameObject($"GlowLineL (1)", trackLights))
+            {
+                for (int i = 2; i < 25; i++)
+                {
                     FindAddGameObject($"GlowLineL ({i})", trackLights);
                 }
             }
@@ -538,7 +604,8 @@ namespace CustomFloorPlugin {
             // Dragons, Panic
             FindAddGameObject("DragonsSidePSL", trackLights);
             FindAddGameObject("DragonsSidePSR", trackLights);
-            for (int i = 0; i < 15; i++) {
+            for (int i = 0; i < 15; i++)
+            {
                 FindAddGameObject($"ConstructionGlowLine ({i + 1})", trackLights);
             }
 
@@ -548,25 +615,33 @@ namespace CustomFloorPlugin {
             FindAddGameObject("GateLight0", trackLights);
             FindAddGameObject("GateLight1", trackLights);
             FindAddGameObject("GateLight1 (4)", trackLights);
-            if (FindAddGameObject("EnvLight0", trackLights)) {
-                for (int i = 2; i < 10; i++) {
+            if (FindAddGameObject("EnvLight0", trackLights))
+            {
+                for (int i = 2; i < 10; i++)
+                {
                     FindAddGameObject($"EnvLight0 ({i})", trackLights);
                 }
             }
 
             // LinkinPark
-            if (FindAddGameObject($"LampShadow (1)", trackLights)) {
-                for (int i = 2; i < 13; i++) {
+            if (FindAddGameObject($"LampShadow (1)", trackLights))
+            {
+                for (int i = 2; i < 13; i++)
+                {
                     FindAddGameObject($"LampShadow ({i})", trackLights);
                 }
             }
-            if (FindAddGameObject($"LaserTop (2)", trackLights)) {
-                for (int i = 3; i < 22; i++) {
+            if (FindAddGameObject($"LaserTop (2)", trackLights))
+            {
+                for (int i = 3; i < 22; i++)
+                {
                     FindAddGameObject($"LaserTop ({i})", trackLights);
                 }
             }
-            if (FindAddGameObject("TunnelRotatingLasersPair", trackLights)) {
-                for (int i = 1; i < 18; i++) {
+            if (FindAddGameObject("TunnelRotatingLasersPair", trackLights))
+            {
+                for (int i = 1; i < 18; i++)
+                {
                     FindAddGameObject($"TunnelRotatingLasersPair ({i})", trackLights);
                 }
             }
@@ -589,13 +664,17 @@ namespace CustomFloorPlugin {
             FindAddGameObject("LaserR", trackLights);
 
             // 360°
-            if (FindAddGameObject("TopLaser", trackLights)) {
-                for (int i = 1; i < 6; i++) {
+            if (FindAddGameObject("TopLaser", trackLights))
+            {
+                for (int i = 1; i < 6; i++)
+                {
                     FindAddGameObject($"TopLaser ({i})", trackLights);
                 }
             }
-            if (FindAddGameObject("Cube", trackLights)) {
-                for (int i = 82; i < 90; i++) {
+            if (FindAddGameObject("Cube", trackLights))
+            {
+                for (int i = 82; i < 90; i++)
+                {
                     FindAddGameObject($"Cube ({i})", trackLights);
                 }
             }

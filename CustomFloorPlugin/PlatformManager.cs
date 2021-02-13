@@ -13,19 +13,15 @@ using UnityEngine.SceneManagement;
 using Zenject;
 
 
-namespace CustomFloorPlugin {
-
-
+namespace CustomFloorPlugin
+{
     /// <summary>
     /// Handles Platforms, and hearts, everything about them
     /// </summary>
-    public class PlatformManager : MonoBehaviour {
-
+    public class PlatformManager : MonoBehaviour
+    {
         [Inject]
         private readonly PluginConfig _config;
-
-        [Inject]
-        private readonly PlatformLoader _platformLoader;
 
         /// <summary>
         /// List of all loaded Platforms
@@ -116,36 +112,36 @@ namespace CustomFloorPlugin {
         /// <summary>
         /// Initializes the <see cref="PlatformManager"/>
         /// </summary>
-        public void Start() {
+        public void Start()
+        {
             StartCoroutine(IHateUnity());
-            IEnumerator<WaitForEndOfFrame> IHateUnity() {
+            IEnumerator<WaitForEndOfFrame> IHateUnity()
+            {
                 yield return new WaitForEndOfFrame();
                 LoadAssets();
-                yield return new WaitForEndOfFrame();
-                Reload();
             }
         }
 
         /// <summary>
-        /// Reloads all <see cref="CustomPlatform"/>s and selects the last selected before the game was closed from the <see cref="PluginConfig"/>
+        /// Sets the last selected <see cref="CustomPlatform"/>s
         /// </summary>
-        internal void Reload() {
-            allPlatforms = new List<CustomPlatform>();
-            _platformLoader.CreateAllDescriptors((CustomPlatform platform) =>
+        internal void GetLastSelectedPlatforms()
+        {
+            foreach (CustomPlatform platform in allPlatforms)
             {
-                platform.transform.SetParent(transform);
-                allPlatforms.Add(platform);
                 if (_config.SingleplayerPlatformPath == platform.platName + platform.platAuthor)
                     currentSingleplayerPlatform = platform;
                 if (_config.MultiplayerPlatformPath == platform.platName + platform.platAuthor)
                     currentMultiplayerPlatform = platform;
                 if (_config.A360PlatformPath == platform.platName + platform.platAuthor)
                     currentA360Platform = platform;
-            });
+            }
         }
 
-        internal int GetIndexForType(PlatformType platformType) {
-            int index = platformType switch {
+        internal int GetIndexForType(PlatformType platformType)
+        {
+            int index = platformType switch
+            {
                 PlatformType.Singleplayer => allPlatforms.IndexOf(currentSingleplayerPlatform),
                 PlatformType.Multiplayer => allPlatforms.IndexOf(currentMultiplayerPlatform),
                 PlatformType.A360 => allPlatforms.IndexOf(currentA360Platform),
@@ -161,12 +157,14 @@ namespace CustomFloorPlugin {
         /// Gets the Non-Mesh LightSource and the PlayersPlace used in the Platform Preview too.<br></br>
         /// Now also steals the LightEffects for multiplayer, this scene is really useful
         /// </summary>
-        private void LoadAssets() {
+        private void LoadAssets()
+        {
             Stopwatch sw = new Stopwatch();
             sw.Start();
             Scene greenDay = SceneManager.LoadScene("GreenDayGrenadeEnvironment", new LoadSceneParameters(LoadSceneMode.Additive));
             StartCoroutine(fuckUnity());
-            IEnumerator<WaitUntil> fuckUnity() {//did you know loaded scenes are loaded asynchronously, regarless if you use async or not?
+            IEnumerator<WaitUntil> fuckUnity()
+            {//did you know loaded scenes are loaded asynchronously, regarless if you use async or not?
                 yield return new WaitUntil(() => { return greenDay.isLoaded; });
                 GameObject root = greenDay.GetRootGameObjects()[0];
 
@@ -200,20 +198,24 @@ namespace CustomFloorPlugin {
                 string[][] string_vector3s = new string[dimension2[0].Length][];
 
                 int i = 0;
-                foreach (string string_vector3 in dimension2[0]) {
+                foreach (string string_vector3 in dimension2[0])
+                {
                     string_vector3s[i++] = string_vector3.Split(',');
                 }
 
                 List<Vector3> vertices = new List<Vector3>();
                 List<int> triangles = new List<int>();
-                foreach (string[] string_vector3 in string_vector3s) {
+                foreach (string[] string_vector3 in string_vector3s)
+                {
                     vertices.Add(new Vector3(float.Parse(string_vector3[0], NumberFormatInfo.InvariantInfo), float.Parse(string_vector3[1], NumberFormatInfo.InvariantInfo), float.Parse(string_vector3[2], NumberFormatInfo.InvariantInfo)));
                 }
-                foreach (string s_int in dimension2[1]) {
+                foreach (string s_int in dimension2[1])
+                {
                     triangles.Add(int.Parse(s_int, NumberFormatInfo.InvariantInfo));
                 }
 
-                Mesh mesh = new Mesh {
+                Mesh mesh = new Mesh
+                {
                     vertices = vertices.ToArray(),
                     triangles = triangles.ToArray()
                 };

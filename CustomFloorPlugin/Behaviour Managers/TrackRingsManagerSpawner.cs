@@ -8,15 +8,17 @@ using UnityEngine;
 using Zenject;
 
 
-namespace CustomFloorPlugin {
-
-
+namespace CustomFloorPlugin
+{
     /// <summary>
     /// Instantiable wrapper and manager class for <see cref="TrackRings"/>.<br/>
     /// Handles spawning of multiple Components, relevant to track rings<br/>
     /// Handles reparenting of <see cref="TrackLaneRing"/>s after the game has spawned them<br/>
     /// </summary>
-    internal class TrackRingsManagerSpawner : MonoBehaviour {
+    internal class TrackRingsManagerSpawner : MonoBehaviour
+    {
+        [Inject]
+        private readonly MaterialSwapper _materialSwapper;
 
         [Inject]
         private readonly LightWithIdManager _lightManager;
@@ -29,58 +31,58 @@ namespace CustomFloorPlugin {
         /// </summary>
         private List<TrackRings> trackRingsDescriptors;
 
-
         /// <summary>
         /// <see cref="List{T}"/> of all known <see cref="TrackLaneRingsManager"/>s under a specific <see cref="GameObject"/>
         /// </summary>
         internal List<TrackLaneRingsManager> trackLaneRingsManagers;
-
 
         /// <summary>
         /// <see cref="List{T}"/> of all known <see cref="TrackLaneRingsRotationEffectSpawner"/>s under a specific <see cref="GameObject"/>
         /// </summary>
         private List<TrackLaneRingsRotationEffectSpawner> rotationSpawners;
 
-
         /// <summary>
         /// <see cref="List{T}"/> of all known <see cref="TrackLaneRingsPositionStepEffectSpawner"/>s under a specific <see cref="GameObject"/>
         /// </summary>
         private List<TrackLaneRingsPositionStepEffectSpawner> stepSpawners;
-
-
 
         /// <summary>
         /// Re-Parenting <see cref="TrackLaneRing"/>s, created by the game, to this <see cref="CustomPlatform"/><br/>
         /// [Unity calls this before any of this <see cref="MonoBehaviour"/>s Update functions are called for the first time]
         /// </summary>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("CodeQuality", "IDE0051:Remove unused private members", Justification = "Called by Unity")]
-        private void Start() {
-            foreach (TrackLaneRingsManager trackLaneRingsManager in trackLaneRingsManagers) {
+        private void Start()
+        {
+            foreach (TrackLaneRingsManager trackLaneRingsManager in trackLaneRingsManagers)
+            {
                 TrackLaneRing[] rings = trackLaneRingsManager.GetField<TrackLaneRing[], TrackLaneRingsManager>("_rings");
-                foreach (TrackLaneRing ring in rings) {
+                foreach (TrackLaneRing ring in rings)
+                {
                     ring.transform.parent = transform;
                     PlatformManager.SpawnedObjects.Add(ring.gameObject);
-                    MaterialSwapper.ReplaceMaterials(ring.gameObject);
-                    foreach (TubeLight tubeLight in ring.GetComponentsInChildren<TubeLight>()) {
+                    _materialSwapper.ReplaceMaterials(ring.gameObject);
+                    foreach (TubeLight tubeLight in ring.GetComponentsInChildren<TubeLight>())
+                    {
                         tubeLight.GameAwake(_lightManager);
                     }
                 }
             }
         }
 
-
         /// <summary>
         /// Creates and stores references to multiple objects (of different types) per <see cref="TrackRings"/> on the <paramref name="gameObject"/>
         /// </summary>
         /// <param name="gameObject">What <see cref="GameObject"/> to create TrackRings for</param>
-        internal void CreateTrackRings(GameObject gameObject) {
+        internal void CreateTrackRings(GameObject gameObject)
+        {
             rotationSpawners = new List<TrackLaneRingsRotationEffectSpawner>();
             stepSpawners = new List<TrackLaneRingsPositionStepEffectSpawner>();
             trackLaneRingsManagers = new List<TrackLaneRingsManager>();
             trackRingsDescriptors = new List<TrackRings>();
 
             TrackRings[] ringsDescriptors = gameObject.GetComponentsInChildren<TrackRings>();
-            foreach (TrackRings trackRingDesc in ringsDescriptors) {
+            foreach (TrackRings trackRingDesc in ringsDescriptors)
+            {
                 trackRingsDescriptors.Add(trackRingDesc);
 
                 TrackLaneRingsManager ringsManager = trackRingDesc.gameObject.AddComponent<TrackLaneRingsManager>();
@@ -94,7 +96,8 @@ namespace CustomFloorPlugin {
                 ringsManager.SetField("_ringCount", trackRingDesc.ringCount);
                 ringsManager.SetField("_ringPositionStep", trackRingDesc.ringPositionStep);
 
-                if (trackRingDesc.useRotationEffect) {
+                if (trackRingDesc.useRotationEffect)
+                {
                     TrackLaneRingsRotationEffect rotationEffect = trackRingDesc.gameObject.AddComponent<TrackLaneRingsRotationEffect>();
                     PlatformManager.SpawnedComponents.Add(rotationEffect);
                     rotationEffect.SetField("_trackLaneRingsManager", ringsManager);
@@ -118,7 +121,8 @@ namespace CustomFloorPlugin {
                     rotationEffectSpawner.SetField("_rotationFlexySpeed", trackRingDesc.rotationFlexySpeed);
                     rotationEffectSpawner.SetField("_trackLaneRingsRotationEffect", rotationEffect);
                 }
-                if (trackRingDesc.useStepEffect) {
+                if (trackRingDesc.useStepEffect)
+                {
                     TrackLaneRingsPositionStepEffectSpawner stepEffectSpawner = trackRingDesc.gameObject.AddComponent<TrackLaneRingsPositionStepEffectSpawner>();
                     stepSpawners.Add(stepEffectSpawner);
                     PlatformManager.SpawnedComponents.Add(stepEffectSpawner);

@@ -1,10 +1,10 @@
 ﻿using UnityEngine;
 
 
-namespace CustomFloorPlugin {
-
-
-    public class TrackRings : MonoBehaviour {
+namespace CustomFloorPlugin
+{
+    public class TrackRings : MonoBehaviour
+    {
         [Space]
         [Header("Rings")]
         public GameObject trackLaneRingPrefab;
@@ -32,20 +32,24 @@ namespace CustomFloorPlugin {
         public float maxPositionStep = 2f;
         public float moveSpeed = 1f;
 
-
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Code Quality", "IDE0051:Remove unused private members", Justification = "Called by Unity")]
-        private void OnDrawGizmos() {
+        private void OnDrawGizmos()
+        {
             Gizmos.matrix = transform.localToWorldMatrix;
             Gizmos.color = Color.blue;
             Vector3 zOffset;
-            for (int i = 0; i < ringCount; i++) {
+            for (int i = 0; i < ringCount; i++)
+            {
                 zOffset = i * ringPositionStep * Vector3.forward;
-                if (trackLaneRingPrefab != null) {
-                    foreach (Renderer r in trackLaneRingPrefab.GetComponentsInChildren<Renderer>()) {
+                if (trackLaneRingPrefab != null)
+                {
+                    foreach (Renderer r in trackLaneRingPrefab.GetComponentsInChildren<Renderer>())
+                    {
                         Gizmos.DrawCube(zOffset + r.bounds.center, r.bounds.size);
                     }
                 }
-                else {
+                else
+                {
                     Gizmos.DrawCube(zOffset, Vector3.one * 0.5f);
                 }
             }

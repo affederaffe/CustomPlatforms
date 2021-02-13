@@ -1,14 +1,17 @@
 ﻿using UnityEngine;
 
 
-namespace CustomFloorPlugin {
-
-
+namespace CustomFloorPlugin
+{
     [RequireComponent(typeof(EventManager))]
-    public class EventFilterBehaviour : MonoBehaviour {
-        protected EventManager EventManager {
-            get {
-                if (_eventManager == null) {
+    public class EventFilterBehaviour : MonoBehaviour
+    {
+        protected EventManager EventManager
+        {
+            get
+            {
+                if (_eventManager == null)
+                {
                     _eventManager = GetComponent<EventManager>();
                 }
                 return _eventManager;
