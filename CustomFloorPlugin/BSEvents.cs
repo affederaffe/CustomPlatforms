@@ -7,6 +7,9 @@ using Zenject;
 
 namespace CustomFloorPlugin
 {
+    /// <summary>
+    /// Should be pretty self-explanatory, this is a giant wrapper for many events Beat Saber uses
+    /// </summary>
     public class BSEvents : IInitializable, IDisposable
     {
         [Inject]
@@ -43,8 +46,8 @@ namespace CustomFloorPlugin
         public event Action GameSceneLoadedEvent = delegate { };
         public event Action LevelFinishedEvent = delegate { };
         public event Action LevelFailedEvent = delegate { };
-        public event Action<int> NewHighscore = delegate { };
-        public event Action<SaberType> NoteWasCutEvent = delegate { };
+        public event Action NewHighscore = delegate { };
+        public event Action<int> NoteWasCutEvent = delegate { };
         public event Action NoteWasMissedEvent = delegate { };
         public event Action ComboDidBreakEvent = delegate { };
         public event Action<int> GoodCutCountDidChangeEvent = delegate { };
@@ -65,7 +68,7 @@ namespace CustomFloorPlugin
 
         public void Initialize()
         {
-            cuttableNotes = _difficultyBeatmap.beatmapData.cuttableNotesType;
+            cuttableNotes = _difficultyBeatmap.beatmapData.cuttableNotesType - _difficultyBeatmap.beatmapData.bombsCount - 1;
             _beatmapObjectCallbackController.beatmapEventDidTriggerEvent += BeatmapEventDidTrigger;
             _beatmapObjectManager.noteWasCutEvent += NoteWasCut;
             _beatmapObjectManager.noteWasMissedEvent += NoteWasMissed;
@@ -101,15 +104,15 @@ namespace CustomFloorPlugin
 
         private void NoteWasCut(NoteController noteController, NoteCutInfo noteCutInfo)
         {
-            AllNotesCountDidChangeEvent(++allNotesCount, cuttableNotes);
+            AllNotesCountDidChangeEvent(allNotesCount++, cuttableNotes);
             if (noteCutInfo.allIsOK)
             {
-                NoteWasCutEvent(noteCutInfo.saberType);
-                GoodCutCountDidChangeEvent(++goodCutCount);
+                NoteWasCutEvent((int)noteCutInfo.saberType);
+                GoodCutCountDidChangeEvent(goodCutCount++);
             }
             else
             {
-                BadCutCountDidChangeEvent(++badCutCount);
+                BadCutCountDidChangeEvent(badCutCount++);
             }
             if (Mathf.Approximately(noteController.noteData.time, _lastNoteTime))
             {
@@ -118,15 +121,15 @@ namespace CustomFloorPlugin
                 PlayerLevelStatsData playerLevelStatsData = _playerDataModel.playerData.GetPlayerLevelStatsData(_difficultyBeatmap);
                 LevelCompletionResults results = _prepareLevelCompletionResults.FillLevelCompletionResults(LevelCompletionResults.LevelEndStateType.Cleared, LevelCompletionResults.LevelEndAction.None);
                 if (results.modifiedScore > playerLevelStatsData.highScore)
-                    NewHighscore(results.modifiedScore);
+                    NewHighscore();
             }
         }
 
         private void NoteWasMissed(NoteController noteController)
         {
             NoteWasMissedEvent();
-            AllNotesCountDidChangeEvent(++allNotesCount, cuttableNotes);
-            MissCountDidChangeEvent(++missCount);
+            AllNotesCountDidChangeEvent(allNotesCount++, cuttableNotes);
+            MissCountDidChangeEvent(missCount++);
             if (Mathf.Approximately(noteController.noteData.time, _lastNoteTime))
             {
                 _lastNoteTime = 0f;
@@ -134,7 +137,7 @@ namespace CustomFloorPlugin
                 PlayerLevelStatsData playerLevelStatsData = _playerDataModel.playerData.GetPlayerLevelStatsData(_difficultyBeatmap);
                 LevelCompletionResults results = _prepareLevelCompletionResults.FillLevelCompletionResults(LevelCompletionResults.LevelEndStateType.Cleared, LevelCompletionResults.LevelEndAction.None);
                 if (results.modifiedScore > playerLevelStatsData.highScore)
-                    NewHighscore(results.modifiedScore);
+                    NewHighscore();
             }
         }
 

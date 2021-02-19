@@ -3,9 +3,16 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Reflection;
+using System.Text;
 
 using CustomFloorPlugin.Configuration;
+using CustomFloorPlugin.Extensions;
+
+using IPA.Utilities;
+
+using SiraUtil.Tools;
 
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -21,7 +28,13 @@ namespace CustomFloorPlugin
     public class PlatformManager : MonoBehaviour
     {
         [Inject]
+        private readonly SiraLog _siraLog;
+
+        [Inject]
         private readonly PluginConfig _config;
+
+        [Inject]
+        private readonly PlatformLoader _platformLoader;
 
         /// <summary>
         /// List of all loaded Platforms
@@ -31,12 +44,12 @@ namespace CustomFloorPlugin
         /// <summary>
         /// Stores the index of an API requested <see cref="CustomPlatform"/>
         /// </summary>
-        public int apiRequestIndex = -1;
+        internal int apiRequestIndex = -1;
 
         /// <summary>
         /// Stores the BeatmapLevel the platform was requested for
         /// </summary>
-        public string apiRequestedLevelId;
+        internal string apiRequestedLevelId;
 
         /// <summary>
         /// Keeps track of the currently selected <see cref="PlatformType"/>
@@ -62,6 +75,21 @@ namespace CustomFloorPlugin
         /// Keeps track of the currently active <see cref="CustomPlatform"/>
         /// </summary>
         internal CustomPlatform activePlatform;
+
+        /// <summary>
+        /// The cover used for all platforms missing a cover normally
+        /// </summary>
+        internal Sprite fallbackCover;
+
+        /// <summary>
+        /// The folder all CustomPlatform files are located
+        /// </summary>
+        internal readonly string customPlatformsFolderPath = Path.Combine(UnityGame.InstallPath, "CustomPlatforms");
+
+        /// <summary>
+        /// The path used to cache platform descriptors for faster loading
+        /// </summary>
+        internal readonly string customPlatformsInfoCacheFilePath = Path.Combine(UnityGame.UserDataPath, "Custom PlatformsInfoCache.dat");
 
         /// <summary>
         /// Acts as a prefab for custom light sources that require meshes...<br/>
@@ -110,6 +138,11 @@ namespace CustomFloorPlugin
         internal static Action<LightWithIdManager> SpawnQueue = delegate { };
 
         /// <summary>
+        /// The cache file version to prevent loading older ones if something changes
+        /// </summary>
+        private const byte kCacheFileVersion = 1;
+
+        /// <summary>
         /// Initializes the <see cref="PlatformManager"/>
         /// </summary>
         public void Start()
@@ -119,25 +152,63 @@ namespace CustomFloorPlugin
             {
                 yield return new WaitForEndOfFrame();
                 LoadAssets();
+                yield return new WaitForEndOfFrame();
+                Reload();
             }
         }
 
         /// <summary>
-        /// Sets the last selected <see cref="CustomPlatform"/>s
+        /// Automaticly save platform descriptors on exit
         /// </summary>
-        internal void GetLastSelectedPlatforms()
+        public void OnDestroy()
         {
-            foreach (CustomPlatform platform in allPlatforms)
+            SavePlatformInfosToFile();
+        }
+
+        /// <summary>
+        /// Loads all platforms or their descritpors if a cache file exists
+        /// </summary>
+        private void Reload()
+        {
+            if (!Directory.Exists(customPlatformsFolderPath))
+                Directory.CreateDirectory(customPlatformsFolderPath);
+
+            allPlatforms = new List<CustomPlatform>();
+
+            string[] bundlePaths = Directory.GetFiles(customPlatformsFolderPath, "*.plat");
+
+            Sprite[] allSprites = Resources.FindObjectsOfTypeAll<Sprite>();
+            Sprite lvlInsaneCover = allSprites.First(x => x.name == "LvlInsaneCover");
+            fallbackCover = allSprites.First(x => x.name == "FeetIcon");
+
+            CustomPlatform defaultPlatform = new GameObject("Default Platform").AddComponent<CustomPlatform>();
+            defaultPlatform.transform.parent = transform;
+            defaultPlatform.platName = "Default Environment";
+            defaultPlatform.platAuthor = "Beat Saber";
+            defaultPlatform.icon = lvlInsaneCover;
+            allPlatforms.Add(defaultPlatform);
+
+            if (File.Exists(customPlatformsInfoCacheFilePath))
             {
-                if (_config.SingleplayerPlatformPath == platform.platName + platform.platAuthor)
-                    currentSingleplayerPlatform = platform;
-                if (_config.MultiplayerPlatformPath == platform.platName + platform.platAuthor)
-                    currentMultiplayerPlatform = platform;
-                if (_config.A360PlatformPath == platform.platName + platform.platAuthor)
-                    currentA360Platform = platform;
+                LoadPlatformInfosFromFile();
+                foreach (string path in bundlePaths.Select(x => Path.GetFullPath(x)).Except(allPlatforms.Select(x => x.fullPath)))
+                {
+                    StartCoroutine(_platformLoader.LoadFromFileAsync(path, HandlePlatformLoaded));
+                }
+            }
+            else
+            {
+                foreach (string path in bundlePaths)
+                {
+                    string fullPath = Path.GetFullPath(path);
+                    StartCoroutine(_platformLoader.LoadFromFileAsync(fullPath, HandlePlatformLoaded));
+                }
             }
         }
 
+        /// <summary>
+        /// Returns the index for a <see cref="PlatformType"/> in <see cref="allPlatforms"/>
+        /// </summary>
         internal int GetIndexForType(PlatformType platformType)
         {
             int index = platformType switch
@@ -148,6 +219,125 @@ namespace CustomFloorPlugin
                 _ => 0
             };
             return index != -1 ? index : 0;
+        }
+
+        /// <summary>
+        /// Sets the platforms that were last selected as the current ones
+        /// </summary>
+        internal void CheckLastSelectedPlatform(ref CustomPlatform platform)
+        {
+            if (_config.SingleplayerPlatformPath == platform.platName + platform.platAuthor)
+                currentSingleplayerPlatform = platform;
+            if (_config.MultiplayerPlatformPath == platform.platName + platform.platAuthor)
+                currentMultiplayerPlatform = platform;
+            if (_config.A360PlatformPath == platform.platName + platform.platAuthor)
+                currentA360Platform = platform;
+        }
+
+        /// <summary>
+        /// The callback executed when a platform is successfully loaded
+        /// </summary>
+        internal void HandlePlatformLoaded(CustomPlatform platform, string fullPath)
+        {
+            CustomPlatform newPlatform = Instantiate(platform);
+            newPlatform.name = platform.name;
+            newPlatform.fullPath = platform.fullPath;
+            newPlatform.platHash = platform.platHash;
+            newPlatform.transform.parent = transform;
+            if (newPlatform.icon == null)
+                newPlatform.icon = fallbackCover;
+            CheckLastSelectedPlatform(ref newPlatform);
+
+            if (_platformLoader.platformFilePaths.ContainsKey(fullPath))
+            {
+                int index = allPlatforms.IndexOf(_platformLoader.platformFilePaths[fullPath]);
+                allPlatforms.RemoveAt(index);
+                if (activePlatform == _platformLoader.platformFilePaths[fullPath])
+                    activePlatform = newPlatform;
+                Destroy(_platformLoader.platformFilePaths[fullPath].gameObject);
+                _platformLoader.platformFilePaths[fullPath] = newPlatform;
+                allPlatforms.Insert(index, newPlatform);
+            }
+            else
+            {
+                _platformLoader.platformFilePaths.Add(fullPath, newPlatform);
+                allPlatforms.Add(newPlatform);
+            }
+        }
+
+        /// <summary>
+        /// Reads all saved platform descriptors out of the cache file
+        /// </summary>
+        private void LoadPlatformInfosFromFile()
+        {
+            try
+            {
+                using FileStream stream = new FileStream(customPlatformsInfoCacheFilePath, FileMode.Open, FileAccess.Read);
+                using BinaryReader reader = new BinaryReader(stream, Encoding.UTF8);
+                if (reader.ReadByte() != kCacheFileVersion)
+                    return;
+
+                int count = reader.ReadInt32();
+                for (int i = 0; i < count; i++)
+                {
+                    CustomPlatform platform = new GameObject().AddComponent<CustomPlatform>();
+                    platform.platName = reader.ReadString();
+                    platform.platAuthor = reader.ReadString();
+                    platform.platHash = reader.ReadString();
+                    platform.fullPath = reader.ReadString();
+                    Texture2D tex = reader.ReadTexture2D();
+                    platform.icon = Sprite.Create(tex, new Rect(0f, 0f, tex.width, tex.height), Vector2.zero);
+                    platform.name = platform.platName + " by " + platform.platAuthor;
+                    platform.transform.parent = transform;
+                    if (!File.Exists(platform.fullPath))
+                    {
+                        _siraLog.Info($"File {platform.fullPath} no longer exists; skipped");
+                        continue;
+                    }
+
+                    CheckLastSelectedPlatform(ref platform);
+
+                    _platformLoader.platformFilePaths.Add(platform.fullPath, platform);
+                    allPlatforms.Add(platform);
+                }
+            }
+            catch (Exception e)
+            {
+                _siraLog.Error("Failed to load cached platform info:\n" + e);
+            }
+        }
+
+        /// <summary>
+        /// Saves descritpors of all loaded <see cref="CustomPlatform"/>s into a cache file
+        /// </summary>
+        private void SavePlatformInfosToFile()
+        {
+            try
+            {
+                using (FileStream stream = new FileStream(customPlatformsInfoCacheFilePath, FileMode.OpenOrCreate, FileAccess.Write))
+                {
+                    using (BinaryWriter writer = new BinaryWriter(stream, Encoding.UTF8, true))
+                    {
+                        writer.Write(kCacheFileVersion);
+                        writer.Write(allPlatforms.Count-1);
+                        foreach (CustomPlatform platform in allPlatforms.Skip(1))
+                        {
+                            writer.Write(platform.platName);
+                            writer.Write(platform.platAuthor);
+                            writer.Write(platform.platHash);
+                            writer.Write(platform.fullPath);
+                            writer.Write(platform.icon.texture, true);
+                        }
+                    }
+                    stream.SetLength(stream.Position);
+                }
+                File.SetAttributes(customPlatformsInfoCacheFilePath, FileAttributes.Hidden);
+            }
+            catch (Exception e)
+            {
+                _siraLog.Error("Failed to save info cache");
+                _siraLog.Error(e);
+            }
         }
 
         /// <summary>
@@ -186,8 +376,7 @@ namespace CustomFloorPlugin
                 LightEffects.SetActive(false);
                 LightEffects.transform.SetParent(transform);
 
-                AsyncOperation unloadSceneOperation = SceneManager.UnloadSceneAsync("GreenDayGrenadeEnvironment");
-                yield return new WaitUntil(() => { return unloadSceneOperation.isDone; });
+                SceneManager.UnloadSceneAsync("GreenDayGrenadeEnvironment");
 
                 using Stream manifestResourceStream = Assembly.GetExecutingAssembly().GetManifestResourceStream("CustomFloorPlugin.heart.mesh");
                 using StreamReader streamReader = new StreamReader(manifestResourceStream);
@@ -230,9 +419,6 @@ namespace CustomFloorPlugin
 
                 Heart.SetActive(_config.ShowHeart);
                 Heart.GetComponent<InstancedMaterialLightWithId>().ColorWasSet(Color.magenta);
-
-                sw.Stop();
-                Utilities.Logging.Log($"Loaded assets in {sw.Elapsed.TotalSeconds} seconds");
             }
         }
     }

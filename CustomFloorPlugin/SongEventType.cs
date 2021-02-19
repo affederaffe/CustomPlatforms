@@ -20,6 +20,7 @@
         RingSpeedLeft = 12,
         RingSpeedRight = 13,
         Unused14 = 14,
-        Unused15 = 15
+        Unused15 = 15,
+        Void = -1
     }
 }

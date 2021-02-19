@@ -1,7 +1,5 @@
 ﻿using BeatSaberMarkupLanguage;
 
-using CustomFloorPlugin.Utilities;
-
 using HMUI;
 
 using Zenject;
@@ -14,9 +12,6 @@ namespace CustomFloorPlugin.UI
     /// </summary>
     internal class PlatformListFlowCoordinator : FlowCoordinator
     {
-        [Inject]
-        private readonly PlatformManager _platformManager;
-
         [Inject]
         private readonly PlatformListsView _platformsListView;
 
@@ -51,9 +46,6 @@ namespace CustomFloorPlugin.UI
         /// <param name="_1"></param>
         protected override void BackButtonWasPressed(ViewController _1)
         {
-            Logging.Log("Selected Singleplayer Platform: " + _platformManager.currentSingleplayerPlatform?.platName);
-            Logging.Log("Selected Multiplayer Platform: " + _platformManager.currentMultiplayerPlatform?.platName);
-            Logging.Log("Selected 360 Platform: " + _platformManager.currentA360Platform?.platName);
             _mainFlowCoordinator.DismissFlowCoordinator(this, null, ViewController.AnimationDirection.Horizontal, false);
         }
     }

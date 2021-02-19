@@ -16,7 +16,6 @@ namespace CustomFloorPlugin.Installers
                 Container.Bind<float>().WithId("LastNoteTime").FromInstance(lastNoteTime).AsSingle();
                 Container.BindInterfacesAndSelfTo<BSEvents>().AsSingle();
             }
-
             Container.BindInterfacesAndSelfTo<PlatformSpawnerGame>().AsSingle().WithArguments(Container).NonLazy();
         }
     }

@@ -57,10 +57,7 @@ namespace CustomFloorPlugin
                 ApplyRendererInfo(m_Renderers, m_LightmapOffsetScales, lightmaps.Length);
                 LightmapSettings.lightmaps = combinedLightmaps;
             }
-            catch (Exception e)
-            {
-                Utilities.Logging.Log(e);
-            }
+            catch { }
         }
 
 

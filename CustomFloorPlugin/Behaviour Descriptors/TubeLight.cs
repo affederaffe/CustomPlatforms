@@ -38,6 +38,18 @@ namespace CustomFloorPlugin
         public Color color = Color.white;
         public LightsID lightsID = LightsID.Static;
 
+        public Color Color
+        {
+            get
+            {
+                if (tubeBloomLight != null)
+                    return tubeBloomLight.color;
+                else if (materialPropertyBlockColorSetter != null)
+                    return materialPropertyBlockColorSetter.color;
+                else return color;
+            }
+        }
+
         [System.Diagnostics.CodeAnalysis.SuppressMessage("CodeQuality", "IDE0051:Remove unused private members", Justification = "Called by Unity")]
         private void OnDrawGizmos()
         {
@@ -49,6 +61,7 @@ namespace CustomFloorPlugin
 
         private TubeBloomPrePassLight tubeBloomLight;
         private GameObject iHeartBeatSaber;
+        private MaterialPropertyBlockColorSetter materialPropertyBlockColorSetter;
 
         internal void GameAwake(LightWithIdManager lightManager)
         {
@@ -66,12 +79,9 @@ namespace CustomFloorPlugin
                 tubeBloomLight.gameObject.SetActive(false);
 
                 TubeBloomPrePassLightWithId lightWithId = tubeBloomLight.GetComponent<TubeBloomPrePassLightWithId>();
-                if (lightWithId)
-                {
-                    lightWithId.SetField("_tubeBloomPrePassLight", tubeBloomLight);
-                    ((LightWithIdMonoBehaviour)lightWithId).SetField("_ID", (int)lightsID);
-                    ((LightWithIdMonoBehaviour)lightWithId).SetField("_lightManager", lightManager);
-                }
+                lightWithId.SetField("_tubeBloomPrePassLight", tubeBloomLight);
+                ((LightWithIdMonoBehaviour)lightWithId).SetField("_ID", (int)lightsID);
+                ((LightWithIdMonoBehaviour)lightWithId).SetField("_lightManager", lightManager);
 
                 tubeBloomLight.SetField("_width", width * 2);
                 tubeBloomLight.SetField("_length", length);
@@ -94,13 +104,13 @@ namespace CustomFloorPlugin
             }
             else
             {
-                // swap for <3
                 iHeartBeatSaber = Instantiate(PlatformManager.Heart);
                 PlatformManager.SpawnedObjects.Add(iHeartBeatSaber);
                 iHeartBeatSaber.transform.parent = transform;
                 iHeartBeatSaber.transform.position = transform.position;
                 iHeartBeatSaber.transform.localScale = Vector3.one;
                 iHeartBeatSaber.transform.rotation = transform.rotation;
+                materialPropertyBlockColorSetter = iHeartBeatSaber.GetComponent<MaterialPropertyBlockColorSetter>();
                 InstancedMaterialLightWithId lightWithId = iHeartBeatSaber.GetComponent<InstancedMaterialLightWithId>();
                 ((LightWithIdMonoBehaviour)lightWithId).SetField("_ID", (int)lightsID);
                 ((LightWithIdMonoBehaviour)lightWithId).SetField("_lightManager", lightManager);

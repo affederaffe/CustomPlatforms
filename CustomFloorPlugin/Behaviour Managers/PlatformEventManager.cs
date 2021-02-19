@@ -48,7 +48,7 @@ namespace CustomFloorPlugin
                 _events.BeatmapEventDidTriggerEvent += LightEventCallBack;
                 _events.GameSceneLoadedEvent += delegate { _eventManager.OnLevelStart.Invoke(); };
                 _events.NoteWasCutEvent += delegate { _eventManager.OnSlice.Invoke(); };
-                _events.NoteWasCutEvent += delegate (SaberType saberType) { _eventManager.OnSpecificSlice.Invoke(saberType); };
+                _events.NoteWasCutEvent += delegate (int saberType) { _eventManager.OnSpecificSlice.Invoke(saberType); };
                 _events.NoteWasMissedEvent += delegate { _eventManager.OnMiss.Invoke(); };
                 _events.ComboDidBreakEvent += delegate { _eventManager.OnComboBreak.Invoke(); };
                 _events.MultiplierDidIncreaseEvent += delegate { _eventManager.MultiplierUp.Invoke(); };
@@ -57,7 +57,7 @@ namespace CustomFloorPlugin
                 _events.SabersEndCollideEvent += delegate { _eventManager.SaberStopColliding.Invoke(); };
                 _events.LevelFinishedEvent += delegate { _eventManager.OnLevelFinish.Invoke(); };
                 _events.LevelFailedEvent += delegate { _eventManager.OnLevelFail.Invoke(); };
-                _events.NewHighscore += delegate (int newHighscore) { _eventManager.OnNewHighScore.Invoke(newHighscore); };
+                _events.NewHighscore += delegate { _eventManager.OnNewHighscore.Invoke(); };
                 _events.ScoreDidChangeEvent += delegate (int rawScore, int modifiedScore) { _eventManager.OnScoreChanged.Invoke(rawScore, modifiedScore); };
                 _events.GoodCutCountDidChangeEvent += delegate (int goodCuts) { _eventManager.OnGoodCutCountChanged.Invoke(goodCuts); };
                 _events.BadCutCountDidChangeEvent += delegate (int badCuts) { _eventManager.OnBadCutCountChanged.Invoke(badCuts); };
@@ -84,7 +84,7 @@ namespace CustomFloorPlugin
                 _events.SabersEndCollideEvent -= delegate { _eventManager.SaberStopColliding.Invoke(); };
                 _events.LevelFinishedEvent -= delegate { _eventManager.OnLevelFinish.Invoke(); };
                 _events.LevelFailedEvent -= delegate { _eventManager.OnLevelFail.Invoke(); };
-                _events.NewHighscore -= delegate (int newHighscore) { _eventManager.OnNewHighScore.Invoke(newHighscore); };
+                _events.NewHighscore -= delegate { _eventManager.OnNewHighscore.Invoke(); };
                 _events.ScoreDidChangeEvent -= delegate (int rawScore, int modifiedScore) { _eventManager.OnScoreChanged.Invoke(rawScore, modifiedScore); };
                 _events.GoodCutCountDidChangeEvent -= delegate (int goodCuts) { _eventManager.OnGoodCutCountChanged.Invoke(goodCuts); };
                 _events.BadCutCountDidChangeEvent -= delegate (int badCuts) { _eventManager.OnBadCutCountChanged.Invoke(badCuts); };

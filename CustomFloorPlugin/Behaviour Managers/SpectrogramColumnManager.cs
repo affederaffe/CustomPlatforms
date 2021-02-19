@@ -1,7 +1,5 @@
 using System.Collections.Generic;
 
-using IPA.Utilities;
-
 using UnityEngine;
 
 using Zenject;
@@ -14,9 +12,6 @@ namespace CustomFloorPlugin
     /// </summary>
     internal class SpectrogramColumnManager : MonoBehaviour
     {
-        [Inject]
-        private readonly MaterialSwapper _materialSwapper;
-
         [Inject]
         private readonly LightWithIdManager _lightWithIdManager;
 
@@ -58,14 +53,14 @@ namespace CustomFloorPlugin
                 SpectrogramColumns specCol = spec.gameObject.AddComponent<SpectrogramColumns>();
                 PlatformManager.SpawnedComponents.Add(specCol);
 
-                _materialSwapper.ReplaceMaterials(spec.columnPrefab);
+                MaterialSwapper.ReplaceMaterials(spec.columnPrefab);
 
-                specCol.SetField("_columnPrefab", spec.columnPrefab);
-                specCol.SetField("_separator", spec.separator);
-                specCol.SetField("_minHeight", spec.minHeight);
-                specCol.SetField("_maxHeight", spec.maxHeight);
-                specCol.SetField("_columnWidth", spec.columnWidth);
-                specCol.SetField("_columnDepth", spec.columnDepth);
+                specCol._columnPrefab = spec.columnPrefab;
+                specCol._separator = spec.separator;
+                specCol._minHeight = spec.minHeight;
+                specCol._maxHeight = spec.maxHeight;
+                specCol._columnWidth = spec.columnWidth;
+                specCol._columnDepth = spec.columnDepth;
 
                 spectrogramColumns.Add(specCol);
                 columnDescriptors.Add(spec);
@@ -77,16 +72,11 @@ namespace CustomFloorPlugin
         /// </summary>
         internal void UpdateSpectrogramDataProvider()
         {
-            if (_basicSpectrogramData != null)
-            {
-                foreach (SpectrogramColumns specCol in spectrogramColumns)
-                {
-                    specCol.SetField("_spectrogramData", _basicSpectrogramData);
-                }
-            }
             foreach (SpectrogramColumns specCol in spectrogramColumns)
             {
-                specCol.SetField("_lightWithIdManager", _lightWithIdManager);
+                specCol._lightWithIdManager = _lightWithIdManager;
+                if (_basicSpectrogramData != null)
+                        specCol._spectrogramData = _basicSpectrogramData;
             }
         }
     }

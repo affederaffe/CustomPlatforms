@@ -17,12 +17,6 @@ namespace CustomFloorPlugin
     /// </summary>
     internal class TrackRingsManagerSpawner : MonoBehaviour
     {
-        [Inject]
-        private readonly MaterialSwapper _materialSwapper;
-
-        [Inject]
-        private readonly LightWithIdManager _lightManager;
-
         [InjectOptional]
         private readonly BeatmapObjectCallbackController _beatmapObjectCallbackController;
 
@@ -34,7 +28,7 @@ namespace CustomFloorPlugin
         /// <summary>
         /// <see cref="List{T}"/> of all known <see cref="TrackLaneRingsManager"/>s under a specific <see cref="GameObject"/>
         /// </summary>
-        internal List<TrackLaneRingsManager> trackLaneRingsManagers;
+        private List<TrackLaneRingsManager> trackLaneRingsManagers;
 
         /// <summary>
         /// <see cref="List{T}"/> of all known <see cref="TrackLaneRingsRotationEffectSpawner"/>s under a specific <see cref="GameObject"/>
@@ -58,13 +52,8 @@ namespace CustomFloorPlugin
                 TrackLaneRing[] rings = trackLaneRingsManager.GetField<TrackLaneRing[], TrackLaneRingsManager>("_rings");
                 foreach (TrackLaneRing ring in rings)
                 {
-                    ring.transform.parent = transform;
                     PlatformManager.SpawnedObjects.Add(ring.gameObject);
-                    _materialSwapper.ReplaceMaterials(ring.gameObject);
-                    foreach (TubeLight tubeLight in ring.GetComponentsInChildren<TubeLight>())
-                    {
-                        tubeLight.GameAwake(_lightManager);
-                    }
+                    MaterialSwapper.ReplaceMaterials(ring.gameObject);
                 }
             }
         }
@@ -95,6 +84,7 @@ namespace CustomFloorPlugin
                 ringsManager.SetField("_trackLaneRingPrefab", ring);
                 ringsManager.SetField("_ringCount", trackRingDesc.ringCount);
                 ringsManager.SetField("_ringPositionStep", trackRingDesc.ringPositionStep);
+                ringsManager.SetField("_spawnAsChildren", true);
 
                 if (trackRingDesc.useRotationEffect)
                 {

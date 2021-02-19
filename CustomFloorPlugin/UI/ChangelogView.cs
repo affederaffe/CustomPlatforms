@@ -22,7 +22,12 @@ namespace CustomFloorPlugin.UI
         /// </summary>
         [UIValue("changelog-text")]
         public string Changelog =>
-        @"<size=150%><color=#888888>Version 6.0.0</color></size>
+        @"<size=150%><color=#888888>Version 6.1.0</color></size>
+        - Many new features for platform makers
+        - Further reduced loading time
+        - Performance improvements
+
+<size=150%><color=#888888>Version 6.0.0</color></size>
         - Basicly a complete rewrite of the plugin and updated for 1.13.2
         - Platforms can now be used in the menu
          - Redesigned menu, moved settings section here and added a changelog
@@ -48,12 +53,12 @@ namespace CustomFloorPlugin.UI
         [UIValue("credits-text")]
         public string Credits =>
         @"<size=150%><color=#888888>Credits</color></size>
-        boulders2000: I don't know what to write here...
-                                      This guy is just awesome.
-        Kyle 1413: Helped me rewrite the API and updated SongCore for it
+        boulders2000: This guy is just awesome.
+        Kyle 1413: Helped me rewrite the API
         Dakari: Compatibility with Cinema
-
-        <size=125%>CustomPlatforms developed by affederaffe</size>";
+        AkaRaiden: Features for platform makers
+        Nicolas: Faster platform loading
+  <size=125%>CustomPlatforms developed by affederaffe</size>";
 
         protected override void DidDeactivate(bool removedFromHierarchy, bool screenSystemDisabling)
         {

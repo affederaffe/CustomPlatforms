@@ -11,6 +11,8 @@ using IPA.Loader;
 
 using Newtonsoft.Json;
 
+using SiraUtil.Tools;
+
 using UnityEngine;
 using UnityEngine.Networking;
 
@@ -21,10 +23,13 @@ namespace CustomFloorPlugin
 {
     /// <summary>
     /// A class that handles all interaction with outside plugins, atm just SongCore and Cinema
-    /// Also detects changes in the platforms directory and loads added platforms automaticly
+    /// Also detects changes in the platforms directory and loads added platforms automaticly / deletes removed ones
     /// </summary>
     internal class API : IInitializable, IDisposable
     {
+        [Inject]
+        private readonly SiraLog _siraLog;
+
         [Inject]
         private readonly PlatformLoader _platformLoader;
 
@@ -43,18 +48,14 @@ namespace CustomFloorPlugin
 
         public void Initialize()
         {
-            _fileSystemWatcher = new FileSystemWatcher(_platformLoader.customPlatformsFolderPath, "*.plat");
+            _fileSystemWatcher = new FileSystemWatcher(_platformManager.customPlatformsFolderPath, "*.plat");
             _fileSystemWatcher.Created += (object sender, FileSystemEventArgs e) => SharedCoroutineStarter.instance.StartCoroutine(OnFileCreated(sender, e));
             _fileSystemWatcher.Deleted += (object sender, FileSystemEventArgs e) => SharedCoroutineStarter.instance.StartCoroutine(OnFileDeleted(sender, e));
             _fileSystemWatcher.EnableRaisingEvents = true;
             if (PluginManager.GetPlugin("SongCore") != null)
-            {
                 SubscribeToSongCoreEvent();
-            }
             if (PluginManager.GetPlugin("Cinema") != null)
-            {
                 SubscribeToCinemaEvent();
-            }
         }
 
         public void Dispose()
@@ -67,25 +68,26 @@ namespace CustomFloorPlugin
         private IEnumerator<WaitForEndOfFrame> OnFileCreated(object sender, FileSystemEventArgs e)
         {
             yield return new WaitForEndOfFrame();
-            CustomPlatform newPlatform = _platformLoader.GetPlatformInfo(e.FullPath);
-            _platformLoader.customPlatformPaths.Add(newPlatform, e.FullPath);
-            _platformManager.allPlatforms.Add(newPlatform);
-
-            if (_platformListsView.allListTables != null)
+            SharedCoroutineStarter.instance.StartCoroutine(_platformLoader.LoadFromFileAsync(e.FullPath, (CustomPlatform platform, string path) =>
             {
-                CustomListTableData.CustomCellInfo cell = new CustomListTableData.CustomCellInfo(newPlatform.platName, newPlatform.platAuthor, newPlatform.icon);
-                foreach (CustomListTableData listTable in _platformListsView.allListTables)
+                _platformManager.HandlePlatformLoaded(platform, path);
+
+                if (_platformListsView.allListTables != null)
                 {
-                    listTable.data.Add(cell);
-                    listTable.tableView.ReloadData();
+                    CustomListTableData.CustomCellInfo cell = new CustomListTableData.CustomCellInfo(platform.platName, platform.platAuthor, platform.icon);
+                    foreach (CustomListTableData listTable in _platformListsView.allListTables)
+                    {
+                        listTable.data.Add(cell);
+                        listTable.tableView.ReloadData();
+                    }
                 }
-            }
 
-            if (apiRequest)
-            {
-                _platformManager.apiRequestIndex = _platformManager.allPlatforms.IndexOf(newPlatform);
-                apiRequest = false;
-            }
+                if (apiRequest)
+                {
+                    _platformManager.apiRequestIndex = _platformManager.allPlatforms.IndexOf(platform);
+                    apiRequest = false;
+                }
+            }));
         }
 
         /// <summary>
@@ -94,51 +96,62 @@ namespace CustomFloorPlugin
         private IEnumerator<WaitForEndOfFrame> OnFileDeleted(object sender, FileSystemEventArgs e)
         {
             yield return new WaitForEndOfFrame();
-            if (_platformLoader.customPlatformPaths.ContainsValue(e.FullPath))
+            if (_platformLoader.platformFilePaths.TryGetValue(e.FullPath, out CustomPlatform platform))
             {
-                KeyValuePair<CustomPlatform, string> deletedPlatformPair = _platformLoader.customPlatformPaths.First(x => x.Value == e.FullPath);
-                _platformLoader.customPlatformPaths.Remove(deletedPlatformPair.Key);
-                _platformManager.allPlatforms.Remove(deletedPlatformPair.Key);
                 if (_platformListsView.allListTables != null)
                 {
                     foreach (CustomListTableData listTable in _platformListsView.allListTables)
                     {
-                        CustomListTableData.CustomCellInfo deletedPlatformCell = listTable.data.Find(x => x.text == deletedPlatformPair.Key.platName && x.subtext == deletedPlatformPair.Key.platAuthor);
+                        CustomListTableData.CustomCellInfo deletedPlatformCell = listTable.data.Find(x => x.text == platform.platName && x.subtext == platform.platAuthor);
                         listTable.data.Remove(deletedPlatformCell);
                         listTable.tableView.ReloadData();
                     }
-                }
-                if (_platformManager.currentSingleplayerPlatform == deletedPlatformPair.Key)
-                {
-                    _platformManager.currentSingleplayerPlatform = _platformManager.allPlatforms[0];
-                    if (_platformListsView.singleplayerPlatformListTable != null)
+                    bool platformDidChange = false;
+                    if (_platformManager.currentSingleplayerPlatform == platform)
                     {
                         _platformListsView.singleplayerPlatformListTable.tableView.SelectCellWithIdx(0);
-                        _platformListsView.singleplayerPlatformListTable.tableView.ScrollToCellWithIdx(0, HMUI.TableViewScroller.ScrollPositionType.End, true);
-                        if (_platformManager.currentPlatformType == PlatformType.Singleplayer) _platformSpawner.ChangeToPlatform(0);
+                        platformDidChange = true;
                     }
-                }
-                if (_platformManager.currentMultiplayerPlatform == deletedPlatformPair.Key)
-                {
-                    _platformManager.currentMultiplayerPlatform = _platformManager.allPlatforms[0];
-                    if (_platformListsView.multiplayerPlatformListTable != null)
+                        
+                    if (_platformManager.currentMultiplayerPlatform == platform)
                     {
                         _platformListsView.multiplayerPlatformListTable.tableView.SelectCellWithIdx(0);
-                        _platformListsView.multiplayerPlatformListTable.tableView.ScrollToCellWithIdx(0, HMUI.TableViewScroller.ScrollPositionType.End, true);
-                        if (_platformManager.currentPlatformType == PlatformType.Multiplayer) _platformSpawner.ChangeToPlatform(0);
+                        platformDidChange = true;
                     }
-                }
-                if (_platformManager.currentA360Platform == deletedPlatformPair.Key)
-                {
-                    _platformManager.currentA360Platform = _platformManager.allPlatforms[0];
-                    if (_platformListsView.a360PlatformListTable != null)
+                        
+                    if (_platformManager.currentA360Platform == platform)
                     {
                         _platformListsView.a360PlatformListTable.tableView.SelectCellWithIdx(0);
-                        _platformListsView.a360PlatformListTable.tableView.ScrollToCellWithIdx(0, HMUI.TableViewScroller.ScrollPositionType.End, true);
-                        if (_platformManager.currentPlatformType == PlatformType.A360) _platformSpawner.ChangeToPlatform(0);
+                        platformDidChange = true;
                     }
+                    if (platformDidChange)
+                        _platformSpawner.ChangeToPlatform(0);
+
                 }
-                GameObject.Destroy(deletedPlatformPair.Key.gameObject);
+                else
+                {
+                    bool platformDidChange = false;
+                    if (_platformManager.currentSingleplayerPlatform == platform)
+                    {
+                        _platformManager.currentSingleplayerPlatform = _platformManager.allPlatforms[0];
+                        platformDidChange = true;
+                    }
+                    if (_platformManager.currentMultiplayerPlatform == platform)
+                    {
+                        _platformManager.currentMultiplayerPlatform = _platformManager.allPlatforms[0];
+                        platformDidChange = true;
+                    }
+                    if (_platformManager.currentA360Platform == platform)
+                    {
+                        _platformManager.currentA360Platform = _platformManager.allPlatforms[0];
+                    }
+                    if (platformDidChange)
+                        _platformSpawner.ChangeToPlatform(0);
+                }
+                
+                _platformLoader.platformFilePaths.Remove(platform.fullPath);
+                _platformManager.allPlatforms.Remove(platform);
+                GameObject.Destroy(platform.gameObject);
             }
         }
 
@@ -215,9 +228,7 @@ namespace CustomFloorPlugin
                 yield return www.SendWebRequest();
 
                 if (www.isNetworkError || www.isHttpError)
-                {
-                    Utilities.Logging.Log("Error downloading a platform: \n" + www.error, IPA.Logging.Logger.Level.Error);
-                }
+                    _siraLog.Error("Error downloading a platform: \n" + www.error);
                 else
                 {
                     Dictionary<string, PlatformDownloadData> downloadData = JsonConvert.DeserializeObject<Dictionary<string, PlatformDownloadData>>(www.downloadHandler.text);
@@ -235,9 +246,7 @@ namespace CustomFloorPlugin
                 yield return www.SendWebRequest();
 
                 if (www.isNetworkError || www.isHttpError)
-                {
-                    Utilities.Logging.Log("Error downloading a platform: \n" + www.error, IPA.Logging.Logger.Level.Error);
-                }
+                    _siraLog.Info("Error downloading a platform: \n" + www.error);
                 else
                 {
                     Dictionary<string, PlatformDownloadData> downloadData = JsonConvert.DeserializeObject<Dictionary<string, PlatformDownloadData>>(www.downloadHandler.text);
@@ -261,12 +270,10 @@ namespace CustomFloorPlugin
             yield return www.SendWebRequest();
 
             if (www.isNetworkError || www.isHttpError)
-            {
-                Utilities.Logging.Log("Error downloading a platform: \n" + www.error, IPA.Logging.Logger.Level.Error);
-            }
+                _siraLog.Info("Error downloading a platform: \n" + www.error);
             else
             {
-                string destination = Path.Combine(_platformLoader.customPlatformsFolderPath, data.name + ".plat");
+                string destination = Path.Combine(_platformManager.customPlatformsFolderPath, data.name + ".plat");
                 File.WriteAllBytes(destination, www.downloadHandler.data);
                 apiRequest = true;
             }

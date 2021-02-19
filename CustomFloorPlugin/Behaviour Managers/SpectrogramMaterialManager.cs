@@ -37,7 +37,7 @@ namespace CustomFloorPlugin
         {
             spectrogramMaterials = new List<SpectrogramMaterial>();
 
-            foreach (SpectrogramMaterial spec in go.GetComponents<SpectrogramMaterial>())
+            foreach (SpectrogramMaterial spec in go.GetComponentsInChildren<SpectrogramMaterial>())
             {
                 spectrogramMaterials.Add(spec);
             }

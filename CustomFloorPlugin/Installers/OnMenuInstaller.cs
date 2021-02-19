@@ -11,8 +11,6 @@ namespace CustomFloorPlugin.Installers
     {
         public override void InstallBindings()
         {
-            Container.BindInterfacesAndSelfTo<MaterialSwapper>().AsSingle();
-            Container.BindInterfacesAndSelfTo<PlatformLoader>().AsSingle();
             Container.BindInterfacesAndSelfTo<PlatformSpawnerMenu>().AsSingle().WithArguments(Container).NonLazy();
             Container.Bind<PlatformListsView>().FromNewComponentAsViewController().AsSingle();
             Container.Bind<ChangelogView>().FromNewComponentAsViewController().AsSingle();

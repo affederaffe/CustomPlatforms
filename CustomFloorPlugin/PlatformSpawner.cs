@@ -1,9 +1,10 @@
 ﻿using System.Collections;
 
 using CustomFloorPlugin.Configuration;
-using CustomFloorPlugin.Utilities;
 
 using IPA.Utilities;
+
+using SiraUtil.Tools;
 
 using UnityEngine;
 
@@ -14,6 +15,9 @@ namespace CustomFloorPlugin
 {
     internal abstract class PlatformSpawner
     {
+        [Inject]
+        protected readonly SiraLog _siraLog;
+
         [Inject]
         protected readonly PluginConfig _config;
 
@@ -70,32 +74,20 @@ namespace CustomFloorPlugin
         /// <param name="index">The index of the new <see cref="CustomPlatform"/> in the list <see cref="AllPlatforms"/></param>
         internal void ChangeToPlatform(int index)
         {
-            Logging.Log("Switching to " + _platformManager.allPlatforms[index].name);
+            _siraLog.Info("Switching to " + _platformManager.allPlatforms[index].name);
             _platformManager.activePlatform?.gameObject.SetActive(false);
             NotifyPlatform(_platformManager.activePlatform, NotifyType.Disable);
             DestroyCustomObjects();
             _platformManager.activePlatform = _platformManager.allPlatforms[index];
 
-            // if the active platform is only a descriptor, load the real one and replace all references
-            if (_platformManager.activePlatform.transform.childCount == 0 && index != 0)
-            {
-                string path = _platformLoader.customPlatformPaths[_platformManager.activePlatform];
-                CustomPlatform realPlatform = _platformLoader.LoadPlatformBundle(path, _platformManager.transform);
-                if (_platformManager.currentSingleplayerPlatform == _platformManager.activePlatform)
-                    _platformManager.currentSingleplayerPlatform = realPlatform;
-                if (_platformManager.currentMultiplayerPlatform == _platformManager.activePlatform)
-                    _platformManager.currentMultiplayerPlatform = realPlatform;
-                if (_platformManager.currentA360Platform == _platformManager.activePlatform)
-                    _platformManager.currentA360Platform = realPlatform;
-                _platformLoader.customPlatformPaths.Remove(_platformManager.activePlatform);
-                _platformLoader.customPlatformPaths.Add(realPlatform, path);
-                GameObject.Destroy(_platformManager.activePlatform.gameObject);
-                _platformManager.allPlatforms[index] = realPlatform;
-                _platformManager.activePlatform = realPlatform;
-            }
             SharedCoroutineStarter.instance.StartCoroutine(WaitAndSpawn());
             IEnumerator WaitAndSpawn()
             {
+                if (_platformManager.activePlatform.transform.childCount == 0 && index != 0)
+                {
+                    yield return SharedCoroutineStarter.instance.StartCoroutine(_platformLoader.LoadFromFileAsync(_platformManager.activePlatform.fullPath, _platformManager.HandlePlatformLoaded));
+                }
+
                 yield return new WaitForEndOfFrame();
                 if (index != 0)
                 {
@@ -105,9 +97,8 @@ namespace CustomFloorPlugin
                     SpawnCustomObjects();
                 }
                 else
-                {
                     _platformManager.activePlatform = null;
-                }
+
                 _hider.HideObjectsForPlatform(_platformManager.allPlatforms[index]);
             }
         }
@@ -125,13 +116,9 @@ namespace CustomFloorPlugin
                 foreach (INotifyOnEnableOrDisable thing in things)
                 {
                     if (type == NotifyType.Disable)
-                    {
                         thing.PlatformDisabled();
-                    }
                     else
-                    {
                         thing.PlatformEnabled();
-                    }
                 }
             }
         }
@@ -141,7 +128,6 @@ namespace CustomFloorPlugin
         /// </summary>
         private void SpawnCustomObjects()
         {
-            Logging.Log("Members in SpawnQueue: " + (PlatformManager.SpawnQueue.GetInvocationList().Length - 1));
             PlatformManager.SpawnQueue(_lightManager);
         }
 
@@ -180,19 +166,15 @@ namespace CustomFloorPlugin
         /// Adds managers to a <see cref="CustomPlatform"/>
         /// </summary>
         /// <param name="customPlatform">The <see cref="CustomPlatform"/> for which to spawn managers</param>
-        internal void AddManagers(CustomPlatform customPlatform)
+        private void AddManagers(CustomPlatform customPlatform)
         {
             GameObject go = customPlatform.gameObject;
             bool active = go.activeSelf;
             if (active)
-            {
                 go.SetActive(false);
-            }
             AddManagers(go, go);
             if (active)
-            {
                 go.SetActive(true);
-            }
         }
 
 
@@ -204,15 +186,14 @@ namespace CustomFloorPlugin
         private void AddManagers(GameObject go, GameObject root)
         {
             // Rotation effect manager
-            if (go.GetComponentInChildren<RotationEventEffect>(true) != null || go.GetComponentInChildren<MultiRotationEventEffect>(true) != null)
+            if (go.GetComponentInChildren<RotationEventEffect>(true) != null || go.GetComponentInChildren<PairRotationEventEffect>(true) != null)
             {
-                RotationEventEffectManager rotManager = root.GetComponent<RotationEventEffectManager>();
+                RotationEventEffectManager rotManager = go.GetComponent<RotationEventEffectManager>();
                 if (rotManager == null)
                 {
-                    rotManager = _container.InstantiateComponent<RotationEventEffectManager>(root);
+                    rotManager = _container.InstantiateComponent<RotationEventEffectManager>(go);
                     PlatformManager.SpawnedComponents.Add(rotManager);
                     rotManager.CreateEffects(go);
-                    rotManager.RegisterForEvents();
                 }
             }
 
@@ -227,10 +208,10 @@ namespace CustomFloorPlugin
                     AddManagers(ringPrefab, root);
                 }
 
-                TrackRingsManagerSpawner trms = root.GetComponent<TrackRingsManagerSpawner>();
+                TrackRingsManagerSpawner trms = go.GetComponent<TrackRingsManagerSpawner>();
                 if (trms == null)
                 {
-                    trms = _container.InstantiateComponent<TrackRingsManagerSpawner>(root);
+                    trms = _container.InstantiateComponent<TrackRingsManagerSpawner>(go);
                     PlatformManager.SpawnedComponents.Add(trms);
                 }
                 trms.CreateTrackRings(go);
@@ -276,6 +257,18 @@ namespace CustomFloorPlugin
                     PlatformManager.SpawnedComponents.Add(specAnimManager);
                 }
                 specAnimManager.UpdateAnimationStates();
+            }
+
+            if (go.GetComponentInChildren<ColorMaterial>(true) != null)
+            {
+                // Add color materials manager
+                ColorMaterialManager colMatManager = go.GetComponent<ColorMaterialManager>();
+                if (colMatManager == null)
+                {
+                    colMatManager = _container.InstantiateComponent<ColorMaterialManager>(go);
+                    PlatformManager.SpawnedComponents.Add(colMatManager);
+                }
+                colMatManager.UpdateMaterials(go);
             }
 
             // Add Song event manager

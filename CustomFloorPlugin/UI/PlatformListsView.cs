@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 
 using BeatSaberMarkupLanguage.Attributes;
@@ -127,13 +128,9 @@ namespace CustomFloorPlugin.UI
         {
             base.DidDeactivate(removedFromHierarchy, screenSystemDisabling);
             if (_config.ShowInMenu)
-            {
                 _platformSpawner.ChangeToPlatform(PlatformType.Singleplayer);
-            }
             else
-            {
                 _platformSpawner.ChangeToPlatform(0);
-            }
         }
 
         /// <summary>
@@ -144,23 +141,20 @@ namespace CustomFloorPlugin.UI
         [System.Diagnostics.CodeAnalysis.SuppressMessage("CodeQuality", "IDE0051:Remove unused private members", Justification = "Called by BSML")]
         private void SetupLists()
         {
+            _platformManager.allPlatforms.Sort(1, _platformManager.allPlatforms.Count-1, null);
             allListTables = new CustomListTableData[] { singleplayerPlatformListTable, multiplayerPlatformListTable, a360PlatformListTable };
             foreach (CustomPlatform platform in _platformManager.allPlatforms)
             {
                 CustomListTableData.CustomCellInfo cell = new CustomListTableData.CustomCellInfo(platform.platName, platform.platAuthor, platform.icon);
                 foreach (CustomListTableData listTable in allListTables)
-                {
                     listTable.data.Add(cell);
-                }
             }
             for (int i = 0; i < allListTables.Length; i++)
             {
                 allListTables[i].tableView.ReloadData();
                 int idx = _platformManager.GetIndexForType((PlatformType)i);
                 if (!allListTables[i].tableView.visibleCells.Any(x => x.selected))
-                {
                     allListTables[i].tableView.ScrollToCellWithIdx(idx, TableViewScroller.ScrollPositionType.Beginning, false);
-                }
                 allListTables[i].tableView.SelectCellWithIdx(idx);
             }
         }
