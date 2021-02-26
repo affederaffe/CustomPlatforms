@@ -7,10 +7,12 @@ namespace CustomFloorPlugin
 {
     public class CustomPlatform : MonoBehaviour, IComparable<CustomPlatform>
     {
+        [Header("Platform Description")]
         public string platName = "MyCustomPlatform";
         public string platAuthor = "MyName";
         public Sprite icon;
-
+        [Space]
+        [Header("Hide Environment")]
         public bool hideHighway = false;
         public bool hideTowers = false;
         public bool hideDefaultPlatform = false;

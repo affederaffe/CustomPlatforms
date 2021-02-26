@@ -4,7 +4,7 @@
 namespace CustomFloorPlugin
 {
     [RequireComponent(typeof(Renderer))]
-    public class ColorMaterial : MonoBehaviour, INotifyOnEnableOrDisable
+    public class ColorMaterial : MonoBehaviour
     {
         public MaterialColorType materialColorType;
         private Renderer _renderer;
@@ -38,13 +38,12 @@ namespace CustomFloorPlugin
                 _renderer.material.color = color;
         }
 
-        void INotifyOnEnableOrDisable.PlatformEnabled()
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Code Quality", "IDE0051:Remove unused private members", Justification = "Called by Unity")]
+        private void OnEnable()
         {
             if (_colorManager != null && _renderer != null)
                 ChangeColors();
         }
-
-        void INotifyOnEnableOrDisable.PlatformDisabled() { }
 
         public enum MaterialColorType
         {

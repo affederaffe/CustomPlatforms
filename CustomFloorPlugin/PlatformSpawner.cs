@@ -44,15 +44,15 @@ namespace CustomFloorPlugin
             switch (platformType)
             {
                 case PlatformType.Singleplayer:
-                    _platformManager.currentSingleplayerPlatform = _platformManager.allPlatforms[index % _platformManager.allPlatforms.Count];
+                    _platformManager.currentSingleplayerPlatform = _platformManager.allPlatforms[index];
                     _config.SingleplayerPlatformPath = _platformManager.currentSingleplayerPlatform.platName + _platformManager.currentSingleplayerPlatform.platAuthor;
                     break;
                 case PlatformType.Multiplayer:
-                    _platformManager.currentMultiplayerPlatform = _platformManager.allPlatforms[index % _platformManager.allPlatforms.Count];
+                    _platformManager.currentMultiplayerPlatform = _platformManager.allPlatforms[index];
                     _config.MultiplayerPlatformPath = _platformManager.currentMultiplayerPlatform.platName + _platformManager.currentMultiplayerPlatform.platAuthor;
                     break;
                 case PlatformType.A360:
-                    _platformManager.currentA360Platform = _platformManager.allPlatforms[index % _platformManager.allPlatforms.Count];
+                    _platformManager.currentA360Platform = _platformManager.allPlatforms[index];
                     _config.A360PlatformPath = _platformManager.currentA360Platform.platName + _platformManager.currentA360Platform.platAuthor;
                     break;
             }
@@ -76,7 +76,6 @@ namespace CustomFloorPlugin
         {
             _siraLog.Info("Switching to " + _platformManager.allPlatforms[index].name);
             _platformManager.activePlatform?.gameObject.SetActive(false);
-            NotifyPlatform(_platformManager.activePlatform, NotifyType.Disable);
             DestroyCustomObjects();
             _platformManager.activePlatform = _platformManager.allPlatforms[index];
 
@@ -93,33 +92,12 @@ namespace CustomFloorPlugin
                 {
                     _platformManager.activePlatform.gameObject.SetActive(true);
                     AddManagers(_platformManager.activePlatform);
-                    NotifyPlatform(_platformManager.activePlatform, NotifyType.Enable);
                     SpawnCustomObjects();
                 }
                 else
                     _platformManager.activePlatform = null;
 
                 _hider.HideObjectsForPlatform(_platformManager.allPlatforms[index]);
-            }
-        }
-
-        /// <summary>
-        /// Notifies a given <see cref="CustomPlatform"/> when it gets activated or deactivated
-        /// </summary>
-        /// <param name="customPlatform">What <see cref="CustomPlatform"/> to notify</param>
-        /// <param name="type">What happened to the platform</param>
-        private void NotifyPlatform(CustomPlatform customPlatform, NotifyType type)
-        {
-            INotifyOnEnableOrDisable[] things = customPlatform?.gameObject?.GetComponentsInChildren<INotifyOnEnableOrDisable>(true);
-            if (things != null)
-            {
-                foreach (INotifyOnEnableOrDisable thing in things)
-                {
-                    if (type == NotifyType.Disable)
-                        thing.PlatformDisabled();
-                    else
-                        thing.PlatformEnabled();
-                }
             }
         }
 
@@ -176,7 +154,6 @@ namespace CustomFloorPlugin
             if (active)
                 go.SetActive(true);
         }
-
 
         /// <summary>
         /// Recursively attaches managers to a <see cref="CustomPlatform"/>

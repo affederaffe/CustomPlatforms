@@ -1,7 +1,5 @@
 ﻿using System;
 
-using IPA.Utilities;
-
 using UnityEngine;
 
 using Zenject;
@@ -12,9 +10,6 @@ namespace CustomFloorPlugin
 
     internal class PlatformSpawnerGame : PlatformSpawner, IInitializable, IDisposable
     {
-        [InjectOptional]
-        private readonly BeatmapObjectCallbackController _beatmapObjectCallbackController;
-
         [InjectOptional]
         private readonly IDifficultyBeatmap _difficultyBeatmap;
 
@@ -33,7 +28,7 @@ namespace CustomFloorPlugin
         {
             PlatformManager.Heart.SetActive(false);
             a360 = (_difficultyBeatmap?.parentDifficultyBeatmapSet.beatmapCharacteristic.requires360Movement).GetValueOrDefault();
-            multiplayer = _multiplayerPlayersManager ? true : false;
+            multiplayer = _multiplayerPlayersManager != null;
 
             if (multiplayer)
             {
@@ -41,8 +36,6 @@ namespace CustomFloorPlugin
                 {
                     ChangeToPlatform(PlatformType.Multiplayer);
                     _multiplayerPlayersManager.playerDidFinishEvent += HandlePlayerDidFinishEvent;
-                    _multiplayerPlayersManager.activeLocalPlayerFacade?.introAnimator.StopAllCoroutines();
-                    _multiplayerPlayersManager.inactivePlayerFacade?.introAnimator.StopAllCoroutines();
                     SpawnLightEffects();
                 }
             }
@@ -61,7 +54,7 @@ namespace CustomFloorPlugin
             else
             {
                 ChangeToPlatform(0);
-            }
+            }  
         }
 
         public void Dispose()
@@ -73,13 +66,14 @@ namespace CustomFloorPlugin
                 if (_config.ShowInMenu)
                 {
                     ChangeToPlatform(PlatformType.Singleplayer);
-                }
+                } 
                 else
                 {
                     ChangeToPlatform(0);
                 }
                 if (_platformManager.apiRequestIndex == 0)
-                { // If a mod requests to disable the platform for the song, reset it when the level is finished
+                {
+                    // If a mod requests to disable the platform for the song, reset it when the level is finished
                     _platformManager.apiRequestIndex = -1;
                 }
             }
@@ -92,14 +86,8 @@ namespace CustomFloorPlugin
 
         private void SpawnLightEffects()
         {
-            GameObject lightEffects = GameObject.Instantiate(PlatformManager.LightEffects);
+            GameObject lightEffects = _container.InstantiatePrefab(PlatformManager.LightEffects);
             PlatformManager.SpawnedObjects.Add(lightEffects);
-            foreach (LightSwitchEventEffect lightEffect in lightEffects.GetComponents<LightSwitchEventEffect>())
-            {
-                lightEffect.SetField("_beatmapObjectCallbackController", _beatmapObjectCallbackController);
-                lightEffect.SetField("_lightManager", _lightManager);
-                lightEffect.SetField("_initialized", false);
-            }
             lightEffects.SetActive(true);
         }
     }

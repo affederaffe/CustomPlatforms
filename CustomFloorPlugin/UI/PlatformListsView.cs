@@ -1,4 +1,3 @@
-using System;
 using System.Linq;
 
 using BeatSaberMarkupLanguage.Attributes;
@@ -61,7 +60,10 @@ namespace CustomFloorPlugin.UI
             PlatformType type = (PlatformType)segmentedControl.selectedCellNumber;
             int index = _platformManager.GetIndexForType(type);
             singleplayerPlatformListTable.tableView.ScrollToCellWithIdx(index, TableViewScroller.ScrollPositionType.Beginning, false);
-            _platformSpawner.ChangeToPlatform(index);
+            if (index != _platformManager.GetIndexForType(_platformManager.currentPlatformType))
+            {
+                _platformSpawner.ChangeToPlatform(index);
+            }
             _platformManager.currentPlatformType = type;
         }
 
@@ -111,7 +113,18 @@ namespace CustomFloorPlugin.UI
         protected override void DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
         {
             base.DidActivate(firstActivation, addedToHierarchy, screenSystemEnabling);
-            _platformSpawner.ChangeToPlatform(_platformManager.currentPlatformType);
+            // Only change the platform if it's necessary
+            if (_config.ShowInMenu)
+            {
+                if (_platformManager.currentPlatformType != PlatformType.Singleplayer)
+                {
+                    _platformSpawner.ChangeToPlatform(_platformManager.currentPlatformType);
+                }
+            }
+            else
+            {
+                _platformSpawner.ChangeToPlatform(_platformManager.currentPlatformType);
+            }
             for (int i = 0; i < allListTables.Length; i++)
             {
                 PlatformType type = (PlatformType)i;
@@ -127,10 +140,18 @@ namespace CustomFloorPlugin.UI
         protected override void DidDeactivate(bool removedFromHierarchy, bool screenSystemDisabling)
         {
             base.DidDeactivate(removedFromHierarchy, screenSystemDisabling);
+            // Only change the platform if it's necessary
             if (_config.ShowInMenu)
-                _platformSpawner.ChangeToPlatform(PlatformType.Singleplayer);
+            {
+                if (_platformManager.currentPlatformType != PlatformType.Singleplayer)
+                {
+                    _platformSpawner.ChangeToPlatform(PlatformType.Singleplayer);
+                }
+            }
             else
+            {
                 _platformSpawner.ChangeToPlatform(0);
+            }      
         }
 
         /// <summary>

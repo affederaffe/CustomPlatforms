@@ -30,7 +30,6 @@ namespace CustomFloorPlugin
             zenjector.OnMenu<OnMenuInstaller>();
             zenjector.OnGame<OnGameInstaller>(false);
             zenjector.OnGame<OnGameInstaller>(true).ShortCircuitForCampaign().ShortCircuitForMultiplayer().ShortCircuitForStandard(); // Counters+...
-            zenjector.On(typeof(LobbyDataModelInstaller).FullName).Register<OnLobbyInstaller>();
         }
     }
 }

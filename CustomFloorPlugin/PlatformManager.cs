@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -25,7 +24,7 @@ namespace CustomFloorPlugin
     /// <summary>
     /// Handles Platforms, and hearts, everything about them
     /// </summary>
-    public class PlatformManager : MonoBehaviour
+    internal class PlatformManager : MonoBehaviour
     {
         [Inject]
         private readonly SiraLog _siraLog;
@@ -106,12 +105,6 @@ namespace CustomFloorPlugin
         internal static GameObject PlayersPlace;
 
         /// <summary>
-        /// GameObject used when AlwaysShowFeet is true
-        /// Reference set in the <see cref="EnvironmentHider"/>
-        /// </summary>
-        internal static GameObject Feet;
-
-        /// <summary>
         /// The Light Source used for non-mesh lights
         /// </summary>
         internal static GameObject LightSource;
@@ -145,7 +138,8 @@ namespace CustomFloorPlugin
         /// <summary>
         /// Initializes the <see cref="PlatformManager"/>
         /// </summary>
-        public void Start()
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Code Quality", "IDE0051:Remove unused private members", Justification = "Called by Unity")]
+        private void Start()
         {
             StartCoroutine(IHateUnity());
             IEnumerator<WaitForEndOfFrame> IHateUnity()
@@ -160,7 +154,8 @@ namespace CustomFloorPlugin
         /// <summary>
         /// Automaticly save platform descriptors on exit
         /// </summary>
-        public void OnDestroy()
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Code Quality", "IDE0051:Remove unused private members", Justification = "Called by Unity")]
+        private void OnDestroy()
         {
             SavePlatformInfosToFile();
         }
@@ -349,8 +344,6 @@ namespace CustomFloorPlugin
         /// </summary>
         private void LoadAssets()
         {
-            Stopwatch sw = new Stopwatch();
-            sw.Start();
             Scene greenDay = SceneManager.LoadScene("GreenDayGrenadeEnvironment", new LoadSceneParameters(LoadSceneMode.Additive));
             StartCoroutine(fuckUnity());
             IEnumerator<WaitUntil> fuckUnity()
@@ -378,7 +371,7 @@ namespace CustomFloorPlugin
 
                 SceneManager.UnloadSceneAsync("GreenDayGrenadeEnvironment");
 
-                using Stream manifestResourceStream = Assembly.GetExecutingAssembly().GetManifestResourceStream("CustomFloorPlugin.heart.mesh");
+                using Stream manifestResourceStream = Assembly.GetExecutingAssembly().GetManifestResourceStream("CustomFloorPlugin.Assets.heart.mesh");
                 using StreamReader streamReader = new StreamReader(manifestResourceStream);
 
                 string meshfile = streamReader.ReadToEnd();
@@ -408,14 +401,11 @@ namespace CustomFloorPlugin
                     vertices = vertices.ToArray(),
                     triangles = triangles.ToArray()
                 };
-                Vector3 position = new Vector3(-8f, 25f, 26f);
-                Quaternion rotation = Quaternion.Euler(-100f, 90f, 90f);
-                Vector3 scale = new Vector3(25f, 25f, 25f);
 
                 Heart.GetComponent<MeshFilter>().mesh = mesh;
-                Heart.transform.position = position;
-                Heart.transform.rotation = rotation;
-                Heart.transform.localScale = scale;
+                Heart.transform.position = new Vector3(-8f, 25f, 26f);
+                Heart.transform.rotation = Quaternion.Euler(-100f, 90f, 90f);
+                Heart.transform.localScale = new Vector3(25f, 25f, 25f);
 
                 Heart.SetActive(_config.ShowHeart);
                 Heart.GetComponent<InstancedMaterialLightWithId>().ColorWasSet(Color.magenta);

@@ -37,11 +37,7 @@ namespace CustomFloorPlugin.UI
         public bool AlwaysShowFeet
         {
             get => _config.AlwaysShowFeet;
-            set
-            {
-                _config.AlwaysShowFeet = value;
-                if (PlatformManager.Feet != null) PlatformManager.Feet.SetActive(value);
-            }
+            set => _config.AlwaysShowFeet = value;
         }
 
         /// <summary>

@@ -26,6 +26,7 @@ namespace CustomFloorPlugin.UI
         - Many new features for platform makers
         - Further reduced loading time
         - Performance improvements
+        - Fixed a bug where the credits environment wouldn't be hidden
 
 <size=150%><color=#888888>Version 6.0.0</color></size>
         - Basicly a complete rewrite of the plugin and updated for 1.13.2

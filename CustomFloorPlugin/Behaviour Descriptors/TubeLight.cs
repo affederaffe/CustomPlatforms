@@ -7,7 +7,7 @@ namespace CustomFloorPlugin
 {
     [RequireComponent(typeof(MeshFilter))]
     [RequireComponent(typeof(MeshRenderer))]
-    public class TubeLight : MonoBehaviour, INotifyOnEnableOrDisable
+    public class TubeLight : MonoBehaviour
     {
         public enum LightsID
         {
@@ -126,12 +126,14 @@ namespace CustomFloorPlugin
             tubeBloomLight.Refresh();
         }
 
-        void INotifyOnEnableOrDisable.PlatformEnabled()
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Code Quality", "IDE0051:Remove unused private members", Justification = "Called by Unity")]
+        private void OnEnable()
         {
             PlatformManager.SpawnQueue += GameAwake;
         }
 
-        void INotifyOnEnableOrDisable.PlatformDisabled()
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Code Quality", "IDE0051:Remove unused private members", Justification = "Called by Unity")]
+        private void OnDisable()
         {
             PlatformManager.SpawnQueue -= GameAwake;
         }

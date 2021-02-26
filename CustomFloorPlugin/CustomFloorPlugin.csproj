@@ -30,8 +30,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="heart.mesh" />
-    <EmbeddedResource Include="heart.png" />
+    <EmbeddedResource Include="Assets\heart.mesh" />
+    <EmbeddedResource Include="Assets\heart.png" />
     <EmbeddedResource Include="manifest.json" />
     <EmbeddedResource Include="Views\PlatformLists.bsml" />
     <EmbeddedResource Include="Views\Settings.bsml" />

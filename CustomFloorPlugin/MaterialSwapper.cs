@@ -60,17 +60,17 @@ namespace CustomFloorPlugin
             {
                 if (materialsCopy[i] != null)
                 {
-                    if (materialsCopy[i].name.Equals(fakeDarkMatName))
+                    if (materialsCopy[i].name == fakeDarkMatName)
                     {
                         materialsCopy[i] = dark;
                         materialsDidChange = true;
                     }
-                    else if (materialsCopy[i].name.Equals(fakeGlowMatName))
+                    else if (materialsCopy[i].name == fakeGlowMatName)
                     {
                         materialsCopy[i] = glow;
                         materialsDidChange = true;
                     }
-                    else if (materialsCopy[i].name.Equals(fakeOpaqueGlowMatName))
+                    else if (materialsCopy[i].name == fakeOpaqueGlowMatName)
                     {
                         materialsCopy[i] = opaqueGlow;
                         materialsDidChange = true;

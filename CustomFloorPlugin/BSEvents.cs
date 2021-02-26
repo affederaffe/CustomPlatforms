@@ -65,10 +65,12 @@ namespace CustomFloorPlugin
         private int badCutCount = 0;
         private int missCount = 0;
         private int cuttableNotes = 0;
+        private int highScore = 0;
 
         public void Initialize()
         {
-            cuttableNotes = _difficultyBeatmap.beatmapData.cuttableNotesType - _difficultyBeatmap.beatmapData.bombsCount - 1;
+            cuttableNotes = _difficultyBeatmap.beatmapData.cuttableNotesType - 1;
+            highScore = _playerDataModel.playerData.GetPlayerLevelStatsData(_difficultyBeatmap).highScore;
             _beatmapObjectCallbackController.beatmapEventDidTriggerEvent += BeatmapEventDidTrigger;
             _beatmapObjectManager.noteWasCutEvent += NoteWasCut;
             _beatmapObjectManager.noteWasMissedEvent += NoteWasMissed;
@@ -104,6 +106,9 @@ namespace CustomFloorPlugin
 
         private void NoteWasCut(NoteController noteController, NoteCutInfo noteCutInfo)
         {
+            if (noteController.noteData.colorType == ColorType.None || noteController.noteData.beatmapObjectType != BeatmapObjectType.Note)
+                return;
+
             AllNotesCountDidChangeEvent(allNotesCount++, cuttableNotes);
             if (noteCutInfo.allIsOK)
             {
@@ -118,15 +123,17 @@ namespace CustomFloorPlugin
             {
                 _lastNoteTime = 0f;
                 LevelFinishedEvent();
-                PlayerLevelStatsData playerLevelStatsData = _playerDataModel.playerData.GetPlayerLevelStatsData(_difficultyBeatmap);
                 LevelCompletionResults results = _prepareLevelCompletionResults.FillLevelCompletionResults(LevelCompletionResults.LevelEndStateType.Cleared, LevelCompletionResults.LevelEndAction.None);
-                if (results.modifiedScore > playerLevelStatsData.highScore)
+                if (results.modifiedScore > highScore)
                     NewHighscore();
             }
         }
 
         private void NoteWasMissed(NoteController noteController)
         {
+            if (noteController.noteData.colorType == ColorType.None || noteController.noteData.beatmapObjectType != BeatmapObjectType.Note)
+                return;
+
             NoteWasMissedEvent();
             AllNotesCountDidChangeEvent(allNotesCount++, cuttableNotes);
             MissCountDidChangeEvent(missCount++);
@@ -134,9 +141,8 @@ namespace CustomFloorPlugin
             {
                 _lastNoteTime = 0f;
                 LevelFinishedEvent();
-                PlayerLevelStatsData playerLevelStatsData = _playerDataModel.playerData.GetPlayerLevelStatsData(_difficultyBeatmap);
                 LevelCompletionResults results = _prepareLevelCompletionResults.FillLevelCompletionResults(LevelCompletionResults.LevelEndStateType.Cleared, LevelCompletionResults.LevelEndAction.None);
-                if (results.modifiedScore > playerLevelStatsData.highScore)
+                if (results.modifiedScore > highScore)
                     NewHighscore();
             }
         }
