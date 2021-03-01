@@ -8,10 +8,9 @@
 ### Manual Method
 
 * Ensure your game is patched with BSIPA (ModAssistant does this for you)
-* Extract CustomPlatformsX.Y.Z.zip into your Beat Saber directory
-* Extract the Platform .zip into your Beat Saber directory - A few are Platforms are included in the CustomPlatformsX.Y.Z.zip
+* Place the CustomPlatformsX.Y.Z.dll in your Beat Saber\Plugins directory
 
-Your Beat Saber folder should then look like this:
+After a relaunch, your Beat Saber folder should look like this:
 
 ```
 | Beat Saber
@@ -32,15 +31,13 @@ Visit the Platforms Menu page ingame to do things like:
 * Always show feet, to mark the center of the room
 * Hide the :heart: that CustomPlatforms uses as a cloneable light source
 * Show your selected platform in the menu
-* Load CustomScripts, only use this option if all scripts are from a trusted source!
-* Use in 360- and 90° Levels, not recommended.
-* Use in Multiplayer, not recommended.
-* etc.
+* Load CustomScripts, only use this option if the platform is from a trusted source!
 
 ## Adding More Platforms
 
-Place platforms (.plat) files in the "BeatSaber\CustomPlatforms" folder. 
-Your installed platforms will be available upon relaunching the game.
+Place platforms (.plat) files in the "BeatSaber\CustomPlatforms" folder.
+Your installed platforms will be available after a few seconds.
+A possible source for platforms is [modelsaber](https://modelsaber.com/Platforms/?pc).
 
 ## Creating New Platforms
 
