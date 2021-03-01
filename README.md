@@ -64,7 +64,7 @@ Only attach the scripts of the new .dll to your gameObjects, otherwise it won't 
 5. When you are finished, select the root object you attached the "Custom Platform" component to.
 In the inspector, click "Export". Navigate to your CustomPlatforms folder, and press save.
 
-6. Share your custom platform with other players by uploading the Platforms' .zip file
+6. Share your custom platform with other players by uploading the Platforms' .plat file
 
 ## Hall of Fame (Credits for major rework contributions)
 #### AkaRaiden - (The QA Department, Beta Tester, Tome of Wisdom)
