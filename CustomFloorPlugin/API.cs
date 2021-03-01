@@ -74,6 +74,8 @@ namespace CustomFloorPlugin
 
                 if (_platformListsView.allListTables != null)
                 {
+                    if (platform.icon == null)
+                        platform.icon = _platformManager.fallbackCover;
                     CustomListTableData.CustomCellInfo cell = new CustomListTableData.CustomCellInfo(platform.platName, platform.platAuthor, platform.icon);
                     foreach (CustomListTableData listTable in _platformListsView.allListTables)
                     {

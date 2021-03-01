@@ -21,7 +21,6 @@ namespace CustomFloorPlugin
         public bool hideBigRings = false;
         public bool hideBackColumns = false;
         public bool hideBackLasers = false;
-        public bool hideDoubleLasers = false;
         public bool hideDoubleColorLasers = false;
         public bool hideRotatingLasers = false;
         public bool hideTrackLights = false;
