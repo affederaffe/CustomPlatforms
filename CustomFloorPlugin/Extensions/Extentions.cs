@@ -1,99 +1,102 @@
 ﻿using System.Collections.Generic;
-using System.Runtime.CompilerServices;
-using System.Text;
-
-using BS_Utils.Utilities;
+using System.IO;
 
 using UnityEngine;
 
 
-namespace CustomFloorPlugin.Extensions {
-
-
+namespace CustomFloorPlugin.Extensions
+{
     /// <summary>
     /// This class holds extensions
     /// </summary>
-    internal static class Extentions {
-
-
+    internal static class Extentions
+    {
         /// <summary>
-        /// Returns the full path of a GameObject in the scene hierarchy.
+        /// Gets the time of the song the last note is spawned<br></br>
+        /// (stolen from SaberFactory)
         /// </summary>
-        /// <param name="gameObject">The instance of a GameObject to generate a path for.</param>
+        /// <param name="beatmapData"></param>
         /// <returns></returns>
-        internal static string GetFullPath(this GameObject gameObject) {
-            StringBuilder path = new StringBuilder();
-            while (true) {
-                path.Insert(0, "/" + gameObject.name);
-                if (gameObject.transform.parent == null) {
-                    path.Insert(0, gameObject.scene.name);
-                    break;
+        internal static float GetLastNoteTime(this BeatmapData beatmapData)
+        {
+            float lastTime = 0f;
+            IReadOnlyList<IReadonlyBeatmapLineData> beatmapLinesData = beatmapData.beatmapLinesData;
+            foreach (BeatmapLineData beatMapLineData in beatmapLinesData)
+            {
+                IReadOnlyList<BeatmapObjectData> beatmapObjectsData = beatMapLineData.beatmapObjectsData;
+                for (int i = beatmapObjectsData.Count - 1; i >= 0; i--)
+                {
+                    BeatmapObjectData beatmapObjectData = beatmapObjectsData[i];
+                    if (beatmapObjectData.beatmapObjectType == BeatmapObjectType.Note && ((NoteData)beatmapObjectData).colorType != ColorType.None)
+                    {
+                        if (beatmapObjectData.time > lastTime)
+                        {
+                            lastTime = beatmapObjectData.time;
+                        }
+                    }
                 }
-                gameObject = gameObject.transform.parent.gameObject;
             }
-            return path.ToString();
+            return lastTime;
         }
 
-
         /// <summary>
-        /// Returns the full path of a Component in the scene hierarchy.
+        /// Reads a <see cref="Texture2D"/> from a <see cref="BinaryReader"/>
+        /// (stolen from CustomAvatars)
         /// </summary>
-        /// <param name="component">The instance of a Component to generate a path for.</param>
         /// <returns></returns>
-        [MethodImpl(MethodImplOptions.NoOptimization | MethodImplOptions.NoInlining)]
-        internal static string GetFullPath(this Component component) {
-            StringBuilder path = new StringBuilder(component.gameObject.GetFullPath());
-            path.Append("/" + component.GetType().Name);
-            return path.ToString();
+        internal static Texture2D ReadTexture2D(this BinaryReader reader)
+        {
+            return BytesToTexture2D(reader.ReadBytes(reader.ReadInt32()));
         }
 
-
         /// <summary>
-        /// Converts a <see cref="List{T}"/> to a list of <see langword="object"/>s for BSML
+        /// Writes a <see cref="Texture2D"/> with a <see cref="BinaryReader"/>
         /// </summary>
-        /// <typeparam name="T">Type of the original list</typeparam>
-        /// <param name="list">The original list</param>
-        internal static List<object> ToBoxedList<T>(this List<T> list) {
-            List<object> convertedList = new List<object>();
-            foreach (T thing in list) {
-                convertedList.Add(thing);
-            }
-            return convertedList;
+        internal static void Write(this BinaryWriter writer, Texture2D texture, bool forceReadable)
+        {
+            byte[] textureBytes = BytesFromTexture2D(texture, forceReadable);
+
+            writer.Write(textureBytes.Length);
+            writer.Write(textureBytes);
         }
 
+        /// <summary>
+        /// Converts a given <see cref="byte"/>[] to a <see cref="Texture2D"/>
+        /// </summary>
+        private static Texture2D BytesToTexture2D(byte[] bytes)
+        {
+            if (bytes.Length == 0) return null;
+
+            Texture2D texture = new Texture2D(0, 0, TextureFormat.ARGB32, false);
+
+            texture.LoadImage(bytes);
+
+            return texture;
+        }
 
         /// <summary>
-        /// Fills a <see cref="LightWithIdManager"/> with colors so Platforms' lights don't appear black
+        /// Converts a given <see cref="Texture2D"/> to a <see cref="byte"/>[]
         /// </summary>
-        /// <param name="manager">The <see cref="LightWithIdManager"/> to fill the colors in</param>
-        /// <param name="colors">What Colors to use</param>
-        internal static void FillManager(this LightWithIdManager manager, Color?[] colors = null) {
-            if (colors == null) {
-                ColorScheme scheme = GlobalCollection.PDM.playerData.colorSchemesSettings.GetOverrideColorScheme();
-                colors = new Color?[] {
-                    scheme.environmentColor0,
-                    scheme.environmentColor1,
-                    scheme.obstaclesColor,
-                    scheme.saberAColor,
-                    scheme.saberBColor,
-                    scheme.environmentColor0,
-                    scheme.environmentColor1,
-                    scheme.obstaclesColor,
-                    scheme.saberAColor,
-                    scheme.saberBColor,
-                    scheme.environmentColor0,
-                    scheme.environmentColor1,
-                    scheme.obstaclesColor,
-                    scheme.saberAColor,
-                    scheme.saberBColor,
-                    scheme.environmentColor0,
-                    scheme.environmentColor1,
-                    scheme.obstaclesColor,
-                    scheme.saberAColor,
-                    scheme.saberBColor,
-                };
+        private static byte[] BytesFromTexture2D(Texture2D texture, bool forceReadable)
+        {
+            if (texture == null || (!texture.isReadable && !forceReadable)) return new byte[0];
+
+            // create readable texture by rendering onto a RenderTexture
+            if (!texture.isReadable)
+            {
+                float maxSize = 256;
+                float scale = Mathf.Min(1, maxSize / texture.width, maxSize / texture.height);
+                int width = Mathf.RoundToInt(texture.width * scale);
+                int height = Mathf.RoundToInt(texture.height * scale);
+
+                RenderTexture renderTexture = RenderTexture.GetTemporary(width, height, 0, RenderTextureFormat.ARGB32);
+                RenderTexture.active = renderTexture;
+                Graphics.Blit(texture, renderTexture);
+                texture = renderTexture.GetTexture2D();
+                RenderTexture.active = null;
+                RenderTexture.ReleaseTemporary(renderTexture);
             }
-            manager.SetField("_colors", colors);
+            return texture.EncodeToPNG();
         }
     }
 }

@@ -1,16 +1,18 @@
-﻿using UnityEngine;
+﻿using System;
+
+using UnityEngine;
 
 
-namespace CustomFloorPlugin {
-
-
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1051:Do not declare visible instance fields", Justification = "Too old to change")]
-    public class CustomPlatform : MonoBehaviour {
+namespace CustomFloorPlugin
+{
+    public class CustomPlatform : MonoBehaviour, IComparable<CustomPlatform>
+    {
+        [Header("Platform Description")]
         public string platName = "MyCustomPlatform";
         public string platAuthor = "MyName";
-        public string platHash = "";
         public Sprite icon;
-
+        [Space]
+        [Header("Hide Environment")]
         public bool hideHighway = false;
         public bool hideTowers = false;
         public bool hideDefaultPlatform = false;
@@ -19,13 +21,21 @@ namespace CustomFloorPlugin {
         public bool hideBigRings = false;
         public bool hideBackColumns = false;
         public bool hideBackLasers = false;
-        public bool hideDoubleLasers = false;
         public bool hideDoubleColorLasers = false;
         public bool hideRotatingLasers = false;
         public bool hideTrackLights = false;
 
-        public void Awake() {
+        internal string platHash;
+        internal string fullPath;
+
+        public void Awake()
+        {
             gameObject.SetActive(false);
+        }
+
+        public int CompareTo(CustomPlatform platform)
+        {
+            return platName.CompareTo(platform.platName);
         }
     }
 }

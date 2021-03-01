@@ -4,25 +4,44 @@ using UnityEngine;
 using UnityEngine.Events;
 
 
-namespace CustomFloorPlugin {
-
-
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1051:Do not declare visible instance fields", Justification = "Too old to change")]
-    public class EventManager : MonoBehaviour {
+namespace CustomFloorPlugin
+{
+    public class EventManager : MonoBehaviour
+    {
         public UnityEvent OnSlice;
+        public UnityEvent OnMiss;
         public UnityEvent OnComboBreak;
         public UnityEvent MultiplierUp;
         public UnityEvent SaberStartColliding;
         public UnityEvent SaberStopColliding;
         public UnityEvent OnLevelStart;
         public UnityEvent OnLevelFail;
+        public UnityEvent OnLevelFinish;
         public UnityEvent OnBlueLightOn;
         public UnityEvent OnRedLightOn;
+        public UnityEvent OnNewHighscore;
 
         [Serializable]
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1034:Nested types should not be visible", Justification = "Too old to change")]
-        public class ComboChangedEvent : UnityEvent<int> {
-        }
+        public class ComboChangedEvent : UnityEvent<int> { }
+        [Serializable]
+        public class OnSpecificSliceEvent : UnityEvent<int> { }
+        [Serializable]
+        public class OnScoreChangedEvent : UnityEvent<int, int> { }
+        [Serializable]
+        public class OnGoodCutCountChangedEvent : UnityEvent<int> { }
+        [Serializable]
+        public class OnBadCutCountChangedEvent : UnityEvent<int> { }
+        [Serializable]
+        public class OnMissCountChangedEvent : UnityEvent<int> { }
+        [Serializable]
+        public class OnAllNotesCountChangedEvent : UnityEvent<int, int> { }
+
         public ComboChangedEvent OnComboChanged = new ComboChangedEvent();
+        public OnSpecificSliceEvent OnSpecificSlice = new OnSpecificSliceEvent();
+        public OnScoreChangedEvent OnScoreChanged = new OnScoreChangedEvent();
+        public OnGoodCutCountChangedEvent OnGoodCutCountChanged = new OnGoodCutCountChangedEvent();
+        public OnBadCutCountChangedEvent OnBadCutCountChanged = new OnBadCutCountChangedEvent();
+        public OnMissCountChangedEvent OnMissCountChanged = new OnMissCountChangedEvent();
+        public OnAllNotesCountChangedEvent OnAllNotesCountChanged = new OnAllNotesCountChangedEvent();
     }
 }

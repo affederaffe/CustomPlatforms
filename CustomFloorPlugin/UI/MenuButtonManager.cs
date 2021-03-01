@@ -2,41 +2,44 @@
 
 using BeatSaberMarkupLanguage;
 using BeatSaberMarkupLanguage.MenuButtons;
-using BeatSaberMarkupLanguage.Settings;
 
 using Zenject;
 
 
-namespace CustomFloorPlugin.UI {
-
-
+namespace CustomFloorPlugin.UI
+{
     /// <summary>
-    /// UI Class, sets up MenuButton and Settings Section
+    /// UI Class, sets up the menu button and everything about it
     /// </summary>
-    internal class MenuButtonManager : IInitializable, IDisposable {
-
+    internal class MenuButtonManager : IInitializable, IDisposable
+    {
         private readonly MenuButton _menuButton;
         private readonly PlatformListFlowCoordinator _platformListFlowCoordinator;
-        private readonly Settings _settings;
+        private readonly MainFlowCoordinator _mainFlowCoordinator;
 
-        public MenuButtonManager(PlatformListFlowCoordinator platformListFlowCoordinator, Settings settings) {
+        public MenuButtonManager(PlatformListFlowCoordinator platformListFlowCoordinator, MainFlowCoordinator mainFlowCoordinator)
+        {
             _platformListFlowCoordinator = platformListFlowCoordinator;
+            _mainFlowCoordinator = mainFlowCoordinator;
             _menuButton = new MenuButton("Custom Platforms", "Change your Platform here!", SummonFlowCoordinator);
-            _settings = settings;
         }
 
-        public void Initialize() {
+        public void Initialize()
+        {
             MenuButtons.instance.RegisterButton(_menuButton);
-            BSMLSettings.instance.AddSettingsMenu("Custom Platforms", "CustomFloorPlugin.Views.Settings.bsml", _settings);
         }
 
-        public void Dispose() {
-            //MenuButtons.instance.UnregisterButton(_menuButton); Seems like the MenuButtons Singleton is already destroyed before this is called
-            BSMLSettings.instance.RemoveSettingsMenu(_settings);
+        public void Dispose()
+        {
+            if (MenuButtons.IsSingletonAvailable)
+            {
+                MenuButtons.instance.UnregisterButton(_menuButton);
+            }
         }
 
-        private void SummonFlowCoordinator() {
-            BeatSaberUI.MainFlowCoordinator.PresentFlowCoordinator(_platformListFlowCoordinator);
+        private void SummonFlowCoordinator()
+        {
+            _mainFlowCoordinator.PresentFlowCoordinator(_platformListFlowCoordinator);
         }
     }
 }

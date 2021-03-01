@@ -4,50 +4,49 @@ using HMUI;
 
 using Zenject;
 
-using CustomFloorPlugin.Utilities;
 
-
-namespace CustomFloorPlugin.UI {
-
-
+namespace CustomFloorPlugin.UI
+{
     /// <summary>
     /// Instatiable custom <see cref="FlowCoordinator"/> used by BSML
     /// </summary>
-    internal class PlatformListFlowCoordinator : FlowCoordinator {
+    internal class PlatformListFlowCoordinator : FlowCoordinator
+    {
+        [Inject]
+        private readonly PlatformListsView _platformsListView;
 
         [Inject]
-        private readonly PlatformsListView platformsListView;
+        private readonly ChangelogView _changelogView;
 
         [Inject]
-        private readonly EnvironmentOverrideListView environmentOverrideListView;
+        private readonly SettingsView _settingsView;
 
         [Inject]
-        private readonly ReloadPlatformsButtonView reloadPlatformsButtonView;
-
+        private readonly MainFlowCoordinator _mainFlowCoordinator;
 
         /// <summary>
         /// Set the window properties on first activation<br/>
         /// [Called by Beat Saber]
         /// </summary>
         /// <param name="firstActivation">Was this the first activation?</param>
-        protected override void DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling) {
-            if (firstActivation) {
+        protected override void DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
+        {
+            if (firstActivation)
+            {
                 SetTitle("Custom Platforms");
                 showBackButton = true;
-                ProvideInitialViewControllers(platformsListView, environmentOverrideListView, null, reloadPlatformsButtonView);
+                ProvideInitialViewControllers(_platformsListView, _changelogView, _settingsView);
             }
         }
-
 
         /// <summary>
         /// Transitions back to the main <see cref="FlowCoordinator"/><br/>
         /// [Called by Beat Saber]
         /// </summary>
-        /// <param name="ignored1"></param>
-        protected override void BackButtonWasPressed(ViewController ignored1) {
-            Logging.Log("Selected Environment: " + PlatformManager.CurrentPlatform.platName);
-            Logging.Log("Selected Override: " + EnvironmentOverrideListView.EnvOr);
-            BeatSaberUI.MainFlowCoordinator.DismissFlowCoordinator(this, null, ViewController.AnimationDirection.Horizontal, false);
+        /// <param name="_1"></param>
+        protected override void BackButtonWasPressed(ViewController _1)
+        {
+            _mainFlowCoordinator.DismissFlowCoordinator(this, null, ViewController.AnimationDirection.Horizontal, false);
         }
     }
 }

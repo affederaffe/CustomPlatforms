@@ -19,8 +19,6 @@ Your Beat Saber folder should then look like this:
     | CustomPlatforms.dll             <-- 
   | CustomPlatforms		      <--
     | <.plat files>		      <--
-    | Scripts                         <--
-      | <.dll Custom Script files>    <--
   | IPA
   | Beat Saber.exe
   | (other files and folders)
@@ -28,26 +26,25 @@ Your Beat Saber folder should then look like this:
 
 ## Controls
 
-Visit the ModSettings page ingame to access important settings, like:
-* Always show feet, to mark the center of the room,
+Visit the Platforms Menu page ingame to do things like:
+* Change your platform
+* View the changelog
+* Always show feet, to mark the center of the room
 * Hide the :heart: that CustomPlatforms uses as a cloneable light source
-* Load Custom Scripts, only use this option if all Scripts are from a trusted source!
+* Show your selected platform in the menu
+* Load CustomScripts, only use this option if all scripts are from a trusted source!
 * Use in 360- and 90° Levels, not recommended.
 * Use in Multiplayer, not recommended.
 * etc.
 
-You can press Numpad0 (while playing songs) to toggle the heart on and have it react to light events.
-To disable the Mod, turn on "Override Environment" in the Gameplay Setup
-
 ## Adding More Platforms
 
-Extract the Platforms' .zip file in the Beat Saber directory.
+Place platforms (.plat) files in the "BeatSaber\CustomPlatforms" folder. 
 Your installed platforms will be available upon relaunching the game.
 
 ## Creating New Platforms
 
 There's a comprehensive guide at https://bsmg.wiki/models/platforms-guide.html written by Emma.
-For a guide about how to create Custom Scripts use the guide at https://affederaffe.github.io/CustomPlatformsUnityProject/.
 The following are the basic steps:
 
 1. Download the Unity project from https://github.com/affederaffe/CustomPlatformsUnityProject, unzip it.
@@ -61,7 +58,8 @@ Add an icon for your platform by importing an image, settings it to Sprite/UI in
 
 4. Create your custom platform as a child of this root object
 You can use most of the built in Unity components, custom shaders and materials, custom meshes, animators, etc.
-You cannot attach your own custom scripts to these objects. Only scripts from the CustomPlatforms dll will work.
+If you want to use your own scripts, place them in the "_Scripts" folder and press "Compile Scripts" on the root gameObject
+Only attach the scripts of the new .dll to your gameObjects, otherwise it won't work.
 
 5. When you are finished, select the root object you attached the "Custom Platform" component to.
 In the inspector, click "Export". Navigate to your CustomPlatforms folder, and press save.
@@ -81,5 +79,5 @@ In the inspector, click "Export". Navigate to your CustomPlatforms folder, and p
 #### Tiruialon - (Top-Cat)
   - Thank you for your contributions!
  
-#### Boulders2000 - (Bug Hunter Extreme)
+#### Boulders2000 - (Bug Hunter)
   - Stopped counting how many bugreports he sent.

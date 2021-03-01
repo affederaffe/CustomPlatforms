@@ -1,89 +1,47 @@
-using System.Collections.Generic;
-
-using BS_Utils.Utilities;
-
 using IPA.Utilities;
 
 using UnityEngine;
 
-using static CustomFloorPlugin.GlobalCollection;
+using Zenject;
 
 
-namespace CustomFloorPlugin {
-
-
+namespace CustomFloorPlugin
+{
     /// <summary>
     /// Instantiable wrapper class for <see cref="RotationEventEffect"/>s, that handles registering and de-registering
     /// </summary>
-    internal class RotationEventEffectManager : MonoBehaviour {
+    internal class RotationEventEffectManager : MonoBehaviour
+    {
+        [InjectOptional]
+        private readonly BeatmapObjectCallbackController _beatmapObjectCallbackController;
 
-
-        /// <summary>
-        /// To be filled with spawned <see cref="LightRotationEventEffect"/>s
-        /// </summary>
-        private List<LightRotationEventEffect> lightRotationEffects;
-
-
-        /// <summary>
-        /// To be filled with spawned <see cref="MultiRotationEventEffect.Actor"/>s
-        /// </summary>
-        private List<MultiRotationEventEffect.Actor> multiEffects;
-
-
-        /// <summary>
-        /// Registers all currently known <see cref="LightRotationEventEffect"/>s for Events.
-        /// </summary>
-        internal void RegisterForEvents() {
-            foreach (LightRotationEventEffect rotEffect in lightRotationEffects) {
-                BSEvents.beatmapEvent += rotEffect.HandleBeatmapObjectCallbackControllerBeatmapEventDidTrigger;
-            }
-            foreach (MultiRotationEventEffect.Actor effect in multiEffects) {
-                BSEvents.beatmapEvent += effect.EventCallback;
-            }
-        }
-
-
-        /// <summary>
-        /// De-Registers from lighting events<br/>
-        /// [Unity calls this when the <see cref="MonoBehaviour"/> becomes inactive in the hierachy]
-        /// </summary>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Code Quality", "IDE0051:Remove unused private members", Justification = "Called by Unity")]
-        private void OnDisable() {
-            foreach (LightRotationEventEffect rotEffect in lightRotationEffects) {
-                BSEvents.beatmapEvent -= rotEffect.HandleBeatmapObjectCallbackControllerBeatmapEventDidTrigger;
-            }
-            foreach (MultiRotationEventEffect.Actor effect in multiEffects) {
-                BSEvents.beatmapEvent -= effect.EventCallback;
-            }
-        }
-
-
-        /// <summary>
-        /// Creates all <see cref="LightRotationEventEffect"/>s for the <paramref name="currentPlatform"/><br/>
-        /// (From <see cref="RotationEventEffect"/>s present on the <paramref name="currentPlatform"/>)
-        /// </summary>
-        /// <param name="currentPlatform">Current <see cref="CustomPlatform"/>s <see cref="GameObject"/></param>
-        internal void CreateEffects(GameObject currentPlatform) {
-            lightRotationEffects = new List<LightRotationEventEffect>();
-            multiEffects = new List<MultiRotationEventEffect.Actor>();
-
-            RotationEventEffect[] effectDescriptors = currentPlatform.GetComponentsInChildren<RotationEventEffect>(true);
-
-            foreach (RotationEventEffect effectDescriptor in effectDescriptors) {
-                LightRotationEventEffect rotEvent = effectDescriptor.gameObject.AddComponent<LightRotationEventEffect>();
-                PlatformManager.SpawnedComponents.Add(rotEvent);
-                rotEvent.SetField("_event", (BeatmapEventType)effectDescriptor.eventType);
-                rotEvent.SetField("_rotationVector", effectDescriptor.rotationVector);
-                rotEvent.SetField("_transform", rotEvent.transform);
-                rotEvent.SetField("_startRotation", rotEvent.transform.rotation);
-                rotEvent.SetField("_beatmapObjectCallbackController", BOCC);
-                lightRotationEffects.Add(rotEvent);
-            }
-            MultiRotationEventEffect[] effectDescriptors2 = currentPlatform.GetComponentsInChildren<MultiRotationEventEffect>(true);
-            foreach (MultiRotationEventEffect effectDescriptor in effectDescriptors2) {
-                MultiRotationEventEffect.Actor rotEvent = effectDescriptor.Create();
-                PlatformManager.SpawnedComponents.Add(rotEvent);
-                multiEffects.Add(rotEvent);
+        internal void CreateEffects(GameObject currentPlatform)
+        {
+            if (_beatmapObjectCallbackController != null)
+            {
+                foreach (PairRotationEventEffect descriptor in currentPlatform.GetComponentsInChildren<PairRotationEventEffect>(true))
+                {
+                    LightPairRotationEventEffect rotEffect = descriptor.gameObject.AddComponent<LightPairRotationEventEffect>();
+                    rotEffect.SetField("_beatmapObjectCallbackController", _beatmapObjectCallbackController);
+                    rotEffect.SetField("_eventL", (BeatmapEventType)descriptor.eventL);
+                    rotEffect.SetField("_eventR", (BeatmapEventType)descriptor.eventR);
+                    rotEffect.SetField("_rotationVector", descriptor.rotationVector);
+                    rotEffect.SetField("_transformL", descriptor.tranformL);
+                    rotEffect.SetField("_transformR", descriptor.tranformR);
+                    rotEffect.SetField("_useZPositionForAngleOffset", descriptor.useZPositionForAngleOffset);
+                    rotEffect.SetField("_overrideRandomValues", descriptor.overrideRandomValues);
+                    rotEffect.SetField("_randomStartRotation", descriptor.randomStartRotation);
+                    rotEffect.SetField("_randomDirection", descriptor.randomDirection);
+                    PlatformManager.SpawnedComponents.Add(rotEffect);
+                }
+                foreach (var descriptor in currentPlatform.GetComponentsInChildren<RotationEventEffect>(true))
+                {
+                    LightRotationEventEffect rotEffect = descriptor.gameObject.AddComponent<LightRotationEventEffect>();
+                    rotEffect.SetField("_beatmapObjectCallbackController", _beatmapObjectCallbackController);
+                    rotEffect.SetField("_event", (BeatmapEventType)descriptor.eventType);
+                    rotEffect.SetField("_rotationVector", descriptor.rotationVector);
+                    rotEffect.SetField("_transform", descriptor.transform);
+                }
             }
         }
     }

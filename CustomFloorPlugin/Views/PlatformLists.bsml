@@ -1,0 +1,31 @@
+﻿<vertical xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="https://monkeymanboy.github.io/BSML-Docs/ https://raw.githubusercontent.com/monkeymanboy/BSML-Docs/gh-pages/BSMLSchema.xsd">
+  <horizontal pref-width="100" pref-height="10">
+    <tab-selector page-count="3" tab-tag="platform-lists" select-cell="Select-cell" hover-hint="Select different platforms for each gamemode" child-expand-width="true" child-control-width="true"></tab-selector>
+  </horizontal>
+
+  <horizontal pref-width="100" pref-height="72">
+    <tab tab-name="Singleplayer" tags="platform-lists" hover-hint="Select which platform is used in singleplayer and the menu" size-delta-x="25">
+      <vertical pref-width="65" pref-height="72">
+        <page-button click-event="singleplayerPlatformList#PageUp" direction="Up"></page-button>
+        <list id="singleplayerPlatformList" expand-cell="true" select-cell="SingleplayerSelect"></list>
+        <page-button click-event="singleplayerPlatformList#PageDown" direction="Down"></page-button>
+      </vertical>
+    </tab>
+    
+    <tab tab-name="Multiplayer" tags="platform-lists" hover-hint="Select which platform is used in multiplayer" size-delta-x="25">
+      <vertical pref-width="65" pref-height="72">
+        <page-button click-event="multiplayerPlatformList#PageUp" direction="Up"></page-button>
+        <list id="multiplayerPlatformList" expand-cell="true" select-cell="MultiplayerSelect"></list>
+        <page-button click-event="multiplayerPlatformList#PageDown" direction="Down"></page-button>
+      </vertical>
+    </tab>
+
+    <tab tab-name="360°" tags="platform-lists" hover-hint="Select which platform is used in 360°-levels" size-delta-x="25">
+      <vertical pref-width="65" pref-height="72">
+        <page-button click-event="a360PlatformList#PageUp" direction="Up"></page-button>
+        <list id="a360PlatformList" expand-cell="true" select-cell="A360Select"></list>
+        <page-button click-event="a360PlatformList#PageDown" direction="Down"></page-button>
+      </vertical>
+    </tab>
+  </horizontal>
+</vertical>

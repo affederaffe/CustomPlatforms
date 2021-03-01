@@ -1,3 +1,0 @@
-﻿<vertical>
-  <button text="Reload all platforms" on-click="reloadPlatforms" font-size="6"/>
-</vertical>

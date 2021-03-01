@@ -1,12 +1,22 @@
-﻿using Zenject;
+﻿using CustomFloorPlugin.Extensions;
 
-namespace CustomFloorPlugin.Installers {
+using Zenject;
 
 
-    internal class OnGameInstaller : Installer {
-
-        public override void InstallBindings() {
-            //GlobalCollection.BOCC = Container.Resolve<BeatmapObjectCallbackController>();
+namespace CustomFloorPlugin.Installers
+{
+    internal class OnGameInstaller : Installer
+    {
+        public override void InstallBindings()
+        {
+            if (Container.HasBinding<GameplayCoreSceneSetupData>())
+            {
+                GameplayCoreSceneSetupData sceneSetupData = Container.Resolve<GameplayCoreSceneSetupData>();
+                float lastNoteTime = sceneSetupData.difficultyBeatmap.beatmapData.GetLastNoteTime();
+                Container.Bind<float>().WithId("LastNoteTime").FromInstance(lastNoteTime).AsSingle();
+                Container.BindInterfacesAndSelfTo<BSEvents>().AsSingle();
+            }
+            Container.BindInterfacesAndSelfTo<PlatformSpawnerGame>().AsSingle().WithArguments(Container).NonLazy();
         }
     }
 }
