@@ -6,6 +6,7 @@ namespace CustomFloorPlugin
     [RequireComponent(typeof(Renderer))]
     public class ColorMaterial : MonoBehaviour
     {
+        public string propertyName;
         public MaterialColorType materialColorType;
         private Renderer _renderer;
         private ColorManager _colorManager;
@@ -32,8 +33,8 @@ namespace CustomFloorPlugin
                 MaterialColorType.ObstacleColor => _colorManager.GetObstacleEffectColor(),
                 _ => new Color(0f, 0f, 0f),
             };
-            if (_renderer.material.HasProperty("_Color"))
-                _renderer.material.SetColor("_Color", color);
+            if (_renderer.material.HasProperty(propertyName))
+                _renderer.material.SetColor(propertyName, color);
             else
                 _renderer.material.color = color;
         }

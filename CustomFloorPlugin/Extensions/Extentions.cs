@@ -40,6 +40,20 @@ namespace CustomFloorPlugin.Extensions
         }
 
         /// <summary>
+        /// Reads a <see cref="Sprite"/> from a <see cref="Stream"/>
+        /// </summary>
+        /// <param name="resourceStream"></param>
+        /// <returns></returns>
+        internal static Sprite ReadSprite(this Stream resourceStream)
+        {
+            byte[] data = new byte[resourceStream.Length];
+            resourceStream.Read(data, 0, data.Length);
+            Texture2D tex = new Texture2D(2, 2);
+            tex.LoadImage(data);
+            return Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), Vector2.zero);
+        }
+
+        /// <summary>
         /// Reads a <see cref="Texture2D"/> from a <see cref="BinaryReader"/>
         /// (stolen from CustomAvatars)
         /// </summary>

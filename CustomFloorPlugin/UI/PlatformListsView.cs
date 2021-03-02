@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using System.Linq;
 
 using BeatSaberMarkupLanguage.Attributes;
@@ -19,7 +20,7 @@ namespace CustomFloorPlugin.UI
     /// Tagged functions and variables from this class may be used/called by BSML if the .bsml file mentions them.<br/>
     /// </summary>
     [ViewDefinition("CustomFloorPlugin.Views.PlatformLists.bsml")]
-    internal class PlatformListsView : BSMLAutomaticViewController
+    internal class PlatformListsView : BSMLAutomaticViewController, INotifyPropertyChanged
     {
         [Inject]
         private readonly PluginConfig _config;
@@ -30,28 +31,52 @@ namespace CustomFloorPlugin.UI
         [Inject]
         private readonly PlatformManager _platformManager;
 
+        [UIComponent("requirements-modal")]
+        private readonly ModalView requirementsModal;
+
         /// <summary>
         /// The table of currently loaded Platforms, for singleplayer only because BSML can't use the same list for different tabs
         /// </summary>
         [UIComponent("singleplayerPlatformList")]
-        public CustomListTableData singleplayerPlatformListTable;
+        internal readonly CustomListTableData singleplayerPlatformListTable;
 
         /// <summary>
         /// The table of currently loaded Platforms, for multiplayer only because BSML can't use the same list for different tabs
         /// </summary>
         [UIComponent("multiplayerPlatformList")]
-        public CustomListTableData multiplayerPlatformListTable;
+        internal readonly CustomListTableData multiplayerPlatformListTable;
 
         /// <summary>
         /// The table of currently loaded Platforms, for multiplayer only because BSML can't use the same list for different tabs
         /// </summary>
         [UIComponent("a360PlatformList")]
-        public CustomListTableData a360PlatformListTable;
+        internal readonly CustomListTableData a360PlatformListTable;
+
+        /// <summary>
+        /// List of requirements or suggestions for the current platform
+        /// </summary>
+        [UIComponent("requirementsList")]
+        private readonly CustomListTableData requirementsListTable;
 
         /// <summary>
         /// An <see cref="System.Array"/> holding all <see cref="CustomListTableData"/>s
         /// </summary>
         internal CustomListTableData[] allListTables;
+
+        /// <summary>
+        /// Used to hide the button if there's no requirement or suggestion
+        /// </summary>
+        [UIValue("reqButtonActive")]
+        public bool ReqButtonActive 
+        { 
+            get => _ReqButtonActive;
+            set
+            {
+                _ReqButtonActive = value;
+                NotifyPropertyChanged();
+            }
+        }
+        private bool _ReqButtonActive;
 
         [UIAction("Select-cell")]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("CodeQuality", "IDE0051:Remove unused private members", Justification = "Called by BSML")]
@@ -60,10 +85,10 @@ namespace CustomFloorPlugin.UI
             PlatformType type = (PlatformType)segmentedControl.selectedCellNumber;
             int index = _platformManager.GetIndexForType(type);
             singleplayerPlatformListTable.tableView.ScrollToCellWithIdx(index, TableViewScroller.ScrollPositionType.Beginning, false);
+            UpdateRequirementsForPlatform(_platformManager.allPlatforms[index]);
+            
             if (index != _platformManager.GetIndexForType(_platformManager.currentPlatformType))
-            {
                 _platformSpawner.ChangeToPlatform(index);
-            }
             _platformManager.currentPlatformType = type;
         }
 
@@ -77,6 +102,7 @@ namespace CustomFloorPlugin.UI
         [System.Diagnostics.CodeAnalysis.SuppressMessage("CodeQuality", "IDE0051:Remove unused private members", Justification = "Called by BSML")]
         private void SingleplayerSelect(TableView _1, int idx)
         {
+            UpdateRequirementsForPlatform(_platformManager.allPlatforms[idx]);
             _platformSpawner.SetPlatformAndShow(idx, PlatformType.Singleplayer);
         }
 
@@ -90,6 +116,7 @@ namespace CustomFloorPlugin.UI
         [System.Diagnostics.CodeAnalysis.SuppressMessage("CodeQuality", "IDE0051:Remove unused private members", Justification = "Called by BSML")]
         private void MultiplayerSelect(TableView _1, int idx)
         {
+            UpdateRequirementsForPlatform(_platformManager.allPlatforms[idx]);
             _platformSpawner.SetPlatformAndShow(idx, PlatformType.Multiplayer);
         }
 
@@ -103,6 +130,7 @@ namespace CustomFloorPlugin.UI
         [System.Diagnostics.CodeAnalysis.SuppressMessage("CodeQuality", "IDE0051:Remove unused private members", Justification = "Called by BSML")]
         private void A360Select(TableView _1, int idx)
         {
+            UpdateRequirementsForPlatform(_platformManager.allPlatforms[idx]);
             _platformSpawner.SetPlatformAndShow(idx, PlatformType.A360);
         }
 
@@ -118,12 +146,21 @@ namespace CustomFloorPlugin.UI
             {
                 if (_platformManager.currentPlatformType != PlatformType.Singleplayer)
                 {
-                    _platformSpawner.ChangeToPlatform(_platformManager.currentPlatformType);
+                    int idx = _platformManager.GetIndexForType(_platformManager.currentPlatformType);
+                    UpdateRequirementsForPlatform(_platformManager.allPlatforms[idx]);
+                    _platformSpawner.ChangeToPlatform(idx);
+                }
+                else
+                {
+                    int idx = _platformManager.GetIndexForType(PlatformType.Singleplayer);
+                    UpdateRequirementsForPlatform(_platformManager.allPlatforms[idx]);
                 }
             }
             else
             {
-                _platformSpawner.ChangeToPlatform(_platformManager.currentPlatformType);
+                int idx = _platformManager.GetIndexForType(_platformManager.currentPlatformType);
+                UpdateRequirementsForPlatform(_platformManager.allPlatforms[idx]);
+                _platformSpawner.ChangeToPlatform(idx);
             }
             for (int i = 0; i < allListTables.Length; i++)
             {
@@ -140,6 +177,7 @@ namespace CustomFloorPlugin.UI
         protected override void DidDeactivate(bool removedFromHierarchy, bool screenSystemDisabling)
         {
             base.DidDeactivate(removedFromHierarchy, screenSystemDisabling);
+            requirementsModal.gameObject.SetActive(false);
             // Only change the platform if it's necessary
             if (_config.ShowInMenu)
             {
@@ -178,6 +216,33 @@ namespace CustomFloorPlugin.UI
                     allListTables[i].tableView.ScrollToCellWithIdx(idx, TableViewScroller.ScrollPositionType.Beginning, false);
                 allListTables[i].tableView.SelectCellWithIdx(idx);
             }
+        }
+
+        private void UpdateRequirementsForPlatform(CustomPlatform platform)
+        {
+            if (platform.requirements.Count == 0 && platform.suggestions.Count == 0)
+            {
+                ReqButtonActive = false;
+                return;
+            }
+
+            ReqButtonActive = true;
+            requirementsListTable.data.Clear();
+            foreach (string req in platform.requirements)
+            {
+                CustomListTableData.CustomCellInfo cell = _platformManager.allPluginNames.Contains(req)
+                    ? new CustomListTableData.CustomCellInfo(req, "Required", _platformManager.greenCheck)
+                    : new CustomListTableData.CustomCellInfo(req, "Required", _platformManager.redX);
+                requirementsListTable.data.Add(cell);
+            }
+            foreach (string sug in platform.suggestions)
+            {
+                CustomListTableData.CustomCellInfo cell = _platformManager.allPluginNames.Contains(sug)
+                    ? new CustomListTableData.CustomCellInfo(sug, "Suggestion", _platformManager.yellowCheck)
+                    : new CustomListTableData.CustomCellInfo(sug, "Suggestion", _platformManager.yellowX);
+                requirementsListTable.data.Add(cell);
+            }
+            requirementsListTable.tableView.ReloadData();
         }
     }
 }

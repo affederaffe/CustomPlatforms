@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using System.Linq;
 
 using CustomFloorPlugin.Configuration;
 
@@ -74,6 +75,13 @@ namespace CustomFloorPlugin
         /// <param name="index">The index of the new <see cref="CustomPlatform"/> in the list <see cref="AllPlatforms"/></param>
         internal void ChangeToPlatform(int index)
         {
+            if (!_platformManager.allPlatforms[index].requirements.All(x => _platformManager.allPluginNames.Contains(x)))
+            {
+                _siraLog.Warning("Missing requirement for platform " + _platformManager.allPlatforms[index].name);
+                ChangeToPlatform(0);
+                return;
+            }
+
             _siraLog.Info("Switching to " + _platformManager.allPlatforms[index].name);
             _platformManager.activePlatform?.gameObject.SetActive(false);
             DestroyCustomObjects();

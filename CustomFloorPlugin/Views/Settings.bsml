@@ -1,4 +1,5 @@
 ﻿<vertical xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="https://monkeymanboy.github.io/BSML-Docs/ https://raw.githubusercontent.com/monkeymanboy/BSML-Docs/gh-pages/BSMLSchema.xsd">
+  
   <horizontal bg="panel-fade-gradient" bg-color="#db3eef" pref-width="100">
     <label text="Settings" align="Center" font-size="6"></label>
   </horizontal>
@@ -6,6 +7,5 @@
   <bool-setting text="Always show feet" value="always-show-feet" apply-on-change="true" hover-hint="Always display the feet icon on the floor, regardless of chosen platform"></bool-setting>
   <bool-setting text="Show heart" value="show-heart" apply-on-change="true" hover-hint="Makes the heart, that Custom Platforms uses to generate most lights, visible in the menu"></bool-setting>
   <bool-setting text="Show platform in menu" value="show-in-menu" apply-on-change="true" hover-hint="Show the selected platform in menu"></bool-setting>
-  <bool-setting text="Load CustomScripts" value="load-custom-scripts" apply-on-change="true" hover-hint="~LoadCustomScripts"></bool-setting>
-  
+
 </vertical>

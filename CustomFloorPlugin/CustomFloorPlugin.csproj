@@ -30,8 +30,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="Assets\GreenCheck.png" />
     <EmbeddedResource Include="Assets\heart.mesh" />
     <EmbeddedResource Include="Assets\heart.png" />
+    <EmbeddedResource Include="Assets\RedX.png" />
+    <EmbeddedResource Include="Assets\YellowCheck.png" />
+    <EmbeddedResource Include="Assets\YellowX.png" />
     <EmbeddedResource Include="manifest.json" />
     <EmbeddedResource Include="Views\PlatformLists.bsml" />
     <EmbeddedResource Include="Views\Settings.bsml" />

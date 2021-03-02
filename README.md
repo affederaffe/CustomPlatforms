@@ -26,12 +26,11 @@ After a relaunch, your Beat Saber folder should look like this:
 ## Controls
 
 Visit the Platforms Menu page ingame to do things like:
-* Change your platform
+* Change your platform for different gamemmodes
 * View the changelog
 * Always show feet, to mark the center of the room
 * Hide the :heart: that CustomPlatforms uses as a cloneable light source
 * Show your selected platform in the menu
-* Load CustomScripts, only use this option if the platform is from a trusted source!
 
 ## Adding More Platforms
 
@@ -47,7 +46,7 @@ The following are the basic steps:
 1. Download the Unity project from https://github.com/affederaffe/CustomPlatformsUnityProject, unzip it.
 
 2. Open the Unity project
-The project was created and tested in version 2018.1.6f1, other versions may not be supported.
+The project was created and tested in version 2019.3.15f1, other versions may not be supported.
 
 3. Create an empty GameObject and attach a "Custom Platform" component to it
 Fill out the fields for your name and the name of the platform.  You can also toggle the visibility of default environment parts if you need to make room for your platform.
@@ -55,10 +54,9 @@ Add an icon for your platform by importing an image, settings it to Sprite/UI in
 
 4. Create your custom platform as a child of this root object
 You can use most of the built in Unity components, custom shaders and materials, custom meshes, animators, etc.
-If you want to use your own scripts, place them in the "_Scripts" folder and press "Compile Scripts" on the root gameObject
-Only attach the scripts of the new .dll to your gameObjects, otherwise it won't work.
+If you want to use your own scripts, you have to write a mod or use an existing one and add it as requirement or suggestion.
 
-5. When you are finished, select the root object you attached the "Custom Platform" component to.
+1. When you are finished, select the root object you attached the "Custom Platform" component to.
 In the inspector, click "Export". Navigate to your CustomPlatforms folder, and press save.
 
 6. Share your custom platform with other players by uploading the Platforms' .plat file

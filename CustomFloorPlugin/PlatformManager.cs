@@ -76,9 +76,22 @@ namespace CustomFloorPlugin
         internal CustomPlatform activePlatform;
 
         /// <summary>
-        /// The cover used for all platforms missing a cover normally
+        /// The cover used for all platforms normally missing one
         /// </summary>
         internal Sprite fallbackCover;
+
+        /// <summary>
+        /// 
+        /// </summary>
+        internal Sprite greenCheck;
+        internal Sprite yellowCheck;
+        internal Sprite redX;
+        internal Sprite yellowX;
+
+        /// <summary>
+        /// List of all loaded plugins
+        /// </summary>
+        internal readonly IReadOnlyList<string> allPluginNames = IPA.Loader.PluginManager.EnabledPlugins.Select(x => x.Name).ToList();
 
         /// <summary>
         /// The folder all CustomPlatform files are located
@@ -144,6 +157,7 @@ namespace CustomFloorPlugin
             StartCoroutine(IHateUnity());
             IEnumerator<WaitForEndOfFrame> IHateUnity()
             {
+                LoadSprites();
                 yield return new WaitForEndOfFrame();
                 LoadAssets();
                 yield return new WaitForEndOfFrame();
@@ -281,6 +295,12 @@ namespace CustomFloorPlugin
                     platform.platHash = reader.ReadString();
                     platform.fullPath = reader.ReadString();
                     Texture2D tex = reader.ReadTexture2D();
+                    int reqCount = reader.ReadInt32();
+                    for (int j = 0; j < reqCount; j++)
+                        platform.requirements.Add(reader.ReadString());
+                    int sugCount = reader.ReadInt32();
+                    for (int j = 0; j < sugCount; j++)
+                        platform.suggestions.Add(reader.ReadString());
                     platform.icon = Sprite.Create(tex, new Rect(0f, 0f, tex.width, tex.height), Vector2.zero);
                     platform.name = platform.platName + " by " + platform.platAuthor;
                     platform.transform.parent = transform;
@@ -322,6 +342,12 @@ namespace CustomFloorPlugin
                             writer.Write(platform.platHash);
                             writer.Write(platform.fullPath);
                             writer.Write(platform.icon.texture, true);
+                            writer.Write(platform.requirements.Count);
+                            for (int i = 0; i < platform.requirements.Count; i++)
+                                writer.Write(platform.requirements[i]);
+                            writer.Write(platform.suggestions.Count);
+                            for (int i = 0; i < platform.suggestions.Count; i++)
+                                writer.Write(platform.suggestions[i]);
                         }
                     }
                     stream.SetLength(stream.Position);
@@ -333,6 +359,15 @@ namespace CustomFloorPlugin
                 _siraLog.Error("Failed to save info cache");
                 _siraLog.Error(e);
             }
+        }
+
+        private void LoadSprites()
+        {
+            Assembly executingAssembly = Assembly.GetExecutingAssembly();
+            greenCheck = executingAssembly.GetManifestResourceStream("CustomFloorPlugin.Assets.GreenCheck.png").ReadSprite();
+            yellowCheck = executingAssembly.GetManifestResourceStream("CustomFloorPlugin.Assets.YellowCheck.png").ReadSprite();
+            redX = executingAssembly.GetManifestResourceStream("CustomFloorPlugin.Assets.RedX.png").ReadSprite();
+            yellowX = executingAssembly.GetManifestResourceStream("CustomFloorPlugin.Assets.YellowX.png").ReadSprite();
         }
 
         /// <summary>

@@ -22,7 +22,12 @@ namespace CustomFloorPlugin.UI
         /// </summary>
         [UIValue("changelog-text")]
         public string Changelog =>
-        @"<size=150%><color=#888888>Version 6.1.0</color></size>
+        @"<size=150%><color=#888888>Version 6.1.1</color></size>
+        - Security fix:  removed embedded CustomScripts
+        - CustomScripts can still be done, create your own mod
+           and then add it as a requirement or suggestion
+
+<size=150%><color=#888888>Version 6.1.0</color></size>
         - Many new features for platform makers
         - Further reduced loading time
         - Performance improvements

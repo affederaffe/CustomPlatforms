@@ -1,14 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Reflection;
 using System.Security.Cryptography;
 
-using CustomFloorPlugin.Configuration;
-
 using UnityEngine;
-
-using Zenject;
 
 
 namespace CustomFloorPlugin
@@ -18,9 +13,6 @@ namespace CustomFloorPlugin
     /// </summary>
     internal class PlatformLoader
     {
-        [Inject]
-        private readonly PluginConfig _config;
-
         internal Dictionary<string, CustomPlatform> platformFilePaths = new Dictionary<string, CustomPlatform>();
 
         /// <summary>
@@ -37,17 +29,6 @@ namespace CustomFloorPlugin
             yield return assetBundleCreateRequest;
             if (!assetBundleCreateRequest.isDone || !assetBundleCreateRequest.assetBundle)
                 throw new FileLoadException("File coulnd not be loaded", fullPath);
-
-            if (_config.LoadCustomScripts)
-            {
-                AssetBundleRequest scriptAssetBundleRequest = assetBundleCreateRequest.assetBundle.LoadAssetAsync("_Scripts");
-                yield return scriptAssetBundleRequest;
-                if (scriptAssetBundleRequest.isDone && scriptAssetBundleRequest.asset)
-                {
-                    TextAsset script = (TextAsset)scriptAssetBundleRequest.asset;
-                    Assembly.Load(script.bytes);
-                }
-            }
 
             AssetBundleRequest platformAssetBundleRequest = assetBundleCreateRequest.assetBundle.LoadAssetAsync("_CustomPlatform");
             yield return platformAssetBundleRequest;

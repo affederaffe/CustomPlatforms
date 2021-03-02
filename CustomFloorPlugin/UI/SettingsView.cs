@@ -24,12 +24,6 @@ namespace CustomFloorPlugin.UI
         private readonly PluginConfig _config;
 
         /// <summary>
-        /// Hover hint of load-custom-scripts
-        /// </summary>
-        [UIValue("LoadCustomScripts")]
-        public const string loadingCustomScriptsText = "Loads custom scripts which allows further features for platforms\nThese scripts could potentially contain malware\nUse this option at your own risk!";
-
-        /// <summary>
         /// Determines if the feet icon is shown even if the platform would normally hide them<br/>
         /// Forwards the current choice to the UI, and the new choice to the plugin
         /// </summary>
@@ -68,17 +62,6 @@ namespace CustomFloorPlugin.UI
         {
             get => _config.ShowInMenu;
             set => _config.ShowInMenu = value;
-        }
-
-        /// <summary>
-        /// Should this Plugin load CustomScripts?
-        /// Forwards the current choice to the UI, and the new choice to the plugin
-        /// </summary>
-        [UIValue("load-custom-scripts")]
-        public bool LoadCustomScripts
-        {
-            get => _config.LoadCustomScripts;
-            set => _config.LoadCustomScripts = value;
         }
     }
 }

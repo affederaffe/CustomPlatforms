@@ -1,4 +1,5 @@
 ﻿<vertical child-align="UpperCenter" child-control-height="false" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="https://monkeymanboy.github.io/BSML-Docs/ https://raw.githubusercontent.com/monkeymanboy/BSML-Docs/gh-pages/BSMLSchema.xsd">
+  
   <horizontal bg="panel-fade-gradient" bg-color="#db3eef" pref-width="100">
     <label text="Changelog" align="Center" font-size="6"></label>
   </horizontal>
@@ -18,4 +19,5 @@
       </vertical>
     </horizontal>
   </modal>
+  
 </vertical>
