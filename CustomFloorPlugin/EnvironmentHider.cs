@@ -68,7 +68,7 @@ namespace CustomFloorPlugin
             if (doubleColorLasers != null) SetCollectionHidden(doubleColorLasers, platform.hideDoubleColorLasers);
             if (rotatingLasers != null) SetCollectionHidden(rotatingLasers, platform.hideRotatingLasers);
             if (trackLights != null) SetCollectionHidden(trackLights, platform.hideTrackLights);
-            _platformManager.playersPlace.SetActive(_platformManager.activePlatform != null && !platform.hideDefaultPlatform && (sceneName == "MenuEnvironment" || sceneName == "Credits" || sceneName == "HealthWarning"));
+            _platformManager.playersPlace?.SetActive(_platformManager.activePlatform != null && !platform.hideDefaultPlatform && (sceneName == "MenuEnvironment" || sceneName == "Credits" || sceneName == "HealthWarning"));
         }
 
         /// <summary>
@@ -215,7 +215,7 @@ namespace CustomFloorPlugin
             switch (sceneName)
             {
                 case "GlassDesertEnvironment":
-                    FindAddGameObject("playersPlace", playersPlace);
+                    FindAddGameObject("PlayersPlace", playersPlace);
                     FindAddGameObject("Collider", playersPlace);
                     break;
                 case "LinkinParkEnvironment":
@@ -226,7 +226,7 @@ namespace CustomFloorPlugin
                     FindAddGameObject("IsActiveObjects/Construction/playersPlace", playersPlace);
                     break;
                 default:
-                    FindAddGameObject("playersPlace", playersPlace);
+                    FindAddGameObject("PlayersPlace", playersPlace);
                     break;
             }
         }
@@ -240,7 +240,7 @@ namespace CustomFloorPlugin
                     FindAddGameObject("IsActiveObjects/Construction/playersPlace/Feet", feet);
                     break;
                 default:
-                    FindAddGameObject("playersPlace/Feet", feet);
+                    FindAddGameObject("PlayersPlace/Feet", feet);
                     break;
             }
 

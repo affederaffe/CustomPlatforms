@@ -27,7 +27,7 @@ namespace CustomFloorPlugin
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Code Quality", "IDE0051:Remove unused private members", Justification = "Called by Unity")]
-        private void Start()
+        private void Awake()
         {
             renderer = gameObject.GetComponent<Renderer>();
         }

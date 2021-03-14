@@ -27,6 +27,7 @@ namespace CustomFloorPlugin
         private readonly PlatformLoader _platformLoader;
         private readonly PlatformManager _platformManager;
         private readonly GameScenesManager _gameScenesManager;
+        private readonly System.Random _random;
         private DiContainer _container;
 
         internal PlatformSpawner(SiraLog siraLog, PluginConfig config, EnvironmentHider hider, PlatformLoader platformLoader, PlatformManager platformManager, GameScenesManager gameScenesManager)
@@ -37,7 +38,10 @@ namespace CustomFloorPlugin
             _platformLoader = platformLoader;
             _platformManager = platformManager;
             _gameScenesManager = gameScenesManager;
+            _random = new();
         }
+
+        internal int RandomPlatformIndex => _random.Next(0, _platformManager.allPlatforms.Count);
 
         public void Initialize()
         {
@@ -52,42 +56,57 @@ namespace CustomFloorPlugin
         private void HandleTransistionDidFinish(ScenesTransitionSetupDataSO setupData, DiContainer container)
         {
             _container = container;
+            int platformIndex = 0;
+
             switch (setupData)
             {
                 case null:
                 case MenuScenesTransitionSetupDataSO:
-                    _platformManager.heart.SetActive(_config.ShowHeart);
-                    _platformManager.heart.GetComponent<InstancedMaterialLightWithId>().ColorWasSet(Color.magenta);
+                    _platformManager.heart?.SetActive(_config.ShowHeart);
+                    _platformManager.heart?.GetComponent<InstancedMaterialLightWithId>().ColorWasSet(Color.magenta);
                     if (_config.ShowInMenu)
-                        ChangeToPlatform(PlatformType.Singleplayer);
+                        platformIndex = _config.ShufflePlatforms
+                            ? RandomPlatformIndex
+                            : _platformManager.GetIndexForType(PlatformType.Singleplayer);
                     break;
                 case StandardLevelScenesTransitionSetupDataSO:
                 case MissionLevelScenesTransitionSetupDataSO:
                 case TutorialScenesTransitionSetupDataSO:
-                    _platformManager.heart.SetActive(false);
-                    if (setupData.Is360Level())
-                        ChangeToPlatform(PlatformType.A360);
-                    else
-                        ChangeToPlatform(PlatformType.Singleplayer);
+                    _platformManager.heart?.SetActive(false);
+                    platformIndex = _config.ShufflePlatforms
+                        ? RandomPlatformIndex
+                        : setupData.Is360Level()
+                        ? _platformManager.GetIndexForType(PlatformType.A360)
+                        : _platformManager.GetIndexForType(PlatformType.Singleplayer);
                     break;
                 case MultiplayerLevelScenesTransitionSetupDataSO:
-                    _platformManager.heart.SetActive(false);
-                    ChangeToPlatform(PlatformType.Multiplayer);
+                    _platformManager.heart?.SetActive(false);
+                    platformIndex = _platformManager.GetIndexForType(PlatformType.Singleplayer);
+                    SpawnLightEffects();
                     break;
                 case CreditsScenesTransitionSetupDataSO:
-                    _hider.HideObjectsForPlatform(_platformManager.activePlatform);
+                    _hider.HideObjectsForPlatform(_platformManager.activePlatform ?? _platformManager.allPlatforms[0]);
                     break;
                 default:
-                    _platformManager.heart.SetActive(false);
-                    ChangeToPlatform(0);
+                    _platformManager.heart?.SetActive(false);
                     break;
             }
+
+            // Handle possible API request
+            if (_platformManager.apiRequestIndex != -1 && (_platformManager.apiRequestedLevelId == setupData.GetLevelId() || _platformManager.apiRequestIndex == 0))
+            {
+                platformIndex = _platformManager.apiRequestIndex;
+                if (_platformManager.apiRequestIndex == 0)
+                    _platformManager.apiRequestIndex = -1;
+            }
+
+            ChangeToPlatform(platformIndex);
         }
 
         /// <summary>
         /// Changes to a specific <see cref="CustomPlatform"/> and saves the choice
         /// </summary>
-        /// <param name="index">The index of the new <see cref="CustomPlatform"/> in the list <see cref="AllPlatforms"/></param>
+        /// <param name="index">The index of the new <see cref="CustomPlatform"/> in the list</param>
         internal void SetPlatformAndShow(int index, PlatformType platformType)
         {
             switch (platformType)
@@ -209,6 +228,16 @@ namespace CustomFloorPlugin
                 _platformManager.spawnedComponents.RemoveAt(0);
                 GameObject.Destroy(component);
             }
+        }
+
+        /// <summary>
+        /// Instantiates the light effects prefab for multiplayer levels
+        /// </summary>
+        private void SpawnLightEffects()
+        {
+            GameObject lightEffects = _container.InstantiatePrefab(_platformManager.lightEffects);
+            _platformManager.spawnedObjects.Add(lightEffects);
+            lightEffects.SetActive(true);
         }
     }
 }

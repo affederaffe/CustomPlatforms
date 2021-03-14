@@ -145,8 +145,6 @@ namespace CustomFloorPlugin.UI
             int tableIndex = (int)_platformManager.currentPlatformType;
             allListTables[tableIndex].tableView.ScrollToCellWithIdx(platformIndex, TableView.ScrollPositionType.Beginning, false);
             UpdateRequirementsForPlatform(_platformManager.allPlatforms[platformIndex]);
-            if (_config.ShowInMenu && _platformManager.currentPlatformType == PlatformType.Singleplayer)
-                return;
             _platformSpawner.ChangeToPlatform(platformIndex);
         }
 
@@ -158,18 +156,12 @@ namespace CustomFloorPlugin.UI
         {
             base.DidDeactivate(removedFromHierarchy, screenSystemDisabling);
             requirementsModal.gameObject.SetActive(false);
-            // Only change the platform if it's necessary
+            int platformIndex = 0;
             if (_config.ShowInMenu)
-            {
-                if (_platformManager.currentPlatformType != PlatformType.Singleplayer)
-                {
-                    _platformSpawner.ChangeToPlatform(PlatformType.Singleplayer);
-                }
-            }
-            else
-            {
-                _platformSpawner.ChangeToPlatform(0);
-            }
+                platformIndex = _config.ShufflePlatforms
+                ? _platformSpawner.RandomPlatformIndex
+                : _platformManager.GetIndexForType(PlatformType.Singleplayer);
+            _platformSpawner.ChangeToPlatform(platformIndex);
         }
 
         /// <summary>

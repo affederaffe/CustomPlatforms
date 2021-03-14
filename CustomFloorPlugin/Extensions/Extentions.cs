@@ -25,6 +25,16 @@ namespace CustomFloorPlugin.Extensions
             return is360;
         }
 
+        internal static string GetLevelId(this ScenesTransitionSetupDataSO setupData)
+        {
+            string levelId = (setupData as StandardLevelScenesTransitionSetupDataSO)?
+                .difficultyBeatmap
+                .level
+                .levelID
+                ?? string.Empty;
+            return levelId;
+        }
+
         /// <summary>
         /// Gets the time of the song the last note is spawned<br/>
         /// (stolen from SaberFactory)
