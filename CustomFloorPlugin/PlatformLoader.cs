@@ -11,9 +11,15 @@ namespace CustomFloorPlugin
     /// <summary>
     /// Loads AssetBundles containing CustomPlatorms
     /// </summary>
-    internal class PlatformLoader
+    public class PlatformLoader
     {
-        internal Dictionary<string, CustomPlatform> platformFilePaths = new Dictionary<string, CustomPlatform>();
+        internal readonly Dictionary<string, CustomPlatform> platformFilePaths = new();
+        private readonly MaterialSwapper _materialSwapper;
+
+        public PlatformLoader(MaterialSwapper materialSwapper)
+        {
+            _materialSwapper = materialSwapper;
+        }
 
         /// <summary>
         /// Asynchronously loads a <see cref="CustomPlatform"/> from a specified file path
@@ -78,7 +84,7 @@ namespace CustomFloorPlugin
             byte[] hash = md5.ComputeHash(fileStream);
             customPlatform.platHash = BitConverter.ToString(hash).Replace("-", string.Empty).ToLowerInvariant();
 
-            MaterialSwapper.ReplaceMaterials(customPlatform.gameObject);
+            _materialSwapper.ReplaceMaterials(customPlatform.gameObject);
 
             callback(customPlatform, fullPath);
 

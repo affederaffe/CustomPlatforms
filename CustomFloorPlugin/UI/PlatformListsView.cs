@@ -22,41 +22,44 @@ namespace CustomFloorPlugin.UI
     [ViewDefinition("CustomFloorPlugin.Views.PlatformLists.bsml")]
     internal class PlatformListsView : BSMLAutomaticViewController, INotifyPropertyChanged
     {
-        [Inject]
-        private readonly PluginConfig _config;
+        private PluginConfig _config;
+        private PlatformManager _platformManager;
+        private PlatformSpawner _platformSpawner;
 
         [Inject]
-        private readonly PlatformSpawnerMenu _platformSpawner;
-
-        [Inject]
-        private readonly PlatformManager _platformManager;
+        public void Construct(PluginConfig config, PlatformSpawner platformSpawner, PlatformManager platformManager)
+        {
+            _config = config;
+            _platformManager = platformManager;
+            _platformSpawner = platformSpawner;
+        }
 
         [UIComponent("requirements-modal")]
-        private readonly ModalView requirementsModal;
+        internal readonly ModalView requirementsModal;
 
         /// <summary>
-        /// The table of currently loaded Platforms, for singleplayer only because BSML can't use the same list for different tabs
+        /// The table of currently loaded Platforms for singleplayer
         /// </summary>
-        [UIComponent("singleplayerPlatformList")]
+        [UIComponent("singleplayer-platforms-list")]
         internal readonly CustomListTableData singleplayerPlatformListTable;
 
         /// <summary>
-        /// The table of currently loaded Platforms, for multiplayer only because BSML can't use the same list for different tabs
+        /// The table of currently loaded Platforms for multiplayer
         /// </summary>
-        [UIComponent("multiplayerPlatformList")]
+        [UIComponent("multiplayer-platforms-list")]
         internal readonly CustomListTableData multiplayerPlatformListTable;
 
         /// <summary>
-        /// The table of currently loaded Platforms, for multiplayer only because BSML can't use the same list for different tabs
+        /// The table of currently loaded Platforms for multiplayer
         /// </summary>
-        [UIComponent("a360PlatformList")]
+        [UIComponent("a360-platforms-list")]
         internal readonly CustomListTableData a360PlatformListTable;
 
         /// <summary>
         /// List of requirements or suggestions for the current platform
         /// </summary>
-        [UIComponent("requirementsList")]
-        private readonly CustomListTableData requirementsListTable;
+        [UIComponent("requirements-list")]
+        internal readonly CustomListTableData requirementsListTable;
 
         /// <summary>
         /// An <see cref="System.Array"/> holding all <see cref="CustomListTableData"/>s
@@ -66,9 +69,9 @@ namespace CustomFloorPlugin.UI
         /// <summary>
         /// Used to hide the button if there's no requirement or suggestion
         /// </summary>
-        [UIValue("reqButtonActive")]
-        public bool ReqButtonActive 
-        { 
+        [UIValue("req-button-active")]
+        public bool ReqButtonActive
+        {
             get => _ReqButtonActive;
             set
             {
@@ -78,15 +81,15 @@ namespace CustomFloorPlugin.UI
         }
         private bool _ReqButtonActive;
 
-        [UIAction("Select-cell")]
+        [UIAction("select-cell")]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("CodeQuality", "IDE0051:Remove unused private members", Justification = "Called by BSML")]
         private void TabSelect(SegmentedControl segmentedControl, int _1)
         {
             PlatformType type = (PlatformType)segmentedControl.selectedCellNumber;
             int index = _platformManager.GetIndexForType(type);
-            singleplayerPlatformListTable.tableView.ScrollToCellWithIdx(index, TableViewScroller.ScrollPositionType.Beginning, false);
+            singleplayerPlatformListTable.tableView.ScrollToCellWithIdx(index, TableView.ScrollPositionType.Beginning, false);
             UpdateRequirementsForPlatform(_platformManager.allPlatforms[index]);
-            
+
             if (index != _platformManager.GetIndexForType(_platformManager.currentPlatformType))
                 _platformSpawner.ChangeToPlatform(index);
             _platformManager.currentPlatformType = type;
@@ -94,11 +97,10 @@ namespace CustomFloorPlugin.UI
 
         /// <summary>
         /// Called when a <see cref="CustomPlatform"/> is selected by the user<br/>
-        /// Passes the choice to the <see cref="PlatformManager"/>
         /// </summary>
         /// <param name="_1">I love how optimised BSML is</param>
         /// <param name="idx">Cell index of the users selection</param>
-        [UIAction("SingleplayerSelect")]
+        [UIAction("singleplayer-select")]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("CodeQuality", "IDE0051:Remove unused private members", Justification = "Called by BSML")]
         private void SingleplayerSelect(TableView _1, int idx)
         {
@@ -108,11 +110,10 @@ namespace CustomFloorPlugin.UI
 
         /// <summary>
         /// Called when a <see cref="CustomPlatform"/> is selected by the user<br/>
-        /// Passes the choice to the <see cref="PlatformManager"/>
         /// </summary>
         /// <param name="_1">I love how optimised BSML is</param>
         /// <param name="idx">Cell index of the users selection</param>
-        [UIAction("MultiplayerSelect")]
+        [UIAction("multiplayer-select")]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("CodeQuality", "IDE0051:Remove unused private members", Justification = "Called by BSML")]
         private void MultiplayerSelect(TableView _1, int idx)
         {
@@ -122,11 +123,10 @@ namespace CustomFloorPlugin.UI
 
         /// <summary>
         /// Called when a <see cref="CustomPlatform"/> is selected by the user<br/>
-        /// Passes the choice to the <see cref="PlatformManager"/>
         /// </summary>
         /// <param name="_1">I love how optimised BSML is</param>
         /// <param name="idx">Cell index of the users selection</param>
-        [UIAction("A360Select")]
+        [UIAction("a360-select")]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("CodeQuality", "IDE0051:Remove unused private members", Justification = "Called by BSML")]
         private void A360Select(TableView _1, int idx)
         {
@@ -141,33 +141,13 @@ namespace CustomFloorPlugin.UI
         protected override void DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
         {
             base.DidActivate(firstActivation, addedToHierarchy, screenSystemEnabling);
-            // Only change the platform if it's necessary
-            if (_config.ShowInMenu)
-            {
-                if (_platformManager.currentPlatformType != PlatformType.Singleplayer)
-                {
-                    int idx = _platformManager.GetIndexForType(_platformManager.currentPlatformType);
-                    UpdateRequirementsForPlatform(_platformManager.allPlatforms[idx]);
-                    _platformSpawner.ChangeToPlatform(idx);
-                }
-                else
-                {
-                    int idx = _platformManager.GetIndexForType(PlatformType.Singleplayer);
-                    UpdateRequirementsForPlatform(_platformManager.allPlatforms[idx]);
-                }
-            }
-            else
-            {
-                int idx = _platformManager.GetIndexForType(_platformManager.currentPlatformType);
-                UpdateRequirementsForPlatform(_platformManager.allPlatforms[idx]);
-                _platformSpawner.ChangeToPlatform(idx);
-            }
-            for (int i = 0; i < allListTables.Length; i++)
-            {
-                PlatformType type = (PlatformType)i;
-                int index = _platformManager.GetIndexForType(type);
-                allListTables[i].tableView.ScrollToCellWithIdx(index, TableViewScroller.ScrollPositionType.Beginning, false);
-            }
+            int platformIndex = _platformManager.GetIndexForType(_platformManager.currentPlatformType);
+            int tableIndex = (int)_platformManager.currentPlatformType;
+            allListTables[tableIndex].tableView.ScrollToCellWithIdx(platformIndex, TableView.ScrollPositionType.Beginning, false);
+            UpdateRequirementsForPlatform(_platformManager.allPlatforms[platformIndex]);
+            if (_config.ShowInMenu && _platformManager.currentPlatformType == PlatformType.Singleplayer)
+                return;
+            _platformSpawner.ChangeToPlatform(platformIndex);
         }
 
         /// <summary>
@@ -189,7 +169,7 @@ namespace CustomFloorPlugin.UI
             else
             {
                 _platformSpawner.ChangeToPlatform(0);
-            }      
+            }
         }
 
         /// <summary>
@@ -200,11 +180,11 @@ namespace CustomFloorPlugin.UI
         [System.Diagnostics.CodeAnalysis.SuppressMessage("CodeQuality", "IDE0051:Remove unused private members", Justification = "Called by BSML")]
         private void SetupLists()
         {
-            _platformManager.allPlatforms.Sort(1, _platformManager.allPlatforms.Count-1, null);
+            _platformManager.allPlatforms.Sort(1, _platformManager.allPlatforms.Count - 1, null);
             allListTables = new CustomListTableData[] { singleplayerPlatformListTable, multiplayerPlatformListTable, a360PlatformListTable };
             foreach (CustomPlatform platform in _platformManager.allPlatforms)
             {
-                CustomListTableData.CustomCellInfo cell = new CustomListTableData.CustomCellInfo(platform.platName, platform.platAuthor, platform.icon);
+                CustomListTableData.CustomCellInfo cell = new(platform.platName, platform.platAuthor, platform.icon);
                 foreach (CustomListTableData listTable in allListTables)
                     listTable.data.Add(cell);
             }
@@ -213,7 +193,7 @@ namespace CustomFloorPlugin.UI
                 allListTables[i].tableView.ReloadData();
                 int idx = _platformManager.GetIndexForType((PlatformType)i);
                 if (!allListTables[i].tableView.visibleCells.Any(x => x.selected))
-                    allListTables[i].tableView.ScrollToCellWithIdx(idx, TableViewScroller.ScrollPositionType.Beginning, false);
+                    allListTables[i].tableView.ScrollToCellWithIdx(idx, TableView.ScrollPositionType.Beginning, false);
                 allListTables[i].tableView.SelectCellWithIdx(idx);
             }
         }

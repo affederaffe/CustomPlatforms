@@ -1,18 +1,18 @@
-﻿using UnityEngine.Events;
+﻿using TMPro;
 
-using TMPro;
+using Zenject;
 
 
 namespace CustomFloorPlugin
 {
-    public class TextEventFilter : EventFilterBehaviour
+    public class TextEventFilter : EventFilterBehaviour, INotifyPlatformEnabled, INotifyPlatformDisabled
     {
         public EventType eventType = EventType.AllNotes;
         public TextMeshPro tmPro;
+
         private string startText;
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Code Quality", "IDE0051:Remove unused private members", Justification = "Called by Unity")]
-        private void OnEnable()
+        void INotifyPlatformEnabled.PlatformEnabled(DiContainer container)
         {
             if (!tmPro)
                 return;
@@ -40,8 +40,7 @@ namespace CustomFloorPlugin
             }
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Code Quality", "IDE0051:Remove unused private members", Justification = "Called by Unity")]
-        private void OnDisable()
+        void INotifyPlatformDisabled.PlatformDisabled()
         {
             if (!tmPro)
                 return;

@@ -1,45 +1,45 @@
 ﻿<vertical xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="https://monkeymanboy.github.io/BSML-Docs/ https://raw.githubusercontent.com/monkeymanboy/BSML-Docs/gh-pages/BSMLSchema.xsd">
   
   <horizontal pref-width="100" pref-height="10">
-    <tab-selector page-count="3" tab-tag="platform-lists" select-cell="Select-cell" hover-hint="Select different platforms for each gamemode" child-expand-width="true" child-control-width="true"></tab-selector>
+    <tab-selector page-count="3" tab-tag="platform-lists" select-cell="select-cell" hover-hint="Select different platforms for each gamemode" child-expand-width="true" child-control-width="true"></tab-selector>
   </horizontal>
 
   <horizontal pref-width="100" pref-height="72">
     <tab tab-name="Singleplayer" tags="platform-lists" hover-hint="Select which platform is used in singleplayer and the menu" size-delta-x="25">
       <vertical pref-width="65" pref-height="72">
-        <page-button click-event="singleplayerPlatformList#PageUp" direction="Up"></page-button>
-        <list id="singleplayerPlatformList" expand-cell="true" select-cell="SingleplayerSelect"></list>
-        <page-button click-event="singleplayerPlatformList#PageDown" direction="Down"></page-button>
+        <page-button click-event="singleplayer-platforms-list#PageUp" direction="Up"></page-button>
+        <list id="singleplayer-platforms-list" expand-cell="true" select-cell="singleplayer-select"></list>
+        <page-button click-event="singleplayer-platforms-list#PageDown" direction="Down"></page-button>
       </vertical>
     </tab>
     
     <tab tab-name="Multiplayer" tags="platform-lists" hover-hint="Select which platform is used in multiplayer" size-delta-x="25">
       <vertical pref-width="65" pref-height="72">
-        <page-button click-event="multiplayerPlatformList#PageUp" direction="Up"></page-button>
-        <list id="multiplayerPlatformList" expand-cell="true" select-cell="MultiplayerSelect"></list>
-        <page-button click-event="multiplayerPlatformList#PageDown" direction="Down"></page-button>
+        <page-button click-event="multiplayer-platforms-list#PageUp" direction="Up"></page-button>
+        <list id="multiplayer-platforms-list" expand-cell="true" select-cell="multiplayer-select"></list>
+        <page-button click-event="multiplayer-platforms-list#PageDown" direction="Down"></page-button>
       </vertical>
     </tab>
 
     <tab tab-name="360°" tags="platform-lists" hover-hint="Select which platform is used in 360°-levels" size-delta-x="25">
       <vertical pref-width="65" pref-height="72">
-        <page-button click-event="a360PlatformList#PageUp" direction="Up"></page-button>
-        <list id="a360PlatformList" expand-cell="true" select-cell="A360Select"></list>
-        <page-button click-event="a360PlatformList#PageDown" direction="Down"></page-button>
+        <page-button click-event="a360-platforms-list#PageUp" direction="Up"></page-button>
+        <list id="a360-platforms-list" expand-cell="true" select-cell="a360-select"></list>
+        <page-button click-event="a360-platforms-list#PageDown" direction="Down"></page-button>
       </vertical>
     </tab>
   </horizontal>
 
   <horizontal ignore-layout="true" anchor-pos-x="50" anchor-pos-y="20">
-    <action-button id="info-button" active="~reqButtonActive" text="?" click-event="open-requirements" ></action-button>
+    <action-button id="info-button" active="~req-button-active" text="?" click-event="open-requirements" ></action-button>
   </horizontal>
   
   <modal id="requirements-modal" show-event="open-requirements" hide-event="close-requirements" clickerino-offerino-closerino="true" anchor-pos-x="50" anchor-pos-y="21.2" size-delta-x="65" size-delta-y="75" move-to-center="false">
-    <button text="Close" click-event="close-requirements" anchor-pos-x ="10" anchor-pos-y="5" ></button>
+    <!--<button text="Close" click-event="close-requirements" anchor-pos-x ="10" anchor-pos-y="-90"></button>-->
     <vertical horizontal-fit="PreferredSize" vertical-fit="PreferredSize" anchor-pos-y="3" size-delta-y="0">
-      <page-button event-click="requirementsList#PageUp" direction="Up" ignore-layout="true" anchor-min-y="0.8" anchor-pos-x="25" anchor-pos-y="10" pref-width="12"></page-button>
-      <list id="requirementsList" expand-cell="true" pref-height="50"></list>
-      <page-button event-click="requirementsList#PageDown" direction="Down" ignore-layout="true" anchor-min-y="-0.8" anchor-pos-x="25" anchor-pos-y="-16" pref-width="12"></page-button>
+      <page-button event-click="requirements-list#PageUp" direction="Up" ignore-layout="true" anchor-min-y="0.8" anchor-pos-x="25" anchor-pos-y="10" pref-width="12"></page-button>
+      <list id="requirements-list" expand-cell="true" pref-height="50"></list>
+      <page-button event-click="requirements-list#PageDown" direction="Down" ignore-layout="true" anchor-min-y="-0.8" anchor-pos-x="25" anchor-pos-y="-16" pref-width="12"></page-button>
     </vertical>
   </modal>
 

@@ -6,7 +6,7 @@ using IPA.Config.Stores;
 [assembly: InternalsVisibleTo(GeneratedStore.AssemblyVisibilityTarget)]
 namespace CustomFloorPlugin.Configuration
 {
-    internal class PluginConfig
+    public class PluginConfig
     {
         public virtual bool AlwaysShowFeet { get; set; } = false;
         public virtual bool ShowHeart { get; set; } = true;

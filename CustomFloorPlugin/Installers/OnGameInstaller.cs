@@ -13,10 +13,8 @@ namespace CustomFloorPlugin.Installers
             {
                 GameplayCoreSceneSetupData sceneSetupData = Container.Resolve<GameplayCoreSceneSetupData>();
                 float lastNoteTime = sceneSetupData.difficultyBeatmap.beatmapData.GetLastNoteTime();
-                Container.Bind<float>().WithId("LastNoteTime").FromInstance(lastNoteTime).AsSingle();
-                Container.BindInterfacesAndSelfTo<BSEvents>().AsSingle();
+                Container.BindInterfacesAndSelfTo<BSEvents>().AsSingle().WithArguments(lastNoteTime);
             }
-            Container.BindInterfacesAndSelfTo<PlatformSpawnerGame>().AsSingle().WithArguments(Container).NonLazy();
         }
     }
 }

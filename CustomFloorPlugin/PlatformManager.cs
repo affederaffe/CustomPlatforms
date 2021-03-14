@@ -14,6 +14,7 @@ using IPA.Utilities;
 using SiraUtil.Tools;
 
 using UnityEngine;
+using UnityEngine.ProBuilder;
 using UnityEngine.SceneManagement;
 
 using Zenject;
@@ -24,16 +25,19 @@ namespace CustomFloorPlugin
     /// <summary>
     /// Handles Platforms, and hearts, everything about them
     /// </summary>
-    internal class PlatformManager : MonoBehaviour
+    public class PlatformManager : MonoBehaviour
     {
-        [Inject]
-        private readonly SiraLog _siraLog;
+        private SiraLog _siraLog;
+        private PluginConfig _config;
+        private PlatformLoader _platformLoader;
 
         [Inject]
-        private readonly PluginConfig _config;
-
-        [Inject]
-        private readonly PlatformLoader _platformLoader;
+        public void Construct(SiraLog siraLog, PluginConfig config, PlatformLoader platformLoader)
+        {
+            _siraLog = siraLog;
+            _config = config;
+            _platformLoader = platformLoader;
+        }
 
         /// <summary>
         /// List of all loaded Platforms
@@ -76,16 +80,33 @@ namespace CustomFloorPlugin
         internal CustomPlatform activePlatform;
 
         /// <summary>
+        /// The cover for the default platform
+        /// </summary>
+        internal Sprite defaultPlatformCover;
+
+        /// <summary>
         /// The cover used for all platforms normally missing one
         /// </summary>
         internal Sprite fallbackCover;
 
         /// <summary>
-        /// 
+        /// Sprite used to indicate that a mod requirement is fulfilled
         /// </summary>
         internal Sprite greenCheck;
+
+        /// <summary>
+        /// Sprite used to indicate that a mod suggestion is fulfilled
+        /// </summary>
         internal Sprite yellowCheck;
+
+        /// <summary>
+        /// Sprite used to indicate that a mod requirement is not fulfilled
+        /// </summary>
         internal Sprite redX;
+
+        /// <summary>
+        /// Sprite used to indicate that a mod suggestion is not fulfilled
+        /// </summary>
         internal Sprite yellowX;
 
         /// <summary>
@@ -104,44 +125,38 @@ namespace CustomFloorPlugin
         internal readonly string customPlatformsInfoCacheFilePath = Path.Combine(UnityGame.UserDataPath, "Custom PlatformsInfoCache.dat");
 
         /// <summary>
+        /// Keeps track of all spawned custom <see cref="GameObject"/>s, whichs lifetime ends on any scene transition
+        /// </summary>
+        internal readonly List<GameObject> spawnedObjects = new();
+
+        /// <summary>
+        /// Keeps track of all spawned custom <see cref="Component"/>s, whichs lifetime ends on any scene transition
+        /// </summary>
+        internal readonly List<Component> spawnedComponents = new();
+
+        /// <summary>
         /// Acts as a prefab for custom light sources that require meshes...<br/>
         /// Not 100% bug free tbh<br/>
         /// <br/>
         /// Also:<br/>
         /// We love Beat Saber
         /// </summary>
-        internal static GameObject Heart;
+        internal GameObject heart;
 
         /// <summary>
         /// Used as a platform in platform preview if <see cref="CustomPlatform.hideDefaultPlatform"/> is false
         /// </summary>
-        internal static GameObject PlayersPlace;
+        internal GameObject playersPlace;
 
         /// <summary>
         /// The Light Source used for non-mesh lights
         /// </summary>
-        internal static GameObject LightSource;
+        internal GameObject lightSource;
 
         /// <summary>
         /// Used as a prefab for light effects in multiplayer
         /// </summary>
-        internal static GameObject LightEffects;
-
-        /// <summary>
-        /// Keeps track of all spawned custom <see cref="GameObject"/>s, whichs lifetime ends on any scene transition
-        /// </summary>
-        internal static List<GameObject> SpawnedObjects = new List<GameObject>();
-
-        /// <summary>
-        /// Keeps track of all spawned custom <see cref="Component"/>s, whichs lifetime ends on any scene transition
-        /// </summary>
-        internal static List<Component> SpawnedComponents = new List<Component>();
-
-        /// <summary>
-        /// This <see cref="Action"/> <see langword="delegate"/> is called whenever a platform is activated,<br/>
-        /// after all instantiated objects implementing <see cref="INotifyOnEnableOrDisable"/> have been notified.
-        /// </summary>
-        internal static Action<LightWithIdManager> SpawnQueue = delegate { };
+        internal GameObject lightEffects;
 
         /// <summary>
         /// The cache file version to prevent loading older ones if something changes
@@ -154,15 +169,9 @@ namespace CustomFloorPlugin
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Code Quality", "IDE0051:Remove unused private members", Justification = "Called by Unity")]
         private void Start()
         {
-            StartCoroutine(IHateUnity());
-            IEnumerator<WaitForEndOfFrame> IHateUnity()
-            {
-                LoadSprites();
-                yield return new WaitForEndOfFrame();
-                LoadAssets();
-                yield return new WaitForEndOfFrame();
-                Reload();
-            }
+            LoadSprites();
+            LoadAssets();
+            LoadPlatforms();
         }
 
         /// <summary>
@@ -177,7 +186,7 @@ namespace CustomFloorPlugin
         /// <summary>
         /// Loads all platforms or their descritpors if a cache file exists
         /// </summary>
-        private void Reload()
+        private void LoadPlatforms()
         {
             if (!Directory.Exists(customPlatformsFolderPath))
                 Directory.CreateDirectory(customPlatformsFolderPath);
@@ -186,15 +195,11 @@ namespace CustomFloorPlugin
 
             string[] bundlePaths = Directory.GetFiles(customPlatformsFolderPath, "*.plat");
 
-            Sprite[] allSprites = Resources.FindObjectsOfTypeAll<Sprite>();
-            Sprite lvlInsaneCover = allSprites.First(x => x.name == "LvlInsaneCover");
-            fallbackCover = allSprites.First(x => x.name == "FeetIcon");
-
             CustomPlatform defaultPlatform = new GameObject("Default Platform").AddComponent<CustomPlatform>();
             defaultPlatform.transform.parent = transform;
             defaultPlatform.platName = "Default Environment";
             defaultPlatform.platAuthor = "Beat Saber";
-            defaultPlatform.icon = lvlInsaneCover;
+            defaultPlatform.icon = defaultPlatformCover;
             allPlatforms.Add(defaultPlatform);
 
             if (File.Exists(customPlatformsInfoCacheFilePath))
@@ -233,7 +238,7 @@ namespace CustomFloorPlugin
         /// <summary>
         /// Sets the platforms that were last selected as the current ones
         /// </summary>
-        internal void CheckLastSelectedPlatform(ref CustomPlatform platform)
+        internal void CheckLastSelectedPlatform(in CustomPlatform platform)
         {
             if (_config.SingleplayerPlatformPath == platform.platName + platform.platAuthor)
                 currentSingleplayerPlatform = platform;
@@ -255,17 +260,16 @@ namespace CustomFloorPlugin
             newPlatform.transform.parent = transform;
             if (newPlatform.icon == null)
                 newPlatform.icon = fallbackCover;
-            CheckLastSelectedPlatform(ref newPlatform);
+            CheckLastSelectedPlatform(in newPlatform);
 
             if (_platformLoader.platformFilePaths.ContainsKey(fullPath))
             {
                 int index = allPlatforms.IndexOf(_platformLoader.platformFilePaths[fullPath]);
-                allPlatforms.RemoveAt(index);
                 if (activePlatform == _platformLoader.platformFilePaths[fullPath])
                     activePlatform = newPlatform;
                 Destroy(_platformLoader.platformFilePaths[fullPath].gameObject);
                 _platformLoader.platformFilePaths[fullPath] = newPlatform;
-                allPlatforms.Insert(index, newPlatform);
+                allPlatforms[index] = newPlatform;
             }
             else
             {
@@ -281,8 +285,9 @@ namespace CustomFloorPlugin
         {
             try
             {
-                using FileStream stream = new FileStream(customPlatformsInfoCacheFilePath, FileMode.Open, FileAccess.Read);
-                using BinaryReader reader = new BinaryReader(stream, Encoding.UTF8);
+                using FileStream stream = new(customPlatformsInfoCacheFilePath, FileMode.Open, FileAccess.Read);
+                using BinaryReader reader = new(stream, Encoding.UTF8);
+
                 if (reader.ReadByte() != kCacheFileVersion)
                     return;
 
@@ -310,7 +315,7 @@ namespace CustomFloorPlugin
                         continue;
                     }
 
-                    CheckLastSelectedPlatform(ref platform);
+                    CheckLastSelectedPlatform(in platform);
 
                     _platformLoader.platformFilePaths.Add(platform.fullPath, platform);
                     allPlatforms.Add(platform);
@@ -329,12 +334,12 @@ namespace CustomFloorPlugin
         {
             try
             {
-                using (FileStream stream = new FileStream(customPlatformsInfoCacheFilePath, FileMode.OpenOrCreate, FileAccess.Write))
+                using (FileStream stream = new(customPlatformsInfoCacheFilePath, FileMode.OpenOrCreate, FileAccess.Write))
                 {
-                    using (BinaryWriter writer = new BinaryWriter(stream, Encoding.UTF8, true))
+                    using (BinaryWriter writer = new(stream, Encoding.UTF8, true))
                     {
                         writer.Write(kCacheFileVersion);
-                        writer.Write(allPlatforms.Count-1);
+                        writer.Write(allPlatforms.Count - 1);
                         foreach (CustomPlatform platform in allPlatforms.Skip(1))
                         {
                             writer.Write(platform.platName);
@@ -364,6 +369,8 @@ namespace CustomFloorPlugin
         private void LoadSprites()
         {
             Assembly executingAssembly = Assembly.GetExecutingAssembly();
+            defaultPlatformCover = executingAssembly.GetManifestResourceStream("CustomFloorPlugin.Assets.LvlInsaneCover.png").ReadSprite();
+            fallbackCover = executingAssembly.GetManifestResourceStream("CustomFloorPlugin.Assets.FeetIcon.png").ReadSprite();
             greenCheck = executingAssembly.GetManifestResourceStream("CustomFloorPlugin.Assets.GreenCheck.png").ReadSprite();
             yellowCheck = executingAssembly.GetManifestResourceStream("CustomFloorPlugin.Assets.YellowCheck.png").ReadSprite();
             redX = executingAssembly.GetManifestResourceStream("CustomFloorPlugin.Assets.RedX.png").ReadSprite();
@@ -372,42 +379,43 @@ namespace CustomFloorPlugin
 
         /// <summary>
         /// Steals the heart from the GreenDayScene<br/>
-        /// Then De-Serializes the data from the embedded resource heart.mesh onto the GreenDayHeart to make it more visually pleasing<br></br>
-        /// Also adjusts it position and color.<br></br>
-        /// Gets the Non-Mesh LightSource and the PlayersPlace used in the Platform Preview too.<br></br>
-        /// Now also steals the LightEffects for multiplayer, this scene is really useful
+        /// Then De-Serializes the data from the embedded resource heart.mesh onto the GreenDayHeart to make it more visually pleasing<br/>
+        /// Also adjusts it position and color.<br/>
+        /// Gets the Non-Mesh lightSource and the playersPlace used in the Platform Preview too.<br/>
+        /// Now also steals the lightEffects for multiplayer, this scene is really useful
         /// </summary>
         private void LoadAssets()
         {
-            Scene greenDay = SceneManager.LoadScene("GreenDayGrenadeEnvironment", new LoadSceneParameters(LoadSceneMode.Additive));
             StartCoroutine(fuckUnity());
             IEnumerator<WaitUntil> fuckUnity()
             {//did you know loaded scenes are loaded asynchronously, regarless if you use async or not?
+                yield return null;
+                Scene greenDay = SceneManager.LoadScene("GreenDayGrenadeEnvironment", new LoadSceneParameters(LoadSceneMode.Additive));
                 yield return new WaitUntil(() => { return greenDay.isLoaded; });
                 GameObject root = greenDay.GetRootGameObjects()[0];
 
-                Heart = root.transform.Find("GreenDayCity/armHeartLighting").gameObject;
-                Heart.SetActive(false);
-                Heart.transform.SetParent(transform);
-                Heart.name = "<3";
+                heart = root.transform.Find("GreenDayCity/ArmHeartLighting").gameObject;
+                heart.SetActive(false);
+                heart.transform.SetParent(transform);
+                heart.name = "<3";
 
-                PlayersPlace = root.transform.Find("PlayersPlace").gameObject;
-                PlayersPlace.SetActive(false);
-                PlayersPlace.transform.SetParent(transform);
+                playersPlace = root.transform.Find("PlayersPlace").gameObject;
+                playersPlace.SetActive(false);
+                playersPlace.transform.SetParent(transform);
 
-                LightSource = root.transform.Find("GlowLineL (2)").gameObject;
-                LightSource.SetActive(false);
-                LightSource.transform.SetParent(transform);
-                LightSource.name = "LightSource";
+                lightSource = root.transform.Find("GlowLineL (2)").gameObject;
+                lightSource.SetActive(false);
+                lightSource.transform.SetParent(transform);
+                lightSource.name = "LightSource";
 
-                LightEffects = root.transform.Find("LightEffects").gameObject;
-                LightEffects.SetActive(false);
-                LightEffects.transform.SetParent(transform);
+                lightEffects = root.transform.Find("LightEffects").gameObject;
+                lightEffects.SetActive(false);
+                lightEffects.transform.SetParent(transform);
 
                 SceneManager.UnloadSceneAsync("GreenDayGrenadeEnvironment");
 
                 using Stream manifestResourceStream = Assembly.GetExecutingAssembly().GetManifestResourceStream("CustomFloorPlugin.Assets.heart.mesh");
-                using StreamReader streamReader = new StreamReader(manifestResourceStream);
+                using StreamReader streamReader = new(manifestResourceStream);
 
                 string meshfile = streamReader.ReadToEnd();
                 string[] dimension1 = meshfile.Split('|');
@@ -420,8 +428,8 @@ namespace CustomFloorPlugin
                     string_vector3s[i++] = string_vector3.Split(',');
                 }
 
-                List<Vector3> vertices = new List<Vector3>();
-                List<int> triangles = new List<int>();
+                List<Vector3> vertices = new();
+                List<int> triangles = new();
                 foreach (string[] string_vector3 in string_vector3s)
                 {
                     vertices.Add(new Vector3(float.Parse(string_vector3[0], NumberFormatInfo.InvariantInfo), float.Parse(string_vector3[1], NumberFormatInfo.InvariantInfo), float.Parse(string_vector3[2], NumberFormatInfo.InvariantInfo)));
@@ -431,19 +439,21 @@ namespace CustomFloorPlugin
                     triangles.Add(int.Parse(s_int, NumberFormatInfo.InvariantInfo));
                 }
 
-                Mesh mesh = new Mesh
+                Mesh mesh = new()
                 {
                     vertices = vertices.ToArray(),
                     triangles = triangles.ToArray()
                 };
 
-                Heart.GetComponent<MeshFilter>().mesh = mesh;
-                Heart.transform.position = new Vector3(-8f, 25f, 26f);
-                Heart.transform.rotation = Quaternion.Euler(-100f, 90f, 90f);
-                Heart.transform.localScale = new Vector3(25f, 25f, 25f);
+                DestroyImmediate(heart.GetComponent<ProBuilderMesh>());
 
-                Heart.SetActive(_config.ShowHeart);
-                Heart.GetComponent<InstancedMaterialLightWithId>().ColorWasSet(Color.magenta);
+                heart.GetComponent<MeshFilter>().mesh = mesh;
+                heart.transform.position = new Vector3(-8f, 25f, 26f);
+                heart.transform.rotation = Quaternion.Euler(-100f, 90f, 90f);
+                heart.transform.localScale = new Vector3(25f, 25f, 25f);
+
+                heart.SetActive(_config.ShowHeart);
+                heart.GetComponent<InstancedMaterialLightWithId>().ColorWasSet(Color.magenta);
             }
         }
     }

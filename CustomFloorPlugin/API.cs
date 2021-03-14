@@ -27,20 +27,20 @@ namespace CustomFloorPlugin
     /// </summary>
     internal class API : IInitializable, IDisposable
     {
-        [Inject]
         private readonly SiraLog _siraLog;
-
-        [Inject]
         private readonly PlatformLoader _platformLoader;
-
-        [Inject]
         private readonly PlatformManager _platformManager;
-
-        [Inject]
-        private readonly PlatformSpawnerMenu _platformSpawner;
-
-        [Inject]
+        private readonly PlatformSpawner _platformSpawner;
         private readonly PlatformListsView _platformListsView;
+
+        public API(SiraLog siraLog, PlatformLoader platformLoader, PlatformManager platformManager, PlatformSpawner platformSpawner, PlatformListsView platformListsView)
+        {
+            _siraLog = siraLog;
+            _platformLoader = platformLoader;
+            _platformManager = platformManager;
+            _platformSpawner = platformSpawner;
+            _platformListsView = platformListsView;
+        }
 
         private FileSystemWatcher _fileSystemWatcher;
 
@@ -76,7 +76,7 @@ namespace CustomFloorPlugin
                 {
                     if (platform.icon == null)
                         platform.icon = _platformManager.fallbackCover;
-                    CustomListTableData.CustomCellInfo cell = new CustomListTableData.CustomCellInfo(platform.platName, platform.platAuthor, platform.icon);
+                    CustomListTableData.CustomCellInfo cell = new(platform.platName, platform.platAuthor, platform.icon);
                     foreach (CustomListTableData listTable in _platformListsView.allListTables)
                     {
                         listTable.data.Add(cell);
@@ -114,13 +114,13 @@ namespace CustomFloorPlugin
                         _platformListsView.singleplayerPlatformListTable.tableView.SelectCellWithIdx(0);
                         platformDidChange = true;
                     }
-                        
+
                     if (_platformManager.currentMultiplayerPlatform == platform)
                     {
                         _platformListsView.multiplayerPlatformListTable.tableView.SelectCellWithIdx(0);
                         platformDidChange = true;
                     }
-                        
+
                     if (_platformManager.currentA360Platform == platform)
                     {
                         _platformListsView.a360PlatformListTable.tableView.SelectCellWithIdx(0);
@@ -150,7 +150,7 @@ namespace CustomFloorPlugin
                     if (platformDidChange)
                         _platformSpawner.ChangeToPlatform(0);
                 }
-                
+
                 _platformLoader.platformFilePaths.Remove(platform.fullPath);
                 _platformManager.allPlatforms.Remove(platform);
                 GameObject.Destroy(platform.gameObject);
@@ -182,16 +182,16 @@ namespace CustomFloorPlugin
         [Serializable]
         private class PlatformDownloadData
         {
-            public string[] tags;
-            public string type;
-            public string name;
-            public string author;
-            public string image;
-            public string hash;
-            public string bsaber;
-            public string download;
-            public string install_link;
-            public string date;
+            public string[] tags = Array.Empty<string>();
+            public string type = string.Empty;
+            public string name = string.Empty;
+            public string author = string.Empty;
+            public string image = string.Empty;
+            public string hash = string.Empty;
+            public string bsaber = string.Empty;
+            public string download = string.Empty;
+            public string install_link = string.Empty;
+            public string date = string.Empty;
         }
 
         /// <summary>

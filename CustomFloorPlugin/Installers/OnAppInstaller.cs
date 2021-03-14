@@ -24,10 +24,12 @@ namespace CustomFloorPlugin.Installers
         {
             Container.BindLoggerAsSiraLogger(_logger);
             Container.BindInstance(_config).AsSingle();
+            Container.BindInterfacesAndSelfTo<MaterialSwapper>().AsSingle();
             Container.BindInterfacesAndSelfTo<PlatformLoader>().AsSingle();
             PlatformManager manager = Container.InstantiateComponentOnNewGameObject<PlatformManager>("CustomPlatforms");
-            Container.BindInstance(manager);
+            Container.BindInstance(manager).AsSingle();
             Container.BindInterfacesAndSelfTo<EnvironmentHider>().AsSingle();
+            Container.BindInterfacesAndSelfTo<PlatformSpawner>().AsSingle().NonLazy();
         }
     }
 }

@@ -12,17 +12,19 @@ namespace CustomFloorPlugin.UI
     /// </summary>
     internal class PlatformListFlowCoordinator : FlowCoordinator
     {
-        [Inject]
-        private readonly PlatformListsView _platformsListView;
+        private PlatformListsView _platformsListView;
+        private ChangelogView _changelogView;
+        private SettingsView _settingsView;
+        private MainFlowCoordinator _mainFlowCoordinator;
 
         [Inject]
-        private readonly ChangelogView _changelogView;
-
-        [Inject]
-        private readonly SettingsView _settingsView;
-
-        [Inject]
-        private readonly MainFlowCoordinator _mainFlowCoordinator;
+        public void Construct(PlatformListsView platformsListView, ChangelogView changelogView, SettingsView settingsView, MainFlowCoordinator mainFlowCoordinator)
+        {
+            _platformsListView = platformsListView;
+            _changelogView = changelogView;
+            _settingsView = settingsView;
+            _mainFlowCoordinator = mainFlowCoordinator;
+        }
 
         /// <summary>
         /// Set the window properties on first activation<br/>

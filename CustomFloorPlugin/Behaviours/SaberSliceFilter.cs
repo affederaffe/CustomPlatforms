@@ -1,21 +1,21 @@
 ﻿using UnityEngine.Events;
 
+using Zenject;
+
 
 namespace CustomFloorPlugin
 {
-    public class SaberSliceFilter : EventFilterBehaviour
+    public class SaberSliceFilter : EventFilterBehaviour, INotifyPlatformEnabled, INotifyPlatformDisabled
     {
         public SaberType saberType;
         public UnityEvent SaberSlice;
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Code Quality", "IDE0051:Remove unused private members", Justification = "Called by Unity")]
-        private void OnEnable()
+        void INotifyPlatformEnabled.PlatformEnabled(DiContainer container)
         {
             EventManager.OnSpecificSlice.AddListener(OnSlice);
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Code Quality", "IDE0051:Remove unused private members", Justification = "Called by Unity")]
-        private void OnDisable()
+        void INotifyPlatformDisabled.PlatformDisabled()
         {
             EventManager.OnComboChanged.RemoveListener(OnSlice);
         }

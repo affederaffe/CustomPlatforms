@@ -20,8 +20,15 @@ namespace CustomFloorPlugin.UI
     [ViewDefinition("CustomFloorPlugin.Views.Settings.bsml")]
     internal class SettingsView : BSMLAutomaticViewController
     {
+        private PluginConfig _config;
+        private PlatformManager _platformManager;
+
         [Inject]
-        private readonly PluginConfig _config;
+        public void Construct(PluginConfig config, PlatformManager platformManager)
+        {
+            _config = config;
+            _platformManager = platformManager;
+        }
 
         /// <summary>
         /// Determines if the feet icon is shown even if the platform would normally hide them<br/>
@@ -45,11 +52,8 @@ namespace CustomFloorPlugin.UI
             set
             {
                 _config.ShowHeart = value;
-                if (PlatformManager.Heart != null)
-                {
-                    PlatformManager.Heart.SetActive(value);
-                    PlatformManager.Heart.GetComponent<InstancedMaterialLightWithId>().ColorWasSet(Color.magenta);
-                }
+                _platformManager.heart.SetActive(value);
+                _platformManager.heart.GetComponent<InstancedMaterialLightWithId>().ColorWasSet(Color.magenta);
             }
         }
 

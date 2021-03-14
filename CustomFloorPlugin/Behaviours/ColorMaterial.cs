@@ -1,19 +1,28 @@
 ﻿using UnityEngine;
 
+using Zenject;
+
 
 namespace CustomFloorPlugin
 {
     [RequireComponent(typeof(Renderer))]
-    public class ColorMaterial : MonoBehaviour
+    public class ColorMaterial : MonoBehaviour, INotifyPlatformEnabled
     {
-        public string propertyName;
+        public string propertyName = "_Color";
         public MaterialColorType materialColorType;
         private Renderer _renderer;
         private ColorManager _colorManager;
 
-        internal void SetColorManager(ColorManager colorManager)
+        [Inject]
+        public void Construct(ColorManager colorManager)
         {
             _colorManager = colorManager;
+        }
+
+        void INotifyPlatformEnabled.PlatformEnabled(DiContainer container)
+        {
+            container.Inject(this);
+            ChangeColors();
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Code Quality", "IDE0051:Remove unused private members", Justification = "Called by Unity")]
@@ -35,15 +44,6 @@ namespace CustomFloorPlugin
             };
             if (_renderer.material.HasProperty(propertyName))
                 _renderer.material.SetColor(propertyName, color);
-            else
-                _renderer.material.color = color;
-        }
-
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Code Quality", "IDE0051:Remove unused private members", Justification = "Called by Unity")]
-        private void OnEnable()
-        {
-            if (_colorManager != null && _renderer != null)
-                ChangeColors();
         }
 
         public enum MaterialColorType

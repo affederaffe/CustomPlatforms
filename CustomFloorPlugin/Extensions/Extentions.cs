@@ -12,7 +12,21 @@ namespace CustomFloorPlugin.Extensions
     internal static class Extentions
     {
         /// <summary>
-        /// Gets the time of the song the last note is spawned<br></br>
+        /// Tests if a <see cref="ScenesTransitionSetupDataSO"/> transitions to a 360° level
+        /// </summary>
+        internal static bool Is360Level(this ScenesTransitionSetupDataSO setupData)
+        {
+            bool is360 = (setupData as StandardLevelScenesTransitionSetupDataSO)?
+                .difficultyBeatmap?
+                .parentDifficultyBeatmapSet
+                .beatmapCharacteristic
+                .requires360Movement
+                ?? false;
+            return is360;
+        }
+
+        /// <summary>
+        /// Gets the time of the song the last note is spawned<br/>
         /// (stolen from SaberFactory)
         /// </summary>
         /// <param name="beatmapData"></param>
@@ -48,7 +62,7 @@ namespace CustomFloorPlugin.Extensions
         {
             byte[] data = new byte[resourceStream.Length];
             resourceStream.Read(data, 0, data.Length);
-            Texture2D tex = new Texture2D(2, 2);
+            Texture2D tex = new(2, 2);
             tex.LoadImage(data);
             return Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), Vector2.zero);
         }
@@ -79,9 +93,10 @@ namespace CustomFloorPlugin.Extensions
         /// </summary>
         private static Texture2D BytesToTexture2D(byte[] bytes)
         {
-            if (bytes.Length == 0) return null;
+            if (bytes.Length == 0)
+                return null;
 
-            Texture2D texture = new Texture2D(0, 0, TextureFormat.ARGB32, false);
+            Texture2D texture = new(0, 0, TextureFormat.ARGB32, false);
 
             texture.LoadImage(bytes);
 

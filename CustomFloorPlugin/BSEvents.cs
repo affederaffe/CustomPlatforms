@@ -12,35 +12,38 @@ namespace CustomFloorPlugin
     /// </summary>
     public class BSEvents : IInitializable, IDisposable
     {
-        [Inject]
-        private readonly BeatmapObjectCallbackController _beatmapObjectCallbackController;
-
-        [Inject]
+        private readonly IBeatmapObjectCallbackController _beatmapObjectCallbackController;
         private readonly BeatmapObjectManager _beatmapObjectManager;
-
-        [Inject]
         private readonly GameEnergyCounter _gameEnergyCounter;
-
-        [Inject]
         private readonly GameScenesManager _gameScenesManager;
-
-        [Inject]
         private readonly ObstacleSaberSparkleEffectManager _obstacleSaberSparkleEffectManager;
-
-        [Inject]
         private readonly ScoreController _scoreController;
-
-        [Inject]
         private readonly PlayerDataModel _playerDataModel;
-
-        [Inject]
         private readonly PrepareLevelCompletionResults _prepareLevelCompletionResults;
-
-        [Inject]
         private readonly IDifficultyBeatmap _difficultyBeatmap;
-
-        [Inject(Id = "LastNoteTime")]
         private float _lastNoteTime;
+
+        public BSEvents(IBeatmapObjectCallbackController beatmapObjectCallbackController,
+                        BeatmapObjectManager beatmapObjectManager,
+                        GameEnergyCounter gameEnergyCounter,
+                        GameScenesManager gameScenesManager,
+                        ObstacleSaberSparkleEffectManager obstacleSaberSparkleEffectManager,
+                        ScoreController scoreController, PlayerDataModel playerDataModel,
+                        PrepareLevelCompletionResults prepareLevelCompletionResults,
+                        IDifficultyBeatmap difficultyBeatmap,
+                        float lastNoteTime)
+        {
+            _beatmapObjectCallbackController = beatmapObjectCallbackController;
+            _beatmapObjectManager = beatmapObjectManager;
+            _gameEnergyCounter = gameEnergyCounter;
+            _gameScenesManager = gameScenesManager;
+            _obstacleSaberSparkleEffectManager = obstacleSaberSparkleEffectManager;
+            _scoreController = scoreController;
+            _playerDataModel = playerDataModel;
+            _prepareLevelCompletionResults = prepareLevelCompletionResults;
+            _difficultyBeatmap = difficultyBeatmap;
+            _lastNoteTime = lastNoteTime;
+        }
 
         public event Action<BeatmapEventData> BeatmapEventDidTriggerEvent = delegate { };
         public event Action GameSceneLoadedEvent = delegate { };
@@ -72,7 +75,7 @@ namespace CustomFloorPlugin
             cuttableNotes = _difficultyBeatmap.beatmapData.cuttableNotesType - 1;
             highScore = _playerDataModel.playerData.GetPlayerLevelStatsData(_difficultyBeatmap).highScore;
             _beatmapObjectCallbackController.beatmapEventDidTriggerEvent += BeatmapEventDidTrigger;
-            _beatmapObjectManager.noteWasCutEvent += NoteWasCut;
+            _beatmapObjectManager.noteWasCutEvent += new BeatmapObjectManager.NoteWasCutDelegate(NoteWasCut);
             _beatmapObjectManager.noteWasMissedEvent += NoteWasMissed;
             _gameEnergyCounter.gameEnergyDidReach0Event += LevelFailed;
             _gameScenesManager.transitionDidFinishEvent += GameSceneLoaded;
@@ -87,7 +90,7 @@ namespace CustomFloorPlugin
         public void Dispose()
         {
             _beatmapObjectCallbackController.beatmapEventDidTriggerEvent -= BeatmapEventDidTrigger;
-            _beatmapObjectManager.noteWasCutEvent -= NoteWasCut;
+            _beatmapObjectManager.noteWasCutEvent -= new BeatmapObjectManager.NoteWasCutDelegate(NoteWasCut);
             _beatmapObjectManager.noteWasMissedEvent -= NoteWasMissed;
             _gameEnergyCounter.gameEnergyDidReach0Event -= LevelFailed;
             _gameScenesManager.transitionDidFinishEvent -= GameSceneLoaded;
@@ -104,7 +107,7 @@ namespace CustomFloorPlugin
             BeatmapEventDidTriggerEvent(eventData);
         }
 
-        private void NoteWasCut(NoteController noteController, NoteCutInfo noteCutInfo)
+        private void NoteWasCut(NoteController noteController, in NoteCutInfo noteCutInfo)
         {
             if (noteController.noteData.colorType == ColorType.None || noteController.noteData.beatmapObjectType != BeatmapObjectType.Note)
                 return;

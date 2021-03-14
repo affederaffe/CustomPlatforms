@@ -27,8 +27,8 @@ namespace CustomFloorPlugin
         public bool hideTrackLights = false;
         [Space]
         [Header("Script Libraries")]
-        public List<string> requirements = new List<string>();
-        public List<string> suggestions = new List<string>();
+        public List<string> requirements = new();
+        public List<string> suggestions = new();
 
         internal string platHash;
         internal string fullPath;

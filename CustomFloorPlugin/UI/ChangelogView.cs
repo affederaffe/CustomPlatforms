@@ -15,14 +15,18 @@ namespace CustomFloorPlugin.UI
     internal class ChangelogView : BSMLAutomaticViewController
     {
         [UIComponent("credits-modal")]
-        private readonly ModalView creditsModal;
+        internal readonly ModalView creditsModal;
 
         /// <summary>
         /// The string displayed in the changelog   
         /// </summary>
         [UIValue("changelog-text")]
         public string Changelog =>
-        @"<size=150%><color=#888888>Version 6.1.1</color></size>
+        @"<size=150%><color=#888888>Version 6.1.2</color></size>
+        - Updated for 1.13.5
+        - Internal code 'cleanup'
+
+<size=150%><color=#888888>Version 6.1.1</color></size>
         - Security fix:  removed embedded CustomScripts
         - CustomScripts can still be done, create your own mod
            and then add it as a requirement or suggestion
@@ -68,6 +72,7 @@ namespace CustomFloorPlugin.UI
 
         protected override void DidDeactivate(bool removedFromHierarchy, bool screenSystemDisabling)
         {
+            base.DidDeactivate(removedFromHierarchy, screenSystemDisabling);
             creditsModal.gameObject.SetActive(false);
         }
     }

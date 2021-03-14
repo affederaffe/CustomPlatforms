@@ -1,7 +1,9 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Linq;
 
 using CustomFloorPlugin.Configuration;
+using CustomFloorPlugin.Extensions;
 
 using IPA.Utilities;
 
@@ -14,27 +16,73 @@ using Zenject;
 
 namespace CustomFloorPlugin
 {
-    internal abstract class PlatformSpawner
+    /// <summary>
+    /// Handles platform spawing and despawning
+    /// </summary>
+    internal class PlatformSpawner : IInitializable, IDisposable
     {
-        [Inject]
-        protected readonly SiraLog _siraLog;
+        private readonly SiraLog _siraLog;
+        private readonly PluginConfig _config;
+        private readonly EnvironmentHider _hider;
+        private readonly PlatformLoader _platformLoader;
+        private readonly PlatformManager _platformManager;
+        private readonly GameScenesManager _gameScenesManager;
+        private DiContainer _container;
 
-        [Inject]
-        protected readonly PluginConfig _config;
+        internal PlatformSpawner(SiraLog siraLog, PluginConfig config, EnvironmentHider hider, PlatformLoader platformLoader, PlatformManager platformManager, GameScenesManager gameScenesManager)
+        {
+            _siraLog = siraLog;
+            _config = config;
+            _hider = hider;
+            _platformLoader = platformLoader;
+            _platformManager = platformManager;
+            _gameScenesManager = gameScenesManager;
+        }
 
-        [Inject]
-        protected readonly EnvironmentHider _hider;
+        public void Initialize()
+        {
+            _gameScenesManager.transitionDidFinishEvent += HandleTransistionDidFinish;
+        }
 
-        [Inject]
-        protected readonly PlatformLoader _platformLoader;
+        public void Dispose()
+        {
+            _gameScenesManager.transitionDidFinishEvent -= HandleTransistionDidFinish;
+        }
 
-        [Inject]
-        protected readonly PlatformManager _platformManager;
-
-        [Inject]
-        protected readonly LightWithIdManager _lightManager;
-
-        protected DiContainer _container;
+        private void HandleTransistionDidFinish(ScenesTransitionSetupDataSO setupData, DiContainer container)
+        {
+            _container = container;
+            switch (setupData)
+            {
+                case null:
+                case MenuScenesTransitionSetupDataSO:
+                    _platformManager.heart.SetActive(_config.ShowHeart);
+                    _platformManager.heart.GetComponent<InstancedMaterialLightWithId>().ColorWasSet(Color.magenta);
+                    if (_config.ShowInMenu)
+                        ChangeToPlatform(PlatformType.Singleplayer);
+                    break;
+                case StandardLevelScenesTransitionSetupDataSO:
+                case MissionLevelScenesTransitionSetupDataSO:
+                case TutorialScenesTransitionSetupDataSO:
+                    _platformManager.heart.SetActive(false);
+                    if (setupData.Is360Level())
+                        ChangeToPlatform(PlatformType.A360);
+                    else
+                        ChangeToPlatform(PlatformType.Singleplayer);
+                    break;
+                case MultiplayerLevelScenesTransitionSetupDataSO:
+                    _platformManager.heart.SetActive(false);
+                    ChangeToPlatform(PlatformType.Multiplayer);
+                    break;
+                case CreditsScenesTransitionSetupDataSO:
+                    _hider.HideObjectsForPlatform(_platformManager.activePlatform);
+                    break;
+                default:
+                    _platformManager.heart.SetActive(false);
+                    ChangeToPlatform(0);
+                    break;
+            }
+        }
 
         /// <summary>
         /// Changes to a specific <see cref="CustomPlatform"/> and saves the choice
@@ -90,20 +138,25 @@ namespace CustomFloorPlugin
             SharedCoroutineStarter.instance.StartCoroutine(WaitAndSpawn());
             IEnumerator WaitAndSpawn()
             {
-                if (_platformManager.activePlatform.transform.childCount == 0 && index != 0)
+                if (_platformManager.activePlatform?.transform.childCount == 0 && index != 0)
                 {
-                    yield return SharedCoroutineStarter.instance.StartCoroutine(_platformLoader.LoadFromFileAsync(_platformManager.activePlatform.fullPath, _platformManager.HandlePlatformLoaded));
+                    string platformPath = _platformManager.activePlatform.fullPath;
+                    yield return SharedCoroutineStarter.instance.StartCoroutine(_platformLoader.LoadFromFileAsync(platformPath, _platformManager.HandlePlatformLoaded));
+                    // Check if another platform has been spawned in the meantime and abort if that's the case
+                    if (_platformManager.activePlatform?.fullPath != platformPath)
+                        yield break;
                 }
 
-                yield return new WaitForEndOfFrame();
                 if (index != 0)
                 {
-                    _platformManager.activePlatform.gameObject.SetActive(true);
-                    AddManagers(_platformManager.activePlatform);
+                    yield return new WaitForEndOfFrame();
+                    _platformManager.activePlatform?.gameObject.SetActive(true);
                     SpawnCustomObjects();
                 }
                 else
+                {
                     _platformManager.activePlatform = null;
+                }
 
                 _hider.HideObjectsForPlatform(_platformManager.allPlatforms[index]);
             }
@@ -114,7 +167,14 @@ namespace CustomFloorPlugin
         /// </summary>
         private void SpawnCustomObjects()
         {
-            PlatformManager.SpawnQueue(_lightManager);
+            INotifyPlatformEnabled[] notifyEnables = _platformManager.activePlatform?.GetComponentsInChildren<INotifyPlatformEnabled>(true);
+            if (notifyEnables != null)
+            {
+                foreach (INotifyPlatformEnabled notifyEnable in notifyEnables)
+                {
+                    notifyEnable.PlatformEnabled(_container);
+                }
+            }
         }
 
         /// <summary>
@@ -122,10 +182,19 @@ namespace CustomFloorPlugin
         /// </summary>
         private void DestroyCustomObjects()
         {
-            while (PlatformManager.SpawnedObjects.Count != 0)
+            INotifyPlatformDisabled[] notifyDisables = _platformManager.activePlatform?.GetComponentsInChildren<INotifyPlatformDisabled>(true);
+            if (notifyDisables != null)
             {
-                GameObject gameObject = PlatformManager.SpawnedObjects[0];
-                PlatformManager.SpawnedObjects.Remove(gameObject);
+                foreach (INotifyPlatformDisabled notifyDisable in notifyDisables)
+                {
+                    notifyDisable.PlatformDisabled();
+                }
+            }
+
+            while (_platformManager.spawnedObjects.Count != 0)
+            {
+                GameObject gameObject = _platformManager.spawnedObjects[0];
+                _platformManager.spawnedObjects.RemoveAt(0);
                 GameObject.Destroy(gameObject);
                 foreach (TubeBloomPrePassLight tubeBloomPrePassLight in gameObject.GetComponentsInChildren<TubeBloomPrePassLight>(true))
                 {
@@ -134,148 +203,11 @@ namespace CustomFloorPlugin
                 }
             }
 
-            while (PlatformManager.SpawnedComponents.Count != 0)
+            while (_platformManager.spawnedComponents.Count != 0)
             {
-                Component component = PlatformManager.SpawnedComponents[0];
-                PlatformManager.SpawnedComponents.Remove(component);
+                Component component = _platformManager.spawnedComponents[0];
+                _platformManager.spawnedComponents.RemoveAt(0);
                 GameObject.Destroy(component);
-            }
-        }
-
-        private enum NotifyType
-        {
-            Enable = 0,
-            Disable = 1
-        }
-
-        /// <summary>
-        /// Adds managers to a <see cref="CustomPlatform"/>
-        /// </summary>
-        /// <param name="customPlatform">The <see cref="CustomPlatform"/> for which to spawn managers</param>
-        private void AddManagers(CustomPlatform customPlatform)
-        {
-            GameObject go = customPlatform.gameObject;
-            bool active = go.activeSelf;
-            if (active)
-                go.SetActive(false);
-            AddManagers(go, go);
-            if (active)
-                go.SetActive(true);
-        }
-
-        /// <summary>
-        /// Recursively attaches managers to a <see cref="CustomPlatform"/>
-        /// </summary>
-        /// <param name="go">The current <see cref="GameObject"/>, this parameter acts as a pointer</param>
-        /// <param name="root">The root <see cref="GameObject"/> of the <see cref="CustomPlatform"/></param>
-        private void AddManagers(GameObject go, GameObject root)
-        {
-            // Rotation effect manager
-            if (go.GetComponentInChildren<RotationEventEffect>(true) != null || go.GetComponentInChildren<PairRotationEventEffect>(true) != null)
-            {
-                RotationEventEffectManager rotManager = go.GetComponent<RotationEventEffectManager>();
-                if (rotManager == null)
-                {
-                    rotManager = _container.InstantiateComponent<RotationEventEffectManager>(go);
-                    PlatformManager.SpawnedComponents.Add(rotManager);
-                    rotManager.CreateEffects(go);
-                }
-            }
-
-            // Add a trackRing controller if there are track ring descriptors
-            if (go.GetComponentInChildren<TrackRings>(true) != null)
-            {
-                foreach (TrackRings trackRings in go.GetComponentsInChildren<TrackRings>(true))
-                {
-                    GameObject ringPrefab = trackRings.trackLaneRingPrefab;
-
-                    // Add managers to prefabs (nesting)
-                    AddManagers(ringPrefab, root);
-                }
-
-                TrackRingsManagerSpawner trms = go.GetComponent<TrackRingsManagerSpawner>();
-                if (trms == null)
-                {
-                    trms = _container.InstantiateComponent<TrackRingsManagerSpawner>(go);
-                    PlatformManager.SpawnedComponents.Add(trms);
-                }
-                trms.CreateTrackRings(go);
-            }
-
-            // Add spectrogram manager
-            if (go.GetComponentInChildren<Spectrogram>(true) != null)
-            {
-                foreach (Spectrogram spec in go.GetComponentsInChildren<Spectrogram>(true))
-                {
-                    GameObject colPrefab = spec.columnPrefab;
-                    AddManagers(colPrefab, root);
-                }
-
-                SpectrogramColumnManager specManager = go.GetComponent<SpectrogramColumnManager>();
-                if (specManager == null)
-                {
-                    specManager = _container.InstantiateComponent<SpectrogramColumnManager>(go);
-                    PlatformManager.SpawnedComponents.Add(specManager);
-                }
-                specManager.CreateColumns(go);
-            }
-
-            if (go.GetComponentInChildren<SpectrogramMaterial>(true) != null)
-            {
-                // Add spectrogram materials manager
-                SpectrogramMaterialManager specMatManager = go.GetComponent<SpectrogramMaterialManager>();
-                if (specMatManager == null)
-                {
-                    specMatManager = _container.InstantiateComponent<SpectrogramMaterialManager>(go);
-                    PlatformManager.SpawnedComponents.Add(specMatManager);
-                }
-                specMatManager.UpdateMaterials(go);
-            }
-
-            if (go.GetComponentInChildren<SpectrogramAnimationState>(true) != null)
-            {
-                // Add spectrogram animation state manager
-                SpectrogramAnimationStateManager specAnimManager = go.GetComponent<SpectrogramAnimationStateManager>();
-                if (specAnimManager == null)
-                {
-                    specAnimManager = _container.InstantiateComponent<SpectrogramAnimationStateManager>(go);
-                    PlatformManager.SpawnedComponents.Add(specAnimManager);
-                }
-                specAnimManager.UpdateAnimationStates();
-            }
-
-            if (go.GetComponentInChildren<ColorMaterial>(true) != null)
-            {
-                // Add color materials manager
-                ColorMaterialManager colMatManager = go.GetComponent<ColorMaterialManager>();
-                if (colMatManager == null)
-                {
-                    colMatManager = _container.InstantiateComponent<ColorMaterialManager>(go);
-                    PlatformManager.SpawnedComponents.Add(colMatManager);
-                }
-                colMatManager.UpdateMaterials(go);
-            }
-
-            // Add Song event manager
-            if (go.GetComponentInChildren<SongEventHandler>(true) != null)
-            {
-                foreach (SongEventHandler handler in go.GetComponentsInChildren<SongEventHandler>())
-                {
-                    SongEventManager manager = _container.InstantiateComponent<SongEventManager>(handler.gameObject);
-                    PlatformManager.SpawnedComponents.Add(manager);
-                    manager._songEventHandler = handler;
-                }
-            }
-
-            // Add EventManager 
-            if (go.GetComponentInChildren<EventManager>(true) != null)
-            {
-                foreach (EventManager em in go.GetComponentsInChildren<EventManager>())
-                {
-                    PlatformEventManager pem = _container.InstantiateComponent<PlatformEventManager>(em.gameObject);
-                    PlatformManager.SpawnedComponents.Add(pem);
-                    pem._eventManager = em;
-                }
             }
         }
     }

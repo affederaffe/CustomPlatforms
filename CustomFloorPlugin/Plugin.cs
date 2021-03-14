@@ -22,7 +22,7 @@ namespace CustomFloorPlugin
         /// </summary>
         /// <param name="logger">The instance of the IPA logger that BSIPA hands to plugins on initialization</param>
         /// <param name="config">The config BSIPA provides</param>
-        /// <param name="zenjector">The holy zenjector that SiraUtil passes to this plugin</param>
+        /// <param name="zenjector">The zenjector that SiraUtil passes to this plugin</param>
         [Init]
         public void Init(Logger logger, Config config, Zenjector zenjector)
         {
