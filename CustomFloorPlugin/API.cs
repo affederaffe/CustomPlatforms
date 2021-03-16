@@ -28,14 +28,21 @@ namespace CustomFloorPlugin
     internal class API : IInitializable, IDisposable
     {
         private readonly SiraLog _siraLog;
+        private readonly AssetLoader _assetLoader;
         private readonly PlatformLoader _platformLoader;
         private readonly PlatformManager _platformManager;
         private readonly PlatformSpawner _platformSpawner;
         private readonly PlatformListsView _platformListsView;
 
-        public API(SiraLog siraLog, PlatformLoader platformLoader, PlatformManager platformManager, PlatformSpawner platformSpawner, PlatformListsView platformListsView)
+        public API(SiraLog siraLog,
+                   AssetLoader assetLoader,
+                   PlatformLoader platformLoader,
+                   PlatformManager platformManager,
+                   PlatformSpawner platformSpawner,
+                   PlatformListsView platformListsView)
         {
             _siraLog = siraLog;
+            _assetLoader = assetLoader;
             _platformLoader = platformLoader;
             _platformManager = platformManager;
             _platformSpawner = platformSpawner;
@@ -75,7 +82,7 @@ namespace CustomFloorPlugin
                 if (_platformListsView.allListTables != null)
                 {
                     if (platform.icon == null)
-                        platform.icon = _platformManager.fallbackCover;
+                        platform.icon = _assetLoader.fallbackCover;
                     CustomListTableData.CustomCellInfo cell = new(platform.platName, platform.platAuthor, platform.icon);
                     foreach (CustomListTableData listTable in _platformListsView.allListTables)
                     {

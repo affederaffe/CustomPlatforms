@@ -27,7 +27,8 @@ namespace CustomFloorPlugin
         private const string kRealOpaqueGlowMatName = "EnvLightOpaque";
 
         /// <summary>
-        /// Automatically initializes needed variables
+        /// Initializes needed variables<br/>
+        /// Unity needs some time to load the materials, so only search for them when a platform is first spawned
         /// </summary>
         private void InitIfNeeded()
         {

@@ -21,13 +21,13 @@ namespace CustomFloorPlugin.UI
     internal class SettingsView : BSMLAutomaticViewController
     {
         private PluginConfig _config;
-        private PlatformManager _platformManager;
+        private AssetLoader _assetLoader;
 
         [Inject]
-        public void Construct(PluginConfig config, PlatformManager platformManager)
+        public void Construct(PluginConfig config, AssetLoader assetLoader)
         {
             _config = config;
-            _platformManager = platformManager;
+            _assetLoader = assetLoader;
         }
 
         /// <summary>
@@ -52,8 +52,8 @@ namespace CustomFloorPlugin.UI
             set
             {
                 _config.ShowHeart = value;
-                _platformManager.heart.SetActive(value);
-                _platformManager.heart.GetComponent<InstancedMaterialLightWithId>().ColorWasSet(Color.magenta);
+                _assetLoader.heart.SetActive(value);
+                _assetLoader.heart.GetComponent<InstancedMaterialLightWithId>().ColorWasSet(Color.magenta);
             }
         }
 

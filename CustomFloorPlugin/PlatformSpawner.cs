@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 
 using CustomFloorPlugin.Configuration;
@@ -23,25 +23,37 @@ namespace CustomFloorPlugin
     {
         private readonly SiraLog _siraLog;
         private readonly PluginConfig _config;
+        private readonly AssetLoader _assetLoader;
         private readonly EnvironmentHider _hider;
         private readonly PlatformLoader _platformLoader;
         private readonly PlatformManager _platformManager;
         private readonly GameScenesManager _gameScenesManager;
         private readonly System.Random _random;
         private DiContainer _container;
+        internal bool isMultiplayer;
 
-        internal PlatformSpawner(SiraLog siraLog, PluginConfig config, EnvironmentHider hider, PlatformLoader platformLoader, PlatformManager platformManager, GameScenesManager gameScenesManager)
+        /// <summary>
+        /// Returns a random index of all platforms
+        /// </summary>
+        internal int RandomPlatformIndex => _random.Next(0, _platformManager.allPlatforms.Count);
+
+        internal PlatformSpawner(SiraLog siraLog,
+                                 PluginConfig config,
+                                 AssetLoader assetLoader,
+                                 EnvironmentHider hider,
+                                 PlatformLoader platformLoader,
+                                 PlatformManager platformManager,
+                                 GameScenesManager gameScenesManager)
         {
             _siraLog = siraLog;
             _config = config;
+            _assetLoader = assetLoader;
             _hider = hider;
             _platformLoader = platformLoader;
             _platformManager = platformManager;
             _gameScenesManager = gameScenesManager;
             _random = new();
         }
-
-        internal int RandomPlatformIndex => _random.Next(0, _platformManager.allPlatforms.Count);
 
         public void Initialize()
         {
@@ -52,18 +64,18 @@ namespace CustomFloorPlugin
         {
             _gameScenesManager.transitionDidFinishEvent -= HandleTransistionDidFinish;
         }
-
+        
         private void HandleTransistionDidFinish(ScenesTransitionSetupDataSO setupData, DiContainer container)
         {
-            _container = container;
             int platformIndex = 0;
-
             switch (setupData)
             {
                 case null:
                 case MenuScenesTransitionSetupDataSO:
-                    _platformManager.heart?.SetActive(_config.ShowHeart);
-                    _platformManager.heart?.GetComponent<InstancedMaterialLightWithId>().ColorWasSet(Color.magenta);
+                    if (isMultiplayer) 
+                        return;
+                    _assetLoader.heart.SetActive(_config.ShowHeart);
+                    _assetLoader.heart.GetComponent<InstancedMaterialLightWithId>().ColorWasSet(Color.magenta);
                     if (_config.ShowInMenu)
                         platformIndex = _config.ShufflePlatforms
                             ? RandomPlatformIndex
@@ -72,23 +84,18 @@ namespace CustomFloorPlugin
                 case StandardLevelScenesTransitionSetupDataSO:
                 case MissionLevelScenesTransitionSetupDataSO:
                 case TutorialScenesTransitionSetupDataSO:
-                    _platformManager.heart?.SetActive(false);
-                    platformIndex = _config.ShufflePlatforms
-                        ? RandomPlatformIndex
-                        : setupData.Is360Level()
+                    _assetLoader.heart.SetActive(false);
+                    platformIndex = setupData.Is360Level()
                         ? _platformManager.GetIndexForType(PlatformType.A360)
+                        : _config.ShufflePlatforms
+                        ? RandomPlatformIndex
                         : _platformManager.GetIndexForType(PlatformType.Singleplayer);
                     break;
+                case AppInitScenesTransitionSetupDataSO:
                 case MultiplayerLevelScenesTransitionSetupDataSO:
-                    _platformManager.heart?.SetActive(false);
-                    platformIndex = _platformManager.GetIndexForType(PlatformType.Singleplayer);
-                    SpawnLightEffects();
-                    break;
-                case CreditsScenesTransitionSetupDataSO:
-                    _hider.HideObjectsForPlatform(_platformManager.activePlatform ?? _platformManager.allPlatforms[0]);
-                    break;
+                    return; // Multiplayer levels are handled by the MultiplayerGameHelper because this event doesn't provide the GameplayCore DiContainer.
                 default:
-                    _platformManager.heart?.SetActive(false);
+                    _assetLoader.heart.SetActive(false);
                     break;
             }
 
@@ -100,7 +107,18 @@ namespace CustomFloorPlugin
                     _platformManager.apiRequestIndex = -1;
             }
 
-            ChangeToPlatform(platformIndex);
+            SetContainerAndShow(platformIndex, container);
+        }
+
+        /// <summary>
+        /// Changes to a specific <see cref="CustomPlatform"/>
+        /// </summary>
+        /// <param name="index">The index of the new <see cref="CustomPlatform"/> in the list</param>
+        /// <param name="container">The container used to instantiate all custom objects</param>
+        internal void SetContainerAndShow(int index, DiContainer container)
+        {
+            _container = container;
+            ChangeToPlatform(index);
         }
 
         /// <summary>
@@ -128,15 +146,6 @@ namespace CustomFloorPlugin
         }
 
         /// <summary>
-        /// Changes to the currently selected <see cref="CustomPlatform"/>
-        /// </summary>
-        internal void ChangeToPlatform(PlatformType platformType)
-        {
-            int index = _platformManager.GetIndexForType(platformType);
-            ChangeToPlatform(index);
-        }
-
-        /// <summary>
         /// Changes to a specific <see cref="CustomPlatform"/>
         /// </summary>
         /// <param name="index">The index of the new <see cref="CustomPlatform"/> in the list <see cref="AllPlatforms"/></param>
@@ -150,12 +159,12 @@ namespace CustomFloorPlugin
             }
 
             _siraLog.Info("Switching to " + _platformManager.allPlatforms[index].name);
-            _platformManager.activePlatform?.gameObject.SetActive(false);
             DestroyCustomObjects();
+            _platformManager.activePlatform?.gameObject.SetActive(false);
             _platformManager.activePlatform = _platformManager.allPlatforms[index];
 
-            SharedCoroutineStarter.instance.StartCoroutine(WaitAndSpawn());
-            IEnumerator WaitAndSpawn()
+            SharedCoroutineStarter.instance.StartCoroutine(SpawnPlatform());
+            IEnumerator<Coroutine> SpawnPlatform()
             {
                 if (_platformManager.activePlatform?.transform.childCount == 0 && index != 0)
                 {
@@ -168,8 +177,7 @@ namespace CustomFloorPlugin
 
                 if (index != 0)
                 {
-                    yield return new WaitForEndOfFrame();
-                    _platformManager.activePlatform?.gameObject.SetActive(true);
+                    _platformManager.activePlatform.gameObject.SetActive(true);
                     SpawnCustomObjects();
                 }
                 else
@@ -228,16 +236,6 @@ namespace CustomFloorPlugin
                 _platformManager.spawnedComponents.RemoveAt(0);
                 GameObject.Destroy(component);
             }
-        }
-
-        /// <summary>
-        /// Instantiates the light effects prefab for multiplayer levels
-        /// </summary>
-        private void SpawnLightEffects()
-        {
-            GameObject lightEffects = _container.InstantiatePrefab(_platformManager.lightEffects);
-            _platformManager.spawnedObjects.Add(lightEffects);
-            lightEffects.SetActive(true);
         }
     }
 }

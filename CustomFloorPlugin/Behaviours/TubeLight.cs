@@ -49,6 +49,7 @@ namespace CustomFloorPlugin
             Gizmos.DrawCube(cubeCenter, new Vector3(2 * width, length, 2 * width));
         }
 
+        private AssetLoader _assetLoader;
         private PlatformManager _platformManager;
         private LightWithIdManager _lightManager;
 
@@ -56,8 +57,9 @@ namespace CustomFloorPlugin
         private GameObject iHeartBeatSaber;
 
         [Inject]
-        public void Construct(PlatformManager platformManager, LightWithIdManager lightManager)
+        public void Construct(AssetLoader assetLoader, PlatformManager platformManager, LightWithIdManager lightManager)
         {
+            _assetLoader = assetLoader;
             _platformManager = platformManager;
             _lightManager = lightManager;
         }
@@ -73,7 +75,7 @@ namespace CustomFloorPlugin
             GetComponent<MeshRenderer>().enabled = false;
             if (GetComponent<MeshFilter>().mesh.vertexCount == 0)
             {
-                tubeBloomLight = Instantiate(_platformManager.lightSource.GetComponent<TubeBloomPrePassLight>());
+                tubeBloomLight = Instantiate(_assetLoader.lightSource.GetComponent<TubeBloomPrePassLight>());
                 _platformManager.spawnedObjects.Add(tubeBloomLight.gameObject);
 
                 tubeBloomLight.transform.parent = transform;
@@ -109,7 +111,7 @@ namespace CustomFloorPlugin
             }
             else
             {
-                iHeartBeatSaber = Instantiate(_platformManager.heart);
+                iHeartBeatSaber = Instantiate(_assetLoader.heart);
                 _platformManager.spawnedObjects.Add(iHeartBeatSaber);
                 iHeartBeatSaber.transform.parent = transform;
                 iHeartBeatSaber.transform.position = transform.position;

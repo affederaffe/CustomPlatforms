@@ -25,6 +25,7 @@ namespace CustomFloorPlugin.UI
         @"<size=150%><color=#888888>Version 6.1.2</color></size>
         - Updated for 1.13.5
         - Internal code 'cleanup'
+        - Added 'Shuffle Platforms' option
 
 <size=150%><color=#888888>Version 6.1.1</color></size>
         - Security fix:  removed embedded CustomScripts

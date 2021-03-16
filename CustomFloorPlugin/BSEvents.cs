@@ -45,23 +45,23 @@ namespace CustomFloorPlugin
             _lastNoteTime = lastNoteTime;
         }
 
-        public event Action<BeatmapEventData> BeatmapEventDidTriggerEvent = delegate { };
-        public event Action GameSceneLoadedEvent = delegate { };
-        public event Action LevelFinishedEvent = delegate { };
-        public event Action LevelFailedEvent = delegate { };
-        public event Action NewHighscore = delegate { };
-        public event Action<int> NoteWasCutEvent = delegate { };
-        public event Action NoteWasMissedEvent = delegate { };
-        public event Action ComboDidBreakEvent = delegate { };
-        public event Action<int> GoodCutCountDidChangeEvent = delegate { };
-        public event Action<int> BadCutCountDidChangeEvent = delegate { };
-        public event Action<int> MissCountDidChangeEvent = delegate { };
-        public event Action<int, int> AllNotesCountDidChangeEvent = delegate { };
-        public event Action MultiplierDidIncreaseEvent = delegate { };
-        public event Action<int> ComboDidChangeEvent = delegate { };
-        public event Action SabersStartCollideEvent = delegate { };
-        public event Action SabersEndCollideEvent = delegate { };
-        public event Action<int, int> ScoreDidChangeEvent = delegate { };
+        public event Action<BeatmapEventData> BeatmapEventDidTriggerEvent;
+        public event Action GameSceneLoadedEvent;
+        public event Action LevelFinishedEvent;
+        public event Action LevelFailedEvent;
+        public event Action NewHighscore;
+        public event Action<int> NoteWasCutEvent;
+        public event Action NoteWasMissedEvent;
+        public event Action ComboDidBreakEvent;
+        public event Action<int> GoodCutCountDidChangeEvent;
+        public event Action<int> BadCutCountDidChangeEvent;
+        public event Action<int> MissCountDidChangeEvent;
+        public event Action<int, int> AllNotesCountDidChangeEvent;
+        public event Action MultiplierDidIncreaseEvent;
+        public event Action<int> ComboDidChangeEvent;
+        public event Action SabersStartCollideEvent;
+        public event Action SabersEndCollideEvent;
+        public event Action<int, int> ScoreDidChangeEvent;
 
         private int allNotesCount = 0;
         private int goodCutCount = 0;
@@ -104,7 +104,7 @@ namespace CustomFloorPlugin
 
         private void BeatmapEventDidTrigger(BeatmapEventData eventData)
         {
-            BeatmapEventDidTriggerEvent(eventData);
+            BeatmapEventDidTriggerEvent?.Invoke(eventData);
         }
 
         private void NoteWasCut(NoteController noteController, in NoteCutInfo noteCutInfo)
@@ -112,23 +112,23 @@ namespace CustomFloorPlugin
             if (noteController.noteData.colorType == ColorType.None || noteController.noteData.beatmapObjectType != BeatmapObjectType.Note)
                 return;
 
-            AllNotesCountDidChangeEvent(allNotesCount++, cuttableNotes);
+            AllNotesCountDidChangeEvent?.Invoke(allNotesCount++, cuttableNotes);
             if (noteCutInfo.allIsOK)
             {
-                NoteWasCutEvent((int)noteCutInfo.saberType);
-                GoodCutCountDidChangeEvent(goodCutCount++);
+                NoteWasCutEvent?.Invoke((int)noteCutInfo.saberType);
+                GoodCutCountDidChangeEvent?.Invoke(goodCutCount++);
             }
             else
             {
-                BadCutCountDidChangeEvent(badCutCount++);
+                BadCutCountDidChangeEvent?.Invoke(badCutCount++);
             }
             if (Mathf.Approximately(noteController.noteData.time, _lastNoteTime))
             {
                 _lastNoteTime = 0f;
-                LevelFinishedEvent();
+                LevelFinishedEvent?.Invoke();
                 LevelCompletionResults results = _prepareLevelCompletionResults.FillLevelCompletionResults(LevelCompletionResults.LevelEndStateType.Cleared, LevelCompletionResults.LevelEndAction.None);
                 if (results.modifiedScore > highScore)
-                    NewHighscore();
+                    NewHighscore?.Invoke();
             }
         }
 
@@ -137,60 +137,60 @@ namespace CustomFloorPlugin
             if (noteController.noteData.colorType == ColorType.None || noteController.noteData.beatmapObjectType != BeatmapObjectType.Note)
                 return;
 
-            NoteWasMissedEvent();
-            AllNotesCountDidChangeEvent(allNotesCount++, cuttableNotes);
-            MissCountDidChangeEvent(missCount++);
+            NoteWasMissedEvent?.Invoke();
+            AllNotesCountDidChangeEvent?.Invoke(allNotesCount++, cuttableNotes);
+            MissCountDidChangeEvent?.Invoke(missCount++);
             if (Mathf.Approximately(noteController.noteData.time, _lastNoteTime))
             {
                 _lastNoteTime = 0f;
-                LevelFinishedEvent();
+                LevelFinishedEvent?.Invoke();
                 LevelCompletionResults results = _prepareLevelCompletionResults.FillLevelCompletionResults(LevelCompletionResults.LevelEndStateType.Cleared, LevelCompletionResults.LevelEndAction.None);
                 if (results.modifiedScore > highScore)
-                    NewHighscore();
+                    NewHighscore?.Invoke();
             }
         }
 
         private void LevelFailed()
         {
-            LevelFailedEvent();
+            LevelFailedEvent?.Invoke();
         }
 
         private void GameSceneLoaded(ScenesTransitionSetupDataSO setupData, DiContainer container)
         {
-            GameSceneLoadedEvent();
+            GameSceneLoadedEvent?.Invoke();
         }
 
         private void SabersStartCollide(SaberType saberType)
         {
-            SabersStartCollideEvent();
+            SabersStartCollideEvent?.Invoke();
         }
 
         private void SabersEndCollide(SaberType saberType)
         {
-            SabersEndCollideEvent();
+            SabersEndCollideEvent?.Invoke();
         }
 
         private void ComboDidChange(int combo)
         {
-            ComboDidChangeEvent(combo);
+            ComboDidChangeEvent?.Invoke(combo);
         }
 
         private void ComboDidBreak()
         {
-            ComboDidBreakEvent();
+            ComboDidBreakEvent?.Invoke();
         }
 
         private void MultiplierDidChange(int multiplier, float progress)
         {
             if (multiplier > 1 && progress < 0.1f)
             {
-                MultiplierDidIncreaseEvent();
+                MultiplierDidIncreaseEvent?.Invoke();
             }
         }
 
         private void ScoreDidChange(int rawScore, int modifiedScore)
         {
-            ScoreDidChangeEvent(rawScore, modifiedScore);
+            ScoreDidChangeEvent?.Invoke(rawScore, modifiedScore);
         }
     }
 }

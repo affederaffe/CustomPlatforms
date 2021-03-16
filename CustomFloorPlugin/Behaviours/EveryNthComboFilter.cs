@@ -1,21 +1,20 @@
 ﻿using UnityEngine.Events;
 
+using Zenject;
 
 namespace CustomFloorPlugin
 {
-    public class EveryNthComboFilter : EventFilterBehaviour
+    public class EveryNthComboFilter : EventFilterBehaviour, INotifyPlatformEnabled, INotifyPlatformDisabled
     {
         public int ComboStep = 50;
         public UnityEvent NthComboReached;
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Code Quality", "IDE0051:Remove unused private members", Justification = "Called by Unity")]
-        private void OnEnable()
+        void INotifyPlatformEnabled.PlatformEnabled(DiContainer container)
         {
             EventManager.OnComboChanged.AddListener(OnComboStep);
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Code Quality", "IDE0051:Remove unused private members", Justification = "Called by Unity")]
-        private void OnDisable()
+        void INotifyPlatformDisabled.PlatformDisabled()
         {
             EventManager.OnComboChanged.RemoveListener(OnComboStep);
         }

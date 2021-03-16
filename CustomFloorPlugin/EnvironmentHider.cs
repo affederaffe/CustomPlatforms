@@ -16,6 +16,7 @@ namespace CustomFloorPlugin
     internal class EnvironmentHider
     {
         private readonly PluginConfig _config;
+        private readonly AssetLoader _assetLoader;
         private readonly PlatformManager _platformManager;
         private readonly GameScenesManager _gameScenesManager;
 
@@ -40,9 +41,10 @@ namespace CustomFloorPlugin
         private const string renamedObjectSuffix = "renamed";
         private List<GameObject> renamedObjects;
 
-        public EnvironmentHider(PluginConfig config, PlatformManager platformManager, GameScenesManager gameScenesManager)
+        public EnvironmentHider(PluginConfig config, AssetLoader assetLoader, PlatformManager platformManager, GameScenesManager gameScenesManager)
         {
             _config = config;
+            _assetLoader = assetLoader;
             _platformManager = platformManager;
             _gameScenesManager = gameScenesManager;
         }
@@ -68,7 +70,7 @@ namespace CustomFloorPlugin
             if (doubleColorLasers != null) SetCollectionHidden(doubleColorLasers, platform.hideDoubleColorLasers);
             if (rotatingLasers != null) SetCollectionHidden(rotatingLasers, platform.hideRotatingLasers);
             if (trackLights != null) SetCollectionHidden(trackLights, platform.hideTrackLights);
-            _platformManager.playersPlace?.SetActive(_platformManager.activePlatform != null && !platform.hideDefaultPlatform && (sceneName == "MenuEnvironment" || sceneName == "Credits" || sceneName == "HealthWarning"));
+            _assetLoader.playersPlace?.SetActive(_platformManager.activePlatform != null && !platform.hideDefaultPlatform && (sceneName == "MenuEnvironment" || sceneName == "Credits" || sceneName == "HealthWarning"));
         }
 
         /// <summary>
@@ -310,6 +312,9 @@ namespace CustomFloorPlugin
                 case "GlassDesertEnvironment":
                     for (int i = 2; i < 25; i++)
                         FindAddGameObject($"GameObject ({i})", towers);
+                    break;
+                case "TutorialEnvironment":
+                    FindAddGameObject("Buildings", towers);
                     break;
                 case "DefaultEnvironment":
                     FindAddGameObject("NearBuildingLeft (1)", towers);

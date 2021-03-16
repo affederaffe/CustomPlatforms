@@ -23,13 +23,15 @@ namespace CustomFloorPlugin.UI
     internal class PlatformListsView : BSMLAutomaticViewController, INotifyPropertyChanged
     {
         private PluginConfig _config;
+        private AssetLoader _assetLoader;
         private PlatformManager _platformManager;
         private PlatformSpawner _platformSpawner;
 
         [Inject]
-        public void Construct(PluginConfig config, PlatformSpawner platformSpawner, PlatformManager platformManager)
+        public void Construct(PluginConfig config, AssetLoader assetLoader, PlatformSpawner platformSpawner, PlatformManager platformManager)
         {
             _config = config;
+            _assetLoader = assetLoader;
             _platformManager = platformManager;
             _platformSpawner = platformSpawner;
         }
@@ -70,7 +72,7 @@ namespace CustomFloorPlugin.UI
         /// Used to hide the button if there's no requirement or suggestion
         /// </summary>
         [UIValue("req-button-active")]
-        public bool ReqButtonActive
+        internal bool ReqButtonActive
         {
             get => _ReqButtonActive;
             set
@@ -203,15 +205,15 @@ namespace CustomFloorPlugin.UI
             foreach (string req in platform.requirements)
             {
                 CustomListTableData.CustomCellInfo cell = _platformManager.allPluginNames.Contains(req)
-                    ? new CustomListTableData.CustomCellInfo(req, "Required", _platformManager.greenCheck)
-                    : new CustomListTableData.CustomCellInfo(req, "Required", _platformManager.redX);
+                    ? new CustomListTableData.CustomCellInfo(req, "Required", _assetLoader.greenCheck)
+                    : new CustomListTableData.CustomCellInfo(req, "Required", _assetLoader.redX);
                 requirementsListTable.data.Add(cell);
             }
             foreach (string sug in platform.suggestions)
             {
                 CustomListTableData.CustomCellInfo cell = _platformManager.allPluginNames.Contains(sug)
-                    ? new CustomListTableData.CustomCellInfo(sug, "Suggestion", _platformManager.yellowCheck)
-                    : new CustomListTableData.CustomCellInfo(sug, "Suggestion", _platformManager.yellowX);
+                    ? new CustomListTableData.CustomCellInfo(sug, "Suggestion", _assetLoader.yellowCheck)
+                    : new CustomListTableData.CustomCellInfo(sug, "Suggestion", _assetLoader.yellowX);
                 requirementsListTable.data.Add(cell);
             }
             requirementsListTable.tableView.ReloadData();

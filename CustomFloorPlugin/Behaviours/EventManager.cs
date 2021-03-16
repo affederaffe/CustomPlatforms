@@ -10,19 +10,6 @@ namespace CustomFloorPlugin
 {
     public class EventManager : MonoBehaviour, INotifyPlatformEnabled, INotifyPlatformDisabled
     {
-        public UnityEvent OnSlice;
-        public UnityEvent OnMiss;
-        public UnityEvent OnComboBreak;
-        public UnityEvent MultiplierUp;
-        public UnityEvent SaberStartColliding;
-        public UnityEvent SaberStopColliding;
-        public UnityEvent OnLevelStart;
-        public UnityEvent OnLevelFail;
-        public UnityEvent OnLevelFinish;
-        public UnityEvent OnBlueLightOn;
-        public UnityEvent OnRedLightOn;
-        public UnityEvent OnNewHighscore;
-
         [Serializable]
         public class ComboChangedEvent : UnityEvent<int> { }
         [Serializable]
@@ -38,6 +25,18 @@ namespace CustomFloorPlugin
         [Serializable]
         public class OnAllNotesCountChangedEvent : UnityEvent<int, int> { }
 
+        public UnityEvent OnSlice;
+        public UnityEvent OnMiss;
+        public UnityEvent OnComboBreak;
+        public UnityEvent MultiplierUp;
+        public UnityEvent SaberStartColliding;
+        public UnityEvent SaberStopColliding;
+        public UnityEvent OnLevelStart;
+        public UnityEvent OnLevelFail;
+        public UnityEvent OnLevelFinish;
+        public UnityEvent OnBlueLightOn;
+        public UnityEvent OnRedLightOn;
+        public UnityEvent OnNewHighscore;
         public ComboChangedEvent OnComboChanged = new();
         public OnSpecificSliceEvent OnSpecificSlice = new();
         public OnScoreChangedEvent OnScoreChanged = new();
@@ -73,23 +72,23 @@ namespace CustomFloorPlugin
             if (_events != null)
             {
                 _events.BeatmapEventDidTriggerEvent += LightEventCallBack;
-                _events.GameSceneLoadedEvent += delegate { OnLevelStart.Invoke(); };
-                _events.NoteWasCutEvent += delegate { OnSlice.Invoke(); };
-                _events.NoteWasCutEvent += delegate (int saberType) { OnSpecificSlice.Invoke(saberType); };
-                _events.NoteWasMissedEvent += delegate { OnMiss.Invoke(); };
-                _events.ComboDidBreakEvent += delegate { OnComboBreak.Invoke(); };
-                _events.MultiplierDidIncreaseEvent += delegate { MultiplierUp.Invoke(); };
-                _events.ComboDidChangeEvent += delegate (int combo) { OnComboChanged.Invoke(combo); };
-                _events.SabersStartCollideEvent += delegate { SaberStartColliding.Invoke(); };
-                _events.SabersEndCollideEvent += delegate { SaberStopColliding.Invoke(); };
-                _events.LevelFinishedEvent += delegate { OnLevelFinish.Invoke(); };
-                _events.LevelFailedEvent += delegate { OnLevelFail.Invoke(); };
-                _events.NewHighscore += delegate { OnNewHighscore.Invoke(); };
-                _events.ScoreDidChangeEvent += delegate (int rawScore, int modifiedScore) { OnScoreChanged.Invoke(rawScore, modifiedScore); };
-                _events.GoodCutCountDidChangeEvent += delegate (int goodCuts) { OnGoodCutCountChanged.Invoke(goodCuts); };
-                _events.BadCutCountDidChangeEvent += delegate (int badCuts) { OnBadCutCountChanged.Invoke(badCuts); };
-                _events.MissCountDidChangeEvent += delegate (int misses) { OnMissCountChanged.Invoke(misses); };
-                _events.AllNotesCountDidChangeEvent += delegate (int spawnedNotes, int allNotesInBeatmap) { OnAllNotesCountChanged.Invoke(spawnedNotes, allNotesInBeatmap); };
+                _events.GameSceneLoadedEvent += OnLevelStart.Invoke;
+                _events.NoteWasCutEvent += (_) => OnSlice.Invoke();
+                _events.NoteWasCutEvent += OnSpecificSlice.Invoke;
+                _events.NoteWasMissedEvent += OnMiss.Invoke;
+                _events.ComboDidBreakEvent += OnComboBreak.Invoke;
+                _events.MultiplierDidIncreaseEvent += MultiplierUp.Invoke;
+                _events.ComboDidChangeEvent += OnComboChanged.Invoke;
+                _events.SabersStartCollideEvent += SaberStartColliding.Invoke;
+                _events.SabersEndCollideEvent += SaberStopColliding.Invoke;
+                _events.LevelFinishedEvent += OnLevelFinish.Invoke;
+                _events.LevelFailedEvent += OnLevelFail.Invoke;
+                _events.NewHighscore += OnNewHighscore.Invoke;
+                _events.ScoreDidChangeEvent += OnScoreChanged.Invoke;
+                _events.GoodCutCountDidChangeEvent += OnGoodCutCountChanged.Invoke;
+                _events.BadCutCountDidChangeEvent += OnBadCutCountChanged.Invoke;
+                _events.MissCountDidChangeEvent += OnMissCountChanged.Invoke;
+                _events.AllNotesCountDidChangeEvent += OnAllNotesCountChanged.Invoke;
             }
         }
 
@@ -101,22 +100,23 @@ namespace CustomFloorPlugin
             if (_events != null)
             {
                 _events.BeatmapEventDidTriggerEvent -= LightEventCallBack;
-                _events.GameSceneLoadedEvent -= delegate { OnLevelStart.Invoke(); };
-                _events.NoteWasCutEvent -= delegate { OnSlice.Invoke(); };
-                _events.NoteWasMissedEvent -= delegate { OnMiss.Invoke(); };
-                _events.ComboDidBreakEvent -= delegate { OnComboBreak.Invoke(); };
-                _events.MultiplierDidIncreaseEvent -= delegate { MultiplierUp.Invoke(); };
-                _events.ComboDidChangeEvent -= delegate (int combo) { OnComboChanged.Invoke(combo); };
-                _events.SabersStartCollideEvent -= delegate { SaberStartColliding.Invoke(); };
-                _events.SabersEndCollideEvent -= delegate { SaberStopColliding.Invoke(); };
-                _events.LevelFinishedEvent -= delegate { OnLevelFinish.Invoke(); };
-                _events.LevelFailedEvent -= delegate { OnLevelFail.Invoke(); };
-                _events.NewHighscore -= delegate { OnNewHighscore.Invoke(); };
-                _events.ScoreDidChangeEvent -= delegate (int rawScore, int modifiedScore) { OnScoreChanged.Invoke(rawScore, modifiedScore); };
-                _events.GoodCutCountDidChangeEvent -= delegate (int goodCuts) { OnGoodCutCountChanged.Invoke(goodCuts); };
-                _events.BadCutCountDidChangeEvent -= delegate (int badCuts) { OnBadCutCountChanged.Invoke(badCuts); };
-                _events.MissCountDidChangeEvent -= delegate (int misses) { OnMissCountChanged.Invoke(misses); };
-                _events.AllNotesCountDidChangeEvent -= delegate (int spawnedNotes, int allNotesInBeatmap) { OnAllNotesCountChanged.Invoke(spawnedNotes, allNotesInBeatmap); };
+                _events.GameSceneLoadedEvent -= OnLevelStart.Invoke;
+                _events.NoteWasCutEvent -= (_) => OnSlice.Invoke();
+                _events.NoteWasCutEvent -= OnSpecificSlice.Invoke;
+                _events.NoteWasMissedEvent -= OnMiss.Invoke;
+                _events.ComboDidBreakEvent -= OnComboBreak.Invoke;
+                _events.MultiplierDidIncreaseEvent -= MultiplierUp.Invoke;
+                _events.ComboDidChangeEvent -= OnComboChanged.Invoke;
+                _events.SabersStartCollideEvent -= SaberStartColliding.Invoke;
+                _events.SabersEndCollideEvent -= SaberStopColliding.Invoke;
+                _events.LevelFinishedEvent -= OnLevelFinish.Invoke;
+                _events.LevelFailedEvent -= OnLevelFail.Invoke;
+                _events.NewHighscore -= OnNewHighscore.Invoke;
+                _events.ScoreDidChangeEvent -= OnScoreChanged.Invoke;
+                _events.GoodCutCountDidChangeEvent -= OnGoodCutCountChanged.Invoke;
+                _events.BadCutCountDidChangeEvent -= OnBadCutCountChanged.Invoke;
+                _events.MissCountDidChangeEvent -= OnMissCountChanged.Invoke;
+                _events.AllNotesCountDidChangeEvent -= OnAllNotesCountChanged.Invoke;
             }
         }
 
