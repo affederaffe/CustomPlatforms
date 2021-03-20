@@ -190,6 +190,11 @@ namespace CustomFloorPlugin
                 heart.transform.position = new Vector3(-8f, 25f, 26f);
                 heart.transform.rotation = Quaternion.Euler(-100f, 90f, 90f);
                 heart.transform.localScale = new Vector3(25f, 25f, 25f);
+
+                // Not a perfect solution because the shader seems to ignore the alpha now,
+                // therefore mesh lights won't be transparent when they're turned off, but otherwise they wouldn't glow at all
+                heart.GetComponent<Renderer>().material.shader = Shader.Find("Custom/Glowing");
+                heart.GetComponent<MaterialPropertyBlockColorSetter>().SetField("_property", "_Color");
             }
         }
     }

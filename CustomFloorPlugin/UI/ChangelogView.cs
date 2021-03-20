@@ -28,6 +28,7 @@ namespace CustomFloorPlugin.UI
         - Added 'Shuffle Platforms' option
         - Added manual config option to change your CustomPlatforms directory
         - New feature: nested components
+        - Note: Lighting might be weird on some platforms due to a base game bug.
 
 <size=150%><color=#888888>Version 6.1.1</color></size>
         - Security fix:  removed embedded CustomScripts
