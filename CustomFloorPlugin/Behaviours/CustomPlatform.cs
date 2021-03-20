@@ -30,8 +30,9 @@ namespace CustomFloorPlugin
         public List<string> requirements = new();
         public List<string> suggestions = new();
 
-        internal string platHash;
-        internal string fullPath;
+        [SerializeField] internal string platHash = "";
+        [SerializeField] internal string fullPath = "";
+        [SerializeField] internal bool isDescriptor = true;
 
         public void Awake()
         {

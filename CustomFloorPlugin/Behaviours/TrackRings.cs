@@ -1,8 +1,8 @@
-﻿using System.Collections.Generic;
-
-using IPA.Utilities;
+﻿using IPA.Utilities;
 
 using UnityEngine;
+
+using SiraUtil.Tools;
 
 using Zenject;
 
@@ -38,6 +38,7 @@ namespace CustomFloorPlugin
         public float maxPositionStep = 2f;
         public float moveSpeed = 1f;
 
+        private SiraLog _siraLog;
         private MaterialSwapper _materialSwapper;
         private PlatformManager _platformManager;
         private IBeatmapObjectCallbackController _beatmapObjectCallbackController;
@@ -66,8 +67,9 @@ namespace CustomFloorPlugin
         }
 
         [Inject]
-        public void Construct(MaterialSwapper materialSwapper, PlatformManager platformManager, [InjectOptional] IBeatmapObjectCallbackController beatmapObjectCallbackController)
+        public void Construct(SiraLog siraLog, MaterialSwapper materialSwapper, PlatformManager platformManager, [InjectOptional] IBeatmapObjectCallbackController beatmapObjectCallbackController)
         {
+            _siraLog = siraLog;
             _materialSwapper = materialSwapper;
             _platformManager = platformManager;
             _beatmapObjectCallbackController = beatmapObjectCallbackController;
@@ -75,24 +77,41 @@ namespace CustomFloorPlugin
 
         void INotifyPlatformEnabled.PlatformEnabled(DiContainer container)
         {
+            bool active = gameObject.activeSelf;
             gameObject.SetActive(false);
             container.Inject(this);
             _materialSwapper.ReplaceMaterials(trackLaneRingPrefab);
             TrackLaneRingsManager ringsManager = gameObject.AddComponent<TrackLaneRingsManager>();
-            _platformManager.spawnedComponents.Add(ringsManager);
+            _platformManager.spawnedObjects.Add(ringsManager);
 
-            TrackLaneRing ring = trackLaneRingPrefab.AddComponent<TrackLaneRing>();
-            _platformManager.spawnedComponents.Add(ring);
-            ringsManager.SetField("_trackLaneRingPrefab", ring);
+            TrackLaneRing trackRing = trackLaneRingPrefab.AddComponent<TrackLaneRing>();
+            _platformManager.spawnedObjects.Add(trackRing);
+            ringsManager.SetField("_trackLaneRingPrefab", trackRing);
             ringsManager.SetField("_ringCount", ringCount);
             ringsManager.SetField("_ringPositionStep", ringPositionStep);
             ringsManager.SetField("_spawnAsChildren", true);
-            gameObject.SetActive(true);
+
+            // Check if a TrackRing is using an in-scene GameObject rather than a prefab, which would result in spawning TubeLights twice.
+            // (looking at you, JumpGate)
+            // Sometimes I just want to scrap everything :)
+            if (trackLaneRingPrefab.scene.name != null)
+            {
+                foreach (var tubeLight in trackLaneRingPrefab.GetComponentsInChildren<TubeLight>())
+                {
+                    while (tubeLight.transform.childCount != 0)
+                    {
+                        DestroyImmediate(tubeLight.transform.GetChild(0).gameObject);
+                    }
+                    _siraLog.Warning("Using GameObjects as rings is deprecated. Please use Prefabs instead and re-export your Platform!");
+                }
+            }
+
+            gameObject.SetActive(active);
 
             if (useRotationEffect)
             {
                 TrackLaneRingsRotationEffect rotationEffect = gameObject.AddComponent<TrackLaneRingsRotationEffect>();
-                _platformManager.spawnedComponents.Add(rotationEffect);
+                _platformManager.spawnedObjects.Add(rotationEffect);
                 rotationEffect.SetField("_trackLaneRingsManager", ringsManager);
                 rotationEffect.SetField("_startupRotationAngle", startupRotationAngle);
                 rotationEffect.SetField("_startupRotationStep", startupRotationStep);
@@ -102,7 +121,7 @@ namespace CustomFloorPlugin
                 rotationEffect.SetField("_startupRotationFlexySpeed", startupRotationFlexySpeed);
 
                 TrackLaneRingsRotationEffectSpawner rotationEffectSpawner = gameObject.AddComponent<TrackLaneRingsRotationEffectSpawner>();
-                _platformManager.spawnedComponents.Add(rotationEffectSpawner);
+                _platformManager.spawnedObjects.Add(rotationEffectSpawner);
                 rotationEffectSpawner.SetField("_beatmapObjectCallbackController", _beatmapObjectCallbackController);
 
                 rotationEffectSpawner.SetField("_beatmapEventType", (BeatmapEventType)rotationSongEventType);
@@ -116,7 +135,7 @@ namespace CustomFloorPlugin
             if (useStepEffect)
             {
                 TrackLaneRingsPositionStepEffectSpawner stepEffectSpawner = gameObject.AddComponent<TrackLaneRingsPositionStepEffectSpawner>();
-                _platformManager.spawnedComponents.Add(stepEffectSpawner);
+                _platformManager.spawnedObjects.Add(stepEffectSpawner);
                 stepEffectSpawner.SetField("_beatmapObjectCallbackController", _beatmapObjectCallbackController);
                 stepEffectSpawner.SetField("_trackLaneRingsManager", ringsManager);
                 stepEffectSpawner.SetField("_beatmapEventType", (BeatmapEventType)stepSongEventType);
@@ -125,15 +144,12 @@ namespace CustomFloorPlugin
                 stepEffectSpawner.SetField("_moveSpeed", moveSpeed);
             }
 
-            // Spawn all custom objects of the rings after they're instantiated by Beat Saber
-            StartCoroutine(WaitAndSpawnRings());
-            IEnumerator<WaitForEndOfFrame> WaitAndSpawnRings()
+            // If the GameObject was inactive at start, the rings won't be created, thus Rings could be null
+            if (ringsManager.Rings != null)
             {
-                yield return new WaitForEndOfFrame();
                 foreach (TrackLaneRing ring in ringsManager.Rings)
                 {
                     _platformManager.spawnedObjects.Add(ring.gameObject);
-                    // Distribute the event again over all new spawned rings
                     foreach (INotifyPlatformEnabled notifyEnable in ring.GetComponentsInChildren<INotifyPlatformEnabled>(true))
                     {
                         notifyEnable.PlatformEnabled(container);

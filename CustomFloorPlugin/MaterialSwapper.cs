@@ -1,6 +1,9 @@
-﻿using System.Linq;
+﻿using System.Collections;
+using System.Linq;
 
 using UnityEngine;
+
+using Zenject;
 
 
 namespace CustomFloorPlugin
@@ -10,13 +13,11 @@ namespace CustomFloorPlugin
     /// Primary reason for this is the absence of proper custom <see cref="Shader"/>s (or decompiled source <see cref="Shader"/>s) and a lack of knowledge about their inner workings...<br/>
     /// Part of the documentation for this file is omited because it's a clusterfuck and under construction.
     /// </summary>
-    public class MaterialSwapper
+    public class MaterialSwapper : IInitializable
     {
         private Material _dark;
         private Material _glow;
         private Material _opaqueGlow;
-
-        private bool _isInitialized = false;
 
         private const string kFakeDarkMatName = "_dark_replace (Instance)";
         private const string kFakeGlowMatName = "_transparent_glow_replace (Instance)";
@@ -28,18 +29,17 @@ namespace CustomFloorPlugin
 
         /// <summary>
         /// Initializes needed variables<br/>
-        /// Unity needs some time to load the materials, so only search for them when a platform is first spawned
         /// </summary>
-        private void InitIfNeeded()
+        public void Initialize()
         {
-            if (_isInitialized)
-                return;
-
-            Material[] materials = Resources.FindObjectsOfTypeAll<Material>();
-            _dark = materials.First(x => x.name == kRealDarkMatName);
-            _opaqueGlow = materials.First(x => x.name == kRealOpaqueGlowMatName);
-            _glow = materials.First(x => x.name == kRealGlowMatName);
-            _isInitialized = true;
+            SharedCoroutineStarter.instance.StartCoroutine(WaitForUnityToLoadMaterials());
+            IEnumerator WaitForUnityToLoadMaterials()
+            {
+                yield return null;
+                _dark = AssetLoader.instance.AllMaterials.First(x => x.name == kRealDarkMatName);
+                _glow = AssetLoader.instance.AllMaterials.First(x => x.name == kRealGlowMatName);
+                _opaqueGlow = AssetLoader.instance.AllMaterials.First(x => x.name == kRealOpaqueGlowMatName);
+            }
         }
 
         /// <summary>
@@ -48,10 +48,7 @@ namespace CustomFloorPlugin
         /// <param name="gameObject"><see cref="GameObject"/> to search for <see cref="Renderer"/>s</param>
         internal void ReplaceMaterials(GameObject gameObject)
         {
-            InitIfNeeded();
-
-            Renderer[] renderers = gameObject.GetComponents<Renderer>().Concat(gameObject.GetComponentsInChildren<Renderer>(true)).ToArray();
-            foreach (Renderer renderer in renderers)
+            foreach (Renderer renderer in gameObject.GetComponentsInChildren<Renderer>(true))
             {
                 ReplaceForRenderer(renderer);
             }

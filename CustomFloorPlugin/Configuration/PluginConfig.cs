@@ -1,6 +1,8 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System.IO;
+using System.Runtime.CompilerServices;
 
 using IPA.Config.Stores;
+using IPA.Utilities;
 
 
 [assembly: InternalsVisibleTo(GeneratedStore.AssemblyVisibilityTarget)]
@@ -15,5 +17,6 @@ namespace CustomFloorPlugin.Configuration
         public virtual string SingleplayerPlatformPath { get; set; }
         public virtual string MultiplayerPlatformPath { get; set; }
         public virtual string A360PlatformPath { get; set; }
+        public virtual string CustomPlatformsDirectory { get; set; } = Path.Combine(UnityGame.InstallPath, "CustomPlatforms");
     }
 }

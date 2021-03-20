@@ -12,13 +12,13 @@ namespace CustomFloorPlugin
         [Header("The global intensity (float valueName)")]
         public string AveragePropertyName;
 
-        private BasicSpectrogramData spectrogramData;
-        private Renderer renderer;
+        private BasicSpectrogramData _basicSpectrogramData;
+        private Renderer _renderer;
 
         [Inject]
-        public void Construct([InjectOptional] BasicSpectrogramData newData)
+        public void Construct([InjectOptional] BasicSpectrogramData basicSpectrogramData)
         {
-            spectrogramData = newData;
+            _basicSpectrogramData = basicSpectrogramData;
         }
 
         void INotifyPlatformEnabled.PlatformEnabled(DiContainer container)
@@ -29,24 +29,24 @@ namespace CustomFloorPlugin
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Code Quality", "IDE0051:Remove unused private members", Justification = "Called by Unity")]
         private void Awake()
         {
-            renderer = gameObject.GetComponent<Renderer>();
+            _renderer = GetComponent<Renderer>();
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Code Quality", "IDE0051:Remove unused private members", Justification = "Called by Unity")]
         private void Update()
         {
-            if (spectrogramData != null && renderer != null)
+            if (_basicSpectrogramData != null && _renderer != null)
             {
                 float average = 0.0f;
                 for (int i = 0; i < 64; i++)
                 {
-                    average += spectrogramData.ProcessedSamples[i];
+                    average += _basicSpectrogramData.ProcessedSamples[i];
                 }
                 average /= 64.0f;
 
-                foreach (Material mat in renderer.materials)
+                foreach (Material mat in _renderer.materials)
                 {
-                    mat.SetFloatArray(PropertyName, spectrogramData.ProcessedSamples);
+                    mat.SetFloatArray(PropertyName, _basicSpectrogramData.ProcessedSamples);
                     mat.SetFloat(AveragePropertyName, average);
                 }
             }

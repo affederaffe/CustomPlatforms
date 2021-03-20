@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+
+using UnityEngine;
 
 using Zenject;
 
@@ -37,14 +39,14 @@ namespace CustomFloorPlugin
         /// </summary>
         public float columnDepth = 1f;
 
-        private MaterialSwapper _materialSwapper;
-        private PlatformManager _platformManager;
-        private BasicSpectrogramData _basicSpectrogramData;
-
         /// <summary>
         /// An array of all <see cref="Transform"/>s under a <see cref="Spectrogram"/>
         /// </summary>
         private Transform[] _columnTransforms;
+
+        private MaterialSwapper _materialSwapper;
+        private PlatformManager _platformManager;
+        private BasicSpectrogramData _basicSpectrogramData;
 
         /// <summary>
         /// Spectogram fallback data
@@ -103,10 +105,9 @@ namespace CustomFloorPlugin
             container.Inject(this);
             _materialSwapper.ReplaceMaterials(columnPrefab);
             CreateColums();
-            // Distribute the event again over all new spawned children, and the children only to avoid recursion
-            foreach (INotifyPlatformEnabled notifyEnable in GetComponentsInChildren<INotifyPlatformEnabled>(true))
+            foreach (Transform transform in _columnTransforms)
             {
-                if ((Object)notifyEnable != this)
+                foreach (INotifyPlatformEnabled notifyEnable in transform.GetComponentsInChildren<INotifyPlatformEnabled>(true))
                 {
                     notifyEnable.PlatformEnabled(container);
                 }

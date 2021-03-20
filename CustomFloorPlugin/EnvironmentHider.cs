@@ -16,7 +16,6 @@ namespace CustomFloorPlugin
     internal class EnvironmentHider
     {
         private readonly PluginConfig _config;
-        private readonly AssetLoader _assetLoader;
         private readonly PlatformManager _platformManager;
         private readonly GameScenesManager _gameScenesManager;
 
@@ -41,10 +40,22 @@ namespace CustomFloorPlugin
         private const string renamedObjectSuffix = "renamed";
         private List<GameObject> renamedObjects;
 
-        public EnvironmentHider(PluginConfig config, AssetLoader assetLoader, PlatformManager platformManager, GameScenesManager gameScenesManager)
+        private TrackLaneRing[] TrackLaneRings
+        {
+            get
+            {
+                if (_TrackLaneRings == null)
+                {
+                    _TrackLaneRings = Resources.FindObjectsOfTypeAll<TrackLaneRing>();
+                }
+                return _TrackLaneRings;
+            }
+        }
+        private TrackLaneRing[] _TrackLaneRings;
+
+        public EnvironmentHider(PluginConfig config, PlatformManager platformManager, GameScenesManager gameScenesManager)
         {
             _config = config;
-            _assetLoader = assetLoader;
             _platformManager = platformManager;
             _gameScenesManager = gameScenesManager;
         }
@@ -70,7 +81,8 @@ namespace CustomFloorPlugin
             if (doubleColorLasers != null) SetCollectionHidden(doubleColorLasers, platform.hideDoubleColorLasers);
             if (rotatingLasers != null) SetCollectionHidden(rotatingLasers, platform.hideRotatingLasers);
             if (trackLights != null) SetCollectionHidden(trackLights, platform.hideTrackLights);
-            _assetLoader.playersPlace?.SetActive(_platformManager.activePlatform != null && !platform.hideDefaultPlatform && (sceneName == "MenuEnvironment" || sceneName == "Credits" || sceneName == "HealthWarning"));
+            AssetLoader.instance.playersPlace?.SetActive(_platformManager.activePlatform != null && !platform.hideDefaultPlatform && (sceneName == "MenuEnvironment" || sceneName == "Credits" || sceneName == "HealthWarning"));
+            _TrackLaneRings = null;
         }
 
         /// <summary>
@@ -221,7 +233,7 @@ namespace CustomFloorPlugin
                     FindAddGameObject("Collider", playersPlace);
                     break;
                 case "LinkinParkEnvironment":
-                    FindAddGameObject("playersPlace", playersPlace);
+                    FindAddGameObject("PlayersPlace", playersPlace);
                     FindAddGameObject("PlayersPlaceShadow", playersPlace);
                     break;
                 case "GameCore":
@@ -261,14 +273,17 @@ namespace CustomFloorPlugin
             FindAddGameObject("PairLaserTrackLaneRing", smallRings);
             FindAddGameObject("PanelLightTrackLaneRing", smallRings);
             FindAddGameObject("LightLinesTrackLaneRing", smallRings);
-            foreach (TrackLaneRing trackLaneRing in Resources.FindObjectsOfTypeAll<TrackLaneRing>().Where(x =>
+            FindAddGameObject("DistantRings", smallRings);
+            foreach (TrackLaneRing trackLaneRing in TrackLaneRings.Where(x =>
                 x.name is "TrackLaneRing(Clone)" or
+                "SmallTrackLaneRing(Clone)" or
                 "TriangleTrackLaneRing(Clone)" or
                 "PanelsTrackLaneRing(Clone)" or
                 "Panels4TrackLaneRing(Clone)" or
                 "PairLaserTrackLaneRing(Clone)" or
                 "PanelLightTrackLaneRing(Clone)" or
-                "LightLinesTrackLaneRing(Clone)"
+                "LightLinesTrackLaneRing(Clone)" or
+                "ConeRingBig(Clone)"
                 ))
             {
                 smallRings.Add(trackLaneRing.gameObject);
@@ -283,7 +298,7 @@ namespace CustomFloorPlugin
             FindAddGameObject("BigCenterLightTrackLaneRing", bigRings);
             FindAddGameObject("LightsTrackLaneRing", bigRings);
 
-            foreach (TrackLaneRing trackLaneRing in Resources.FindObjectsOfTypeAll<TrackLaneRing>().Where(x =>
+            foreach (TrackLaneRing trackLaneRing in TrackLaneRings.Where(x =>
                 x.name is "BigTrackLaneRing(Clone)" or
                 "BigCenterLightTrackLaneRing(Clone)" or
                 "LightsTrackLaneRing(Clone)"
@@ -491,6 +506,11 @@ namespace CustomFloorPlugin
                     FindAddGameObject("StarHemisphere", highway);
                     FindAddGameObject("StarEmitterPS", highway);
                     FindAddGameObject("BTSStarTextEffectEvent", highway);
+                    FindAddGameObject("GradientBackground", highway);
+                    break;
+                case "KaleidoscopeEnvironment":
+                    FindAddGameObject("TrackMirror", highway);
+                    FindAddGameObject("Construction", highway);
                     FindAddGameObject("GradientBackground", highway);
                     break;
             }
@@ -701,7 +721,6 @@ namespace CustomFloorPlugin
                     break;
                 default:
                     FindAddGameObject("FrontLights", backLasers);
-                    FindAddGameObject("FrontLight", backLasers);
                     break;
             }
         }

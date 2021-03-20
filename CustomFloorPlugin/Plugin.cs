@@ -29,7 +29,6 @@ namespace CustomFloorPlugin
             zenjector.OnApp<PlatformsAppInstaller>().WithParameters(logger, config.Generated<Configuration.PluginConfig>());
             zenjector.OnMenu<PlatformsMenuInstaller>();
             zenjector.OnGame<PlatformsGameInstaller>(false);
-            zenjector.OnGame<PlatformsGameInstaller>(true).ShortCircuitForCampaign().ShortCircuitForMultiplayer().ShortCircuitForStandard(); // Counters+...
         }
     }
 }

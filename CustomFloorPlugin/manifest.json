@@ -5,7 +5,7 @@
   "author": "Rolo",
   "version": "6.1.2",
   "description": "A plugin to support custom platforms and environments",
-  "gameVersion": "1.13.5",
+  "gameVersion": "1.14.0",
   "dependsOn": {
     "BSIPA": "^4.1.6",
     "BeatSaberMarkupLanguage": "^1.5.1",
@@ -13,6 +13,6 @@
   },
   "loadAfter": [
     "SongCore",
-    "Cinema"
+    "BeatSaberCinema"
   ]
 }

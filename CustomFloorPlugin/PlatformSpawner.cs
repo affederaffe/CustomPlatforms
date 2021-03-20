@@ -23,7 +23,6 @@ namespace CustomFloorPlugin
     {
         private readonly SiraLog _siraLog;
         private readonly PluginConfig _config;
-        private readonly AssetLoader _assetLoader;
         private readonly EnvironmentHider _hider;
         private readonly PlatformLoader _platformLoader;
         private readonly PlatformManager _platformManager;
@@ -39,7 +38,6 @@ namespace CustomFloorPlugin
 
         internal PlatformSpawner(SiraLog siraLog,
                                  PluginConfig config,
-                                 AssetLoader assetLoader,
                                  EnvironmentHider hider,
                                  PlatformLoader platformLoader,
                                  PlatformManager platformManager,
@@ -47,7 +45,6 @@ namespace CustomFloorPlugin
         {
             _siraLog = siraLog;
             _config = config;
-            _assetLoader = assetLoader;
             _hider = hider;
             _platformLoader = platformLoader;
             _platformManager = platformManager;
@@ -74,8 +71,8 @@ namespace CustomFloorPlugin
                 case MenuScenesTransitionSetupDataSO:
                     if (isMultiplayer) 
                         return;
-                    _assetLoader.heart.SetActive(_config.ShowHeart);
-                    _assetLoader.heart.GetComponent<InstancedMaterialLightWithId>().ColorWasSet(Color.magenta);
+                    AssetLoader.instance.heart.SetActive(_config.ShowHeart);
+                    AssetLoader.instance.heart.GetComponent<InstancedMaterialLightWithId>().ColorWasSet(Color.magenta);
                     if (_config.ShowInMenu)
                         platformIndex = _config.ShufflePlatforms
                             ? RandomPlatformIndex
@@ -84,7 +81,7 @@ namespace CustomFloorPlugin
                 case StandardLevelScenesTransitionSetupDataSO:
                 case MissionLevelScenesTransitionSetupDataSO:
                 case TutorialScenesTransitionSetupDataSO:
-                    _assetLoader.heart.SetActive(false);
+                    AssetLoader.instance.heart.SetActive(false);
                     platformIndex = setupData.Is360Level()
                         ? _platformManager.GetIndexForType(PlatformType.A360)
                         : _config.ShufflePlatforms
@@ -93,18 +90,26 @@ namespace CustomFloorPlugin
                     break;
                 case AppInitScenesTransitionSetupDataSO:
                 case MultiplayerLevelScenesTransitionSetupDataSO:
-                    return; // Multiplayer levels are handled by the MultiplayerGameHelper because this event doesn't provide the GameplayCore DiContainer.
+                    // Multiplayer levels are handled by the MultiplayerGameHelper because this event doesn't provide the GameplayCore DiContainer for multiplayer levels.
+                    return; 
                 default:
-                    _assetLoader.heart.SetActive(false);
+                    AssetLoader.instance.heart.SetActive(false);
                     break;
             }
 
             // Handle possible API request
-            if (_platformManager.apiRequestIndex != -1 && (_platformManager.apiRequestedLevelId == setupData.GetLevelId() || _platformManager.apiRequestIndex == 0))
+            if (_platformManager.apiRequestedPlatform != null)
             {
-                platformIndex = _platformManager.apiRequestIndex;
-                if (_platformManager.apiRequestIndex == 0)
-                    _platformManager.apiRequestIndex = -1;
+                int apiIndex = _platformManager.GetIndexForType(PlatformType.API);
+                if (_platformManager.apiRequestedLevelId == setupData.GetLevelId())
+                {
+                    platformIndex = apiIndex;
+                }
+                else if (apiIndex == 0)
+                {
+                    platformIndex = apiIndex;
+                    _platformManager.apiRequestedPlatform = null;
+                }
             }
 
             SetContainerAndShow(platformIndex, container);
@@ -148,7 +153,7 @@ namespace CustomFloorPlugin
         /// <summary>
         /// Changes to a specific <see cref="CustomPlatform"/>
         /// </summary>
-        /// <param name="index">The index of the new <see cref="CustomPlatform"/> in the list <see cref="AllPlatforms"/></param>
+        /// <param name="index">The index of the new <see cref="CustomPlatform"/> in the list of all platforms</param>
         internal void ChangeToPlatform(int index)
         {
             if (!_platformManager.allPlatforms[index].requirements.All(x => _platformManager.allPluginNames.Contains(x)))
@@ -164,7 +169,7 @@ namespace CustomFloorPlugin
             _platformManager.activePlatform = _platformManager.allPlatforms[index];
 
             SharedCoroutineStarter.instance.StartCoroutine(SpawnPlatform());
-            IEnumerator<Coroutine> SpawnPlatform()
+            IEnumerator<YieldInstruction> SpawnPlatform()
             {
                 if (_platformManager.activePlatform?.transform.childCount == 0 && index != 0)
                 {
@@ -177,6 +182,8 @@ namespace CustomFloorPlugin
 
                 if (index != 0)
                 {
+                    // Wait until all custom objects are destroyed by unity
+                    yield return new WaitForEndOfFrame();
                     _platformManager.activePlatform.gameObject.SetActive(true);
                     SpawnCustomObjects();
                 }
@@ -194,13 +201,12 @@ namespace CustomFloorPlugin
         /// </summary>
         private void SpawnCustomObjects()
         {
-            INotifyPlatformEnabled[] notifyEnables = _platformManager.activePlatform?.GetComponentsInChildren<INotifyPlatformEnabled>(true);
-            if (notifyEnables != null)
+            if (_platformManager.activePlatform == null)
+                return;
+
+            foreach (INotifyPlatformEnabled notifyEnable in _platformManager.activePlatform.GetComponentsInChildren<INotifyPlatformEnabled>(true))
             {
-                foreach (INotifyPlatformEnabled notifyEnable in notifyEnables)
-                {
-                    notifyEnable.PlatformEnabled(_container);
-                }
+                notifyEnable.PlatformEnabled(_container);
             }
         }
 
@@ -209,32 +215,25 @@ namespace CustomFloorPlugin
         /// </summary>
         private void DestroyCustomObjects()
         {
-            INotifyPlatformDisabled[] notifyDisables = _platformManager.activePlatform?.GetComponentsInChildren<INotifyPlatformDisabled>(true);
-            if (notifyDisables != null)
+            if (_platformManager.activePlatform == null)
+                return;
+
+            foreach (INotifyPlatformDisabled notifyDisable in _platformManager.activePlatform.GetComponentsInChildren<INotifyPlatformDisabled>(true))
             {
-                foreach (INotifyPlatformDisabled notifyDisable in notifyDisables)
-                {
-                    notifyDisable.PlatformDisabled();
-                }
+                notifyDisable.PlatformDisabled();
+            }
+
+            foreach (TubeBloomPrePassLight tubeBloomPrePassLight in _platformManager.activePlatform.GetComponentsInChildren<TubeBloomPrePassLight>(true))
+            {
+                // Unity requires this to be present, otherwise Unregister won't be called. Memory leaks may occour if this is removed.
+                tubeBloomPrePassLight.InvokeMethod<object, BloomPrePassLight>("UnregisterLight");
             }
 
             while (_platformManager.spawnedObjects.Count != 0)
             {
-                GameObject gameObject = _platformManager.spawnedObjects[0];
+                UnityEngine.Object gameObject = _platformManager.spawnedObjects[0];
                 _platformManager.spawnedObjects.RemoveAt(0);
-                GameObject.Destroy(gameObject);
-                foreach (TubeBloomPrePassLight tubeBloomPrePassLight in gameObject.GetComponentsInChildren<TubeBloomPrePassLight>(true))
-                {
-                    //Unity requires this to be present, otherwise Unregister won't be called. Memory leaks may occour if this is removed.
-                    tubeBloomPrePassLight.InvokeMethod<object, BloomPrePassLight>("UnregisterLight");
-                }
-            }
-
-            while (_platformManager.spawnedComponents.Count != 0)
-            {
-                Component component = _platformManager.spawnedComponents[0];
-                _platformManager.spawnedComponents.RemoveAt(0);
-                GameObject.Destroy(component);
+                UnityEngine.Object.Destroy(gameObject); 
             }
         }
     }

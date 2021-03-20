@@ -7,6 +7,7 @@ using System.Text;
 using CustomFloorPlugin.Configuration;
 using CustomFloorPlugin.Extensions;
 
+using IPA.Loader;
 using IPA.Utilities;
 
 using SiraUtil.Tools;
@@ -25,15 +26,13 @@ namespace CustomFloorPlugin
     {
         private SiraLog _siraLog;
         private PluginConfig _config;
-        private AssetLoader _assetLoader;
         private PlatformLoader _platformLoader;
 
         [Inject]
-        public void Construct(SiraLog siraLog, PluginConfig config, AssetLoader assetLoader, PlatformLoader platformLoader)
+        public void Construct(SiraLog siraLog, PluginConfig config, PlatformLoader platformLoader)
         {
             _siraLog = siraLog;
             _config = config;
-            _assetLoader = assetLoader;
             _platformLoader = platformLoader;
         }
 
@@ -41,16 +40,6 @@ namespace CustomFloorPlugin
         /// List of all loaded Platforms
         /// </summary>
         internal List<CustomPlatform> allPlatforms;
-
-        /// <summary>
-        /// Stores the index of an API requested <see cref="CustomPlatform"/>
-        /// </summary>
-        internal int apiRequestIndex = -1;
-
-        /// <summary>
-        /// Stores the BeatmapLevel the platform was requested for
-        /// </summary>
-        internal string apiRequestedLevelId;
 
         /// <summary>
         /// Keeps track of the currently selected <see cref="PlatformType"/>
@@ -78,14 +67,19 @@ namespace CustomFloorPlugin
         internal CustomPlatform activePlatform;
 
         /// <summary>
-        /// List of all loaded plugins
+        /// Stores the index of an API requested <see cref="CustomPlatform"/>
         /// </summary>
-        internal readonly IReadOnlyList<string> allPluginNames = IPA.Loader.PluginManager.EnabledPlugins.Select(x => x.Name).ToList();
+        internal CustomPlatform apiRequestedPlatform;
 
         /// <summary>
-        /// The folder all CustomPlatform files are located
+        /// Stores the BeatmapLevel the platform was requested for
         /// </summary>
-        internal readonly string customPlatformsFolderPath = Path.Combine(UnityGame.InstallPath, "CustomPlatforms");
+        internal string apiRequestedLevelId;
+
+        /// <summary>
+        /// List of all loaded plugins
+        /// </summary>
+        internal readonly IReadOnlyList<string> allPluginNames = PluginManager.EnabledPlugins.Select(x => x.Name).ToList();
 
         /// <summary>
         /// The path used to cache platform descriptors for faster loading
@@ -93,14 +87,9 @@ namespace CustomFloorPlugin
         internal readonly string customPlatformsInfoCacheFilePath = Path.Combine(UnityGame.UserDataPath, "Custom PlatformsInfoCache.dat");
 
         /// <summary>
-        /// Keeps track of all spawned custom <see cref="GameObject"/>s, whichs lifetime ends on any scene transition
+        /// Keeps track of all spawned custom objects, whichs lifetime ends on any scene transition
         /// </summary>
-        internal readonly List<GameObject> spawnedObjects = new();
-
-        /// <summary>
-        /// Keeps track of all spawned custom <see cref="Component"/>s, whichs lifetime ends on any scene transition
-        /// </summary>
-        internal readonly List<Component> spawnedComponents = new();
+        internal readonly List<UnityEngine.Object> spawnedObjects = new();
 
         /// <summary>
         /// The cache file version to prevent loading older ones if something changes
@@ -113,13 +102,12 @@ namespace CustomFloorPlugin
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Code Quality", "IDE0051:Remove unused private members", Justification = "Called by Unity")]
         private void Start()
         {
-            _assetLoader.LoadSprites();
-            _assetLoader.LoadAssets(transform);
+            AssetLoader.instance.LoadAssets();
             LoadPlatforms();
         }
 
         /// <summary>
-        /// Automaticly save platform descriptors on exit
+        /// Automaticly save the descriptors on exit
         /// </summary>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Code Quality", "IDE0051:Remove unused private members", Justification = "Called by Unity")]
         private void OnDestroy()
@@ -132,23 +120,24 @@ namespace CustomFloorPlugin
         /// </summary>
         private void LoadPlatforms()
         {
-            if (!Directory.Exists(customPlatformsFolderPath))
-                Directory.CreateDirectory(customPlatformsFolderPath);
+            if (!Directory.Exists(_config.CustomPlatformsDirectory))
+                Directory.CreateDirectory(_config.CustomPlatformsDirectory);
 
-            allPlatforms = new List<CustomPlatform>();
-
-            string[] bundlePaths = Directory.GetFiles(customPlatformsFolderPath, "*.plat");
+            allPlatforms = new();
+            string[] bundlePaths = Directory.GetFiles(_config.CustomPlatformsDirectory, "*.plat");
 
             CustomPlatform defaultPlatform = new GameObject("Default Platform").AddComponent<CustomPlatform>();
             defaultPlatform.transform.parent = transform;
             defaultPlatform.platName = "Default Environment";
             defaultPlatform.platAuthor = "Beat Saber";
-            defaultPlatform.icon = _assetLoader.defaultPlatformCover;
+            defaultPlatform.icon = AssetLoader.instance.defaultPlatformCover;
+            defaultPlatform.isDescriptor = false;
             allPlatforms.Add(defaultPlatform);
 
             if (File.Exists(customPlatformsInfoCacheFilePath))
             {
                 LoadPlatformInfosFromFile();
+                // Load all platforms for which no descriptor was found
                 foreach (string path in bundlePaths.Select(x => Path.GetFullPath(x)).Except(allPlatforms.Select(x => x.fullPath)))
                 {
                     StartCoroutine(_platformLoader.LoadFromFileAsync(path, HandlePlatformLoaded));
@@ -174,15 +163,18 @@ namespace CustomFloorPlugin
                 PlatformType.Singleplayer => allPlatforms.IndexOf(currentSingleplayerPlatform),
                 PlatformType.Multiplayer => allPlatforms.IndexOf(currentMultiplayerPlatform),
                 PlatformType.A360 => allPlatforms.IndexOf(currentA360Platform),
+                PlatformType.API => allPlatforms.IndexOf(apiRequestedPlatform),
                 _ => 0
             };
-            return index != -1 ? index : 0;
+            if (index == -1)
+                index = 0;
+            return index;
         }
 
         /// <summary>
         /// Sets the platforms that were last selected as the current ones
         /// </summary>
-        internal void CheckLastSelectedPlatform(in CustomPlatform platform)
+        private void CheckLastSelectedPlatform(in CustomPlatform platform)
         {
             if (_config.SingleplayerPlatformPath == platform.platName + platform.platAuthor)
                 currentSingleplayerPlatform = platform;
@@ -195,29 +187,25 @@ namespace CustomFloorPlugin
         /// <summary>
         /// The callback executed when a platform is successfully loaded
         /// </summary>
-        internal void HandlePlatformLoaded(CustomPlatform platform, string fullPath)
+        internal void HandlePlatformLoaded(CustomPlatform platform)
         {
-            CustomPlatform newPlatform = Instantiate(platform);
+            CustomPlatform newPlatform = Instantiate(platform, transform);
             newPlatform.name = platform.name;
-            newPlatform.fullPath = platform.fullPath;
-            newPlatform.platHash = platform.platHash;
-            newPlatform.transform.parent = transform;
-            if (newPlatform.icon == null)
-                newPlatform.icon = _assetLoader.fallbackCover;
+            newPlatform.isDescriptor = false;
             CheckLastSelectedPlatform(in newPlatform);
-
-            if (_platformLoader.platformFilePaths.ContainsKey(fullPath))
+            if (_platformLoader.platformFilePaths.ContainsKey(newPlatform.fullPath))
             {
-                int index = allPlatforms.IndexOf(_platformLoader.platformFilePaths[fullPath]);
-                if (activePlatform == _platformLoader.platformFilePaths[fullPath])
+                CustomPlatform descriptor = _platformLoader.platformFilePaths[newPlatform.fullPath];
+                int index = allPlatforms.IndexOf(descriptor);
+                if (activePlatform == descriptor)
                     activePlatform = newPlatform;
-                Destroy(_platformLoader.platformFilePaths[fullPath].gameObject);
-                _platformLoader.platformFilePaths[fullPath] = newPlatform;
+                Destroy(descriptor.gameObject);
+                _platformLoader.platformFilePaths[newPlatform.fullPath] = newPlatform;
                 allPlatforms[index] = newPlatform;
             }
             else
             {
-                _platformLoader.platformFilePaths.Add(fullPath, newPlatform);
+                _platformLoader.platformFilePaths.Add(newPlatform.fullPath, newPlatform);
                 allPlatforms.Add(newPlatform);
             }
         }

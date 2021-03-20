@@ -17,7 +17,7 @@ namespace CustomFloorPlugin.Installers
                 Container.BindInterfacesAndSelfTo<BSEvents>().AsSingle().WithArguments(lastNoteTime);
                 if (sceneSetupData.environmentInfo.environmentName == "Multiplayer")
                 {
-                    Container.BindInterfacesTo<MultiplayerGameHelper>().AsSingle().NonLazy();
+                    Container.BindInterfacesTo<MultiplayerGameHelper>().AsSingle();
                 }
             }
         }

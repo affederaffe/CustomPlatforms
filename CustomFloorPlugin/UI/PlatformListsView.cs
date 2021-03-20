@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 
@@ -23,50 +24,50 @@ namespace CustomFloorPlugin.UI
     internal class PlatformListsView : BSMLAutomaticViewController, INotifyPropertyChanged
     {
         private PluginConfig _config;
-        private AssetLoader _assetLoader;
         private PlatformManager _platformManager;
         private PlatformSpawner _platformSpawner;
+        private Dictionary<CustomPlatform, CustomListTableData.CustomCellInfo> platformCellPairs;
 
         [Inject]
-        public void Construct(PluginConfig config, AssetLoader assetLoader, PlatformSpawner platformSpawner, PlatformManager platformManager)
+        public void Construct(PluginConfig config, PlatformSpawner platformSpawner, PlatformManager platformManager)
         {
             _config = config;
-            _assetLoader = assetLoader;
             _platformManager = platformManager;
             _platformSpawner = platformSpawner;
+            platformCellPairs = new();
         }
 
         [UIComponent("requirements-modal")]
-        internal readonly ModalView requirementsModal;
+        private readonly ModalView requirementsModal = null;
 
         /// <summary>
         /// The table of currently loaded Platforms for singleplayer
         /// </summary>
         [UIComponent("singleplayer-platforms-list")]
-        internal readonly CustomListTableData singleplayerPlatformListTable;
+        private readonly CustomListTableData singleplayerPlatformListTable = null;
 
         /// <summary>
         /// The table of currently loaded Platforms for multiplayer
         /// </summary>
         [UIComponent("multiplayer-platforms-list")]
-        internal readonly CustomListTableData multiplayerPlatformListTable;
+        private readonly CustomListTableData multiplayerPlatformListTable = null;
 
         /// <summary>
         /// The table of currently loaded Platforms for multiplayer
         /// </summary>
         [UIComponent("a360-platforms-list")]
-        internal readonly CustomListTableData a360PlatformListTable;
+        private readonly CustomListTableData a360PlatformListTable = null;
 
         /// <summary>
         /// List of requirements or suggestions for the current platform
         /// </summary>
         [UIComponent("requirements-list")]
-        internal readonly CustomListTableData requirementsListTable;
+        private readonly CustomListTableData requirementsListTable = null;
 
         /// <summary>
         /// An <see cref="System.Array"/> holding all <see cref="CustomListTableData"/>s
         /// </summary>
-        internal CustomListTableData[] allListTables;
+        private CustomListTableData[] allListTables;
 
         /// <summary>
         /// Used to hide the button if there's no requirement or suggestion
@@ -178,9 +179,7 @@ namespace CustomFloorPlugin.UI
             allListTables = new CustomListTableData[] { singleplayerPlatformListTable, multiplayerPlatformListTable, a360PlatformListTable };
             foreach (CustomPlatform platform in _platformManager.allPlatforms)
             {
-                CustomListTableData.CustomCellInfo cell = new(platform.platName, platform.platAuthor, platform.icon);
-                foreach (CustomListTableData listTable in allListTables)
-                    listTable.data.Add(cell);
+                AddCellForPlatform(platform, false);
             }
             for (int i = 0; i < allListTables.Length; i++)
             {
@@ -189,6 +188,49 @@ namespace CustomFloorPlugin.UI
                 if (!allListTables[i].tableView.visibleCells.Any(x => x.selected))
                     allListTables[i].tableView.ScrollToCellWithIdx(idx, TableView.ScrollPositionType.Beginning, false);
                 allListTables[i].tableView.SelectCellWithIdx(idx);
+            }
+        }
+
+        internal void AddCellForPlatform(CustomPlatform platform, bool forceReload)
+        {
+            if (allListTables == null)
+                return;
+
+            CustomListTableData.CustomCellInfo cell = new(platform.platName, platform.platAuthor, platform.icon);
+            platformCellPairs.Add(platform, cell);
+            foreach (CustomListTableData listTable in allListTables)
+            {
+                listTable.data.Add(cell);
+                if (forceReload)
+                    listTable.tableView.ReloadData();
+            }
+        }
+
+        internal void RemoveCellForPlatform(CustomPlatform platform)
+        {
+            if (allListTables == null)
+                return;
+
+            CustomListTableData.CustomCellInfo cell = platformCellPairs[platform];
+            foreach (CustomListTableData listTable in allListTables)
+            {
+                listTable.data.Remove(cell);
+                listTable.tableView.ReloadData();
+            }
+            if (_platformManager.currentSingleplayerPlatform == platform)
+            {
+                singleplayerPlatformListTable.tableView.SelectCellWithIdx(0);
+                singleplayerPlatformListTable.tableView.ScrollToCellWithIdx(0, TableView.ScrollPositionType.Center, true);
+            }
+            if (_platformManager.currentMultiplayerPlatform == platform)
+            {
+                multiplayerPlatformListTable.tableView.SelectCellWithIdx(0);
+                multiplayerPlatformListTable.tableView.ScrollToCellWithIdx(0, TableView.ScrollPositionType.Center, true);
+            }
+            if (_platformManager.currentA360Platform == platform)
+            {
+                a360PlatformListTable.tableView.SelectCellWithIdx(0);
+                a360PlatformListTable.tableView.ScrollToCellWithIdx(0, TableView.ScrollPositionType.Center, true);
             }
         }
 
@@ -205,15 +247,15 @@ namespace CustomFloorPlugin.UI
             foreach (string req in platform.requirements)
             {
                 CustomListTableData.CustomCellInfo cell = _platformManager.allPluginNames.Contains(req)
-                    ? new CustomListTableData.CustomCellInfo(req, "Required", _assetLoader.greenCheck)
-                    : new CustomListTableData.CustomCellInfo(req, "Required", _assetLoader.redX);
+                    ? new CustomListTableData.CustomCellInfo(req, "Required", AssetLoader.instance.greenCheck)
+                    : new CustomListTableData.CustomCellInfo(req, "Required", AssetLoader.instance.redX);
                 requirementsListTable.data.Add(cell);
             }
             foreach (string sug in platform.suggestions)
             {
                 CustomListTableData.CustomCellInfo cell = _platformManager.allPluginNames.Contains(sug)
-                    ? new CustomListTableData.CustomCellInfo(sug, "Suggestion", _assetLoader.yellowCheck)
-                    : new CustomListTableData.CustomCellInfo(sug, "Suggestion", _assetLoader.yellowX);
+                    ? new CustomListTableData.CustomCellInfo(sug, "Suggestion", AssetLoader.instance.yellowCheck)
+                    : new CustomListTableData.CustomCellInfo(sug, "Suggestion", AssetLoader.instance.yellowX);
                 requirementsListTable.data.Add(cell);
             }
             requirementsListTable.tableView.ReloadData();

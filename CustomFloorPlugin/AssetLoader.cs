@@ -3,7 +3,10 @@ using System.Globalization;
 using System.IO;
 using System.Reflection;
 
-using CustomFloorPlugin.Configuration;
+using System.Linq;
+
+using IPA.Utilities;
+
 using CustomFloorPlugin.Extensions;
 
 using UnityEngine;
@@ -16,8 +19,10 @@ namespace CustomFloorPlugin
     /// <summary>
     /// Loads all images into sprites as well as stealing some important GameObjects 
     /// from the GreenDayGrenade environment
+    /// This is a <see cref="PersistentSingleton{T}"/> to prevent loading the scene more than once
+    /// which would happen when settings are applied.
     /// </summary>
-    public class AssetLoader
+    public class AssetLoader : PersistentSingleton<AssetLoader>
     {
         /// <summary>
         /// Acts as a prefab for custom light sources that require meshes...<br/>
@@ -73,14 +78,35 @@ namespace CustomFloorPlugin
         /// </summary>
         internal Sprite yellowX;
 
-        private readonly PluginConfig _config;
-
-        public AssetLoader(PluginConfig config)
+        /// <summary>
+        /// An array of all materials to reduce Resources calls
+        /// </summary>
+        internal Material[] AllMaterials
         {
-            _config = config;
+            get
+            {
+                if (_AllMaterials == null)
+                {
+                    _AllMaterials = Resources.FindObjectsOfTypeAll<Material>();
+                }
+                return _AllMaterials;
+            }
+        }
+        private Material[] _AllMaterials;
+
+        private bool isInitialized;
+
+        internal void LoadAssets()
+        {
+            if (!isInitialized)
+            {
+                isInitialized = true;
+                LoadSprites();
+                LoadObjects();
+            }
         }
 
-        internal void LoadSprites()
+        private void LoadSprites()
         {
             Assembly executingAssembly = Assembly.GetExecutingAssembly();
             defaultPlatformCover = executingAssembly.GetManifestResourceStream("CustomFloorPlugin.Assets.LvlInsaneCover.png").ReadSprite();
@@ -98,35 +124,34 @@ namespace CustomFloorPlugin
         /// Gets the Non-Mesh lightSource and the playersPlace used in the Platform Preview too.<br/>
         /// Now also steals the LightEffects for multiplayer, this scene is really useful
         /// </summary>
-        internal void LoadAssets(Transform parent)
+        private void LoadObjects()
         {
-            SharedCoroutineStarter.instance.StartCoroutine(FuckUnity());
+            StartCoroutine(FuckUnity());
             IEnumerator<WaitUntil> FuckUnity()
             {//did you know loaded scenes are loaded asynchronously, regarless if you use async or not?
-                yield return null;
                 Scene greenDay = SceneManager.LoadScene("GreenDayGrenadeEnvironment", new LoadSceneParameters(LoadSceneMode.Additive));
                 yield return new WaitUntil(() => greenDay.isLoaded);
                 GameObject root = greenDay.GetRootGameObjects()[0];
 
                 heart = root.transform.Find("GreenDayCity/ArmHeartLighting").gameObject;
                 heart.SetActive(false);
-                heart.transform.SetParent(parent);
+                heart.transform.SetParent(transform);
                 heart.name = "<3";
 
                 playersPlace = root.transform.Find("PlayersPlace").gameObject;
                 playersPlace.SetActive(false);
-                playersPlace.transform.SetParent(parent);
+                playersPlace.transform.SetParent(transform);
 
                 lightSource = root.transform.Find("GlowLineL (2)").gameObject;
                 lightSource.SetActive(false);
-                lightSource.transform.SetParent(parent);
+                lightSource.transform.SetParent(transform);
                 lightSource.name = "LightSource";
 
                 lightEffects = root.transform.Find("LightEffects").gameObject;
                 lightEffects.SetActive(false);
-                lightEffects.transform.SetParent(parent);
+                lightEffects.transform.SetParent(transform);
 
-                SceneManager.UnloadSceneAsync("GreenDayGrenadeEnvironment");
+                SceneManager.UnloadSceneAsync(greenDay);
 
                 using Stream manifestResourceStream = Assembly.GetExecutingAssembly().GetManifestResourceStream("CustomFloorPlugin.Assets.heart.mesh");
                 using StreamReader streamReader = new(manifestResourceStream);
@@ -159,15 +184,12 @@ namespace CustomFloorPlugin
                     triangles = triangles.ToArray()
                 };
 
-                GameObject.DestroyImmediate(heart.GetComponent<ProBuilderMesh>());
+                DestroyImmediate(heart.GetComponent<ProBuilderMesh>());
 
                 heart.GetComponent<MeshFilter>().mesh = mesh;
                 heart.transform.position = new Vector3(-8f, 25f, 26f);
                 heart.transform.rotation = Quaternion.Euler(-100f, 90f, 90f);
                 heart.transform.localScale = new Vector3(25f, 25f, 25f);
-
-                heart.SetActive(_config.ShowHeart);
-                heart.GetComponent<InstancedMaterialLightWithId>().ColorWasSet(Color.magenta);
             }
         }
     }

@@ -14,8 +14,7 @@ namespace CustomFloorPlugin
 
         void INotifyPlatformEnabled.PlatformEnabled(DiContainer container)
         {
-            if (!tmPro)
-                return;
+            if (tmPro == null) return;
             startText = tmPro.text;
             switch (eventType)
             {
@@ -42,8 +41,7 @@ namespace CustomFloorPlugin
 
         void INotifyPlatformDisabled.PlatformDisabled()
         {
-            if (!tmPro)
-                return;
+            if (tmPro == null) return;
             tmPro.text = startText;
             switch (eventType)
             {

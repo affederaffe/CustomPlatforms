@@ -3,8 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
-using BeatSaberMarkupLanguage.Components;
-
+using CustomFloorPlugin.Configuration;
 using CustomFloorPlugin.UI;
 
 using IPA.Loader;
@@ -28,21 +27,21 @@ namespace CustomFloorPlugin
     internal class API : IInitializable, IDisposable
     {
         private readonly SiraLog _siraLog;
-        private readonly AssetLoader _assetLoader;
+        private readonly PluginConfig _config;
         private readonly PlatformLoader _platformLoader;
         private readonly PlatformManager _platformManager;
         private readonly PlatformSpawner _platformSpawner;
         private readonly PlatformListsView _platformListsView;
 
         public API(SiraLog siraLog,
-                   AssetLoader assetLoader,
+            PluginConfig config,
                    PlatformLoader platformLoader,
                    PlatformManager platformManager,
                    PlatformSpawner platformSpawner,
                    PlatformListsView platformListsView)
         {
             _siraLog = siraLog;
-            _assetLoader = assetLoader;
+            _config = config;
             _platformLoader = platformLoader;
             _platformManager = platformManager;
             _platformSpawner = platformSpawner;
@@ -50,50 +49,47 @@ namespace CustomFloorPlugin
         }
 
         private FileSystemWatcher _fileSystemWatcher;
-
         private bool apiRequest;
+
+        private enum SubscriptionType
+        {
+            Subscribe,
+            Unsubscribe
+        }
 
         public void Initialize()
         {
-            _fileSystemWatcher = new FileSystemWatcher(_platformManager.customPlatformsFolderPath, "*.plat");
-            _fileSystemWatcher.Created += (object sender, FileSystemEventArgs e) => SharedCoroutineStarter.instance.StartCoroutine(OnFileCreated(sender, e));
-            _fileSystemWatcher.Deleted += (object sender, FileSystemEventArgs e) => SharedCoroutineStarter.instance.StartCoroutine(OnFileDeleted(sender, e));
+            _fileSystemWatcher = new FileSystemWatcher(_config.CustomPlatformsDirectory, "*.plat");
+            _fileSystemWatcher.Created += OnFileCreated;
+            _fileSystemWatcher.Deleted += OnFileDeleted;
             _fileSystemWatcher.EnableRaisingEvents = true;
             if (PluginManager.GetPlugin("SongCore") != null)
-                SubscribeToSongCoreEvent();
+                SubscribeToSongCoreEvent(SubscriptionType.Subscribe);
             if (PluginManager.GetPlugin("Cinema") != null)
-                SubscribeToCinemaEvent();
+                SubscribeToCinemaEvent(SubscriptionType.Subscribe);
         }
 
         public void Dispose()
         {
-            _fileSystemWatcher.Created -= (object sender, FileSystemEventArgs e) => SharedCoroutineStarter.instance.StartCoroutine(OnFileCreated(sender, e));
-            _fileSystemWatcher.Deleted -= (object sender, FileSystemEventArgs e) => SharedCoroutineStarter.instance.StartCoroutine(OnFileDeleted(sender, e));
+            _fileSystemWatcher.Created -= OnFileCreated;
+            _fileSystemWatcher.Deleted -= OnFileDeleted;
             _fileSystemWatcher.Dispose();
+            if (PluginManager.GetPlugin("SongCore") != null)
+                SubscribeToCinemaEvent(SubscriptionType.Unsubscribe);
+            if (PluginManager.GetPlugin("Cinema") != null)
+                SubscribeToCinemaEvent(SubscriptionType.Unsubscribe);
         }
 
-        private IEnumerator<WaitForEndOfFrame> OnFileCreated(object sender, FileSystemEventArgs e)
+        private void OnFileCreated(object sender, FileSystemEventArgs e)
         {
-            yield return new WaitForEndOfFrame();
-            SharedCoroutineStarter.instance.StartCoroutine(_platformLoader.LoadFromFileAsync(e.FullPath, (CustomPlatform platform, string path) =>
+            SharedCoroutineStarter.instance.StartCoroutine(_platformLoader.LoadFromFileAsync(e.FullPath, (CustomPlatform platform) =>
             {
-                _platformManager.HandlePlatformLoaded(platform, path);
-
-                if (_platformListsView.allListTables != null)
-                {
-                    if (platform.icon == null)
-                        platform.icon = _assetLoader.fallbackCover;
-                    CustomListTableData.CustomCellInfo cell = new(platform.platName, platform.platAuthor, platform.icon);
-                    foreach (CustomListTableData listTable in _platformListsView.allListTables)
-                    {
-                        listTable.data.Add(cell);
-                        listTable.tableView.ReloadData();
-                    }
-                }
-
+                _platformManager.HandlePlatformLoaded(platform);
+                CustomPlatform newPlatform = _platformLoader.platformFilePaths[platform.fullPath];
+                _platformListsView.AddCellForPlatform(newPlatform, true);
                 if (apiRequest)
                 {
-                    _platformManager.apiRequestIndex = _platformManager.allPlatforms.IndexOf(platform);
+                    _platformManager.apiRequestedPlatform = newPlatform;
                     apiRequest = false;
                 }
             }));
@@ -102,61 +98,13 @@ namespace CustomFloorPlugin
         /// <summary>
         /// Destroy the platform and remove all references
         /// </summary>
-        private IEnumerator<WaitForEndOfFrame> OnFileDeleted(object sender, FileSystemEventArgs e)
+        private void OnFileDeleted(object sender, FileSystemEventArgs e)
         {
-            yield return new WaitForEndOfFrame();
             if (_platformLoader.platformFilePaths.TryGetValue(e.FullPath, out CustomPlatform platform))
             {
-                if (_platformListsView.allListTables != null)
-                {
-                    foreach (CustomListTableData listTable in _platformListsView.allListTables)
-                    {
-                        CustomListTableData.CustomCellInfo deletedPlatformCell = listTable.data.Find(x => x.text == platform.platName && x.subtext == platform.platAuthor);
-                        listTable.data.Remove(deletedPlatformCell);
-                        listTable.tableView.ReloadData();
-                    }
-                    bool platformDidChange = false;
-                    if (_platformManager.currentSingleplayerPlatform == platform)
-                    {
-                        _platformListsView.singleplayerPlatformListTable.tableView.SelectCellWithIdx(0);
-                        platformDidChange = true;
-                    }
-
-                    if (_platformManager.currentMultiplayerPlatform == platform)
-                    {
-                        _platformListsView.multiplayerPlatformListTable.tableView.SelectCellWithIdx(0);
-                        platformDidChange = true;
-                    }
-
-                    if (_platformManager.currentA360Platform == platform)
-                    {
-                        _platformListsView.a360PlatformListTable.tableView.SelectCellWithIdx(0);
-                        platformDidChange = true;
-                    }
-                    if (platformDidChange)
-                        _platformSpawner.ChangeToPlatform(0);
-
-                }
-                else
-                {
-                    bool platformDidChange = false;
-                    if (_platformManager.currentSingleplayerPlatform == platform)
-                    {
-                        _platformManager.currentSingleplayerPlatform = _platformManager.allPlatforms[0];
-                        platformDidChange = true;
-                    }
-                    if (_platformManager.currentMultiplayerPlatform == platform)
-                    {
-                        _platformManager.currentMultiplayerPlatform = _platformManager.allPlatforms[0];
-                        platformDidChange = true;
-                    }
-                    if (_platformManager.currentA360Platform == platform)
-                    {
-                        _platformManager.currentA360Platform = _platformManager.allPlatforms[0];
-                    }
-                    if (platformDidChange)
-                        _platformSpawner.ChangeToPlatform(0);
-                }
+                _platformListsView.RemoveCellForPlatform(platform);
+                if (_platformManager.activePlatform == platform)
+                    _platformSpawner.ChangeToPlatform(0);
 
                 _platformLoader.platformFilePaths.Remove(platform.fullPath);
                 _platformManager.allPlatforms.Remove(platform);
@@ -165,126 +113,144 @@ namespace CustomFloorPlugin
         }
 
         /// <summary>
-        /// Subscribes to SongCore's event, calling it after checking if the plugin exists (optional dependency)
+        /// (Un-)Subscribes to SongCore's event, call this after checking if the plugin exists (optional dependency)
         /// </summary>
-        private void SubscribeToSongCoreEvent()
+        private void SubscribeToSongCoreEvent(SubscriptionType subscriptionType)
         {
-            SongCore.Plugin.CustomSongPlatformSelectionDidChange += (bool usePlatform, string name, string hash, IPreviewBeatmapLevel level) => SharedCoroutineStarter.instance.StartCoroutine(HandleSongSelected(usePlatform, name, hash, level));
+            if (subscriptionType == SubscriptionType.Subscribe)
+                SongCore.Plugin.CustomSongPlatformSelectionDidChange += HandleSongCoreEvent;
+            else
+                SongCore.Plugin.CustomSongPlatformSelectionDidChange -= HandleSongCoreEvent;
         }
 
         /// <summary>
-        /// Subscribes to Cinema's event, calling it after checking if the plugin exists (optional dependency)
+        /// (Un-)Subscribes to Cinema's event, call this after checking if the plugin exists (optional dependency)
         /// </summary>
-        private void SubscribeToCinemaEvent()
+        private void SubscribeToCinemaEvent(SubscriptionType subscriptionType)
         {
-            BeatSaberCinema.Events.AllowCustomPlatform += (bool allowPlatform) =>
-            {
-                if (!allowPlatform) _platformManager.apiRequestIndex = 0;
-            };
+            if (subscriptionType == SubscriptionType.Subscribe)
+                BeatSaberCinema.Events.AllowCustomPlatform += HandleCinemaEvent;
+            else
+                BeatSaberCinema.Events.AllowCustomPlatform -= HandleCinemaEvent;
+        }
+
+        /// <summary>
+        /// Disable platform spawning as required by Cinema
+        /// </summary>
+        private void HandleCinemaEvent(bool allowPlatform)
+        {
+            if (!allowPlatform)
+                _platformManager.apiRequestedPlatform = _platformManager.allPlatforms[0];
         }
 
         /// <summary>
         /// The class the API response of modelsaber is deserialized on
         /// </summary>
         [Serializable]
-        private class PlatformDownloadData
+        public class PlatformDownloadData
         {
-            public string[] tags = Array.Empty<string>();
-            public string type = string.Empty;
-            public string name = string.Empty;
-            public string author = string.Empty;
-            public string image = string.Empty;
-            public string hash = string.Empty;
-            public string bsaber = string.Empty;
-            public string download = string.Empty;
-            public string install_link = string.Empty;
-            public string date = string.Empty;
+            public string[] tags;
+            public string type;
+            public string name;
+            public string author;
+            public string image;
+            public string hash;
+            public string bsaber;
+            public string download;
+            public string install_link;
+            public string date;
         }
 
         /// <summary>
-        /// Handles when a song is selected, downloading a <see cref="CustomPlatform"/> from modelsaber if needed
+        /// Downloads a <see cref="CustomPlatform"/> from modelsaber if the selected level requires it
         /// </summary>
         /// <param name="usePlatform">Wether the selected song requests a platform or not</param>
         /// <param name="name">The name of the requested platform</param>
         /// <param name="hash">The hash of the requested platform</param>
         /// <param name="level">The song the platform was requested for</param>
-        /// <returns></returns>
-        private IEnumerator<UnityWebRequestAsyncOperation> HandleSongSelected(bool usePlatform, string name, string hash, IPreviewBeatmapLevel level)
+        private void HandleSongCoreEvent(bool usePlatform, string name, string hash, IPreviewBeatmapLevel level)
         {
             // No platform is requested, abort
             if (!usePlatform)
             {
-                _platformManager.apiRequestIndex = -1;
+                _platformManager.apiRequestedPlatform = null;
                 _platformManager.apiRequestedLevelId = null;
-                yield break;
+                return;
             }
 
             _platformManager.apiRequestedLevelId = level.levelID;
 
             // Test if the requested platform is already downloaded
-            for (int i = 0; i < _platformManager.allPlatforms.Count; i++)
+            foreach (CustomPlatform platform in _platformManager.allPlatforms)
             {
-                if (_platformManager.allPlatforms[i].platHash == hash || _platformManager.allPlatforms[i].platName.StartsWith(name))
+                if (platform.platHash == hash || platform.platName.StartsWith(name))
                 {
-                    _platformManager.apiRequestIndex = i;
-                    yield break;
+                    _platformManager.apiRequestedPlatform = platform;
+                    return;
                 }
             }
 
-            if (hash != null)
+            SharedCoroutineStarter.instance.StartCoroutine(SendWebRequest());
+            IEnumerator<UnityWebRequestAsyncOperation> SendWebRequest()
             {
-                using UnityWebRequest www = UnityWebRequest.Get("https://modelsaber.com/api/v2/get.php?type=platform&filter=hash:" + hash);
-                yield return www.SendWebRequest();
-
-                if (www.isNetworkError || www.isHttpError)
-                    _siraLog.Error("Error downloading a platform: \n" + www.error);
-                else
+                if (hash != null)
                 {
-                    Dictionary<string, PlatformDownloadData> downloadData = JsonConvert.DeserializeObject<Dictionary<string, PlatformDownloadData>>(www.downloadHandler.text);
-                    PlatformDownloadData data = downloadData.FirstOrDefault().Value;
-                    if (data != null)
+                    using UnityWebRequest www = UnityWebRequest.Get("https://modelsaber.com/api/v2/get.php?type=platform&filter=hash:" + hash);
+                    yield return www.SendWebRequest();
+
+                    if (www.isNetworkError || www.isHttpError)
                     {
-                        SharedCoroutineStarter.instance.StartCoroutine(DownloadSavePlatform(data));
+                        _siraLog.Error("Error downloading a platform: \n" + www.error);
+                    }
+                    else
+                    {
+                        Dictionary<string, PlatformDownloadData> downloadData = JsonConvert.DeserializeObject<Dictionary<string, PlatformDownloadData>>(www.downloadHandler.text);
+                        PlatformDownloadData data = downloadData.FirstOrDefault().Value;
+                        if (data != null)
+                        {
+                            SharedCoroutineStarter.instance.StartCoroutine(DownloadSavePlatform(data));
+                        }
                     }
                 }
-            }
 
-            else if (name != null)
-            {
-                using UnityWebRequest www = UnityWebRequest.Get("https://modelsaber.com/api/v2/get.php?type=platform&filter=name:" + name);
-                yield return www.SendWebRequest();
-
-                if (www.isNetworkError || www.isHttpError)
-                    _siraLog.Info("Error downloading a platform: \n" + www.error);
-                else
+                else if (name != null)
                 {
-                    Dictionary<string, PlatformDownloadData> downloadData = JsonConvert.DeserializeObject<Dictionary<string, PlatformDownloadData>>(www.downloadHandler.text);
-                    PlatformDownloadData data = downloadData.FirstOrDefault().Value;
-                    if (data != null)
+                    using UnityWebRequest www = UnityWebRequest.Get("https://modelsaber.com/api/v2/get.php?type=platform&filter=name:" + name);
+                    yield return www.SendWebRequest();
+
+                    if (www.isNetworkError || www.isHttpError)
                     {
-                        SharedCoroutineStarter.instance.StartCoroutine(DownloadSavePlatform(data));
+                        _siraLog.Error("Error downloading a platform: \n" + www.error);
+                    }
+                    else
+                    {
+                        Dictionary<string, PlatformDownloadData> downloadData = JsonConvert.DeserializeObject<Dictionary<string, PlatformDownloadData>>(www.downloadHandler.text);
+                        PlatformDownloadData data = downloadData.FirstOrDefault().Value;
+                        if (data != null)
+                        {
+                            SharedCoroutineStarter.instance.StartCoroutine(DownloadSavePlatform(data));
+                        }
                     }
                 }
             }
         }
 
         /// <summary>
-        /// Downloads the .plat file from modelsaber, then saves it in the CustomPlatforms directory and loads it
+        /// Downloads the .plat file from modelsaber and saves it in the CustomPlatforms directory
         /// </summary>
         /// <param name="data">The API deserialized API response containing the download link to the .plat file</param>
-        /// <returns></returns>
         private IEnumerator<UnityWebRequestAsyncOperation> DownloadSavePlatform(PlatformDownloadData data)
         {
             using UnityWebRequest www = UnityWebRequest.Get(data.download);
             yield return www.SendWebRequest();
 
             if (www.isNetworkError || www.isHttpError)
-                _siraLog.Info("Error downloading a platform: \n" + www.error);
+                _siraLog.Error("Error downloading a platform: \n" + www.error);
             else
             {
-                string destination = Path.Combine(_platformManager.customPlatformsFolderPath, data.name + ".plat");
-                File.WriteAllBytes(destination, www.downloadHandler.data);
+                string destination = Path.Combine(_config.CustomPlatformsDirectory, data.name + ".plat");
                 apiRequest = true;
+                File.WriteAllBytes(destination, www.downloadHandler.data);
             }
         }
     }

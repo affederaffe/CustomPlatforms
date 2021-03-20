@@ -12,7 +12,7 @@ namespace CustomFloorPlugin.Extensions
     internal static class Extentions
     {
         /// <summary>
-        /// Tests if a <see cref="ScenesTransitionSetupDataSO"/> transitions to a 360° level
+        /// Checks if a <see cref="ScenesTransitionSetupDataSO"/> transitions to a 360° level
         /// </summary>
         internal static bool Is360Level(this ScenesTransitionSetupDataSO setupData)
         {
@@ -36,11 +36,9 @@ namespace CustomFloorPlugin.Extensions
         }
 
         /// <summary>
-        /// Gets the time of the song the last note is spawned<br/>
+        /// Returns the time of the song the last note is spawned<br/>
         /// (stolen from SaberFactory)
         /// </summary>
-        /// <param name="beatmapData"></param>
-        /// <returns></returns>
         internal static float GetLastNoteTime(this BeatmapData beatmapData)
         {
             float lastTime = 0f;

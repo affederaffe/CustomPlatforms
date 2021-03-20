@@ -26,6 +26,8 @@ namespace CustomFloorPlugin.UI
         - Updated for 1.13.5
         - Internal code 'cleanup'
         - Added 'Shuffle Platforms' option
+        - Added manual config option to change your CustomPlatforms directory
+        - New feature: nested components
 
 <size=150%><color=#888888>Version 6.1.1</color></size>
         - Security fix:  removed embedded CustomScripts

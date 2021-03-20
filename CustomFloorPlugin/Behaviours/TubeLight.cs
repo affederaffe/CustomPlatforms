@@ -1,5 +1,7 @@
 using IPA.Utilities;
 
+using SiraUtil.Tools;
+
 using UnityEngine;
 
 using Zenject;
@@ -49,7 +51,6 @@ namespace CustomFloorPlugin
             Gizmos.DrawCube(cubeCenter, new Vector3(2 * width, length, 2 * width));
         }
 
-        private AssetLoader _assetLoader;
         private PlatformManager _platformManager;
         private LightWithIdManager _lightManager;
 
@@ -57,25 +58,19 @@ namespace CustomFloorPlugin
         private GameObject iHeartBeatSaber;
 
         [Inject]
-        public void Construct(AssetLoader assetLoader, PlatformManager platformManager, LightWithIdManager lightManager)
+        public void Construct(PlatformManager platformManager, LightWithIdManager lightManager)
         {
-            _assetLoader = assetLoader;
             _platformManager = platformManager;
             _lightManager = lightManager;
         }
 
         void INotifyPlatformEnabled.PlatformEnabled(DiContainer container)
         {
-            // Skip if the light is already initialized.
-            // This can happen if a platform uses a GameObject instead of a prefab for a TrackRing
-            if (tubeBloomLight != null || iHeartBeatSaber != null)
-                return;
-
             container.Inject(this);
             GetComponent<MeshRenderer>().enabled = false;
             if (GetComponent<MeshFilter>().mesh.vertexCount == 0)
             {
-                tubeBloomLight = Instantiate(_assetLoader.lightSource.GetComponent<TubeBloomPrePassLight>());
+                tubeBloomLight = Instantiate(AssetLoader.instance.lightSource.GetComponent<TubeBloomPrePassLight>());
                 _platformManager.spawnedObjects.Add(tubeBloomLight.gameObject);
 
                 tubeBloomLight.transform.parent = transform;
@@ -107,11 +102,10 @@ namespace CustomFloorPlugin
 
                 SetColorToDefault();
                 tubeBloomLight.gameObject.SetActive(true);
-
             }
             else
             {
-                iHeartBeatSaber = Instantiate(_assetLoader.heart);
+                iHeartBeatSaber = Instantiate(AssetLoader.instance.heart);
                 _platformManager.spawnedObjects.Add(iHeartBeatSaber);
                 iHeartBeatSaber.transform.parent = transform;
                 iHeartBeatSaber.transform.position = transform.position;

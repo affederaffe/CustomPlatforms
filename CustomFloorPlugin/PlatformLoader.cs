@@ -13,18 +13,19 @@ namespace CustomFloorPlugin
     /// </summary>
     public class PlatformLoader
     {
-        internal readonly Dictionary<string, CustomPlatform> platformFilePaths = new();
+        internal readonly Dictionary<string, CustomPlatform> platformFilePaths;
         private readonly MaterialSwapper _materialSwapper;
 
         public PlatformLoader(MaterialSwapper materialSwapper)
         {
+            platformFilePaths = new();
             _materialSwapper = materialSwapper;
         }
 
         /// <summary>
         /// Asynchronously loads a <see cref="CustomPlatform"/> from a specified file path
         /// </summary>
-        internal IEnumerator<AsyncOperation> LoadFromFileAsync(string fullPath, Action<CustomPlatform, string> callback)
+        internal IEnumerator<AsyncOperation> LoadFromFileAsync(string fullPath, Action<CustomPlatform> callback)
         {
             if (!File.Exists(fullPath))
                 throw new FileNotFoundException("File could not be found", fullPath);
@@ -77,20 +78,19 @@ namespace CustomFloorPlugin
                 }
             }
 
-            customPlatform.name = customPlatform.platName + " by " + customPlatform.platAuthor;
-            customPlatform.fullPath = fullPath;
-
             using MD5 md5 = MD5.Create();
             byte[] hash = md5.ComputeHash(fileStream);
             customPlatform.platHash = BitConverter.ToString(hash).Replace("-", string.Empty).ToLowerInvariant();
+            customPlatform.fullPath = fullPath;
+            customPlatform.name = customPlatform.platName + " by " + customPlatform.platAuthor;
+            if (customPlatform.icon == null)
+                customPlatform.icon = AssetLoader.instance.fallbackCover;
 
             _materialSwapper.ReplaceMaterials(customPlatform.gameObject);
 
-            callback(customPlatform, fullPath);
+            callback.Invoke(customPlatform);
 
             GameObject.Destroy(platformPrefab);
-
-            yield break;
         }
     }
 }

@@ -39,7 +39,7 @@ namespace CustomFloorPlugin
                 if (_animation == null)
                 {
                     _animation = gameObject.AddComponent<Animation>();
-                    _platformManager.spawnedComponents.Add(_animation);
+                    _platformManager.spawnedObjects.Add(_animation);
                     _animation.AddClip(animationClip, "clip");
                     _animation.Play("clip");
                     _animation["clip"].speed = 0;

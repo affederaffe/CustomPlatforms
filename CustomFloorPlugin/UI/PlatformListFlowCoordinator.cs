@@ -46,7 +46,7 @@ namespace CustomFloorPlugin.UI
         /// [Called by Beat Saber]
         /// </summary>
         /// <param name="_1"></param>
-        protected override void BackButtonWasPressed(ViewController _1)
+        protected override void BackButtonWasPressed(ViewController viewController)
         {
             _mainFlowCoordinator.DismissFlowCoordinator(this, null, ViewController.AnimationDirection.Horizontal, false);
         }

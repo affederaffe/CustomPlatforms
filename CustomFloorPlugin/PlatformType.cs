@@ -4,6 +4,7 @@
     {
         Singleplayer,
         Multiplayer,
-        A360
+        A360,
+        API
     }
 }

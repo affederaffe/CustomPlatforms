@@ -25,13 +25,12 @@ namespace CustomFloorPlugin
             _beatmapObjectCallbackController = beatmapObjectCallbackController;
         }
 
-        public void PlatformEnabled(DiContainer container)
+        void INotifyPlatformEnabled.PlatformEnabled(DiContainer container)
         {
             container.Inject(this);
-            if (_beatmapObjectCallbackController == null)
-                return;
+            if (_beatmapObjectCallbackController == null) return;
             LightRotationEventEffect rotEffect = gameObject.AddComponent<LightRotationEventEffect>();
-            _platformManager.spawnedComponents.Add(rotEffect);
+            _platformManager.spawnedObjects.Add(rotEffect);
             rotEffect.SetField("_beatmapObjectCallbackController", _beatmapObjectCallbackController);
             rotEffect.SetField("_event", (BeatmapEventType)eventType);
             rotEffect.SetField("_rotationVector", rotationVector);

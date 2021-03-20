@@ -9,19 +9,16 @@ namespace CustomFloorPlugin
 {
     internal class MultiplayerGameHelper : IInitializable, IDisposable
     {
-        private readonly AssetLoader _assetLoader;
         private readonly PlatformManager _platformManager;
         private readonly PlatformSpawner _platformSpawner;
         private readonly MultiplayerPlayersManager _multiplayerPlayersManager;
         private readonly DiContainer _container;
 
-        public MultiplayerGameHelper(AssetLoader assetLoader,
-                                     PlatformManager platformManager,
+        public MultiplayerGameHelper(PlatformManager platformManager,
                                      PlatformSpawner platformSpawner,
                                      MultiplayerPlayersManager multiplayerPlayersManager,
                                      DiContainer container)
         {
-            _assetLoader = assetLoader;
             _platformManager = platformManager;
             _platformSpawner = platformSpawner;
             _multiplayerPlayersManager = multiplayerPlayersManager;
@@ -54,7 +51,7 @@ namespace CustomFloorPlugin
         /// </summary>
         private void SpawnLightEffects()
         {
-            GameObject lightEffects = _container.InstantiatePrefab(_assetLoader.lightEffects);
+            GameObject lightEffects = _container.InstantiatePrefab(AssetLoader.instance.lightEffects);
             _platformManager.spawnedObjects.Add(lightEffects);
             lightEffects.SetActive(true);
         }
