@@ -26,20 +26,22 @@ namespace CustomFloorPlugin
     {
         private SiraLog _siraLog;
         private PluginConfig _config;
+        private AssetLoader _assetLoader;
         private PlatformLoader _platformLoader;
 
         [Inject]
-        public void Construct(SiraLog siraLog, PluginConfig config, PlatformLoader platformLoader)
+        public void Construct(SiraLog siraLog, PluginConfig config, AssetLoader assetLoader, PlatformLoader platformLoader)
         {
             _siraLog = siraLog;
             _config = config;
+            _assetLoader = assetLoader;
             _platformLoader = platformLoader;
         }
 
         /// <summary>
         /// List of all loaded Platforms
         /// </summary>
-        internal List<CustomPlatform> allPlatforms;
+        internal List<CustomPlatform> allPlatforms = new();
 
         /// <summary>
         /// Keeps track of the currently selected <see cref="PlatformType"/>
@@ -102,7 +104,6 @@ namespace CustomFloorPlugin
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Code Quality", "IDE0051:Remove unused private members", Justification = "Called by Unity")]
         private void Start()
         {
-            AssetLoader.instance.LoadAssets();
             LoadPlatforms();
         }
 
@@ -123,33 +124,25 @@ namespace CustomFloorPlugin
             if (!Directory.Exists(_config.CustomPlatformsDirectory))
                 Directory.CreateDirectory(_config.CustomPlatformsDirectory);
 
-            allPlatforms = new();
-            string[] bundlePaths = Directory.GetFiles(_config.CustomPlatformsDirectory, "*.plat");
+            IEnumerable<string> bundlePaths = Directory.GetFiles(_config.CustomPlatformsDirectory, "*.plat");
 
             CustomPlatform defaultPlatform = new GameObject("Default Platform").AddComponent<CustomPlatform>();
             defaultPlatform.transform.parent = transform;
             defaultPlatform.platName = "Default Environment";
             defaultPlatform.platAuthor = "Beat Saber";
-            defaultPlatform.icon = AssetLoader.instance.defaultPlatformCover;
+            defaultPlatform.icon = _assetLoader.defaultPlatformCover;
             defaultPlatform.isDescriptor = false;
             allPlatforms.Add(defaultPlatform);
 
             if (File.Exists(customPlatformsInfoCacheFilePath))
             {
                 LoadPlatformInfosFromFile();
-                // Load all platforms for which no descriptor was found
-                foreach (string path in bundlePaths.Select(x => Path.GetFullPath(x)).Except(allPlatforms.Select(x => x.fullPath)))
-                {
-                    StartCoroutine(_platformLoader.LoadFromFileAsync(path, HandlePlatformLoaded));
-                }
+                bundlePaths = bundlePaths.Except(allPlatforms.Select(x => x.fullPath));
             }
-            else
+            foreach (string path in bundlePaths)
             {
-                foreach (string path in bundlePaths)
-                {
-                    string fullPath = Path.GetFullPath(path);
-                    StartCoroutine(_platformLoader.LoadFromFileAsync(fullPath, HandlePlatformLoaded));
-                }
+                _siraLog.Info(path);
+                StartCoroutine(_platformLoader.LoadFromFileAsync(path, HandlePlatformLoaded));
             }
         }
 
@@ -266,29 +259,27 @@ namespace CustomFloorPlugin
         {
             try
             {
-                using (FileStream stream = new(customPlatformsInfoCacheFilePath, FileMode.OpenOrCreate, FileAccess.Write))
+                using FileStream stream = new(customPlatformsInfoCacheFilePath, FileMode.OpenOrCreate, FileAccess.Write);
+                using BinaryWriter writer = new(stream, Encoding.UTF8, true);
+
+                writer.Write(kCacheFileVersion);
+                writer.Write(allPlatforms.Count - 1);
+                foreach (CustomPlatform platform in allPlatforms.Skip(1))
                 {
-                    using (BinaryWriter writer = new(stream, Encoding.UTF8, true))
-                    {
-                        writer.Write(kCacheFileVersion);
-                        writer.Write(allPlatforms.Count - 1);
-                        foreach (CustomPlatform platform in allPlatforms.Skip(1))
-                        {
-                            writer.Write(platform.platName);
-                            writer.Write(platform.platAuthor);
-                            writer.Write(platform.platHash);
-                            writer.Write(platform.fullPath);
-                            writer.Write(platform.icon.texture, true);
-                            writer.Write(platform.requirements.Count);
-                            for (int i = 0; i < platform.requirements.Count; i++)
-                                writer.Write(platform.requirements[i]);
-                            writer.Write(platform.suggestions.Count);
-                            for (int i = 0; i < platform.suggestions.Count; i++)
-                                writer.Write(platform.suggestions[i]);
-                        }
-                    }
-                    stream.SetLength(stream.Position);
+                    writer.Write(platform.platName);
+                    writer.Write(platform.platAuthor);
+                    writer.Write(platform.platHash);
+                    writer.Write(platform.fullPath);
+                    writer.Write(platform.icon.texture, true);
+                    writer.Write(platform.requirements.Count);
+                    for (int i = 0; i < platform.requirements.Count; i++)
+                        writer.Write(platform.requirements[i]);
+                    writer.Write(platform.suggestions.Count);
+                    for (int i = 0; i < platform.suggestions.Count; i++)
+                        writer.Write(platform.suggestions[i]);
                 }
+
+                stream.SetLength(stream.Position);
                 File.SetAttributes(customPlatformsInfoCacheFilePath, FileAttributes.Hidden);
             }
             catch (Exception e)

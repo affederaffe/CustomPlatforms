@@ -14,11 +14,14 @@ namespace CustomFloorPlugin
     public class PlatformLoader
     {
         internal readonly Dictionary<string, CustomPlatform> platformFilePaths;
+
+        private readonly AssetLoader _assetLoader;
         private readonly MaterialSwapper _materialSwapper;
 
-        public PlatformLoader(MaterialSwapper materialSwapper)
+        public PlatformLoader(AssetLoader assetLoader, MaterialSwapper materialSwapper)
         {
             platformFilePaths = new();
+            _assetLoader = assetLoader;
             _materialSwapper = materialSwapper;
         }
 
@@ -84,7 +87,7 @@ namespace CustomFloorPlugin
             customPlatform.fullPath = fullPath;
             customPlatform.name = customPlatform.platName + " by " + customPlatform.platAuthor;
             if (customPlatform.icon == null)
-                customPlatform.icon = AssetLoader.instance.fallbackCover;
+                customPlatform.icon = _assetLoader.fallbackCover;
 
             _materialSwapper.ReplaceMaterials(customPlatform.gameObject);
 

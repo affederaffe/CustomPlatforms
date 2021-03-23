@@ -127,6 +127,9 @@
     <Reference Include="Newtonsoft.Json">
      <HintPath>$(BeatSaberDir)\Libs\Newtonsoft.Json.dll</HintPath>
    </Reference>
+   <Reference Include="HarmonyLib">
+     <HintPath>$(BeatSaberDir)\Libs\0Harmony.dll</HintPath>
+   </Reference>
     <Reference Include="BSML">
       <HintPath>$(BeatSaberDir)\Plugins\BSML.dll</HintPath>
     </Reference>

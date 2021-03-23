@@ -14,7 +14,7 @@
   
   <modal id="credits-modal" show-event="open-credits" clickerino-offerino-closerino="true" move-to-center="true">
     <horizontal>
-      <vertical bg="round-rect-panel" >
+      <vertical bg="round-rect-panel" pref-width="71">
         <text text="~credits-text" rich-text="true"></text>
       </vertical>
     </horizontal>

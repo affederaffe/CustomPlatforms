@@ -24,6 +24,8 @@ namespace CustomFloorPlugin.Installers
         {
             Container.BindLoggerAsSiraLogger(_logger);
             Container.BindInstance(_config).AsSingle();
+            AssetLoader assetLoader = UnityEngine.Object.FindObjectOfType<AssetLoader>() ?? Container.InstantiateComponentOnNewGameObject<AssetLoader>("AssetLoader");
+            Container.BindInstance(assetLoader).AsSingle();
             Container.BindInterfacesAndSelfTo<MaterialSwapper>().AsSingle();
             Container.BindInterfacesAndSelfTo<PlatformLoader>().AsSingle();
             PlatformManager manager = Container.InstantiateComponentOnNewGameObject<PlatformManager>("CustomPlatforms");

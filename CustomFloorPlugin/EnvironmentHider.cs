@@ -16,6 +16,7 @@ namespace CustomFloorPlugin
     internal class EnvironmentHider
     {
         private readonly PluginConfig _config;
+        private readonly AssetLoader _assetLoader;
         private readonly PlatformManager _platformManager;
         private readonly GameScenesManager _gameScenesManager;
 
@@ -53,9 +54,10 @@ namespace CustomFloorPlugin
         }
         private TrackLaneRing[] _TrackLaneRings;
 
-        public EnvironmentHider(PluginConfig config, PlatformManager platformManager, GameScenesManager gameScenesManager)
+        public EnvironmentHider(PluginConfig config, AssetLoader assetLoader, PlatformManager platformManager, GameScenesManager gameScenesManager)
         {
             _config = config;
+            _assetLoader = assetLoader;
             _platformManager = platformManager;
             _gameScenesManager = gameScenesManager;
         }
@@ -81,7 +83,7 @@ namespace CustomFloorPlugin
             if (doubleColorLasers != null) SetCollectionHidden(doubleColorLasers, platform.hideDoubleColorLasers);
             if (rotatingLasers != null) SetCollectionHidden(rotatingLasers, platform.hideRotatingLasers);
             if (trackLights != null) SetCollectionHidden(trackLights, platform.hideTrackLights);
-            AssetLoader.instance.playersPlace?.SetActive(_platformManager.activePlatform != null && !platform.hideDefaultPlatform && (sceneName == "MenuEnvironment" || sceneName == "Credits" || sceneName == "HealthWarning"));
+            _assetLoader.playersPlace?.SetActive(_platformManager.activePlatform != null && !platform.hideDefaultPlatform && sceneName == "MenuEnvironment");
             _TrackLaneRings = null;
         }
 
@@ -90,7 +92,7 @@ namespace CustomFloorPlugin
         /// </summary>
         private void FindEnvironment()
         {
-            sceneName = _gameScenesManager.GetCurrentlyLoadedSceneNames().LastOrDefault(x => x.EndsWith("Environment") || x == "Credits" || x == "HealthWarning");
+            sceneName = _gameScenesManager.GetCurrentlyLoadedSceneNames().LastOrDefault(x => x.EndsWith("Environment"));
             sceneName = sceneName == "MultiplayerEnvironment" ? sceneName = "GameCore" : sceneName;
             Scene scene = SceneManager.GetSceneByName(sceneName);
             if (!scene.IsValid())
@@ -135,7 +137,9 @@ namespace CustomFloorPlugin
             FindTrackLights();
 
             foreach (GameObject go in renamedObjects)
+            {
                 go.name = go.name.Remove(go.name.Length - renamedObjectSuffix.Length);
+            }
         }
 
         /// <summary>
@@ -237,7 +241,7 @@ namespace CustomFloorPlugin
                     FindAddGameObject("PlayersPlaceShadow", playersPlace);
                     break;
                 case "GameCore":
-                    FindAddGameObject("IsActiveObjects/Construction/playersPlace", playersPlace);
+                    FindAddGameObject("IsActiveObjects/Construction/PlayersPlace", playersPlace);
                     break;
                 default:
                     FindAddGameObject("PlayersPlace", playersPlace);
@@ -337,9 +341,17 @@ namespace CustomFloorPlugin
                     FindAddGameObject("NearBuildingLeft (2)", towers);
                     FindAddGameObject("NearBuildingRight (2)", towers);
                     break;
+                case "TriangleEnvironment":
+                    FindAddGameObject("NearBuildingLeft (3)", towers);
+                    FindAddGameObject("NearBuildingRight (3)", towers);
+                    break;
                 case "NiceEnvironment":
                     FindAddGameObject("NearBuildingLeft (1)", towers);
                     FindAddGameObject("NearBuildingRight (1)", towers);
+                    FindAddGameObject("NearBuildingLeft (2)", towers);
+                    FindAddGameObject("NearBuildingRight (2)", towers);
+                    break;
+                case "BigMirrorEnvironment":
                     FindAddGameObject("NearBuildingLeft (2)", towers);
                     FindAddGameObject("NearBuildingRight (2)", towers);
                     break;

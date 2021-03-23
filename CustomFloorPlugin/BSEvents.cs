@@ -12,7 +12,6 @@ namespace CustomFloorPlugin
     /// </summary>
     public class BSEvents : IInitializable, IDisposable
     {
-        private readonly IBeatmapObjectCallbackController _beatmapObjectCallbackController;
         private readonly BeatmapObjectManager _beatmapObjectManager;
         private readonly GameEnergyCounter _gameEnergyCounter;
         private readonly GameScenesManager _gameScenesManager;
@@ -20,20 +19,20 @@ namespace CustomFloorPlugin
         private readonly ScoreController _scoreController;
         private readonly PlayerDataModel _playerDataModel;
         private readonly PrepareLevelCompletionResults _prepareLevelCompletionResults;
+        private readonly IBeatmapObjectCallbackController _beatmapObjectCallbackController;
         private readonly IDifficultyBeatmap _difficultyBeatmap;
         private float _lastNoteTime;
 
-        public BSEvents(IBeatmapObjectCallbackController beatmapObjectCallbackController,
-                        BeatmapObjectManager beatmapObjectManager,
+        public BSEvents(BeatmapObjectManager beatmapObjectManager,
                         GameEnergyCounter gameEnergyCounter,
                         GameScenesManager gameScenesManager,
                         ObstacleSaberSparkleEffectManager obstacleSaberSparkleEffectManager,
                         ScoreController scoreController, PlayerDataModel playerDataModel,
                         PrepareLevelCompletionResults prepareLevelCompletionResults,
+                        IBeatmapObjectCallbackController beatmapObjectCallbackController,
                         IDifficultyBeatmap difficultyBeatmap,
                         float lastNoteTime)
         {
-            _beatmapObjectCallbackController = beatmapObjectCallbackController;
             _beatmapObjectManager = beatmapObjectManager;
             _gameEnergyCounter = gameEnergyCounter;
             _gameScenesManager = gameScenesManager;
@@ -41,6 +40,7 @@ namespace CustomFloorPlugin
             _scoreController = scoreController;
             _playerDataModel = playerDataModel;
             _prepareLevelCompletionResults = prepareLevelCompletionResults;
+            _beatmapObjectCallbackController = beatmapObjectCallbackController;
             _difficultyBeatmap = difficultyBeatmap;
             _lastNoteTime = lastNoteTime;
         }

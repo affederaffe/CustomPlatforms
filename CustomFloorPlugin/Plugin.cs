@@ -1,4 +1,9 @@
-﻿using CustomFloorPlugin.Installers;
+﻿using System.Reflection;
+
+using CustomFloorPlugin.Configuration;
+using CustomFloorPlugin.Installers;
+
+using HarmonyLib;
 
 using IPA;
 using IPA.Config;
@@ -17,6 +22,9 @@ namespace CustomFloorPlugin
     [Plugin(RuntimeOptions.SingleStartInit)]
     internal class Plugin
     {
+        private const string kHarmonyId = "de.affederaffe.customplatforms";
+        private readonly Harmony harmony = new(kHarmonyId);
+
         /// <summary>
         /// Initializes the Plugin and everything about it
         /// </summary>
@@ -26,9 +34,16 @@ namespace CustomFloorPlugin
         [Init]
         public void Init(Logger logger, Config config, Zenjector zenjector)
         {
-            zenjector.OnApp<PlatformsAppInstaller>().WithParameters(logger, config.Generated<Configuration.PluginConfig>());
+            harmony.PatchAll(Assembly.GetExecutingAssembly());
+            zenjector.OnApp<PlatformsAppInstaller>().WithParameters(logger, config.Generated<PluginConfig>());
             zenjector.OnMenu<PlatformsMenuInstaller>();
             zenjector.OnGame<PlatformsGameInstaller>(false);
+        }
+
+        [OnExit]
+        public void OnExit()
+        {
+            harmony.UnpatchAll(kHarmonyId);
         }
     }
 }

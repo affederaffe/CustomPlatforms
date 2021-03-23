@@ -34,7 +34,7 @@ namespace CustomFloorPlugin
         private readonly PlatformListsView _platformListsView;
 
         public API(SiraLog siraLog,
-            PluginConfig config,
+                   PluginConfig config,
                    PlatformLoader platformLoader,
                    PlatformManager platformManager,
                    PlatformSpawner platformSpawner,
@@ -248,8 +248,8 @@ namespace CustomFloorPlugin
                 _siraLog.Error("Error downloading a platform: \n" + www.error);
             else
             {
-                string destination = Path.Combine(_config.CustomPlatformsDirectory, data.name + ".plat");
                 apiRequest = true;
+                string destination = Path.Combine(_config.CustomPlatformsDirectory, data.name + ".plat");
                 File.WriteAllBytes(destination, www.downloadHandler.data);
             }
         }

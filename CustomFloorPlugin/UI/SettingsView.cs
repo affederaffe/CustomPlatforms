@@ -18,14 +18,17 @@ namespace CustomFloorPlugin.UI
     /// Abuses getters to inline showing values, and setters to perform relevant actions<br/>
     /// </summary>
     [ViewDefinition("CustomFloorPlugin.Views.Settings.bsml")]
+    [HotReload(RelativePathToLayout = "CustomFloorPlugin/Views/Settings.bsml")]
     internal class SettingsView : BSMLAutomaticViewController
     {
         private PluginConfig _config;
+        private AssetLoader _assetLoader;
 
         [Inject]
-        public void Construct(PluginConfig config)
+        public void Construct(PluginConfig config, AssetLoader assetLoader)
         {
             _config = config;
+            _assetLoader = assetLoader;
         }
 
         /// <summary>
@@ -50,8 +53,8 @@ namespace CustomFloorPlugin.UI
             set
             {
                 _config.ShowHeart = value;
-                AssetLoader.instance.heart.SetActive(value);
-                AssetLoader.instance.heart.GetComponent<InstancedMaterialLightWithId>().ColorWasSet(Color.magenta);
+                _assetLoader.heart.SetActive(value);
+                _assetLoader.heart.GetComponent<InstancedMaterialLightWithId>().ColorWasSet(Color.magenta);
             }
         }
 

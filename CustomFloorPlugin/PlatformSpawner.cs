@@ -5,8 +5,6 @@ using System.Linq;
 using CustomFloorPlugin.Configuration;
 using CustomFloorPlugin.Extensions;
 
-using IPA.Utilities;
-
 using SiraUtil.Tools;
 
 using UnityEngine;
@@ -23,6 +21,7 @@ namespace CustomFloorPlugin
     {
         private readonly SiraLog _siraLog;
         private readonly PluginConfig _config;
+        private readonly AssetLoader _assetLoader;
         private readonly EnvironmentHider _hider;
         private readonly PlatformLoader _platformLoader;
         private readonly PlatformManager _platformManager;
@@ -38,6 +37,7 @@ namespace CustomFloorPlugin
 
         internal PlatformSpawner(SiraLog siraLog,
                                  PluginConfig config,
+                                 AssetLoader assetLoader,
                                  EnvironmentHider hider,
                                  PlatformLoader platformLoader,
                                  PlatformManager platformManager,
@@ -45,6 +45,7 @@ namespace CustomFloorPlugin
         {
             _siraLog = siraLog;
             _config = config;
+            _assetLoader = assetLoader;
             _hider = hider;
             _platformLoader = platformLoader;
             _platformManager = platformManager;
@@ -54,14 +55,26 @@ namespace CustomFloorPlugin
 
         public void Initialize()
         {
+            _gameScenesManager.transitionDidStartEvent += HandleTransitionDidStart;
             _gameScenesManager.transitionDidFinishEvent += HandleTransistionDidFinish;
         }
 
         public void Dispose()
         {
+            _gameScenesManager.transitionDidStartEvent -= HandleTransitionDidStart;
             _gameScenesManager.transitionDidFinishEvent -= HandleTransistionDidFinish;
         }
-        
+
+        private void HandleTransitionDidStart(float aheadTime)
+        {
+            SharedCoroutineStarter.instance.StartCoroutine(WaitForSeconds());
+            IEnumerator<WaitForSeconds> WaitForSeconds()
+            {
+                yield return new WaitForSeconds(aheadTime);
+                ChangeToPlatform(0);
+            }
+        }
+
         private void HandleTransistionDidFinish(ScenesTransitionSetupDataSO setupData, DiContainer container)
         {
             int platformIndex = 0;
@@ -69,10 +82,10 @@ namespace CustomFloorPlugin
             {
                 case null:
                 case MenuScenesTransitionSetupDataSO:
-                    if (isMultiplayer) 
+                    if (isMultiplayer)
                         return;
-                    AssetLoader.instance.heart.SetActive(_config.ShowHeart);
-                    AssetLoader.instance.heart.GetComponent<InstancedMaterialLightWithId>().ColorWasSet(Color.magenta);
+                    _assetLoader.heart.SetActive(_config.ShowHeart);
+                    _assetLoader.heart.GetComponent<InstancedMaterialLightWithId>().ColorWasSet(Color.magenta);
                     if (_config.ShowInMenu)
                         platformIndex = _config.ShufflePlatforms
                             ? RandomPlatformIndex
@@ -81,7 +94,7 @@ namespace CustomFloorPlugin
                 case StandardLevelScenesTransitionSetupDataSO:
                 case MissionLevelScenesTransitionSetupDataSO:
                 case TutorialScenesTransitionSetupDataSO:
-                    AssetLoader.instance.heart.SetActive(false);
+                    _assetLoader.heart.SetActive(false);
                     platformIndex = setupData.Is360Level()
                         ? _platformManager.GetIndexForType(PlatformType.A360)
                         : _config.ShufflePlatforms
@@ -91,9 +104,9 @@ namespace CustomFloorPlugin
                 case AppInitScenesTransitionSetupDataSO:
                 case MultiplayerLevelScenesTransitionSetupDataSO:
                     // Multiplayer levels are handled by the MultiplayerGameHelper because this event doesn't provide the GameplayCore DiContainer for multiplayer levels.
-                    return; 
+                    return;
                 default:
-                    AssetLoader.instance.heart.SetActive(false);
+                    _assetLoader.heart.SetActive(false);
                     break;
             }
 
@@ -171,7 +184,7 @@ namespace CustomFloorPlugin
             SharedCoroutineStarter.instance.StartCoroutine(SpawnPlatform());
             IEnumerator<YieldInstruction> SpawnPlatform()
             {
-                if (_platformManager.activePlatform?.transform.childCount == 0 && index != 0)
+                if (_platformManager.activePlatform.isDescriptor)
                 {
                     string platformPath = _platformManager.activePlatform.fullPath;
                     yield return SharedCoroutineStarter.instance.StartCoroutine(_platformLoader.LoadFromFileAsync(platformPath, _platformManager.HandlePlatformLoaded));
@@ -223,17 +236,11 @@ namespace CustomFloorPlugin
                 notifyDisable.PlatformDisabled();
             }
 
-            foreach (TubeBloomPrePassLight tubeBloomPrePassLight in _platformManager.activePlatform.GetComponentsInChildren<TubeBloomPrePassLight>(true))
-            {
-                // Unity requires this to be present, otherwise Unregister won't be called. Memory leaks may occour if this is removed.
-                tubeBloomPrePassLight.InvokeMethod<object, BloomPrePassLight>("UnregisterLight");
-            }
-
             while (_platformManager.spawnedObjects.Count != 0)
             {
                 UnityEngine.Object gameObject = _platformManager.spawnedObjects[0];
                 _platformManager.spawnedObjects.RemoveAt(0);
-                UnityEngine.Object.Destroy(gameObject); 
+                UnityEngine.Object.Destroy(gameObject);
             }
         }
     }

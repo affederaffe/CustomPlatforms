@@ -12,6 +12,7 @@ namespace CustomFloorPlugin.UI
     /// Tagged functions and variables from this class may be used/called by BSML if the .bsml file mentions them.<br/>
     /// </summary>
     [ViewDefinition("CustomFloorPlugin.Views.Changelog.bsml")]
+    [HotReload(RelativePathToLayout = "CustomFloorPlugin/Views/Changelog.bsml")]
     internal class ChangelogView : BSMLAutomaticViewController
     {
         [UIComponent("credits-modal")]
@@ -23,12 +24,11 @@ namespace CustomFloorPlugin.UI
         [UIValue("changelog-text")]
         public string Changelog =>
         @"<size=150%><color=#888888>Version 6.1.2</color></size>
-        - Updated for 1.13.5
+        - Updated for 1.14.0
         - Internal code 'cleanup'
         - Added 'Shuffle Platforms' option
-        - Added manual config option to change your CustomPlatforms directory
+         - Added manual config option to change your CustomPlatforms directory
         - New feature: nested components
-        - Note: Lighting might be weird on some platforms due to a base game bug.
 
 <size=150%><color=#888888>Version 6.1.1</color></size>
         - Security fix:  removed embedded CustomScripts
@@ -66,13 +66,13 @@ namespace CustomFloorPlugin.UI
         /// </summary>
         [UIValue("credits-text")]
         public string Credits =>
-        @"<size=150%><color=#888888>Credits</color></size>
-        boulders2000: This guy is just awesome.
+        @"<size=150%><color=#888888><align=center>Credits</align></color></size>
+        boulders2000: This guy is just awesome
         Kyle 1413: Helped me rewrite the API
         Dakari: Compatibility with Cinema
         AkaRaiden: Features for platform makers
         Nicolas: Faster platform loading
-  <size=125%>CustomPlatforms developed by affederaffe</size>";
+<size=125%><align=center>CustomPlatforms developed by affederaffe</align></size>";
 
         protected override void DidDeactivate(bool removedFromHierarchy, bool screenSystemDisabling)
         {

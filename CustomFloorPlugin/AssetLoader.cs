@@ -1,13 +1,13 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 
-using System.Linq;
+using CustomFloorPlugin.Extensions;
 
 using IPA.Utilities;
-
-using CustomFloorPlugin.Extensions;
 
 using UnityEngine;
 using UnityEngine.ProBuilder;
@@ -19,10 +19,8 @@ namespace CustomFloorPlugin
     /// <summary>
     /// Loads all images into sprites as well as stealing some important GameObjects 
     /// from the GreenDayGrenade environment
-    /// This is a <see cref="PersistentSingleton{T}"/> to prevent loading the scene more than once
-    /// which would happen when settings are applied.
     /// </summary>
-    public class AssetLoader : PersistentSingleton<AssetLoader>
+    public class AssetLoader : MonoBehaviour
     {
         /// <summary>
         /// Acts as a prefab for custom light sources that require meshes...<br/>
@@ -79,7 +77,7 @@ namespace CustomFloorPlugin
         internal Sprite yellowX;
 
         /// <summary>
-        /// An array of all materials to reduce Resources calls
+        /// Reduces Resources calls
         /// </summary>
         internal Material[] AllMaterials
         {
@@ -94,16 +92,12 @@ namespace CustomFloorPlugin
         }
         private Material[] _AllMaterials;
 
-        private bool isInitialized;
-
-        internal void LoadAssets()
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("CodeQuality", "IDE0051:Remove unused private members", Justification = "Called by Unity")]
+        private void Start()
         {
-            if (!isInitialized)
-            {
-                isInitialized = true;
-                LoadSprites();
-                LoadObjects();
-            }
+            DontDestroyOnLoad(this);
+            LoadSprites();
+            LoadAssets();
         }
 
         private void LoadSprites()
@@ -124,11 +118,15 @@ namespace CustomFloorPlugin
         /// Gets the Non-Mesh lightSource and the playersPlace used in the Platform Preview too.<br/>
         /// Now also steals the LightEffects for multiplayer, this scene is really useful
         /// </summary>
-        private void LoadObjects()
+        private void LoadAssets()
         {
             StartCoroutine(FuckUnity());
-            IEnumerator<WaitUntil> FuckUnity()
-            {//did you know loaded scenes are loaded asynchronously, regarless if you use async or not?
+            IEnumerator FuckUnity()
+            {
+                // Wait one frame to prevent a black screen
+                yield return new WaitForEndOfFrame();
+
+                // Did you know loaded scenes are loaded asynchronously, regarless if you use async or not?
                 Scene greenDay = SceneManager.LoadScene("GreenDayGrenadeEnvironment", new LoadSceneParameters(LoadSceneMode.Additive));
                 yield return new WaitUntil(() => greenDay.isLoaded);
                 GameObject root = greenDay.GetRootGameObjects()[0];
@@ -191,9 +189,12 @@ namespace CustomFloorPlugin
                 heart.transform.rotation = Quaternion.Euler(-100f, 90f, 90f);
                 heart.transform.localScale = new Vector3(25f, 25f, 25f);
 
-                // Not a perfect solution because the shader seems to ignore the alpha now,
-                // therefore mesh lights won't be transparent when they're turned off, but otherwise they wouldn't glow at all
-                heart.GetComponent<Renderer>().material.shader = Shader.Find("Custom/Glowing");
+                Material envGlowMat = AllMaterials.First(x => x.name == "EnvLightOpaque");
+                Material heartGlowMat = new(envGlowMat);
+                heartGlowMat.DisableKeyword("ENABLE_HEIGHT_FOG");
+                heartGlowMat.name = "<3";
+                heartGlowMat.color = Color.cyan;
+                heart.GetComponent<Renderer>().material = heartGlowMat;
                 heart.GetComponent<MaterialPropertyBlockColorSetter>().SetField("_property", "_Color");
             }
         }

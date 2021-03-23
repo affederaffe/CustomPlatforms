@@ -21,17 +21,20 @@ namespace CustomFloorPlugin.UI
     /// Tagged functions and variables from this class may be used/called by BSML if the .bsml file mentions them.<br/>
     /// </summary>
     [ViewDefinition("CustomFloorPlugin.Views.PlatformLists.bsml")]
+    [HotReload(RelativePathToLayout = "CustomFloorPlugin/Views/PlatformLists.bsml")]
     internal class PlatformListsView : BSMLAutomaticViewController, INotifyPropertyChanged
     {
         private PluginConfig _config;
+        private AssetLoader _assetLoader;
         private PlatformManager _platformManager;
         private PlatformSpawner _platformSpawner;
         private Dictionary<CustomPlatform, CustomListTableData.CustomCellInfo> platformCellPairs;
 
         [Inject]
-        public void Construct(PluginConfig config, PlatformSpawner platformSpawner, PlatformManager platformManager)
+        public void Construct(PluginConfig config, AssetLoader assetLoader, PlatformSpawner platformSpawner, PlatformManager platformManager)
         {
             _config = config;
+            _assetLoader = assetLoader;
             _platformManager = platformManager;
             _platformSpawner = platformSpawner;
             platformCellPairs = new();
@@ -65,7 +68,7 @@ namespace CustomFloorPlugin.UI
         private readonly CustomListTableData requirementsListTable = null;
 
         /// <summary>
-        /// An <see cref="System.Array"/> holding all <see cref="CustomListTableData"/>s
+        /// An <see cref="System.Array"/> of all <see cref="CustomListTableData"/>s
         /// </summary>
         private CustomListTableData[] allListTables;
 
@@ -247,15 +250,15 @@ namespace CustomFloorPlugin.UI
             foreach (string req in platform.requirements)
             {
                 CustomListTableData.CustomCellInfo cell = _platformManager.allPluginNames.Contains(req)
-                    ? new CustomListTableData.CustomCellInfo(req, "Required", AssetLoader.instance.greenCheck)
-                    : new CustomListTableData.CustomCellInfo(req, "Required", AssetLoader.instance.redX);
+                    ? new CustomListTableData.CustomCellInfo(req, "Required", _assetLoader.greenCheck)
+                    : new CustomListTableData.CustomCellInfo(req, "Required", _assetLoader.redX);
                 requirementsListTable.data.Add(cell);
             }
             foreach (string sug in platform.suggestions)
             {
                 CustomListTableData.CustomCellInfo cell = _platformManager.allPluginNames.Contains(sug)
-                    ? new CustomListTableData.CustomCellInfo(sug, "Suggestion", AssetLoader.instance.yellowCheck)
-                    : new CustomListTableData.CustomCellInfo(sug, "Suggestion", AssetLoader.instance.yellowX);
+                    ? new CustomListTableData.CustomCellInfo(sug, "Suggestion", _assetLoader.yellowCheck)
+                    : new CustomListTableData.CustomCellInfo(sug, "Suggestion", _assetLoader.yellowX);
                 requirementsListTable.data.Add(cell);
             }
             requirementsListTable.tableView.ReloadData();

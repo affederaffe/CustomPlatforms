@@ -1,7 +1,5 @@
 using IPA.Utilities;
 
-using SiraUtil.Tools;
-
 using UnityEngine;
 
 using Zenject;
@@ -11,7 +9,7 @@ namespace CustomFloorPlugin
 {
     [RequireComponent(typeof(MeshFilter))]
     [RequireComponent(typeof(MeshRenderer))]
-    public class TubeLight : MonoBehaviour, INotifyPlatformEnabled
+    public class TubeLight : MonoBehaviour, INotifyPlatformEnabled, INotifyPlatformDisabled
     {
         public enum LightsID
         {
@@ -51,15 +49,18 @@ namespace CustomFloorPlugin
             Gizmos.DrawCube(cubeCenter, new Vector3(2 * width, length, 2 * width));
         }
 
+        private AssetLoader _assetLoader;
         private PlatformManager _platformManager;
         private LightWithIdManager _lightManager;
 
         private TubeBloomPrePassLight tubeBloomLight;
-        private GameObject iHeartBeatSaber;
+        private TubeBloomPrePassLightWithId tubeBloomLightWithId;
+        private InstancedMaterialLightWithId iHeartBeatSaber;
 
         [Inject]
-        public void Construct(PlatformManager platformManager, LightWithIdManager lightManager)
+        public void Construct(AssetLoader assetLoader, PlatformManager platformManager, LightWithIdManager lightManager)
         {
+            _assetLoader = assetLoader;
             _platformManager = platformManager;
             _lightManager = lightManager;
         }
@@ -70,7 +71,7 @@ namespace CustomFloorPlugin
             GetComponent<MeshRenderer>().enabled = false;
             if (GetComponent<MeshFilter>().mesh.vertexCount == 0)
             {
-                tubeBloomLight = Instantiate(AssetLoader.instance.lightSource.GetComponent<TubeBloomPrePassLight>());
+                tubeBloomLight = Instantiate(_assetLoader.lightSource.GetComponent<TubeBloomPrePassLight>());
                 _platformManager.spawnedObjects.Add(tubeBloomLight.gameObject);
 
                 tubeBloomLight.transform.parent = transform;
@@ -80,10 +81,10 @@ namespace CustomFloorPlugin
 
                 tubeBloomLight.gameObject.SetActive(false);
 
-                TubeBloomPrePassLightWithId lightWithId = tubeBloomLight.GetComponent<TubeBloomPrePassLightWithId>();
-                lightWithId.SetField("_tubeBloomPrePassLight", tubeBloomLight);
-                (lightWithId as LightWithIdMonoBehaviour).SetField("_ID", (int)lightsID);
-                (lightWithId as LightWithIdMonoBehaviour).SetField("_lightManager", _lightManager);
+                tubeBloomLightWithId = tubeBloomLight.GetComponent<TubeBloomPrePassLightWithId>();
+                tubeBloomLightWithId.SetField("_tubeBloomPrePassLight", tubeBloomLight);
+                (tubeBloomLightWithId as LightWithIdMonoBehaviour).SetField("_ID", (int)lightsID);
+                (tubeBloomLightWithId as LightWithIdMonoBehaviour).SetField("_lightManager", _lightManager);
 
                 tubeBloomLight.SetField("_width", width * 2);
                 tubeBloomLight.SetField("_length", length);
@@ -105,18 +106,33 @@ namespace CustomFloorPlugin
             }
             else
             {
-                iHeartBeatSaber = Instantiate(AssetLoader.instance.heart);
-                _platformManager.spawnedObjects.Add(iHeartBeatSaber);
+                iHeartBeatSaber = Instantiate(_assetLoader.heart.GetComponent<InstancedMaterialLightWithId>());
+                _platformManager.spawnedObjects.Add(iHeartBeatSaber.gameObject);
+
                 iHeartBeatSaber.transform.parent = transform;
                 iHeartBeatSaber.transform.position = transform.position;
                 iHeartBeatSaber.transform.localScale = Vector3.one;
                 iHeartBeatSaber.transform.rotation = transform.rotation;
-                InstancedMaterialLightWithId lightWithId = iHeartBeatSaber.GetComponent<InstancedMaterialLightWithId>();
-                (lightWithId as LightWithIdMonoBehaviour).SetField("_ID", (int)lightsID);
-                (lightWithId as LightWithIdMonoBehaviour).SetField("_lightManager", _lightManager);
-                lightWithId.SetField("_minAlpha", 0f);
+
+                (iHeartBeatSaber as LightWithIdMonoBehaviour).SetField("_ID", (int)lightsID);
+                (iHeartBeatSaber as LightWithIdMonoBehaviour).SetField("_lightManager", _lightManager);
+                iHeartBeatSaber.SetField("_minAlpha", 0f);
                 iHeartBeatSaber.GetComponent<MeshFilter>().mesh = GetComponent<MeshFilter>().mesh;
-                iHeartBeatSaber.SetActive(true);
+
+                iHeartBeatSaber.gameObject.SetActive(true);
+            }
+        }
+
+        void INotifyPlatformDisabled.PlatformDisabled()
+        {
+            if (tubeBloomLight != null)
+            {
+                tubeBloomLight.InvokeMethod<object, BloomPrePassLight>("UnregisterLight");
+                _lightManager.UnregisterLight(tubeBloomLightWithId);
+            }
+            else if (iHeartBeatSaber != null)
+            {
+                _lightManager.UnregisterLight(iHeartBeatSaber);
             }
         }
 
