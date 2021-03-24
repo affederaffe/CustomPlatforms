@@ -176,6 +176,16 @@ namespace CustomFloorPlugin
                 heart.transform.rotation = Quaternion.Euler(-100f, 90f, 90f);
                 heart.transform.localScale = new Vector3(25f, 25f, 25f);
 
+                InstancedMaterialLightWithId materialLightWithId = heart.GetComponent<InstancedMaterialLightWithId>();
+                materialLightWithId.SetField("_minAlpha", 0f);
+                materialLightWithId.SetField("_intensity", 2f);
+                materialLightWithId.ColorWasSet(Color.magenta);
+
+                TubeBloomPrePassLight tubeBloomLight = lightSource.GetComponent<TubeBloomPrePassLight>();
+                tubeBloomLight.SetField("_maxAlpha", 0.1f);
+                tubeBloomLight.SetField("_bloomFogIntensityMultiplier", 0.15f);
+
+                //--- Temporary fix for mesh lights until Beat Games fixes glow ---\\\
                 Material envGlowMat = AllMaterials.First(x => x.name == "EnvLightOpaque");
                 Material heartGlowMat = new(envGlowMat);
                 heartGlowMat.DisableKeyword("ENABLE_HEIGHT_FOG");
