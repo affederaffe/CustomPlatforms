@@ -23,7 +23,9 @@ namespace CustomFloorPlugin
         private void OnComboReached(int combo)
         {
             if (combo == ComboTarget)
+            {
                 NthComboReached.Invoke();
+            } 
         }
     }
 }

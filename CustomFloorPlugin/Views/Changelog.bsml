@@ -5,7 +5,7 @@
   </horizontal>
 
   <horizontal preferred-height="60">
-    <text-page size-delta-y="60" text="~changelog-text" rich-text="true" word-wrapping="true" overflow-mode="Page"></text-page>
+    <text-page size-delta-y="60" text="~changelog-text" rich-text="true"></text-page>
   </horizontal>
 
   <horizontal>

@@ -1,9 +1,6 @@
-﻿using System.Reflection;
-
-using CustomFloorPlugin.Configuration;
+﻿using CustomFloorPlugin.Configuration;
+using CustomFloorPlugin.HarmonyPatches;
 using CustomFloorPlugin.Installers;
-
-using HarmonyLib;
 
 using IPA;
 using IPA.Config;
@@ -22,11 +19,8 @@ namespace CustomFloorPlugin
     [Plugin(RuntimeOptions.SingleStartInit)]
     internal class Plugin
     {
-        private const string kHarmonyId = "de.affederaffe.customplatforms";
-        private readonly Harmony harmony = new(kHarmonyId);
-
         /// <summary>
-        /// Initializes the Plugin and everything about it
+        /// Initializes the Plugin
         /// </summary>
         /// <param name="logger">The instance of the IPA logger that BSIPA hands to plugins on initialization</param>
         /// <param name="config">The config BSIPA provides</param>
@@ -34,16 +28,19 @@ namespace CustomFloorPlugin
         [Init]
         public void Init(Logger logger, Config config, Zenjector zenjector)
         {
-            harmony.PatchAll(Assembly.GetExecutingAssembly());
+            Patcher.Patch();
             zenjector.OnApp<PlatformsAppInstaller>().WithParameters(logger, config.Generated<PluginConfig>());
             zenjector.OnMenu<PlatformsMenuInstaller>();
             zenjector.OnGame<PlatformsGameInstaller>(false);
         }
 
+        /// <summary>
+        /// Plugin teardown, removes all Harmony Patches
+        /// </summary>
         [OnExit]
         public void OnExit()
         {
-            harmony.UnpatchAll(kHarmonyId);
+            Patcher.Unpatch();
         }
     }
 }

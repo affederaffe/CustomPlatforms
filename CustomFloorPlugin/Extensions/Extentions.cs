@@ -17,7 +17,7 @@ namespace CustomFloorPlugin.Extensions
         internal static bool Is360Level(this ScenesTransitionSetupDataSO setupData)
         {
             bool is360 = (setupData as StandardLevelScenesTransitionSetupDataSO)?
-                .difficultyBeatmap?
+                .difficultyBeatmap
                 .parentDifficultyBeatmapSet
                 .beatmapCharacteristic
                 .requires360Movement

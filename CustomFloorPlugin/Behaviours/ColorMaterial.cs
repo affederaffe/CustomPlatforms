@@ -10,6 +10,7 @@ namespace CustomFloorPlugin
     {
         public string propertyName = "_Color";
         public MaterialColorType materialColorType;
+
         private Renderer _renderer;
         private ColorManager _colorManager;
 
@@ -52,7 +53,7 @@ namespace CustomFloorPlugin
             SaberColorB,
             ColorTypeA,
             ColorTypeB,
-            ObstacleColor,
+            ObstacleColor
         }
     }
 }

@@ -41,20 +41,13 @@ namespace CustomFloorPlugin
         private const string renamedObjectSuffix = "renamed";
         private List<GameObject> renamedObjects;
 
-        private TrackLaneRing[] TrackLaneRings
-        {
-            get
-            {
-                if (_TrackLaneRings == null)
-                {
-                    _TrackLaneRings = Resources.FindObjectsOfTypeAll<TrackLaneRing>();
-                }
-                return _TrackLaneRings;
-            }
-        }
+        private TrackLaneRing[] TrackLaneRings => _TrackLaneRings ??= Resources.FindObjectsOfTypeAll<TrackLaneRing>();
         private TrackLaneRing[] _TrackLaneRings;
 
-        public EnvironmentHider(PluginConfig config, AssetLoader assetLoader, PlatformManager platformManager, GameScenesManager gameScenesManager)
+        public EnvironmentHider(PluginConfig config,
+                                AssetLoader assetLoader,
+                                PlatformManager platformManager,
+                                GameScenesManager gameScenesManager)
         {
             _config = config;
             _assetLoader = assetLoader;

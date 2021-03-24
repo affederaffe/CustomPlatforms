@@ -65,6 +65,9 @@ namespace CustomFloorPlugin
             _gameScenesManager.transitionDidFinishEvent -= HandleTransistionDidFinish;
         }
 
+        /// <summary>
+        /// Automaticly clean up all custom objects
+        /// </summary>
         private void HandleTransitionDidStart(float aheadTime)
         {
             SharedCoroutineStarter.instance.StartCoroutine(WaitForSeconds());
@@ -75,6 +78,9 @@ namespace CustomFloorPlugin
             }
         }
 
+        /// <summary>
+        /// Decide which platform to change to based on the type of the <see cref="ScenesTransitionSetupDataSO"/>
+        /// </summary>
         private void HandleTransistionDidFinish(ScenesTransitionSetupDataSO setupData, DiContainer container)
         {
             int platformIndex = 0;
@@ -214,9 +220,6 @@ namespace CustomFloorPlugin
         /// </summary>
         private void SpawnCustomObjects()
         {
-            if (_platformManager.activePlatform == null)
-                return;
-
             foreach (INotifyPlatformEnabled notifyEnable in _platformManager.activePlatform.GetComponentsInChildren<INotifyPlatformEnabled>(true))
             {
                 notifyEnable.PlatformEnabled(_container);

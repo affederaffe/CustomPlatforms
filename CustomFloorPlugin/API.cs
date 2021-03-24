@@ -33,6 +33,9 @@ namespace CustomFloorPlugin
         private readonly PlatformSpawner _platformSpawner;
         private readonly PlatformListsView _platformListsView;
 
+        private FileSystemWatcher _fileSystemWatcher;
+        private bool apiRequest;
+
         public API(SiraLog siraLog,
                    PluginConfig config,
                    PlatformLoader platformLoader,
@@ -47,9 +50,6 @@ namespace CustomFloorPlugin
             _platformSpawner = platformSpawner;
             _platformListsView = platformListsView;
         }
-
-        private FileSystemWatcher _fileSystemWatcher;
-        private bool apiRequest;
 
         private enum SubscriptionType
         {
@@ -245,7 +245,9 @@ namespace CustomFloorPlugin
             yield return www.SendWebRequest();
 
             if (www.isNetworkError || www.isHttpError)
+            {
                 _siraLog.Error("Error downloading a platform: \n" + www.error);
+            }
             else
             {
                 apiRequest = true;

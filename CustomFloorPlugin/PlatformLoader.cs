@@ -13,14 +13,13 @@ namespace CustomFloorPlugin
     /// </summary>
     public class PlatformLoader
     {
-        internal readonly Dictionary<string, CustomPlatform> platformFilePaths;
-
         private readonly AssetLoader _assetLoader;
         private readonly MaterialSwapper _materialSwapper;
 
+        internal readonly Dictionary<string, CustomPlatform> platformFilePaths = new();
+
         public PlatformLoader(AssetLoader assetLoader, MaterialSwapper materialSwapper)
         {
-            platformFilePaths = new();
             _assetLoader = assetLoader;
             _materialSwapper = materialSwapper;
         }
@@ -50,7 +49,7 @@ namespace CustomFloorPlugin
 
             assetBundleCreateRequest.assetBundle.Unload(false);
 
-            GameObject platformPrefab = (GameObject)platformAssetBundleRequest.asset;
+            GameObject platformPrefab = platformAssetBundleRequest.asset as GameObject;
 
             foreach (AudioListener al in platformPrefab.GetComponentsInChildren<AudioListener>())
             {

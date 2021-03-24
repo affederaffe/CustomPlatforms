@@ -7,7 +7,6 @@ namespace CustomFloorPlugin.Installers
 {
     internal class PlatformsGameInstaller : Installer
     {
-
         public override void InstallBindings()
         {
             if (Container.HasBinding<GameplayCoreSceneSetupData>())

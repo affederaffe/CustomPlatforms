@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -79,17 +78,7 @@ namespace CustomFloorPlugin
         /// <summary>
         /// Reduces Resources calls
         /// </summary>
-        internal Material[] AllMaterials
-        {
-            get
-            {
-                if (_AllMaterials == null)
-                {
-                    _AllMaterials = Resources.FindObjectsOfTypeAll<Material>();
-                }
-                return _AllMaterials;
-            }
-        }
+        internal Material[] AllMaterials => _AllMaterials ??= Resources.FindObjectsOfTypeAll<Material>();
         private Material[] _AllMaterials;
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("CodeQuality", "IDE0051:Remove unused private members", Justification = "Called by Unity")]
@@ -121,11 +110,9 @@ namespace CustomFloorPlugin
         private void LoadAssets()
         {
             StartCoroutine(FuckUnity());
-            IEnumerator FuckUnity()
+            IEnumerator<WaitUntil> FuckUnity()
             {
-                // Wait one frame to prevent a black screen
-                yield return new WaitForEndOfFrame();
-
+                yield return null;
                 // Did you know loaded scenes are loaded asynchronously, regarless if you use async or not?
                 Scene greenDay = SceneManager.LoadScene("GreenDayGrenadeEnvironment", new LoadSceneParameters(LoadSceneMode.Additive));
                 yield return new WaitUntil(() => greenDay.isLoaded);

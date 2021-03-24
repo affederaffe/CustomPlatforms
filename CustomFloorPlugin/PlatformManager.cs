@@ -30,7 +30,10 @@ namespace CustomFloorPlugin
         private PlatformLoader _platformLoader;
 
         [Inject]
-        public void Construct(SiraLog siraLog, PluginConfig config, AssetLoader assetLoader, PlatformLoader platformLoader)
+        public void Construct(SiraLog siraLog,
+                              PluginConfig config,
+                              AssetLoader assetLoader,
+                              PlatformLoader platformLoader)
         {
             _siraLog = siraLog;
             _config = config;
@@ -141,7 +144,6 @@ namespace CustomFloorPlugin
             }
             foreach (string path in bundlePaths)
             {
-                _siraLog.Info(path);
                 StartCoroutine(_platformLoader.LoadFromFileAsync(path, HandlePlatformLoaded));
             }
         }
@@ -192,9 +194,9 @@ namespace CustomFloorPlugin
                 int index = allPlatforms.IndexOf(descriptor);
                 if (activePlatform == descriptor)
                     activePlatform = newPlatform;
-                Destroy(descriptor.gameObject);
-                _platformLoader.platformFilePaths[newPlatform.fullPath] = newPlatform;
+                _platformLoader.platformFilePaths[descriptor.fullPath] = newPlatform;
                 allPlatforms[index] = newPlatform;
+                Destroy(descriptor.gameObject);
             }
             else
             {

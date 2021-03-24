@@ -23,25 +23,25 @@ namespace CustomFloorPlugin.UI
         /// </summary>
         [UIValue("changelog-text")]
         public string Changelog =>
-        @"<size=150%><color=#888888>Version 6.1.2</color></size>
+        @"  <size=150%><color=#888888>Version 6.1.2</color></size>
         - Updated for 1.14.0
         - Internal code 'cleanup'
         - Added 'Shuffle Platforms' option
          - Added manual config option to change your CustomPlatforms directory
         - New feature: nested components
 
-<size=150%><color=#888888>Version 6.1.1</color></size>
+  <size=150%><color=#888888>Version 6.1.1</color></size>
         - Security fix:  removed embedded CustomScripts
         - CustomScripts can still be done, create your own mod
            and then add it as a requirement or suggestion
 
-<size=150%><color=#888888>Version 6.1.0</color></size>
+  <size=150%><color=#888888>Version 6.1.0</color></size>
         - Many new features for platform makers
         - Further reduced loading time
         - Performance improvements
         - Fixed a bug where the credits environment wouldn't be hidden
 
-<size=150%><color=#888888>Version 6.0.0</color></size>
+  <size=150%><color=#888888>Version 6.0.0</color></size>
         - Basicly a complete rewrite of the plugin and updated for 1.13.2
         - Platforms can now be used in the menu
          - Redesigned menu, moved settings section here and added a changelog
