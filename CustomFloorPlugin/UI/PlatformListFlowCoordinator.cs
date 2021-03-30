@@ -18,7 +18,10 @@ namespace CustomFloorPlugin.UI
         private MainFlowCoordinator _mainFlowCoordinator;
 
         [Inject]
-        public void Construct(PlatformListsView platformsListView, ChangelogView changelogView, SettingsView settingsView, MainFlowCoordinator mainFlowCoordinator)
+        public void Construct(PlatformListsView platformsListView,
+                              ChangelogView changelogView,
+                              SettingsView settingsView,
+                              MainFlowCoordinator mainFlowCoordinator)
         {
             _platformsListView = platformsListView;
             _changelogView = changelogView;

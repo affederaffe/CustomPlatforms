@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 
 using UnityEngine;
 
@@ -25,16 +24,13 @@ namespace CustomFloorPlugin
         public bool hideDoubleColorLasers = false;
         public bool hideRotatingLasers = false;
         public bool hideTrackLights = false;
-        [Space]
-        [Header("Script Libraries")]
-        public List<string> requirements = new();
-        public List<string> suggestions = new();
 
-        [SerializeField] internal string platHash = "";
-        [SerializeField] internal string fullPath = "";
-        [SerializeField] internal bool isDescriptor = true;
+        public string platHash = "";
+        public string fullPath = "";
+        public bool isDescriptor = true;
 
-        public void Awake()
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("CodeQuality", "IDE0051:Remove unused private members", Justification = "Called by Unity")]
+        private void Awake()
         {
             gameObject.SetActive(false);
         }

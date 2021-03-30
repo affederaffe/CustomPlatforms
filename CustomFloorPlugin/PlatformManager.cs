@@ -7,7 +7,6 @@ using System.Text;
 using CustomFloorPlugin.Configuration;
 using CustomFloorPlugin.Extensions;
 
-using IPA.Loader;
 using IPA.Utilities;
 
 using SiraUtil.Tools;
@@ -82,11 +81,6 @@ namespace CustomFloorPlugin
         internal string apiRequestedLevelId;
 
         /// <summary>
-        /// List of all loaded plugins
-        /// </summary>
-        internal readonly IReadOnlyList<string> allPluginNames = PluginManager.EnabledPlugins.Select(x => x.Name).ToList();
-
-        /// <summary>
         /// The path used to cache platform descriptors for faster loading
         /// </summary>
         internal readonly string customPlatformsInfoCacheFilePath = Path.Combine(UnityGame.UserDataPath, "Custom PlatformsInfoCache.dat");
@@ -122,12 +116,12 @@ namespace CustomFloorPlugin
         /// <summary>
         /// Loads all platforms or their descritpors if a cache file exists
         /// </summary>
-        private void LoadPlatforms()
+        private async void LoadPlatforms()
         {
             if (!Directory.Exists(_config.CustomPlatformsDirectory))
                 Directory.CreateDirectory(_config.CustomPlatformsDirectory);
 
-            IEnumerable<string> bundlePaths = Directory.GetFiles(_config.CustomPlatformsDirectory, "*.plat");
+            IEnumerable<string> bundlePaths = Directory.EnumerateFiles(_config.CustomPlatformsDirectory, "*.plat");
 
             CustomPlatform defaultPlatform = new GameObject("Default Platform").AddComponent<CustomPlatform>();
             defaultPlatform.transform.parent = transform;
@@ -142,9 +136,11 @@ namespace CustomFloorPlugin
                 LoadPlatformInfosFromFile();
                 bundlePaths = bundlePaths.Except(allPlatforms.Select(x => x.fullPath));
             }
+
+            // Load all remaining platforms, or all if no cache file is found
             foreach (string path in bundlePaths)
             {
-                StartCoroutine(_platformLoader.LoadFromFileAsync(path, HandlePlatformLoaded));
+                await _platformLoader.LoadFromFileAsync(path, HandlePlatformLoaded);
             }
         }
 
@@ -161,15 +157,14 @@ namespace CustomFloorPlugin
                 PlatformType.API => allPlatforms.IndexOf(apiRequestedPlatform),
                 _ => 0
             };
-            if (index == -1)
-                index = 0;
+            if (index == -1) index = 0;
             return index;
         }
 
         /// <summary>
         /// Sets the platforms that were last selected as the current ones
         /// </summary>
-        private void CheckLastSelectedPlatform(in CustomPlatform platform)
+        private void CheckLastSelectedPlatform(CustomPlatform platform)
         {
             if (_config.SingleplayerPlatformPath == platform.platName + platform.platAuthor)
                 currentSingleplayerPlatform = platform;
@@ -187,7 +182,7 @@ namespace CustomFloorPlugin
             CustomPlatform newPlatform = Instantiate(platform, transform);
             newPlatform.name = platform.name;
             newPlatform.isDescriptor = false;
-            CheckLastSelectedPlatform(in newPlatform);
+            CheckLastSelectedPlatform(newPlatform);
             if (_platformLoader.platformFilePaths.ContainsKey(newPlatform.fullPath))
             {
                 CustomPlatform descriptor = _platformLoader.platformFilePaths[newPlatform.fullPath];
@@ -227,22 +222,17 @@ namespace CustomFloorPlugin
                     platform.platHash = reader.ReadString();
                     platform.fullPath = reader.ReadString();
                     Texture2D tex = reader.ReadTexture2D();
-                    int reqCount = reader.ReadInt32();
-                    for (int j = 0; j < reqCount; j++)
-                        platform.requirements.Add(reader.ReadString());
-                    int sugCount = reader.ReadInt32();
-                    for (int j = 0; j < sugCount; j++)
-                        platform.suggestions.Add(reader.ReadString());
                     platform.icon = Sprite.Create(tex, new Rect(0f, 0f, tex.width, tex.height), Vector2.zero);
                     platform.name = platform.platName + " by " + platform.platAuthor;
                     platform.transform.parent = transform;
                     if (!File.Exists(platform.fullPath))
                     {
                         _siraLog.Info($"File {platform.fullPath} no longer exists; skipped");
+                        Destroy(platform.gameObject);
                         continue;
                     }
 
-                    CheckLastSelectedPlatform(in platform);
+                    CheckLastSelectedPlatform(platform);
 
                     _platformLoader.platformFilePaths.Add(platform.fullPath, platform);
                     allPlatforms.Add(platform);
@@ -272,13 +262,7 @@ namespace CustomFloorPlugin
                     writer.Write(platform.platAuthor);
                     writer.Write(platform.platHash);
                     writer.Write(platform.fullPath);
-                    writer.Write(platform.icon.texture, true);
-                    writer.Write(platform.requirements.Count);
-                    for (int i = 0; i < platform.requirements.Count; i++)
-                        writer.Write(platform.requirements[i]);
-                    writer.Write(platform.suggestions.Count);
-                    for (int i = 0; i < platform.suggestions.Count; i++)
-                        writer.Write(platform.suggestions[i]);
+                    writer.WriteTexture2D(platform.icon.texture, true);
                 }
 
                 stream.SetLength(stream.Position);

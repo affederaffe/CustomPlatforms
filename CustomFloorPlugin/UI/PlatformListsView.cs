@@ -25,23 +25,18 @@ namespace CustomFloorPlugin.UI
     internal class PlatformListsView : BSMLAutomaticViewController, INotifyPropertyChanged
     {
         private PluginConfig _config;
-        private AssetLoader _assetLoader;
         private PlatformManager _platformManager;
         private PlatformSpawner _platformSpawner;
         private Dictionary<CustomPlatform, CustomListTableData.CustomCellInfo> platformCellPairs;
 
         [Inject]
-        public void Construct(PluginConfig config, AssetLoader assetLoader, PlatformSpawner platformSpawner, PlatformManager platformManager)
+        public void Construct(PluginConfig config, PlatformSpawner platformSpawner, PlatformManager platformManager)
         {
             _config = config;
-            _assetLoader = assetLoader;
             _platformManager = platformManager;
             _platformSpawner = platformSpawner;
             platformCellPairs = new();
         }
-
-        [UIComponent("requirements-modal")]
-        private readonly ModalView requirementsModal = null;
 
         /// <summary>
         /// The table of currently loaded Platforms for singleplayer
@@ -60,12 +55,6 @@ namespace CustomFloorPlugin.UI
         /// </summary>
         [UIComponent("a360-platforms-list")]
         private readonly CustomListTableData a360PlatformListTable = null;
-
-        /// <summary>
-        /// List of requirements or suggestions for the current platform
-        /// </summary>
-        [UIComponent("requirements-list")]
-        private readonly CustomListTableData requirementsListTable = null;
 
         /// <summary>
         /// An <see cref="System.Array"/> of all <see cref="CustomListTableData"/>s
@@ -94,7 +83,6 @@ namespace CustomFloorPlugin.UI
             PlatformType type = (PlatformType)segmentedControl.selectedCellNumber;
             int index = _platformManager.GetIndexForType(type);
             singleplayerPlatformListTable.tableView.ScrollToCellWithIdx(index, TableView.ScrollPositionType.Beginning, false);
-            UpdateRequirementsForPlatform(_platformManager.allPlatforms[index]);
 
             if (index != _platformManager.GetIndexForType(_platformManager.currentPlatformType))
                 _platformSpawner.ChangeToPlatform(index);
@@ -110,7 +98,6 @@ namespace CustomFloorPlugin.UI
         [System.Diagnostics.CodeAnalysis.SuppressMessage("CodeQuality", "IDE0051:Remove unused private members", Justification = "Called by BSML")]
         private void SingleplayerSelect(TableView _1, int idx)
         {
-            UpdateRequirementsForPlatform(_platformManager.allPlatforms[idx]);
             _platformSpawner.SetPlatformAndShow(idx, PlatformType.Singleplayer);
         }
 
@@ -123,7 +110,6 @@ namespace CustomFloorPlugin.UI
         [System.Diagnostics.CodeAnalysis.SuppressMessage("CodeQuality", "IDE0051:Remove unused private members", Justification = "Called by BSML")]
         private void MultiplayerSelect(TableView _1, int idx)
         {
-            UpdateRequirementsForPlatform(_platformManager.allPlatforms[idx]);
             _platformSpawner.SetPlatformAndShow(idx, PlatformType.Multiplayer);
         }
 
@@ -136,7 +122,6 @@ namespace CustomFloorPlugin.UI
         [System.Diagnostics.CodeAnalysis.SuppressMessage("CodeQuality", "IDE0051:Remove unused private members", Justification = "Called by BSML")]
         private void A360Select(TableView _1, int idx)
         {
-            UpdateRequirementsForPlatform(_platformManager.allPlatforms[idx]);
             _platformSpawner.SetPlatformAndShow(idx, PlatformType.A360);
         }
 
@@ -150,7 +135,6 @@ namespace CustomFloorPlugin.UI
             int platformIndex = _platformManager.GetIndexForType(_platformManager.currentPlatformType);
             int tableIndex = (int)_platformManager.currentPlatformType;
             allListTables[tableIndex].tableView.ScrollToCellWithIdx(platformIndex, TableView.ScrollPositionType.Beginning, false);
-            UpdateRequirementsForPlatform(_platformManager.allPlatforms[platformIndex]);
             _platformSpawner.ChangeToPlatform(platformIndex);
         }
 
@@ -161,7 +145,6 @@ namespace CustomFloorPlugin.UI
         protected override void DidDeactivate(bool removedFromHierarchy, bool screenSystemDisabling)
         {
             base.DidDeactivate(removedFromHierarchy, screenSystemDisabling);
-            requirementsModal.gameObject.SetActive(false);
             int platformIndex = 0;
             if (_config.ShowInMenu)
                 platformIndex = _config.ShufflePlatforms
@@ -235,33 +218,6 @@ namespace CustomFloorPlugin.UI
                 a360PlatformListTable.tableView.SelectCellWithIdx(0);
                 a360PlatformListTable.tableView.ScrollToCellWithIdx(0, TableView.ScrollPositionType.Center, true);
             }
-        }
-
-        private void UpdateRequirementsForPlatform(CustomPlatform platform)
-        {
-            if (platform.requirements.Count == 0 && platform.suggestions.Count == 0)
-            {
-                ReqButtonActive = false;
-                return;
-            }
-
-            ReqButtonActive = true;
-            requirementsListTable.data.Clear();
-            foreach (string req in platform.requirements)
-            {
-                CustomListTableData.CustomCellInfo cell = _platformManager.allPluginNames.Contains(req)
-                    ? new CustomListTableData.CustomCellInfo(req, "Required", _assetLoader.greenCheck)
-                    : new CustomListTableData.CustomCellInfo(req, "Required", _assetLoader.redX);
-                requirementsListTable.data.Add(cell);
-            }
-            foreach (string sug in platform.suggestions)
-            {
-                CustomListTableData.CustomCellInfo cell = _platformManager.allPluginNames.Contains(sug)
-                    ? new CustomListTableData.CustomCellInfo(sug, "Suggestion", _assetLoader.yellowCheck)
-                    : new CustomListTableData.CustomCellInfo(sug, "Suggestion", _assetLoader.yellowX);
-                requirementsListTable.data.Add(cell);
-            }
-            requirementsListTable.tableView.ReloadData();
         }
     }
 }

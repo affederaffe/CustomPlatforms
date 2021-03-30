@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 
 using CustomFloorPlugin.Configuration;
 using CustomFloorPlugin.UI;
@@ -60,6 +61,7 @@ namespace CustomFloorPlugin
         public void Initialize()
         {
             _fileSystemWatcher = new FileSystemWatcher(_config.CustomPlatformsDirectory, "*.plat");
+            _fileSystemWatcher.Changed += OnFileChanged;
             _fileSystemWatcher.Created += OnFileCreated;
             _fileSystemWatcher.Deleted += OnFileDeleted;
             _fileSystemWatcher.EnableRaisingEvents = true;
@@ -71,6 +73,7 @@ namespace CustomFloorPlugin
 
         public void Dispose()
         {
+            _fileSystemWatcher.Changed -= OnFileChanged;
             _fileSystemWatcher.Created -= OnFileCreated;
             _fileSystemWatcher.Deleted -= OnFileDeleted;
             _fileSystemWatcher.Dispose();
@@ -80,19 +83,52 @@ namespace CustomFloorPlugin
                 SubscribeToCinemaEvent(SubscriptionType.Unsubscribe);
         }
 
+        /// <summary>
+        /// Destroy the old platform and spawn the new one.
+        /// </summary>
+        private void OnFileChanged(object sender, FileSystemEventArgs e)
+        {
+            SharedCoroutineStarter.instance.StartCoroutine(WaitAndChange());
+            IEnumerator<WaitForEndOfFrame> WaitAndChange()
+            {
+                yield return new WaitForEndOfFrame();
+                if (_platformLoader.platformFilePaths.TryGetValue(e.FullPath, out CustomPlatform platform))
+                {
+                    bool wasActivePlatform = _platformManager.activePlatform == platform;
+                    _ = _platformLoader.LoadFromFileAsync(e.FullPath, (CustomPlatform platform) =>
+                    {
+                        _platformManager.HandlePlatformLoaded(platform);
+                        if (wasActivePlatform)
+                        {
+                            int index =_platformManager.allPlatforms.IndexOf(_platformManager.activePlatform);
+                            _platformSpawner.ChangeToPlatform(index);
+                        }
+                    });
+                }
+            }
+        }
+
+        /// <summary>
+        /// Create the new platform and add it to the UI
+        /// </summary>
         private void OnFileCreated(object sender, FileSystemEventArgs e)
         {
-            SharedCoroutineStarter.instance.StartCoroutine(_platformLoader.LoadFromFileAsync(e.FullPath, (CustomPlatform platform) =>
+            SharedCoroutineStarter.instance.StartCoroutine(WaitAndCreate());
+            IEnumerator<WaitForEndOfFrame> WaitAndCreate()
             {
-                _platformManager.HandlePlatformLoaded(platform);
-                CustomPlatform newPlatform = _platformLoader.platformFilePaths[platform.fullPath];
-                _platformListsView.AddCellForPlatform(newPlatform, true);
-                if (apiRequest)
+                yield return new WaitForEndOfFrame();
+                _ = _platformLoader.LoadFromFileAsync(e.FullPath, (CustomPlatform platform) =>
                 {
-                    _platformManager.apiRequestedPlatform = newPlatform;
-                    apiRequest = false;
-                }
-            }));
+                    _platformManager.HandlePlatformLoaded(platform);
+                    CustomPlatform newPlatform = _platformLoader.platformFilePaths[platform.fullPath];
+                    _platformListsView.AddCellForPlatform(newPlatform, true);
+                    if (apiRequest)
+                    {
+                        _platformManager.apiRequestedPlatform = newPlatform;
+                        apiRequest = false;
+                    }
+                });
+            }
         }
 
         /// <summary>
@@ -100,15 +136,20 @@ namespace CustomFloorPlugin
         /// </summary>
         private void OnFileDeleted(object sender, FileSystemEventArgs e)
         {
-            if (_platformLoader.platformFilePaths.TryGetValue(e.FullPath, out CustomPlatform platform))
+            SharedCoroutineStarter.instance.StartCoroutine(WaitAndDelete());
+            IEnumerator<WaitForEndOfFrame> WaitAndDelete()
             {
-                _platformListsView.RemoveCellForPlatform(platform);
-                if (_platformManager.activePlatform == platform)
-                    _platformSpawner.ChangeToPlatform(0);
+                yield return new WaitForEndOfFrame();
+                if (_platformLoader.platformFilePaths.TryGetValue(e.FullPath, out CustomPlatform platform))
+                {
+                    _platformListsView.RemoveCellForPlatform(platform);
+                    if (_platformManager.activePlatform == platform)
+                        _platformSpawner.ChangeToPlatform(0);
 
-                _platformLoader.platformFilePaths.Remove(platform.fullPath);
-                _platformManager.allPlatforms.Remove(platform);
-                GameObject.Destroy(platform.gameObject);
+                    _platformLoader.platformFilePaths.Remove(platform.fullPath);
+                    _platformManager.allPlatforms.Remove(platform);
+                    GameObject.Destroy(platform.gameObject);
+                }
             }
         }
 
@@ -162,13 +203,13 @@ namespace CustomFloorPlugin
         }
 
         /// <summary>
-        /// Downloads a <see cref="CustomPlatform"/> from modelsaber if the selected level requires it
+        /// Asynchronously downloads a <see cref="CustomPlatform"/> from modelsaber if the selected level requires it
         /// </summary>
         /// <param name="usePlatform">Wether the selected song requests a platform or not</param>
         /// <param name="name">The name of the requested platform</param>
         /// <param name="hash">The hash of the requested platform</param>
         /// <param name="level">The song the platform was requested for</param>
-        private void HandleSongCoreEvent(bool usePlatform, string name, string hash, IPreviewBeatmapLevel level)
+        private async void HandleSongCoreEvent(bool usePlatform, string name, string hash, IPreviewBeatmapLevel level)
         {
             // No platform is requested, abort
             if (!usePlatform)
@@ -190,69 +231,80 @@ namespace CustomFloorPlugin
                 }
             }
 
-            SharedCoroutineStarter.instance.StartCoroutine(SendWebRequest());
-            IEnumerator<UnityWebRequestAsyncOperation> SendWebRequest()
+            if (hash != null)
             {
-                if (hash != null)
+                PlatformDownloadData downloadData = await GetPlatformDownloadDataAsync("https://modelsaber.com/api/v2/get.php?type=platform&filter=hash:" + hash);
+                if (downloadData != null)
                 {
-                    using UnityWebRequest www = UnityWebRequest.Get("https://modelsaber.com/api/v2/get.php?type=platform&filter=hash:" + hash);
-                    yield return www.SendWebRequest();
-
-                    if (www.isNetworkError || www.isHttpError)
-                    {
-                        _siraLog.Error("Error downloading a platform: \n" + www.error);
-                    }
-                    else
-                    {
-                        Dictionary<string, PlatformDownloadData> downloadData = JsonConvert.DeserializeObject<Dictionary<string, PlatformDownloadData>>(www.downloadHandler.text);
-                        PlatformDownloadData data = downloadData.FirstOrDefault().Value;
-                        if (data != null)
-                        {
-                            SharedCoroutineStarter.instance.StartCoroutine(DownloadSavePlatform(data));
-                        }
-                    }
+                    byte[] platData = await DownloadPlatformAsync(downloadData);
+                    SavePlatformToFile(platData, downloadData.name);
                 }
+            }
 
-                else if (name != null)
+            else if (name != null)
+            {
+                PlatformDownloadData downloadData = await GetPlatformDownloadDataAsync("https://modelsaber.com/api/v2/get.php?type=platform&filter=name:" + name);
+                if (downloadData != null)
                 {
-                    using UnityWebRequest www = UnityWebRequest.Get("https://modelsaber.com/api/v2/get.php?type=platform&filter=name:" + name);
-                    yield return www.SendWebRequest();
-
-                    if (www.isNetworkError || www.isHttpError)
-                    {
-                        _siraLog.Error("Error downloading a platform: \n" + www.error);
-                    }
-                    else
-                    {
-                        Dictionary<string, PlatformDownloadData> downloadData = JsonConvert.DeserializeObject<Dictionary<string, PlatformDownloadData>>(www.downloadHandler.text);
-                        PlatformDownloadData data = downloadData.FirstOrDefault().Value;
-                        if (data != null)
-                        {
-                            SharedCoroutineStarter.instance.StartCoroutine(DownloadSavePlatform(data));
-                        }
-                    }
+                    byte[] platData = await DownloadPlatformAsync(downloadData);
+                    SavePlatformToFile(platData, downloadData.name);
                 }
             }
         }
 
         /// <summary>
-        /// Downloads the .plat file from modelsaber and saves it in the CustomPlatforms directory
+        /// Asynchronously downloads the <see cref="PlatformDownloadData"/> from modelsaber
         /// </summary>
-        /// <param name="data">The API deserialized API response containing the download link to the .plat file</param>
-        private IEnumerator<UnityWebRequestAsyncOperation> DownloadSavePlatform(PlatformDownloadData data)
+        /// <param name="uri">The URI to the platform</param>
+        private async Task<PlatformDownloadData> GetPlatformDownloadDataAsync(string uri)
         {
-            using UnityWebRequest www = UnityWebRequest.Get(data.download);
-            yield return www.SendWebRequest();
-
-            if (www.isNetworkError || www.isHttpError)
+            TaskCompletionSource<PlatformDownloadData> taskSource = new();
+            using UnityWebRequest www = UnityWebRequest.Get(uri);
+            UnityWebRequestAsyncOperation webRequest = www.SendWebRequest();
+            webRequest.completed += delegate
             {
-                _siraLog.Error("Error downloading a platform: \n" + www.error);
-            }
-            else
+                if (www.isNetworkError || www.isHttpError)
+                {
+                    _siraLog.Error("Error downloading a platform: \n" + www.error);
+                    return;
+                }
+                Dictionary<string, PlatformDownloadData> downloadData = JsonConvert.DeserializeObject<Dictionary<string, PlatformDownloadData>>(www.downloadHandler.text);
+                taskSource.TrySetResult(downloadData.FirstOrDefault().Value);
+            };
+            return await taskSource.Task;
+        }
+
+        /// <summary>
+        /// Asynchronously downloads the .plat file from modelsaber and saves it in the CustomPlatforms directory
+        /// </summary>
+        /// <param name="data">The deserialized API response containing the download link to the .plat file</param>
+        private async Task<byte[]> DownloadPlatformAsync(PlatformDownloadData data)
+        {
+            TaskCompletionSource<byte[]> taskSource = new();
+            using UnityWebRequest www = UnityWebRequest.Get(data.download);
+            UnityWebRequestAsyncOperation webRequest = www.SendWebRequest();
+            webRequest.completed += delegate
+            {
+                if (www.isNetworkError || www.isHttpError)
+                {
+                    _siraLog.Error("Error downloading a platform: \n" + www.error);
+                    return;
+                }
+                taskSource.TrySetResult(www.downloadHandler.data);
+            };
+            return await taskSource.Task;
+        }
+
+        /// <summary>
+        /// Saves the downloaded <see cref="CustomPlatform"/>
+        /// </summary>
+        private void SavePlatformToFile(byte[] platformData, string name)
+        {
+            if (platformData != null)
             {
                 apiRequest = true;
-                string destination = Path.Combine(_config.CustomPlatformsDirectory, data.name + ".plat");
-                File.WriteAllBytes(destination, www.downloadHandler.data);
+                string destination = Path.Combine(_config.CustomPlatformsDirectory, name + ".plat");
+                File.WriteAllBytes(destination, platformData);
             }
         }
     }

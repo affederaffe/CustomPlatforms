@@ -7,6 +7,12 @@ namespace CustomFloorPlugin
 {
     public class SaberSliceFilter : EventFilterBehaviour, INotifyPlatformEnabled, INotifyPlatformDisabled
     {
+        public enum SaberType
+        {
+            RightSaber,
+            LeftSaber
+        }
+
         public SaberType saberType;
         public UnityEvent SaberSlice;
 
@@ -24,12 +30,6 @@ namespace CustomFloorPlugin
         {
             if ((SaberType)saber == saberType)
                 SaberSlice.Invoke();
-        }
-
-        public enum SaberType
-        {
-            RightSaber,
-            LeftSaber
         }
     }
 }

@@ -7,7 +7,7 @@ using Zenject;
 
 namespace CustomFloorPlugin
 {
-    internal class MultiplayerGameHelper : IInitializable, IDisposable
+    internal class MultiplayerGameHandler : IInitializable, IDisposable
     {
         private readonly AssetLoader _assetLoader;
         private readonly PlatformManager _platformManager;
@@ -15,7 +15,7 @@ namespace CustomFloorPlugin
         private readonly MultiplayerPlayersManager _multiplayerPlayersManager;
         private readonly DiContainer _container;
 
-        public MultiplayerGameHelper(AssetLoader assetLoader,
+        public MultiplayerGameHandler(AssetLoader assetLoader,
                                      PlatformManager platformManager,
                                      PlatformSpawner platformSpawner,
                                      MultiplayerPlayersManager multiplayerPlayersManager,
@@ -46,7 +46,7 @@ namespace CustomFloorPlugin
 
         private void HandlePlayerDidFinish(LevelCompletionResults results)
         {
-            _platformSpawner.ChangeToPlatform(0);
+             _platformSpawner.ChangeToPlatform(0);
         }
 
         /// <summary>

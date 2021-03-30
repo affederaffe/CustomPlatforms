@@ -10,20 +10,13 @@ namespace CustomFloorPlugin
 {
     public class EventManager : MonoBehaviour, INotifyPlatformEnabled, INotifyPlatformDisabled
     {
-        [Serializable]
-        public class ComboChangedEvent : UnityEvent<int> { }
-        [Serializable]
-        public class OnSpecificSliceEvent : UnityEvent<int> { }
-        [Serializable]
-        public class OnScoreChangedEvent : UnityEvent<int, int> { }
-        [Serializable]
-        public class OnGoodCutCountChangedEvent : UnityEvent<int> { }
-        [Serializable]
-        public class OnBadCutCountChangedEvent : UnityEvent<int> { }
-        [Serializable]
-        public class OnMissCountChangedEvent : UnityEvent<int> { }
-        [Serializable]
-        public class OnAllNotesCountChangedEvent : UnityEvent<int, int> { }
+        [Serializable] public class ComboChangedEvent : UnityEvent<int> { }
+        [Serializable] public class OnSpecificSliceEvent : UnityEvent<int> { }
+        [Serializable] public class OnScoreChangedEvent : UnityEvent<int, int> { }
+        [Serializable] public class OnGoodCutCountChangedEvent : UnityEvent<int> { }
+        [Serializable] public class OnBadCutCountChangedEvent : UnityEvent<int> { }
+        [Serializable] public class OnMissCountChangedEvent : UnityEvent<int> { }
+        [Serializable] public class OnAllNotesCountChangedEvent : UnityEvent<int, int> { }
 
         public UnityEvent OnSlice;
         public UnityEvent OnMiss;

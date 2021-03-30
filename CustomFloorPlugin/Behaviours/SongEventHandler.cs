@@ -9,7 +9,7 @@ namespace CustomFloorPlugin
     public class SongEventHandler : MonoBehaviour, INotifyPlatformEnabled, INotifyPlatformDisabled
     {
         public SongEventType eventType;
-        public int value; // enum? 
+        public int value;
         public bool anyValue;
         public UnityEvent OnTrigger;
 

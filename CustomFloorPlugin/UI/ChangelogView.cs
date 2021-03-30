@@ -16,7 +16,7 @@ namespace CustomFloorPlugin.UI
     internal class ChangelogView : BSMLAutomaticViewController
     {
         [UIComponent("credits-modal")]
-        internal readonly ModalView creditsModal;
+        private readonly ModalView creditsModal = null;
 
         /// <summary>
         /// The string displayed in the changelog   

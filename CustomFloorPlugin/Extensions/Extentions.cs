@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.IO;
+using System.Threading.Tasks;
 
 using UnityEngine;
 
@@ -64,12 +65,10 @@ namespace CustomFloorPlugin.Extensions
         /// <summary>
         /// Reads a <see cref="Sprite"/> from a <see cref="Stream"/>
         /// </summary>
-        /// <param name="resourceStream"></param>
-        /// <returns></returns>
-        internal static Sprite ReadSprite(this Stream resourceStream)
+        internal static async Task<Sprite> ReadSprite(this Stream resourceStream)
         {
             byte[] data = new byte[resourceStream.Length];
-            resourceStream.Read(data, 0, data.Length);
+            await resourceStream.ReadAsync(data, 0, data.Length);
             Texture2D tex = new(2, 2);
             tex.LoadImage(data);
             return Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), Vector2.zero);
@@ -79,7 +78,6 @@ namespace CustomFloorPlugin.Extensions
         /// Reads a <see cref="Texture2D"/> from a <see cref="BinaryReader"/>
         /// (stolen from CustomAvatars)
         /// </summary>
-        /// <returns></returns>
         internal static Texture2D ReadTexture2D(this BinaryReader reader)
         {
             return BytesToTexture2D(reader.ReadBytes(reader.ReadInt32()));
@@ -88,10 +86,9 @@ namespace CustomFloorPlugin.Extensions
         /// <summary>
         /// Writes a <see cref="Texture2D"/> with a <see cref="BinaryReader"/>
         /// </summary>
-        internal static void Write(this BinaryWriter writer, Texture2D texture, bool forceReadable)
+        internal static void WriteTexture2D(this BinaryWriter writer, Texture2D texture, bool forceReadable)
         {
             byte[] textureBytes = BytesFromTexture2D(texture, forceReadable);
-
             writer.Write(textureBytes.Length);
             writer.Write(textureBytes);
         }
@@ -105,9 +102,7 @@ namespace CustomFloorPlugin.Extensions
                 return null;
 
             Texture2D texture = new(0, 0, TextureFormat.ARGB32, false);
-
             texture.LoadImage(bytes);
-
             return texture;
         }
 
@@ -116,7 +111,8 @@ namespace CustomFloorPlugin.Extensions
         /// </summary>
         private static byte[] BytesFromTexture2D(Texture2D texture, bool forceReadable)
         {
-            if (texture == null || (!texture.isReadable && !forceReadable)) return new byte[0];
+            if (texture == null || (!texture.isReadable && !forceReadable)) 
+                return new byte[0];
 
             // create readable texture by rendering onto a RenderTexture
             if (!texture.isReadable)

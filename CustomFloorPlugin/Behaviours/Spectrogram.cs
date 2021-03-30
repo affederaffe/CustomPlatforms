@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+
+using UnityEngine;
 
 using Zenject;
 
@@ -49,16 +51,16 @@ namespace CustomFloorPlugin
         /// <summary>
         /// Spectogram fallback data
         /// </summary>
-        private static float[] FallbackSamples
+        private static IList<float> FallbackSamples
         {
             get
             {
                 if (_FallbackSamples == null)
                 {
                     _FallbackSamples = new float[64];
-                    for (int i = 0; i < FallbackSamples.Length; i++)
+                    for (int i = 0; i < FallbackSamples.Count; i++)
                     {
-                        FallbackSamples[i] = (Mathf.Sin((float)i / 64 * 9 * Mathf.PI + 1.4f * Mathf.PI) + 1.2f) / 25;
+                        FallbackSamples[i] = (Mathf.Sin((float)i / 64 * 15 * Mathf.PI + 5f * Mathf.PI) + 2f) / 15f;
                     }
                 }
                 return _FallbackSamples;
@@ -119,15 +121,13 @@ namespace CustomFloorPlugin
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Code Quality", "IDE0051:Remove unused private members", Justification = "Called by Unity")]
         private void Update()
         {
-            float[] processedSamples = _basicSpectrogramData?.ProcessedSamples.ToArray() ?? FallbackSamples;
-
-            for (int i = 0; i < processedSamples.Length; i++)
+            IList<float> processedSamples = _basicSpectrogramData?.ProcessedSamples ?? FallbackSamples;
+            for (int i = 0; i < processedSamples.Count; i++)
             {
-                float num = processedSamples[i] * (5f + i * 0.01f);
-                if (num > 1f)
-                    num = 1f;
+                float num = processedSamples[i] * (1.5f + i * 0.075f);
+                if (num > 1f) num = 1f;
                 num = Mathf.Pow(num, 2f);
-                _columnTransforms[i].localScale = new Vector3(columnWidth, Mathf.Lerp(minHeight, maxHeight, num) + i * 0.1f, columnDepth);
+                _columnTransforms[i].localScale = new Vector3(columnWidth, Mathf.Lerp(minHeight, maxHeight, num), columnDepth);
                 _columnTransforms[i + 64].localScale = new Vector3(columnWidth, Mathf.Lerp(minHeight, maxHeight, num), columnDepth);
             }
         }

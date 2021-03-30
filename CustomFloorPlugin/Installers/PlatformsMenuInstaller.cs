@@ -17,7 +17,7 @@ namespace CustomFloorPlugin.Installers
             Container.Bind<PlatformListFlowCoordinator>().FromNewComponentOnNewGameObject().AsSingle();
             Container.BindInterfacesTo<MenuButtonManager>().AsSingle();
             Container.BindInterfacesTo<API>().AsSingle();
-            Container.BindInterfacesTo<MultiplayerLobbyHelper>().AsSingle();
+            Container.BindInterfacesTo<MultiplayerLobbyHandler>().AsSingle();
         }
     }
 }

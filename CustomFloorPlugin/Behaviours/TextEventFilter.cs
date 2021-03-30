@@ -7,6 +7,16 @@ namespace CustomFloorPlugin
 {
     public class TextEventFilter : EventFilterBehaviour, INotifyPlatformEnabled, INotifyPlatformDisabled
     {
+        public enum EventType
+        {
+            AllNotes,
+            GoodCuts,
+            BadCuts,
+            Misses,
+            Score,
+            Combo
+        }
+
         public EventType eventType = EventType.AllNotes;
         public TextMeshPro tmPro;
 
@@ -94,16 +104,6 @@ namespace CustomFloorPlugin
         private void OnComboChanged(int combo)
         {
             tmPro.text = combo.ToString();
-        }
-
-        public enum EventType
-        {
-            AllNotes,
-            GoodCuts,
-            BadCuts,
-            Misses,
-            Score,
-            Combo
         }
     }
 }

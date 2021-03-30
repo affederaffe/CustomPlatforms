@@ -9,7 +9,7 @@ using Zenject;
 
 namespace CustomFloorPlugin
 {
-    internal class MultiplayerLobbyHelper : IInitializable, IDisposable
+    internal class MultiplayerLobbyHandler : IInitializable, IDisposable
     {
         private readonly PluginConfig _config;
         private readonly AssetLoader _assetLoader;
@@ -17,7 +17,7 @@ namespace CustomFloorPlugin
         private readonly PlatformSpawner _platformSpawner;
         private readonly IMultiplayerSessionManager _multiplayerSessionManager;
 
-        public MultiplayerLobbyHelper(PluginConfig config,
+        public MultiplayerLobbyHandler(PluginConfig config,
                                       AssetLoader assetLoader,
                                       PlatformManager platformManager,
                                       PlatformSpawner platformSpawner,

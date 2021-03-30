@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 using CustomFloorPlugin.Configuration;
 using CustomFloorPlugin.Extensions;
@@ -68,14 +69,10 @@ namespace CustomFloorPlugin
         /// <summary>
         /// Automaticly clean up all custom objects
         /// </summary>
-        private void HandleTransitionDidStart(float aheadTime)
+        private async void HandleTransitionDidStart(float aheadTime)
         {
-            SharedCoroutineStarter.instance.StartCoroutine(WaitForSeconds());
-            IEnumerator<WaitForSeconds> WaitForSeconds()
-            {
-                yield return new WaitForSeconds(aheadTime);
-                ChangeToPlatform(0);
-            }
+            await Task.Delay(TimeSpan.FromSeconds(aheadTime));
+            ChangeToPlatform(0);
         }
 
         /// <summary>
@@ -108,6 +105,7 @@ namespace CustomFloorPlugin
                         : _platformManager.GetIndexForType(PlatformType.Singleplayer);
                     break;
                 case AppInitScenesTransitionSetupDataSO:
+                case HealthWarningScenesTransitionSetupDataSO:
                 case MultiplayerLevelScenesTransitionSetupDataSO:
                     // Multiplayer levels are handled by the MultiplayerGameHelper because this event doesn't provide the GameplayCore DiContainer for multiplayer levels.
                     return;
@@ -173,46 +171,33 @@ namespace CustomFloorPlugin
         /// Changes to a specific <see cref="CustomPlatform"/>
         /// </summary>
         /// <param name="index">The index of the new <see cref="CustomPlatform"/> in the list of all platforms</param>
-        internal void ChangeToPlatform(int index)
+        internal async void ChangeToPlatform(int index)
         {
-            if (!_platformManager.allPlatforms[index].requirements.All(x => _platformManager.allPluginNames.Contains(x)))
-            {
-                _siraLog.Warning("Missing requirement for platform " + _platformManager.allPlatforms[index].name);
-                ChangeToPlatform(0);
-                return;
-            }
-
             _siraLog.Info("Switching to " + _platformManager.allPlatforms[index].name);
             DestroyCustomObjects();
             _platformManager.activePlatform?.gameObject.SetActive(false);
             _platformManager.activePlatform = _platformManager.allPlatforms[index];
 
-            SharedCoroutineStarter.instance.StartCoroutine(SpawnPlatform());
-            IEnumerator<YieldInstruction> SpawnPlatform()
+            if (_platformManager.activePlatform.isDescriptor)
             {
-                if (_platformManager.activePlatform.isDescriptor)
-                {
-                    string platformPath = _platformManager.activePlatform.fullPath;
-                    yield return SharedCoroutineStarter.instance.StartCoroutine(_platformLoader.LoadFromFileAsync(platformPath, _platformManager.HandlePlatformLoaded));
-                    // Check if another platform has been spawned in the meantime and abort if that's the case
-                    if (_platformManager.activePlatform?.fullPath != platformPath)
-                        yield break;
-                }
-
-                if (index != 0)
-                {
-                    // Wait until all custom objects are destroyed by unity
-                    yield return new WaitForEndOfFrame();
-                    _platformManager.activePlatform.gameObject.SetActive(true);
-                    SpawnCustomObjects();
-                }
-                else
-                {
-                    _platformManager.activePlatform = null;
-                }
-
-                _hider.HideObjectsForPlatform(_platformManager.allPlatforms[index]);
+                string platformPath = _platformManager.activePlatform.fullPath;
+                await _platformLoader.LoadFromFileAsync(platformPath, _platformManager.HandlePlatformLoaded);
+                // Check if another platform has been spawned in the meantime and abort if that's the case
+                if (_platformManager.activePlatform?.fullPath != platformPath)
+                    return;
             }
+
+            if (index != 0)
+            {
+                _platformManager.activePlatform.gameObject.SetActive(true);
+                SpawnCustomObjects();
+            }
+            else
+            {
+                _platformManager.activePlatform = null;
+            }
+
+            _hider.HideObjectsForPlatform(_platformManager.allPlatforms[index]);
         }
 
         /// <summary>

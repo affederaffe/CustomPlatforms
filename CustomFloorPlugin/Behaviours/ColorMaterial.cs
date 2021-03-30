@@ -8,6 +8,15 @@ namespace CustomFloorPlugin
     [RequireComponent(typeof(Renderer))]
     public class ColorMaterial : MonoBehaviour, INotifyPlatformEnabled
     {
+        public enum MaterialColorType
+        {
+            SaberColorA,
+            SaberColorB,
+            ColorTypeA,
+            ColorTypeB,
+            ObstacleColor
+        }
+
         public string propertyName = "_Color";
         public MaterialColorType materialColorType;
 
@@ -45,15 +54,6 @@ namespace CustomFloorPlugin
             };
             if (_renderer.material.HasProperty(propertyName))
                 _renderer.material.SetColor(propertyName, color);
-        }
-
-        public enum MaterialColorType
-        {
-            SaberColorA,
-            SaberColorB,
-            ColorTypeA,
-            ColorTypeB,
-            ObstacleColor
         }
     }
 }

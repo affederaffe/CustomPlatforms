@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Security.Cryptography;
+using System.Threading.Tasks;
 
 using UnityEngine;
 
@@ -27,34 +28,27 @@ namespace CustomFloorPlugin
         /// <summary>
         /// Asynchronously loads a <see cref="CustomPlatform"/> from a specified file path
         /// </summary>
-        internal IEnumerator<AsyncOperation> LoadFromFileAsync(string fullPath, Action<CustomPlatform> callback)
+        internal async Task LoadFromFileAsync(string fullPath, Action<CustomPlatform> callback)
         {
             if (!File.Exists(fullPath))
                 throw new FileNotFoundException("File could not be found", fullPath);
 
             using FileStream fileStream = File.OpenRead(fullPath);
 
-            AssetBundleCreateRequest assetBundleCreateRequest = AssetBundle.LoadFromStreamAsync(fileStream);
-            yield return assetBundleCreateRequest;
-            if (!assetBundleCreateRequest.isDone || !assetBundleCreateRequest.assetBundle)
-                throw new FileLoadException("File coulnd not be loaded", fullPath);
+            AssetBundle assetBundle = await LoadAssetBundleFromStreamAsync(fileStream);
 
-            AssetBundleRequest platformAssetBundleRequest = assetBundleCreateRequest.assetBundle.LoadAssetAsync("_CustomPlatform");
-            yield return platformAssetBundleRequest;
-            if (!platformAssetBundleRequest.isDone || !platformAssetBundleRequest.asset)
+            if (assetBundle == null)
+                throw new FileLoadException("File could not be loaded", fullPath);
+
+            GameObject platformPrefab = await LoadAssetFromAssetBundleAsync<GameObject>(assetBundle, "_CustomPlatform");
+
+            if (platformPrefab == null)
             {
-                assetBundleCreateRequest.assetBundle.Unload(true);
-                throw new FileLoadException("File coulnd not be loaded", fullPath);
+                assetBundle.Unload(true);
+                throw new FileLoadException("Platform GameObject could not be loaded", fullPath);
             }
 
-            assetBundleCreateRequest.assetBundle.Unload(false);
-
-            GameObject platformPrefab = platformAssetBundleRequest.asset as GameObject;
-
-            foreach (AudioListener al in platformPrefab.GetComponentsInChildren<AudioListener>())
-            {
-                GameObject.DestroyImmediate(al);
-            }
+            assetBundle.Unload(false);
 
             CustomPlatform customPlatform = platformPrefab.GetComponent<CustomPlatform>();
 
@@ -76,7 +70,7 @@ namespace CustomFloorPlugin
                 {
                     // no customplatform component, abort
                     GameObject.Destroy(platformPrefab);
-                    yield break;
+                    return;
                 }
             }
 
@@ -93,6 +87,36 @@ namespace CustomFloorPlugin
             callback.Invoke(customPlatform);
 
             GameObject.Destroy(platformPrefab);
+        }
+
+        /// <summary>
+        /// Asynchronously loads and <see cref="AssetBundle"/> from a <see cref="FileStream"/>
+        /// </summary>
+        private async Task<AssetBundle> LoadAssetBundleFromStreamAsync(FileStream fileStream)
+        {
+            TaskCompletionSource<AssetBundle> taskSource = new();
+            AssetBundleCreateRequest assetBundleCreateRequest = AssetBundle.LoadFromStreamAsync(fileStream);
+            assetBundleCreateRequest.completed += delegate
+            {
+                AssetBundle assetBundle = assetBundleCreateRequest.assetBundle;
+                taskSource.TrySetResult(assetBundle);
+            };
+            return await taskSource.Task;
+        }
+
+        /// <summary>
+        /// Asynchronously loads an Asset <typeparamref name="T"/> from an <see cref="AssetBundle"/>
+        /// </summary>
+        private async Task<T> LoadAssetFromAssetBundleAsync<T>(AssetBundle assetBundle, string assetName) where T : UnityEngine.Object
+        {
+            TaskCompletionSource<T> taskSource = new();
+            AssetBundleRequest assetBundleRequest = assetBundle.LoadAssetAsync<T>(assetName);
+            assetBundleRequest.completed += delegate
+            {
+                T asset = (T)assetBundleRequest.asset;
+                taskSource.TrySetResult(asset);
+            };
+            return await taskSource.Task;
         }
     }
 }

@@ -62,22 +62,22 @@ namespace CustomFloorPlugin
         internal void HideObjectsForPlatform(CustomPlatform platform)
         {
             FindEnvironment();
-            if (menuEnvironment != null) SetCollectionHidden(menuEnvironment, _platformManager.activePlatform != null);
-            if (multiplayerEnvironment != null) SetCollectionHidden(multiplayerEnvironment, true);
-            if (feet != null) SetCollectionHidden(feet, platform.hideDefaultPlatform && !_config.AlwaysShowFeet);
-            if (playersPlace != null) SetCollectionHidden(playersPlace, platform.hideDefaultPlatform);
-            if (smallRings != null) SetCollectionHidden(smallRings, platform.hideSmallRings);
-            if (bigRings != null) SetCollectionHidden(bigRings, platform.hideBigRings);
-            if (visualizer != null) SetCollectionHidden(visualizer, platform.hideEQVisualizer);
-            if (towers != null) SetCollectionHidden(towers, platform.hideTowers);
-            if (highway != null) SetCollectionHidden(highway, platform.hideHighway);
-            if (backColumns != null) SetCollectionHidden(backColumns, platform.hideBackColumns);
-            if (backLasers != null) SetCollectionHidden(backLasers, platform.hideBackLasers);
-            if (doubleColorLasers != null) SetCollectionHidden(doubleColorLasers, platform.hideDoubleColorLasers);
-            if (rotatingLasers != null) SetCollectionHidden(rotatingLasers, platform.hideRotatingLasers);
-            if (trackLights != null) SetCollectionHidden(trackLights, platform.hideTrackLights);
+            if (menuEnvironment != null) SetCollectionHidden(ref menuEnvironment, _platformManager.activePlatform != null);
+            if (multiplayerEnvironment != null) SetCollectionHidden(ref multiplayerEnvironment, true);
+            if (feet != null) SetCollectionHidden(ref feet, platform.hideDefaultPlatform && !_config.AlwaysShowFeet);
+            if (playersPlace != null) SetCollectionHidden(ref playersPlace, platform.hideDefaultPlatform);
+            if (smallRings != null) SetCollectionHidden(ref smallRings, platform.hideSmallRings);
+            if (bigRings != null) SetCollectionHidden(ref bigRings, platform.hideBigRings);
+            if (visualizer != null) SetCollectionHidden(ref visualizer, platform.hideEQVisualizer);
+            if (towers != null) SetCollectionHidden(ref towers, platform.hideTowers);
+            if (highway != null) SetCollectionHidden(ref highway, platform.hideHighway);
+            if (backColumns != null) SetCollectionHidden(ref backColumns, platform.hideBackColumns);
+            if (backLasers != null) SetCollectionHidden(ref backLasers, platform.hideBackLasers);
+            if (doubleColorLasers != null) SetCollectionHidden(ref doubleColorLasers, platform.hideDoubleColorLasers);
+            if (rotatingLasers != null) SetCollectionHidden(ref rotatingLasers, platform.hideRotatingLasers);
+            if (trackLights != null) SetCollectionHidden(ref trackLights, platform.hideTrackLights);
             _assetLoader.playersPlace?.SetActive(_platformManager.activePlatform != null && !platform.hideDefaultPlatform && sceneName == "MenuEnvironment");
-            _TrackLaneRings = null;
+            Cleanup();
         }
 
         /// <summary>
@@ -85,54 +85,39 @@ namespace CustomFloorPlugin
         /// </summary>
         private void FindEnvironment()
         {
+            roots = GetRootGameObjects();
+            renamedObjects = new();
+            if (roots != null)
+            {
+                FindMenuEnvironmnet();
+                FindMultiplayerEnvironment();
+                FindPlayersPlace();
+                FindFeetIcon();
+                FindPlayersPlace();
+                FindSmallRings();
+                FindBigRings();
+                FindVisualizers();
+                FindTowers();
+                FindHighway();
+                FindBackColumns();
+                FindBackLasers();
+                FindRotatingLasers();
+                FindDoubleColorLasers();
+                FindTrackLights();
+            }
+        }
+
+        /// <summary>
+        /// Finds the currently loaded environment and gets the root GameObjects of the respective scene
+        /// </summary>
+        /// <returns>The root GameObjects of the environment scene</returns>
+        private GameObject[] GetRootGameObjects()
+        {
             sceneName = _gameScenesManager.GetCurrentlyLoadedSceneNames().LastOrDefault(x => x.EndsWith("Environment"));
-            sceneName = sceneName == "MultiplayerEnvironment" ? sceneName = "GameCore" : sceneName;
+            if (sceneName == "MultiplayerEnvironment") sceneName = "GameCore";
             Scene scene = SceneManager.GetSceneByName(sceneName);
-            if (!scene.IsValid())
-                return;
-            roots = scene.GetRootGameObjects();
-            renamedObjects = new List<GameObject>();
-
-            FindMenuEnvironmnet();
-
-            // If no platform is selected, don't hide anything other than the menu environent to prevent showing objects disabled by chroma
-            if (_platformManager.allPlatforms.IndexOf(_platformManager.activePlatform) <= 0)
-            {
-                multiplayerEnvironment = null;
-                feet = null;
-                playersPlace = null;
-                smallRings = null;
-                bigRings = null;
-                visualizer = null;
-                towers = null;
-                highway = null;
-                backColumns = null;
-                backLasers = null;
-                rotatingLasers = null;
-                doubleColorLasers = null;
-                trackLights = null;
-                return;
-            }
-
-            FindMultiplayerEnvironment();
-            FindPlayersPlace();
-            FindFeetIcon();
-            FindPlayersPlace();
-            FindSmallRings();
-            FindBigRings();
-            FindVisualizers();
-            FindTowers();
-            FindHighway();
-            FindBackColumns();
-            FindBackLasers();
-            FindRotatingLasers();
-            FindDoubleColorLasers();
-            FindTrackLights();
-
-            foreach (GameObject go in renamedObjects)
-            {
-                go.name = go.name.Remove(go.name.Length - renamedObjectSuffix.Length);
-            }
+            if (!scene.IsValid()) return null;
+            return scene.GetRootGameObjects();
         }
 
         /// <summary>
@@ -140,11 +125,22 @@ namespace CustomFloorPlugin
         /// </summary>
         /// <param name="list">A <see cref="List{T}"/> of GameObjects</param>
         /// <param name="hidden">A boolean describing the desired hidden state</param>
-        private void SetCollectionHidden(List<GameObject> list, bool hidden)
+        private void SetCollectionHidden(ref List<GameObject> list, bool hidden)
         {
             foreach (GameObject go in list)
                 go.SetActive(!hidden);
+            list = null;
         }
+
+        /// <summary>
+        /// Resets the names of all renamed objects to it's default
+        /// </summary>
+        private void Cleanup()
+        {
+            foreach (GameObject go in renamedObjects)
+                go.name.Remove(go.name.Length - renamedObjectSuffix.Length);
+            _TrackLaneRings = null;
+    }
 
         /// <summary>
         /// Finds a GameObject by name and adds it to the provided list
@@ -180,7 +176,6 @@ namespace CustomFloorPlugin
             menuEnvironment = new List<GameObject>();
             switch (sceneName)
             {
-                case "HealthWarning":
                 case "MenuEnvironment":
                 case "Credits":
                     FindAddGameObject("MenuFogRing", menuEnvironment);
@@ -248,7 +243,7 @@ namespace CustomFloorPlugin
             switch (sceneName)
             {
                 case "GameCore":
-                    FindAddGameObject("IsActiveObjects/Construction/playersPlace/Feet", feet);
+                    FindAddGameObject("IsActiveObjects/Construction/PlayersPlace/Feet", feet);
                     break;
                 default:
                     FindAddGameObject("PlayersPlace/Feet", feet);
