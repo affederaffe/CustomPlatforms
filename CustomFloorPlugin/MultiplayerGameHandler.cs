@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 
 using UnityEngine;
 
@@ -28,14 +29,14 @@ namespace CustomFloorPlugin
             _container = container;
         }
 
-        public void Initialize()
+        public async void Initialize()
         {
-            int platformIndex = _platformManager.GetIndexForType(PlatformType.Multiplayer);
+            int platformIndex = await _platformManager.GetIndexForTypeAsync(PlatformType.Multiplayer);
             if (platformIndex != 0)
             {
                 _multiplayerPlayersManager.playerDidFinishEvent += HandlePlayerDidFinish;
                 SpawnLightEffects();
-                _platformSpawner.SetContainerAndShow(platformIndex, _container);
+                await _platformSpawner.SetContainerAndShowAsync(platformIndex, _container);
             }
         }
 
@@ -44,9 +45,9 @@ namespace CustomFloorPlugin
             _multiplayerPlayersManager.playerDidFinishEvent -= HandlePlayerDidFinish;
         }
 
-        private void HandlePlayerDidFinish(LevelCompletionResults results)
+        private async void HandlePlayerDidFinish(LevelCompletionResults results)
         {
-             _platformSpawner.ChangeToPlatform(0);
+            await _platformSpawner.ChangeToPlatformAsync(0);
         }
 
         /// <summary>

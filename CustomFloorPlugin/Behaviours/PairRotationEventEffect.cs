@@ -44,7 +44,7 @@ namespace CustomFloorPlugin
             rotEffect.SetField("_transformL", tranformL);
             rotEffect.SetField("_transformR", tranformR);
             rotEffect.SetField("_useZPositionForAngleOffset", useZPositionForAngleOffset);
-            rotEffect.SetField("zPositionAngleOffsetScale", zPositionAngleOffsetScale);
+            rotEffect.SetField("_zPositionAngleOffsetScale", zPositionAngleOffsetScale);
         }
     }
 }

@@ -29,7 +29,6 @@ namespace CustomFloorPlugin
     {
         private readonly SiraLog _siraLog;
         private readonly PluginConfig _config;
-        private readonly PlatformLoader _platformLoader;
         private readonly PlatformManager _platformManager;
         private readonly PlatformSpawner _platformSpawner;
         private readonly PlatformListsView _platformListsView;
@@ -39,14 +38,12 @@ namespace CustomFloorPlugin
 
         public API(SiraLog siraLog,
                    PluginConfig config,
-                   PlatformLoader platformLoader,
                    PlatformManager platformManager,
                    PlatformSpawner platformSpawner,
                    PlatformListsView platformListsView)
         {
             _siraLog = siraLog;
             _config = config;
-            _platformLoader = platformLoader;
             _platformManager = platformManager;
             _platformSpawner = platformSpawner;
             _platformListsView = platformListsView;
@@ -84,26 +81,19 @@ namespace CustomFloorPlugin
         }
 
         /// <summary>
-        /// Destroy the old platform and spawn the new one.
+        /// Replaces the old platform with the updated version
         /// </summary>
-        private void OnFileChanged(object sender, FileSystemEventArgs e)
+        private async void OnFileChanged(object sender, FileSystemEventArgs e)
         {
-            SharedCoroutineStarter.instance.StartCoroutine(WaitAndChange());
-            IEnumerator<WaitForEndOfFrame> WaitAndChange()
+            if (_platformManager.platformFilePaths.TryGetValue(e.FullPath, out CustomPlatform platform))
             {
-                yield return new WaitForEndOfFrame();
-                if (_platformLoader.platformFilePaths.TryGetValue(e.FullPath, out CustomPlatform platform))
+                await _platformManager.allPlatformsTask;
+                bool isActivePlatform = _platformManager.activePlatform == platform;
+                CustomPlatform updatedPlatform = await _platformManager.CreatePlatformAsync(e.FullPath);
+                if (isActivePlatform)
                 {
-                    bool wasActivePlatform = _platformManager.activePlatform == platform;
-                    _ = _platformLoader.LoadFromFileAsync(e.FullPath, (CustomPlatform platform) =>
-                    {
-                        _platformManager.HandlePlatformLoaded(platform);
-                        if (wasActivePlatform)
-                        {
-                            int index =_platformManager.allPlatforms.IndexOf(_platformManager.activePlatform);
-                            _platformSpawner.ChangeToPlatform(index);
-                        }
-                    });
+                    int index = _platformManager.allPlatformsTask.Result.IndexOf(updatedPlatform);
+                    await _platformSpawner.ChangeToPlatformAsync(index);
                 }
             }
         }
@@ -111,45 +101,38 @@ namespace CustomFloorPlugin
         /// <summary>
         /// Create the new platform and add it to the UI
         /// </summary>
-        private void OnFileCreated(object sender, FileSystemEventArgs e)
+        private async void OnFileCreated(object sender, FileSystemEventArgs e)
         {
-            SharedCoroutineStarter.instance.StartCoroutine(WaitAndCreate());
-            IEnumerator<WaitForEndOfFrame> WaitAndCreate()
+            await _platformManager.allPlatformsTask;
+            CustomPlatform newPlatform = await _platformManager.CreatePlatformAsync(e.FullPath);
+            _platformManager.allPlatformsTask.Result.Add(newPlatform);
+            _platformListsView.AddCellForPlatform(newPlatform, true);
+            if (_platformManager.activePlatform == newPlatform)
             {
-                yield return new WaitForEndOfFrame();
-                _ = _platformLoader.LoadFromFileAsync(e.FullPath, (CustomPlatform platform) =>
-                {
-                    _platformManager.HandlePlatformLoaded(platform);
-                    CustomPlatform newPlatform = _platformLoader.platformFilePaths[platform.fullPath];
-                    _platformListsView.AddCellForPlatform(newPlatform, true);
-                    if (apiRequest)
-                    {
-                        _platformManager.apiRequestedPlatform = newPlatform;
-                        apiRequest = false;
-                    }
-                });
+                int index = _platformManager.allPlatformsTask.Result.IndexOf(newPlatform);
+                await _platformSpawner.ChangeToPlatformAsync(index);
+            }
+            if (apiRequest)
+            {
+                _platformManager.apiRequestedPlatform = newPlatform;
+                apiRequest = false;
             }
         }
 
         /// <summary>
         /// Destroy the platform and remove all references
         /// </summary>
-        private void OnFileDeleted(object sender, FileSystemEventArgs e)
+        private async void OnFileDeleted(object sender, FileSystemEventArgs e)
         {
-            SharedCoroutineStarter.instance.StartCoroutine(WaitAndDelete());
-            IEnumerator<WaitForEndOfFrame> WaitAndDelete()
+            if (_platformManager.platformFilePaths.TryGetValue(e.FullPath, out CustomPlatform platform))
             {
-                yield return new WaitForEndOfFrame();
-                if (_platformLoader.platformFilePaths.TryGetValue(e.FullPath, out CustomPlatform platform))
-                {
-                    _platformListsView.RemoveCellForPlatform(platform);
-                    if (_platformManager.activePlatform == platform)
-                        _platformSpawner.ChangeToPlatform(0);
-
-                    _platformLoader.platformFilePaths.Remove(platform.fullPath);
-                    _platformManager.allPlatforms.Remove(platform);
-                    GameObject.Destroy(platform.gameObject);
-                }
+                await _platformManager.allPlatformsTask;
+                await _platformListsView.RemoveCellForPlatform(platform);
+                if (_platformManager.activePlatform == platform)
+                    await _platformSpawner.ChangeToPlatformAsync(0);
+                _platformManager.platformFilePaths.Remove(platform.fullPath);
+                _platformManager.allPlatformsTask.Result.Remove(platform);
+                GameObject.Destroy(platform.gameObject);
             }
         }
 
@@ -178,10 +161,13 @@ namespace CustomFloorPlugin
         /// <summary>
         /// Disable platform spawning as required by Cinema
         /// </summary>
-        private void HandleCinemaEvent(bool allowPlatform)
+        private async void HandleCinemaEvent(bool allowPlatform)
         {
             if (!allowPlatform)
-                _platformManager.apiRequestedPlatform = _platformManager.allPlatforms[0];
+            {
+                await _platformManager.allPlatformsTask;
+                _platformManager.apiRequestedPlatform = _platformManager.allPlatformsTask.Result[0];
+            }   
         }
 
         /// <summary>
@@ -222,7 +208,7 @@ namespace CustomFloorPlugin
             _platformManager.apiRequestedLevelId = level.levelID;
 
             // Test if the requested platform is already downloaded
-            foreach (CustomPlatform platform in _platformManager.allPlatforms)
+            foreach (CustomPlatform platform in await _platformManager.allPlatformsTask)
             {
                 if (platform.platHash == hash || platform.platName.StartsWith(name))
                 {
@@ -255,7 +241,7 @@ namespace CustomFloorPlugin
         /// <summary>
         /// Asynchronously downloads the <see cref="PlatformDownloadData"/> from modelsaber
         /// </summary>
-        /// <param name="uri">The URI to the platform</param>
+        /// <param name="uri">The platforms download link</param>
         private async Task<PlatformDownloadData> GetPlatformDownloadDataAsync(string uri)
         {
             TaskCompletionSource<PlatformDownloadData> taskSource = new();

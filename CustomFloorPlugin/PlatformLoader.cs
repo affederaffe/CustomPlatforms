@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
@@ -17,8 +16,6 @@ namespace CustomFloorPlugin
         private readonly AssetLoader _assetLoader;
         private readonly MaterialSwapper _materialSwapper;
 
-        internal readonly Dictionary<string, CustomPlatform> platformFilePaths = new();
-
         public PlatformLoader(AssetLoader assetLoader, MaterialSwapper materialSwapper)
         {
             _assetLoader = assetLoader;
@@ -28,7 +25,7 @@ namespace CustomFloorPlugin
         /// <summary>
         /// Asynchronously loads a <see cref="CustomPlatform"/> from a specified file path
         /// </summary>
-        internal async Task LoadFromFileAsync(string fullPath, Action<CustomPlatform> callback)
+        internal async Task<CustomPlatform> LoadFromFileAsync(string fullPath)
         {
             if (!File.Exists(fullPath))
                 throw new FileNotFoundException("File could not be found", fullPath);
@@ -68,9 +65,9 @@ namespace CustomFloorPlugin
                 }
                 else
                 {
-                    // no customplatform component, abort
+                    // No customplatform component, abort
                     GameObject.Destroy(platformPrefab);
-                    return;
+                    return null;
                 }
             }
 
@@ -84,9 +81,7 @@ namespace CustomFloorPlugin
 
             _materialSwapper.ReplaceMaterials(customPlatform.gameObject);
 
-            callback.Invoke(customPlatform);
-
-            GameObject.Destroy(platformPrefab);
+            return customPlatform;
         }
 
         /// <summary>

@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.IO;
-using System.Threading.Tasks;
 
 using UnityEngine;
 
@@ -65,10 +64,10 @@ namespace CustomFloorPlugin.Extensions
         /// <summary>
         /// Reads a <see cref="Sprite"/> from a <see cref="Stream"/>
         /// </summary>
-        internal static async Task<Sprite> ReadSprite(this Stream resourceStream)
+        internal static Sprite ReadSprite(this Stream resourceStream)
         {
             byte[] data = new byte[resourceStream.Length];
-            await resourceStream.ReadAsync(data, 0, data.Length);
+            resourceStream.Read(data, 0, data.Length);
             Texture2D tex = new(2, 2);
             tex.LoadImage(data);
             return Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), Vector2.zero);
@@ -111,10 +110,10 @@ namespace CustomFloorPlugin.Extensions
         /// </summary>
         private static byte[] BytesFromTexture2D(Texture2D texture, bool forceReadable)
         {
-            if (texture == null || (!texture.isReadable && !forceReadable)) 
+            if (texture == null || (!texture.isReadable && !forceReadable))
                 return new byte[0];
 
-            // create readable texture by rendering onto a RenderTexture
+            // Create readable texture by rendering onto a RenderTexture
             if (!texture.isReadable)
             {
                 float maxSize = 256;

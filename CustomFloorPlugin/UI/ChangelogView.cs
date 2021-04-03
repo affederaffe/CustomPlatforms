@@ -31,9 +31,7 @@ namespace CustomFloorPlugin.UI
         - New feature: nested components
 
   <size=150%><color=#888888>Version 6.1.1</color></size>
-        - Security fix:  removed embedded CustomScripts
-        - CustomScripts can still be done, create your own mod
-           and then add it as a requirement or suggestion
+        - Security fix: removed embedded CustomScripts
 
   <size=150%><color=#888888>Version 6.1.0</color></size>
         - Many new features for platform makers

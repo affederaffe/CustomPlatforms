@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using CustomFloorPlugin.Extensions;
 
 using IPA.Utilities;
+using IPA.Utilities.Async;
 
 using UnityEngine;
 using UnityEngine.ProBuilder;
@@ -22,6 +23,11 @@ namespace CustomFloorPlugin
     /// </summary>
     public class AssetLoader : MonoBehaviour
     {
+        /// <summary>
+        /// The Task responsible for asset loading
+        /// </summary>
+        internal Task loadAssetsTask;
+
         /// <summary>
         /// Acts as a prefab for custom light sources that require meshes...<br/>
         /// Not 100% bug free tbh<br/>
@@ -63,30 +69,33 @@ namespace CustomFloorPlugin
         private Material[] _AllMaterials;
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("CodeQuality", "IDE0051:Remove unused private members", Justification = "Called by Unity")]
-        private void Start()
+        private async void Start()
         {
             DontDestroyOnLoad(this);
-            LoadSpritesAsync();
-            LoadAssetsAsync();
+            LoadSprites();
+            loadAssetsTask = LoadAssetsAsync();
+            await loadAssetsTask;
         }
 
-        private async void LoadSpritesAsync()
+        private void LoadSprites()
         {
             Assembly executingAssembly = Assembly.GetExecutingAssembly();
-            defaultPlatformCover = await executingAssembly.GetManifestResourceStream("CustomFloorPlugin.Assets.LvlInsaneCover.png").ReadSprite();
-            fallbackCover = await executingAssembly.GetManifestResourceStream("CustomFloorPlugin.Assets.FeetIcon.png").ReadSprite();
+            defaultPlatformCover = executingAssembly.GetManifestResourceStream("CustomFloorPlugin.Assets.LvlInsaneCover.png").ReadSprite();
+            fallbackCover = executingAssembly.GetManifestResourceStream("CustomFloorPlugin.Assets.FeetIcon.png").ReadSprite();
         }
 
         /// <summary>
         /// Steals the heart from the GreenDayScene<br/>
         /// Then De-Serializes the data from the embedded resource heart.mesh onto the GreenDayHeart to make it more visually pleasing<br/>
-        /// Also adjusts it position and color.<br/>
-        /// Gets the Non-Mesh lightSource and the playersPlace used in the Platform Preview too.<br/>
+        /// Also adjusts it position and color<br/>
+        /// Gets the Non-Mesh lightSource and the playersPlace used in the Platform Preview too<br/>
         /// Now also steals the LightEffects for multiplayer, this scene is really useful
         /// </summary>
-        private async void LoadAssetsAsync()
+        private async Task LoadAssetsAsync()
         {
-            Scene greenDay = await GetSceneAsync("GreenDayGrenadeEnvironment");
+            await Coroutines.AsTask(WaitForEndOfFrameCoroutine());
+            static IEnumerator<WaitForEndOfFrame> WaitForEndOfFrameCoroutine() { yield return new WaitForEndOfFrame(); };
+            Scene greenDay = await LoadSceneAsync("GreenDayGrenadeEnvironment");
             GameObject root = greenDay.GetRootGameObjects()[0];
 
             heart = root.transform.Find("GreenDayCity/ArmHeartLighting").gameObject;
@@ -109,38 +118,11 @@ namespace CustomFloorPlugin
 
             SceneManager.UnloadSceneAsync(greenDay);
 
-            using Stream manifestResourceStream = Assembly.GetExecutingAssembly().GetManifestResourceStream("CustomFloorPlugin.Assets.heart.mesh");
-            using StreamReader streamReader = new(manifestResourceStream);
-
-            string meshfile = await streamReader.ReadToEndAsync();
-            string[] dimension1 = meshfile.Split('|');
-            string[][] dimension2 = new string[][] { dimension1[0].Split('/'), dimension1[1].Split('/') };
-            string[][] string_vector3s = new string[dimension2[0].Length][];
-
-            int i = 0;
-            foreach (string string_vector3 in dimension2[0])
-            {
-                string_vector3s[i++] = string_vector3.Split(',');
-            }
-
-            List<Vector3> vertices = new();
-            List<int> triangles = new();
-            foreach (string[] string_vector3 in string_vector3s)
-            {
-                vertices.Add(new Vector3(float.Parse(string_vector3[0], NumberFormatInfo.InvariantInfo), float.Parse(string_vector3[1], NumberFormatInfo.InvariantInfo), float.Parse(string_vector3[2], NumberFormatInfo.InvariantInfo)));
-            }
-            foreach (string s_int in dimension2[1])
-            {
-                triangles.Add(int.Parse(s_int, NumberFormatInfo.InvariantInfo));
-            }
-
-            Mesh mesh = new()
-            {
-                vertices = vertices.ToArray(),
-                triangles = triangles.ToArray()
-            };
-
             DestroyImmediate(heart.GetComponent<ProBuilderMesh>());
+            DestroyImmediate(playersPlace.GetComponentInChildren<SaberBurnMarkArea>().gameObject);
+            DestroyImmediate(playersPlace.GetComponentInChildren<SaberBurnMarkSparkles>().gameObject);
+
+            Mesh mesh = await CreateMeshAsync();
 
             heart.GetComponent<MeshFilter>().mesh = mesh;
             heart.transform.position = new Vector3(-8f, 25f, 26f);
@@ -169,9 +151,46 @@ namespace CustomFloorPlugin
         }
 
         /// <summary>
+        /// Asynchroniously creates the <see cref="Mesh"/> for the heart
+        /// </summary>
+        private async Task<Mesh> CreateMeshAsync()
+        {
+            using Stream manifestResourceStream = Assembly.GetExecutingAssembly().GetManifestResourceStream("CustomFloorPlugin.Assets.heart.mesh");
+            using StreamReader streamReader = new(manifestResourceStream);
+
+            string meshfile = await streamReader.ReadToEndAsync();
+            string[] dimension1 = meshfile.Split('|');
+            string[][] dimension2 = new string[][] { dimension1[0].Split('/'), dimension1[1].Split('/') };
+            string[][] string_vector3s = new string[dimension2[0].Length][];
+
+            int i = 0;
+            foreach (string string_vector3 in dimension2[0])
+            {
+                string_vector3s[i++] = string_vector3.Split(',');
+            }
+
+            List<Vector3> vertices = new();
+            List<int> triangles = new();
+            foreach (string[] string_vector3 in string_vector3s)
+            {
+                vertices.Add(new Vector3(float.Parse(string_vector3[0], NumberFormatInfo.InvariantInfo), float.Parse(string_vector3[1], NumberFormatInfo.InvariantInfo), float.Parse(string_vector3[2], NumberFormatInfo.InvariantInfo)));
+            }
+            foreach (string s_int in dimension2[1])
+            {
+                triangles.Add(int.Parse(s_int, NumberFormatInfo.InvariantInfo));
+            }
+
+            return new Mesh()
+            {
+                vertices = vertices.ToArray(),
+                triangles = triangles.ToArray()
+            };
+        }
+
+        /// <summary>
         /// Asynchroniously loads and then returns a <see cref="Scene"/>
         /// </summary>
-        private async Task<Scene> GetSceneAsync(string name)
+        private async Task<Scene> LoadSceneAsync(string name)
         {
             TaskCompletionSource<Scene> taskSource = new();
             AsyncOperation asyncOperation = SceneManager.LoadSceneAsync(name, new LoadSceneParameters(LoadSceneMode.Additive));

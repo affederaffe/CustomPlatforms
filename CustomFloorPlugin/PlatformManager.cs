@@ -1,13 +1,15 @@
-using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
 using CustomFloorPlugin.Configuration;
 using CustomFloorPlugin.Extensions;
 
 using IPA.Utilities;
+using IPA.Utilities.Async;
 
 using SiraUtil.Tools;
 
@@ -41,9 +43,9 @@ namespace CustomFloorPlugin
         }
 
         /// <summary>
-        /// List of all loaded Platforms
+        /// The Task responsible for platform loading
         /// </summary>
-        internal List<CustomPlatform> allPlatforms = new();
+        internal Task<List<CustomPlatform>> allPlatformsTask;
 
         /// <summary>
         /// Keeps track of the currently selected <see cref="PlatformType"/>
@@ -88,7 +90,12 @@ namespace CustomFloorPlugin
         /// <summary>
         /// Keeps track of all spawned custom objects, whichs lifetime ends on any scene transition
         /// </summary>
-        internal readonly List<UnityEngine.Object> spawnedObjects = new();
+        internal readonly List<Object> spawnedObjects = new();
+
+        /// <summary>
+        /// Keeps track of which <see cref="AssetBundle"/> has loaded a <see cref="CustomPlatform"/>
+        /// </summary>
+        internal readonly Dictionary<string, CustomPlatform> platformFilePaths = new();
 
         /// <summary>
         /// The cache file version to prevent loading older ones if something changes
@@ -101,27 +108,31 @@ namespace CustomFloorPlugin
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Code Quality", "IDE0051:Remove unused private members", Justification = "Called by Unity")]
         private void Start()
         {
-            LoadPlatforms();
+            allPlatformsTask = LoadPlatforms();
         }
 
         /// <summary>
         /// Automaticly save the descriptors on exit
         /// </summary>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Code Quality", "IDE0051:Remove unused private members", Justification = "Called by Unity")]
-        private void OnDestroy()
+        private async void OnDestroy()
         {
-            SavePlatformInfosToFile();
+            await SavePlatformInfosToFile();
         }
 
         /// <summary>
         /// Loads all platforms or their descritpors if a cache file exists
         /// </summary>
-        private async void LoadPlatforms()
+        private async Task<List<CustomPlatform>> LoadPlatforms()
         {
+            Stopwatch sw = new();
+            sw.Start();
+
             if (!Directory.Exists(_config.CustomPlatformsDirectory))
                 Directory.CreateDirectory(_config.CustomPlatformsDirectory);
 
             IEnumerable<string> bundlePaths = Directory.EnumerateFiles(_config.CustomPlatformsDirectory, "*.plat");
+            List<CustomPlatform> platforms = new();
 
             CustomPlatform defaultPlatform = new GameObject("Default Platform").AddComponent<CustomPlatform>();
             defaultPlatform.transform.parent = transform;
@@ -129,32 +140,51 @@ namespace CustomFloorPlugin
             defaultPlatform.platAuthor = "Beat Saber";
             defaultPlatform.icon = _assetLoader.defaultPlatformCover;
             defaultPlatform.isDescriptor = false;
-            allPlatforms.Add(defaultPlatform);
+            platforms.Add(defaultPlatform);
 
             if (File.Exists(customPlatformsInfoCacheFilePath))
             {
-                LoadPlatformInfosFromFile();
-                bundlePaths = bundlePaths.Except(allPlatforms.Select(x => x.fullPath));
+                try
+                {
+                    foreach (CustomPlatform platform in EnumeratePlatformDescriptorsFromFile())
+                    {
+                        platforms.Add(platform);
+                    }
+                }
+                catch (System.Exception e)
+                {
+                    _siraLog.Error("Failed to read cache file");
+                    _siraLog.Error(e);
+                }
+
+                bundlePaths = bundlePaths.Except(platforms.Select(x => x.fullPath));
             }
 
             // Load all remaining platforms, or all if no cache file is found
             foreach (string path in bundlePaths)
             {
-                await _platformLoader.LoadFromFileAsync(path, HandlePlatformLoaded);
+                CustomPlatform platform = await CreatePlatformAsync(path);
+                platforms.Add(platform);
             }
+
+            sw.Stop();
+            _siraLog.Info($"Loaded Platforms in {sw.Elapsed.Seconds}.{sw.Elapsed.Milliseconds}");
+
+            return platforms;
         }
 
         /// <summary>
         /// Returns the index for a <see cref="PlatformType"/> in <see cref="allPlatforms"/>
         /// </summary>
-        internal int GetIndexForType(PlatformType platformType)
+        internal async Task<int> GetIndexForTypeAsync(PlatformType platformType)
         {
+            await allPlatformsTask;
             int index = platformType switch
             {
-                PlatformType.Singleplayer => allPlatforms.IndexOf(currentSingleplayerPlatform),
-                PlatformType.Multiplayer => allPlatforms.IndexOf(currentMultiplayerPlatform),
-                PlatformType.A360 => allPlatforms.IndexOf(currentA360Platform),
-                PlatformType.API => allPlatforms.IndexOf(apiRequestedPlatform),
+                PlatformType.Singleplayer => allPlatformsTask.Result.IndexOf(currentSingleplayerPlatform),
+                PlatformType.Multiplayer => allPlatformsTask.Result.IndexOf(currentMultiplayerPlatform),
+                PlatformType.A360 => allPlatformsTask.Result.IndexOf(currentA360Platform),
+                PlatformType.API => allPlatformsTask.Result.IndexOf(apiRequestedPlatform),
                 _ => 0
             };
             if (index == -1) index = 0;
@@ -175,104 +205,96 @@ namespace CustomFloorPlugin
         }
 
         /// <summary>
-        /// The callback executed when a platform is successfully loaded
+        /// Asynchroniously creates a <see cref="CustomPlatform"/> by loading an <see cref="AssetBundle"/> at the given <paramref name="path"/>
         /// </summary>
-        internal void HandlePlatformLoaded(CustomPlatform platform)
+        internal async Task<CustomPlatform> CreatePlatformAsync(string path)
         {
-            CustomPlatform newPlatform = Instantiate(platform, transform);
-            newPlatform.name = platform.name;
-            newPlatform.isDescriptor = false;
-            CheckLastSelectedPlatform(newPlatform);
-            if (_platformLoader.platformFilePaths.ContainsKey(newPlatform.fullPath))
+            return await await UnityMainThreadTaskScheduler.Factory.StartNew(async () =>
             {
-                CustomPlatform descriptor = _platformLoader.platformFilePaths[newPlatform.fullPath];
-                int index = allPlatforms.IndexOf(descriptor);
-                if (activePlatform == descriptor)
-                    activePlatform = newPlatform;
-                _platformLoader.platformFilePaths[descriptor.fullPath] = newPlatform;
-                allPlatforms[index] = newPlatform;
-                Destroy(descriptor.gameObject);
-            }
-            else
-            {
-                _platformLoader.platformFilePaths.Add(newPlatform.fullPath, newPlatform);
-                allPlatforms.Add(newPlatform);
-            }
+                CustomPlatform platform = await _platformLoader.LoadFromFileAsync(path);
+                CustomPlatform newPlatform = Instantiate(platform, transform);
+                Destroy(platform.gameObject);
+                newPlatform.name = platform.name;
+                newPlatform.isDescriptor = false;
+                CheckLastSelectedPlatform(newPlatform);
+
+                if (platformFilePaths.ContainsKey(newPlatform.fullPath))
+                {
+                    await allPlatformsTask;
+                    CustomPlatform descriptor = platformFilePaths[newPlatform.fullPath];
+                    int index = allPlatformsTask.Result.IndexOf(descriptor);
+                    if (activePlatform == descriptor)
+                        activePlatform = newPlatform;
+                    platformFilePaths[descriptor.fullPath] = newPlatform;
+                    allPlatformsTask.Result[index] = newPlatform;
+                    Destroy(descriptor.gameObject);
+                }
+                else
+                {
+                    platformFilePaths.Add(path, newPlatform);
+                }
+
+                return newPlatform;
+            });
         }
 
         /// <summary>
-        /// Reads all saved platform descriptors out of the cache file
+        /// Reads all saved platform descriptors from the cache file
         /// </summary>
-        private void LoadPlatformInfosFromFile()
+        private IEnumerable<CustomPlatform> EnumeratePlatformDescriptorsFromFile()
         {
-            try
+            using FileStream stream = new(customPlatformsInfoCacheFilePath, FileMode.Open, FileAccess.Read);
+            using BinaryReader reader = new(stream, Encoding.UTF8);
+
+            if (reader.ReadByte() != kCacheFileVersion)
+                yield break;
+
+            int count = reader.ReadInt32();
+            for (int i = 0; i < count; i++)
             {
-                using FileStream stream = new(customPlatformsInfoCacheFilePath, FileMode.Open, FileAccess.Read);
-                using BinaryReader reader = new(stream, Encoding.UTF8);
-
-                if (reader.ReadByte() != kCacheFileVersion)
-                    return;
-
-                int count = reader.ReadInt32();
-                for (int i = 0; i < count; i++)
+                CustomPlatform platform = new GameObject().AddComponent<CustomPlatform>();
+                platform.platName = reader.ReadString();
+                platform.platAuthor = reader.ReadString();
+                platform.platHash = reader.ReadString();
+                platform.fullPath = reader.ReadString();
+                Texture2D tex = reader.ReadTexture2D();
+                if (!File.Exists(platform.fullPath))
                 {
-                    CustomPlatform platform = new GameObject().AddComponent<CustomPlatform>();
-                    platform.platName = reader.ReadString();
-                    platform.platAuthor = reader.ReadString();
-                    platform.platHash = reader.ReadString();
-                    platform.fullPath = reader.ReadString();
-                    Texture2D tex = reader.ReadTexture2D();
-                    platform.icon = Sprite.Create(tex, new Rect(0f, 0f, tex.width, tex.height), Vector2.zero);
-                    platform.name = platform.platName + " by " + platform.platAuthor;
-                    platform.transform.parent = transform;
-                    if (!File.Exists(platform.fullPath))
-                    {
-                        _siraLog.Info($"File {platform.fullPath} no longer exists; skipped");
-                        Destroy(platform.gameObject);
-                        continue;
-                    }
-
-                    CheckLastSelectedPlatform(platform);
-
-                    _platformLoader.platformFilePaths.Add(platform.fullPath, platform);
-                    allPlatforms.Add(platform);
+                    _siraLog.Info($"File {platform.fullPath} no longer exists; skipped");
+                    Destroy(platform.gameObject);
+                    continue;
                 }
-            }
-            catch (Exception e)
-            {
-                _siraLog.Error("Failed to load cached platform info:\n" + e);
+                platform.icon = Sprite.Create(tex, new Rect(0f, 0f, tex.width, tex.height), Vector2.zero);
+                platform.name = platform.platName + " by " + platform.platAuthor;
+                platform.transform.SetParent(transform);
+                CheckLastSelectedPlatform(platform);
+                platformFilePaths.Add(platform.fullPath, platform);
+                yield return platform;
             }
         }
 
         /// <summary>
         /// Saves descritpors of all loaded <see cref="CustomPlatform"/>s into a cache file
         /// </summary>
-        private void SavePlatformInfosToFile()
+        private async Task SavePlatformInfosToFile()
         {
-            try
-            {
-                using FileStream stream = new(customPlatformsInfoCacheFilePath, FileMode.OpenOrCreate, FileAccess.Write);
-                using BinaryWriter writer = new(stream, Encoding.UTF8, true);
+            await allPlatformsTask;
 
-                writer.Write(kCacheFileVersion);
-                writer.Write(allPlatforms.Count - 1);
-                foreach (CustomPlatform platform in allPlatforms.Skip(1))
-                {
-                    writer.Write(platform.platName);
-                    writer.Write(platform.platAuthor);
-                    writer.Write(platform.platHash);
-                    writer.Write(platform.fullPath);
-                    writer.WriteTexture2D(platform.icon.texture, true);
-                }
+            using FileStream stream = new(customPlatformsInfoCacheFilePath, FileMode.OpenOrCreate, FileAccess.Write);
+            using BinaryWriter writer = new(stream, Encoding.UTF8, true);
 
-                stream.SetLength(stream.Position);
-                File.SetAttributes(customPlatformsInfoCacheFilePath, FileAttributes.Hidden);
-            }
-            catch (Exception e)
+            writer.Write(kCacheFileVersion);
+            writer.Write(allPlatformsTask.Result.Count - 1);
+            foreach (CustomPlatform platform in allPlatformsTask.Result.Skip(1))
             {
-                _siraLog.Error("Failed to save info cache");
-                _siraLog.Error(e);
+                writer.Write(platform.platName);
+                writer.Write(platform.platAuthor);
+                writer.Write(platform.platHash);
+                writer.Write(platform.fullPath);
+                writer.WriteTexture2D(platform.icon.texture, true);
             }
+            stream.SetLength(stream.Position);
+            File.SetAttributes(customPlatformsInfoCacheFilePath, FileAttributes.Hidden);
         }
     }
 }

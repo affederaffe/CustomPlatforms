@@ -25,7 +25,7 @@ namespace CustomFloorPlugin
             if (combo == ComboTarget)
             {
                 NthComboReached.Invoke();
-            } 
+            }
         }
     }
 }

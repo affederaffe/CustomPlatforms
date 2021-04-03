@@ -76,7 +76,7 @@ namespace CustomFloorPlugin
             if (doubleColorLasers != null) SetCollectionHidden(ref doubleColorLasers, platform.hideDoubleColorLasers);
             if (rotatingLasers != null) SetCollectionHidden(ref rotatingLasers, platform.hideRotatingLasers);
             if (trackLights != null) SetCollectionHidden(ref trackLights, platform.hideTrackLights);
-            _assetLoader.playersPlace?.SetActive(_platformManager.activePlatform != null && !platform.hideDefaultPlatform && sceneName == "MenuEnvironment");
+            _assetLoader.playersPlace.SetActive(_platformManager.activePlatform != null && !platform.hideDefaultPlatform && sceneName == "MenuEnvironment");
             Cleanup();
         }
 
@@ -86,25 +86,23 @@ namespace CustomFloorPlugin
         private void FindEnvironment()
         {
             roots = GetRootGameObjects();
+            if (roots == null)
             renamedObjects = new();
-            if (roots != null)
-            {
-                FindMenuEnvironmnet();
-                FindMultiplayerEnvironment();
-                FindPlayersPlace();
-                FindFeetIcon();
-                FindPlayersPlace();
-                FindSmallRings();
-                FindBigRings();
-                FindVisualizers();
-                FindTowers();
-                FindHighway();
-                FindBackColumns();
-                FindBackLasers();
-                FindRotatingLasers();
-                FindDoubleColorLasers();
-                FindTrackLights();
-            }
+            FindMenuEnvironmnet();
+            FindMultiplayerEnvironment();
+            FindPlayersPlace();
+            FindFeetIcon();
+            FindPlayersPlace();
+            FindSmallRings();
+            FindBigRings();
+            FindVisualizers();
+            FindTowers();
+            FindHighway();
+            FindBackColumns();
+            FindBackLasers();
+            FindRotatingLasers();
+            FindDoubleColorLasers();
+            FindTrackLights();
         }
 
         /// <summary>
@@ -128,7 +126,9 @@ namespace CustomFloorPlugin
         private void SetCollectionHidden(ref List<GameObject> list, bool hidden)
         {
             foreach (GameObject go in list)
+            {
                 go.SetActive(!hidden);
+            }
             list = null;
         }
 
@@ -140,7 +140,7 @@ namespace CustomFloorPlugin
             foreach (GameObject go in renamedObjects)
                 go.name.Remove(go.name.Length - renamedObjectSuffix.Length);
             _TrackLaneRings = null;
-    }
+        }
 
         /// <summary>
         /// Finds a GameObject by name and adds it to the provided list
@@ -354,6 +354,7 @@ namespace CustomFloorPlugin
                     FindAddGameObject("NearBuildingLeft", towers);
                     FindAddGameObject("NearBuildingRight", towers);
                     FindAddGameObject("FarBuildings", towers);
+
                     break;
                 case "CrabRaveEnvironment":
                     FindAddGameObject("NearBuildingLeft", towers);
@@ -448,6 +449,8 @@ namespace CustomFloorPlugin
                 case "MonstercatEnvironment":
                     FindAddGameObject("TrackMirror", highway);
                     FindAddGameObject("VConstruction", highway);
+                    FindAddGameObject("MonstercatLogoL", highway);
+                    FindAddGameObject("MonstercatLogoR", highway);
                     FindAddGameObject("Construction", highway);
                     break;
                 case "CrabRaveEnvironment":

@@ -96,7 +96,7 @@ namespace CustomFloorPlugin
             // Sometimes I just want to scrap everything :)
             if (trackLaneRingPrefab.scene.name != null)
             {
-                foreach (var tubeLight in trackLaneRingPrefab.GetComponentsInChildren<TubeLight>())
+                foreach (TubeLight tubeLight in trackLaneRingPrefab.GetComponentsInChildren<TubeLight>())
                 {
                     while (tubeLight.transform.childCount != 0)
                     {

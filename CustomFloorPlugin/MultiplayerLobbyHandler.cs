@@ -42,24 +42,26 @@ namespace CustomFloorPlugin
             _multiplayerSessionManager.disconnectedEvent -= HandleDisconnected;
         }
 
-        private void HandleConnected()
+        private async void HandleConnected()
         {
             _platformSpawner.isMultiplayer = true;
+            await _assetLoader.loadAssetsTask;
             _assetLoader.heart.SetActive(false);
-            _platformSpawner.ChangeToPlatform(0);
+            await _platformSpawner.ChangeToPlatformAsync(0);
         }
 
-        private void HandleDisconnected(DisconnectedReason reason)
+        private async void HandleDisconnected(DisconnectedReason reason)
         {
             _platformSpawner.isMultiplayer = false;
+            await _assetLoader.loadAssetsTask;
             _assetLoader.heart.SetActive(_config.ShowHeart);
             _assetLoader.heart.GetComponent<InstancedMaterialLightWithId>().ColorWasSet(Color.magenta);
             if (_config.ShowInMenu)
             {
                 int platformIndex = _config.ShufflePlatforms
-                    ? _platformSpawner.RandomPlatformIndex
-                    : _platformManager.GetIndexForType(PlatformType.Singleplayer);
-                _platformSpawner.ChangeToPlatform(platformIndex);
+                    ? await _platformSpawner.GetRandomPlatformIndexAsync()
+                    : await _platformManager.GetIndexForTypeAsync(PlatformType.Singleplayer);
+                await _platformSpawner.ChangeToPlatformAsync(platformIndex);
             }
         }
     }

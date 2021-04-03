@@ -14,7 +14,6 @@ namespace CustomFloorPlugin
     {
         private readonly BeatmapObjectManager _beatmapObjectManager;
         private readonly GameEnergyCounter _gameEnergyCounter;
-        private readonly GameScenesManager _gameScenesManager;
         private readonly ObstacleSaberSparkleEffectManager _obstacleSaberSparkleEffectManager;
         private readonly ScoreController _scoreController;
         private readonly PlayerDataModel _playerDataModel;
@@ -25,7 +24,6 @@ namespace CustomFloorPlugin
 
         public BSEvents(BeatmapObjectManager beatmapObjectManager,
                         GameEnergyCounter gameEnergyCounter,
-                        GameScenesManager gameScenesManager,
                         ObstacleSaberSparkleEffectManager obstacleSaberSparkleEffectManager,
                         ScoreController scoreController, PlayerDataModel playerDataModel,
                         PrepareLevelCompletionResults prepareLevelCompletionResults,
@@ -35,7 +33,6 @@ namespace CustomFloorPlugin
         {
             _beatmapObjectManager = beatmapObjectManager;
             _gameEnergyCounter = gameEnergyCounter;
-            _gameScenesManager = gameScenesManager;
             _obstacleSaberSparkleEffectManager = obstacleSaberSparkleEffectManager;
             _scoreController = scoreController;
             _playerDataModel = playerDataModel;
@@ -78,13 +75,13 @@ namespace CustomFloorPlugin
             _beatmapObjectManager.noteWasCutEvent += new BeatmapObjectManager.NoteWasCutDelegate(NoteWasCut);
             _beatmapObjectManager.noteWasMissedEvent += NoteWasMissed;
             _gameEnergyCounter.gameEnergyDidReach0Event += LevelFailed;
-            _gameScenesManager.transitionDidFinishEvent += GameSceneLoaded;
             _obstacleSaberSparkleEffectManager.sparkleEffectDidStartEvent += SabersStartCollide;
             _obstacleSaberSparkleEffectManager.sparkleEffectDidEndEvent += SabersEndCollide;
             _scoreController.comboDidChangeEvent += ComboDidChange;
             _scoreController.comboBreakingEventHappenedEvent += ComboDidBreak;
             _scoreController.multiplierDidChangeEvent += MultiplierDidChange;
             _scoreController.scoreDidChangeEvent += ScoreDidChange;
+            GameSceneLoadedEvent?.Invoke();
         }
 
         public void Dispose()
@@ -93,7 +90,6 @@ namespace CustomFloorPlugin
             _beatmapObjectManager.noteWasCutEvent -= new BeatmapObjectManager.NoteWasCutDelegate(NoteWasCut);
             _beatmapObjectManager.noteWasMissedEvent -= NoteWasMissed;
             _gameEnergyCounter.gameEnergyDidReach0Event -= LevelFailed;
-            _gameScenesManager.transitionDidFinishEvent -= GameSceneLoaded;
             _obstacleSaberSparkleEffectManager.sparkleEffectDidStartEvent -= SabersStartCollide;
             _obstacleSaberSparkleEffectManager.sparkleEffectDidEndEvent -= SabersEndCollide;
             _scoreController.comboDidChangeEvent -= ComboDidChange;
@@ -153,11 +149,6 @@ namespace CustomFloorPlugin
         private void LevelFailed()
         {
             LevelFailedEvent?.Invoke();
-        }
-
-        private void GameSceneLoaded(ScenesTransitionSetupDataSO setupData, DiContainer container)
-        {
-            GameSceneLoadedEvent?.Invoke();
         }
 
         private void SabersStartCollide(SaberType saberType)
