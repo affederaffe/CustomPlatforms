@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -10,9 +11,13 @@ using CustomFloorPlugin.Extensions;
 using IPA.Utilities;
 using IPA.Utilities.Async;
 
+using SiraUtil.Tools;
+
 using UnityEngine;
 using UnityEngine.ProBuilder;
 using UnityEngine.SceneManagement;
+
+using Zenject;
 
 
 namespace CustomFloorPlugin
@@ -23,6 +28,14 @@ namespace CustomFloorPlugin
     /// </summary>
     public class AssetLoader : MonoBehaviour
     {
+        private SiraLog _siraLog;
+
+        [Inject]
+        public void Construct(SiraLog siraLog)
+        {
+            _siraLog = siraLog;
+        }
+
         /// <summary>
         /// The Task responsible for asset loading
         /// </summary>
@@ -69,12 +82,11 @@ namespace CustomFloorPlugin
         private Material[] _AllMaterials;
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("CodeQuality", "IDE0051:Remove unused private members", Justification = "Called by Unity")]
-        private async void Start()
+        private void Start()
         {
             DontDestroyOnLoad(this);
             LoadSprites();
             loadAssetsTask = LoadAssetsAsync();
-            await loadAssetsTask;
         }
 
         private void LoadSprites()
@@ -93,6 +105,9 @@ namespace CustomFloorPlugin
         /// </summary>
         private async Task LoadAssetsAsync()
         {
+            Stopwatch sw = new();
+            sw.Start();
+
             await Coroutines.AsTask(WaitForEndOfFrameCoroutine());
             static IEnumerator<WaitForEndOfFrame> WaitForEndOfFrameCoroutine() { yield return new WaitForEndOfFrame(); };
             Scene greenDay = await LoadSceneAsync("GreenDayGrenadeEnvironment");
@@ -148,6 +163,9 @@ namespace CustomFloorPlugin
             TubeBloomPrePassLight tubeBloomLight = lightSource.GetComponent<TubeBloomPrePassLight>();
             tubeBloomLight.SetField("_maxAlpha", 0.1f);
             tubeBloomLight.SetField("_bloomFogIntensityMultiplier", 0.125f);
+
+            sw.Stop();
+            _siraLog.Info($"Loaded Assets in {sw.Elapsed.Seconds}.{sw.Elapsed.Milliseconds}s");
         }
 
         /// <summary>

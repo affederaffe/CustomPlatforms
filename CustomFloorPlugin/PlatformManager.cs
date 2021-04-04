@@ -108,7 +108,7 @@ namespace CustomFloorPlugin
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Code Quality", "IDE0051:Remove unused private members", Justification = "Called by Unity")]
         private void Start()
         {
-            allPlatformsTask = LoadPlatforms();
+            allPlatformsTask = LoadPlatformsAsync();
         }
 
         /// <summary>
@@ -117,13 +117,13 @@ namespace CustomFloorPlugin
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Code Quality", "IDE0051:Remove unused private members", Justification = "Called by Unity")]
         private async void OnDestroy()
         {
-            await SavePlatformInfosToFile();
+            await SavePlatformInfosToFileAsync();
         }
 
         /// <summary>
         /// Loads all platforms or their descritpors if a cache file exists
         /// </summary>
-        private async Task<List<CustomPlatform>> LoadPlatforms()
+        private async Task<List<CustomPlatform>> LoadPlatformsAsync()
         {
             Stopwatch sw = new();
             sw.Start();
@@ -134,29 +134,15 @@ namespace CustomFloorPlugin
             IEnumerable<string> bundlePaths = Directory.EnumerateFiles(_config.CustomPlatformsDirectory, "*.plat");
             List<CustomPlatform> platforms = new();
 
-            CustomPlatform defaultPlatform = new GameObject("Default Platform").AddComponent<CustomPlatform>();
-            defaultPlatform.transform.parent = transform;
-            defaultPlatform.platName = "Default Environment";
-            defaultPlatform.platAuthor = "Beat Saber";
-            defaultPlatform.icon = _assetLoader.defaultPlatformCover;
-            defaultPlatform.isDescriptor = false;
+            CustomPlatform defaultPlatform = CreateDefaultPlatform();
             platforms.Add(defaultPlatform);
 
             if (File.Exists(customPlatformsInfoCacheFilePath))
             {
-                try
+                foreach (CustomPlatform platform in EnumeratePlatformDescriptorsFromFile())
                 {
-                    foreach (CustomPlatform platform in EnumeratePlatformDescriptorsFromFile())
-                    {
-                        platforms.Add(platform);
-                    }
+                    platforms.Add(platform);
                 }
-                catch (System.Exception e)
-                {
-                    _siraLog.Error("Failed to read cache file");
-                    _siraLog.Error(e);
-                }
-
                 bundlePaths = bundlePaths.Except(platforms.Select(x => x.fullPath));
             }
 
@@ -168,27 +154,41 @@ namespace CustomFloorPlugin
             }
 
             sw.Stop();
-            _siraLog.Info($"Loaded Platforms in {sw.Elapsed.Seconds}.{sw.Elapsed.Milliseconds}");
+            _siraLog.Info($"Loaded Platforms in {sw.Elapsed.Seconds}.{sw.Elapsed.Milliseconds}s");
 
             return platforms;
+        }
+
+        private CustomPlatform CreateDefaultPlatform()
+        {
+            CustomPlatform defaultPlatform = new GameObject("Default Platform").AddComponent<CustomPlatform>();
+            defaultPlatform.transform.parent = transform;
+            defaultPlatform.platName = "Default Environment";
+            defaultPlatform.platAuthor = "Beat Saber";
+            defaultPlatform.icon = _assetLoader.defaultPlatformCover;
+            defaultPlatform.hideDefaultPlatform = true;
+            defaultPlatform.isDescriptor = false;
+            currentSingleplayerPlatform = defaultPlatform;
+            currentMultiplayerPlatform = defaultPlatform;
+            currentA360Platform = defaultPlatform;
+            activePlatform = defaultPlatform;
+            return defaultPlatform;
         }
 
         /// <summary>
         /// Returns the index for a <see cref="PlatformType"/> in <see cref="allPlatforms"/>
         /// </summary>
-        internal async Task<int> GetIndexForTypeAsync(PlatformType platformType)
+        internal int GetIndexForType(PlatformType platformType)
         {
-            await allPlatformsTask;
-            int index = platformType switch
+            return platformType switch
             {
                 PlatformType.Singleplayer => allPlatformsTask.Result.IndexOf(currentSingleplayerPlatform),
                 PlatformType.Multiplayer => allPlatformsTask.Result.IndexOf(currentMultiplayerPlatform),
                 PlatformType.A360 => allPlatformsTask.Result.IndexOf(currentA360Platform),
                 PlatformType.API => allPlatformsTask.Result.IndexOf(apiRequestedPlatform),
+                PlatformType.Active => allPlatformsTask.Result.IndexOf(activePlatform),
                 _ => 0
             };
-            if (index == -1) index = 0;
-            return index;
         }
 
         /// <summary>
@@ -276,7 +276,7 @@ namespace CustomFloorPlugin
         /// <summary>
         /// Saves descritpors of all loaded <see cref="CustomPlatform"/>s into a cache file
         /// </summary>
-        private async Task SavePlatformInfosToFile()
+        private async Task SavePlatformInfosToFileAsync()
         {
             await allPlatformsTask;
 

@@ -89,10 +89,10 @@ namespace CustomFloorPlugin
             {
                 await _platformManager.allPlatformsTask;
                 bool isActivePlatform = _platformManager.activePlatform == platform;
-                CustomPlatform updatedPlatform = await _platformManager.CreatePlatformAsync(e.FullPath);
+                await _platformManager.CreatePlatformAsync(e.FullPath);
                 if (isActivePlatform)
                 {
-                    int index = _platformManager.allPlatformsTask.Result.IndexOf(updatedPlatform);
+                    int index = _platformManager.GetIndexForType(PlatformType.Active);
                     await _platformSpawner.ChangeToPlatformAsync(index);
                 }
             }
@@ -127,7 +127,7 @@ namespace CustomFloorPlugin
             if (_platformManager.platformFilePaths.TryGetValue(e.FullPath, out CustomPlatform platform))
             {
                 await _platformManager.allPlatformsTask;
-                await _platformListsView.RemoveCellForPlatform(platform);
+                _platformListsView.RemoveCellForPlatformAsync(platform);
                 if (_platformManager.activePlatform == platform)
                     await _platformSpawner.ChangeToPlatformAsync(0);
                 _platformManager.platformFilePaths.Remove(platform.fullPath);
@@ -167,7 +167,7 @@ namespace CustomFloorPlugin
             {
                 await _platformManager.allPlatformsTask;
                 _platformManager.apiRequestedPlatform = _platformManager.allPlatformsTask.Result[0];
-            }   
+            }
         }
 
         /// <summary>

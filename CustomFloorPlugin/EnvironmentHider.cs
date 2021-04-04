@@ -56,28 +56,26 @@ namespace CustomFloorPlugin
         }
 
         /// <summary>
-        /// Hide and unhide world objects as required by a platform<br/>
+        /// Hide and unhide world objects as required by the active platform
         /// </summary>
-        /// <param name="platform">A platform that defines which objects are to be hidden</param>
-        internal void HideObjectsForPlatform(CustomPlatform platform)
+        internal void HideObjectsForPlatform()
         {
             FindEnvironment();
-            if (menuEnvironment != null) SetCollectionHidden(ref menuEnvironment, _platformManager.activePlatform != null);
+            if (menuEnvironment != null) SetCollectionHidden(ref menuEnvironment, _platformManager.GetIndexForType(PlatformType.Active) != 0);
             if (multiplayerEnvironment != null) SetCollectionHidden(ref multiplayerEnvironment, true);
-            if (feet != null) SetCollectionHidden(ref feet, platform.hideDefaultPlatform && !_config.AlwaysShowFeet);
-            if (playersPlace != null) SetCollectionHidden(ref playersPlace, platform.hideDefaultPlatform);
-            if (smallRings != null) SetCollectionHidden(ref smallRings, platform.hideSmallRings);
-            if (bigRings != null) SetCollectionHidden(ref bigRings, platform.hideBigRings);
-            if (visualizer != null) SetCollectionHidden(ref visualizer, platform.hideEQVisualizer);
-            if (towers != null) SetCollectionHidden(ref towers, platform.hideTowers);
-            if (highway != null) SetCollectionHidden(ref highway, platform.hideHighway);
-            if (backColumns != null) SetCollectionHidden(ref backColumns, platform.hideBackColumns);
-            if (backLasers != null) SetCollectionHidden(ref backLasers, platform.hideBackLasers);
-            if (doubleColorLasers != null) SetCollectionHidden(ref doubleColorLasers, platform.hideDoubleColorLasers);
-            if (rotatingLasers != null) SetCollectionHidden(ref rotatingLasers, platform.hideRotatingLasers);
-            if (trackLights != null) SetCollectionHidden(ref trackLights, platform.hideTrackLights);
-            _assetLoader.playersPlace.SetActive(_platformManager.activePlatform != null && !platform.hideDefaultPlatform && sceneName == "MenuEnvironment");
-            Cleanup();
+            if (playersPlace != null) SetCollectionHidden(ref playersPlace, _platformManager.activePlatform.hideDefaultPlatform);
+            if (feet != null) SetCollectionHidden(ref feet, _platformManager.activePlatform.hideDefaultPlatform && !_config.AlwaysShowFeet);
+            if (smallRings != null) SetCollectionHidden(ref smallRings, _platformManager.activePlatform.hideSmallRings);
+            if (bigRings != null) SetCollectionHidden(ref bigRings, _platformManager.activePlatform.hideBigRings);
+            if (visualizer != null) SetCollectionHidden(ref visualizer, _platformManager.activePlatform.hideEQVisualizer);
+            if (towers != null) SetCollectionHidden(ref towers, _platformManager.activePlatform.hideTowers);
+            if (highway != null) SetCollectionHidden(ref highway, _platformManager.activePlatform.hideHighway);
+            if (backColumns != null) SetCollectionHidden(ref backColumns, _platformManager.activePlatform.hideBackColumns);
+            if (backLasers != null) SetCollectionHidden(ref backLasers, _platformManager.activePlatform.hideBackLasers);
+            if (doubleColorLasers != null) SetCollectionHidden(ref doubleColorLasers, _platformManager.activePlatform.hideDoubleColorLasers);
+            if (rotatingLasers != null) SetCollectionHidden(ref rotatingLasers, _platformManager.activePlatform.hideRotatingLasers);
+            if (trackLights != null) SetCollectionHidden(ref trackLights, _platformManager.activePlatform.hideTrackLights);
+            CleanupEnvironment();
         }
 
         /// <summary>
@@ -86,13 +84,12 @@ namespace CustomFloorPlugin
         private void FindEnvironment()
         {
             roots = GetRootGameObjects();
-            if (roots == null)
             renamedObjects = new();
+            if (roots == null) return;
             FindMenuEnvironmnet();
             FindMultiplayerEnvironment();
             FindPlayersPlace();
             FindFeetIcon();
-            FindPlayersPlace();
             FindSmallRings();
             FindBigRings();
             FindVisualizers();
@@ -126,16 +123,14 @@ namespace CustomFloorPlugin
         private void SetCollectionHidden(ref List<GameObject> list, bool hidden)
         {
             foreach (GameObject go in list)
-            {
                 go.SetActive(!hidden);
-            }
             list = null;
         }
 
         /// <summary>
         /// Resets the names of all renamed objects to it's default
         /// </summary>
-        private void Cleanup()
+        private void CleanupEnvironment()
         {
             foreach (GameObject go in renamedObjects)
                 go.name.Remove(go.name.Length - renamedObjectSuffix.Length);
@@ -220,6 +215,9 @@ namespace CustomFloorPlugin
             playersPlace = new List<GameObject>();
             switch (sceneName)
             {
+                case "MenuEnvironment":
+                    playersPlace.Add(_assetLoader.playersPlace);
+                    break;
                 case "GlassDesertEnvironment":
                     FindAddGameObject("PlayersPlace", playersPlace);
                     FindAddGameObject("Collider", playersPlace);

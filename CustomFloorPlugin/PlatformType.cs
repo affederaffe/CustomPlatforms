@@ -5,6 +5,7 @@
         Singleplayer,
         Multiplayer,
         A360,
-        API
+        API,
+        Active
     }
 }

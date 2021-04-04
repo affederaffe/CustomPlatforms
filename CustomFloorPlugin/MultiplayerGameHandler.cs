@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Threading.Tasks;
 
 using UnityEngine;
 
@@ -31,7 +30,8 @@ namespace CustomFloorPlugin
 
         public async void Initialize()
         {
-            int platformIndex = await _platformManager.GetIndexForTypeAsync(PlatformType.Multiplayer);
+            await _platformManager.allPlatformsTask;
+            int platformIndex = _platformManager.GetIndexForType(PlatformType.Multiplayer);
             if (platformIndex != 0)
             {
                 _multiplayerPlayersManager.playerDidFinishEvent += HandlePlayerDidFinish;

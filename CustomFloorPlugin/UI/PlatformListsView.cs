@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Threading.Tasks;
 
 using BeatSaberMarkupLanguage.Attributes;
 using BeatSaberMarkupLanguage.Components;
@@ -65,8 +64,9 @@ namespace CustomFloorPlugin.UI
         [System.Diagnostics.CodeAnalysis.SuppressMessage("CodeQuality", "IDE0051:Remove unused private members", Justification = "Called by BSML")]
         private async void TabSelect(SegmentedControl segmentedControl, int _1)
         {
+            await _platformManager.allPlatformsTask;
             PlatformType type = (PlatformType)segmentedControl.selectedCellNumber;
-            int index = await _platformManager.GetIndexForTypeAsync(type);
+            int index = _platformManager.GetIndexForType(type);
             await _platformSpawner.ChangeToPlatformAsync(index);
             allListTables[segmentedControl.selectedCellNumber].tableView.ScrollToCellWithIdx(index, TableView.ScrollPositionType.Center, true);
             allListTables[segmentedControl.selectedCellNumber].tableView.SelectCellWithIdx(index);
@@ -115,8 +115,9 @@ namespace CustomFloorPlugin.UI
         /// </summary>
         protected override async void DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
         {
+            await _platformManager.allPlatformsTask;
             base.DidActivate(firstActivation, addedToHierarchy, screenSystemEnabling);
-            int platformIndex = await _platformManager.GetIndexForTypeAsync(_platformManager.currentPlatformType);
+            int platformIndex = _platformManager.GetIndexForType(_platformManager.currentPlatformType);
             await _platformSpawner.ChangeToPlatformAsync(platformIndex);
         }
 
@@ -126,12 +127,13 @@ namespace CustomFloorPlugin.UI
         /// </summary>
         protected override async void DidDeactivate(bool removedFromHierarchy, bool screenSystemDisabling)
         {
+            await _platformManager.allPlatformsTask;
             base.DidDeactivate(removedFromHierarchy, screenSystemDisabling);
             int platformIndex = 0;
             if (_config.ShowInMenu)
                 platformIndex = _config.ShufflePlatforms
-                ? await _platformSpawner.GetRandomPlatformIndexAsync()
-                : await _platformManager.GetIndexForTypeAsync(PlatformType.Singleplayer);
+                ? _platformSpawner.RandomPlatformIndex
+                : _platformManager.GetIndexForType(PlatformType.Singleplayer);
             await _platformSpawner.ChangeToPlatformAsync(platformIndex);
         }
 
@@ -146,14 +148,14 @@ namespace CustomFloorPlugin.UI
             await _platformManager.allPlatformsTask;
             _platformManager.allPlatformsTask.Result.Sort(1, _platformManager.allPlatformsTask.Result.Count - 1, null);
             allListTables = new CustomListTableData[] { _singleplayerPlatformListTable, _multiplayerPlatformListTable, _a360PlatformListTable };
-            foreach (CustomPlatform platform in await _platformManager.allPlatformsTask)
+            foreach (CustomPlatform platform in _platformManager.allPlatformsTask.Result)
             {
                 AddCellForPlatform(platform, false);
             }
             for (int i = 0; i < allListTables.Length; i++)
             {
                 allListTables[i].tableView.ReloadData();
-                int idx = await _platformManager.GetIndexForTypeAsync((PlatformType)i);
+                int idx = _platformManager.GetIndexForType((PlatformType)i);
                 allListTables[i].tableView.ScrollToCellWithIdx(idx, TableView.ScrollPositionType.Center, true);
                 allListTables[i].tableView.SelectCellWithIdx(idx);
             }
@@ -174,18 +176,17 @@ namespace CustomFloorPlugin.UI
             }
         }
 
-        internal async Task RemoveCellForPlatform(CustomPlatform platform)
+        internal void RemoveCellForPlatformAsync(CustomPlatform platform)
         {
             if (allListTables == null)
                 return;
 
-            await _platformManager.allPlatformsTask;
             CustomListTableData.CustomCellInfo cell = _platformCellPairs[platform];
             for (int i = 0; i < allListTables.Length; i++)
             {
                 allListTables[i].data.Remove(cell);
                 allListTables[i].tableView.ReloadData();
-                if (await _platformManager.GetIndexForTypeAsync((PlatformType)i) == _platformManager.allPlatformsTask.Result.IndexOf(platform))
+                if (_platformManager.GetIndexForType((PlatformType)i) == _platformManager.allPlatformsTask.Result.IndexOf(platform))
                 {
                     allListTables[i].tableView.SelectCellWithIdx(0);
                     allListTables[i].tableView.ScrollToCellWithIdx(0, TableView.ScrollPositionType.Center, true);

@@ -54,13 +54,14 @@ namespace CustomFloorPlugin
         {
             _platformSpawner.isMultiplayer = false;
             await _assetLoader.loadAssetsTask;
+            await _platformManager.allPlatformsTask;
             _assetLoader.heart.SetActive(_config.ShowHeart);
             _assetLoader.heart.GetComponent<InstancedMaterialLightWithId>().ColorWasSet(Color.magenta);
             if (_config.ShowInMenu)
             {
                 int platformIndex = _config.ShufflePlatforms
-                    ? await _platformSpawner.GetRandomPlatformIndexAsync()
-                    : await _platformManager.GetIndexForTypeAsync(PlatformType.Singleplayer);
+                    ? _platformSpawner.RandomPlatformIndex
+                    : _platformManager.GetIndexForType(PlatformType.Singleplayer);
                 await _platformSpawner.ChangeToPlatformAsync(platformIndex);
             }
         }
