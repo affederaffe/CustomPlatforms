@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 
 using UnityEngine;
 
@@ -30,12 +31,11 @@ namespace CustomFloorPlugin
 
         public async void Initialize()
         {
-            await _assetLoader.loadAssetsTask;
             int platformIndex = _platformManager.GetIndexForType(PlatformType.Multiplayer);
             if (platformIndex != 0)
             {
                 _multiplayerPlayersManager.playerDidFinishEvent += HandlePlayerDidFinish;
-                SpawnLightEffects();
+                await SpawnLightEffects();
                 await _platformSpawner.SetContainerAndShowAsync(platformIndex, _container);
             }
         }
@@ -53,8 +53,9 @@ namespace CustomFloorPlugin
         /// <summary>
         /// Instantiates the light effects prefab for multiplayer levels
         /// </summary>
-        private void SpawnLightEffects()
+        private async Task SpawnLightEffects()
         {
+            await _assetLoader.loadAssetsTask;
             GameObject lightEffects = _container.InstantiatePrefab(_assetLoader.lightEffects);
             _platformManager.spawnedObjects.Add(lightEffects);
             lightEffects.SetActive(true);

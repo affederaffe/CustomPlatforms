@@ -21,7 +21,7 @@ namespace CustomFloorPlugin
         private readonly GameScenesManager _gameScenesManager;
 
         private string sceneName;
-        private GameObject[] roots;
+        private GameObject root;
 
         private readonly List<GameObject> menuEnvironment = new();
         private readonly List<GameObject> multiplayerEnvironment = new();
@@ -37,9 +37,6 @@ namespace CustomFloorPlugin
         private readonly List<GameObject> backLasers = new();
         private readonly List<GameObject> rotatingLasers = new();
         private readonly List<GameObject> trackLights = new();
-
-        private const string renamedObjectSuffix = "renamed";
-        private readonly List<GameObject> renamedObjects = new();
 
         private TrackLaneRing[] TrackLaneRings => _TrackLaneRings ??= Resources.FindObjectsOfTypeAll<TrackLaneRing>();
         private TrackLaneRing[] _TrackLaneRings;
@@ -61,21 +58,20 @@ namespace CustomFloorPlugin
         internal void HideObjectsForPlatform()
         {
             FindEnvironment();
-            if (menuEnvironment != null) SetCollectionHidden(menuEnvironment, _platformManager.GetIndexForType(PlatformType.Active) != 0);
-            if (multiplayerEnvironment != null) SetCollectionHidden(multiplayerEnvironment, true);
-            if (playersPlace != null) SetCollectionHidden(playersPlace, _platformManager.activePlatform.hideDefaultPlatform);
-            if (feet != null) SetCollectionHidden(feet, _platformManager.activePlatform.hideDefaultPlatform && !_config.AlwaysShowFeet);
-            if (smallRings != null) SetCollectionHidden(smallRings, _platformManager.activePlatform.hideSmallRings);
-            if (bigRings != null) SetCollectionHidden(bigRings, _platformManager.activePlatform.hideBigRings);
-            if (visualizer != null) SetCollectionHidden(visualizer, _platformManager.activePlatform.hideEQVisualizer);
-            if (towers != null) SetCollectionHidden(towers, _platformManager.activePlatform.hideTowers);
-            if (highway != null) SetCollectionHidden(highway, _platformManager.activePlatform.hideHighway);
-            if (backColumns != null) SetCollectionHidden(backColumns, _platformManager.activePlatform.hideBackColumns);
-            if (backLasers != null) SetCollectionHidden(backLasers, _platformManager.activePlatform.hideBackLasers);
-            if (doubleColorLasers != null) SetCollectionHidden(doubleColorLasers, _platformManager.activePlatform.hideDoubleColorLasers);
-            if (rotatingLasers != null) SetCollectionHidden(rotatingLasers, _platformManager.activePlatform.hideRotatingLasers);
-            if (trackLights != null) SetCollectionHidden(trackLights, _platformManager.activePlatform.hideTrackLights);
-            _assetLoader.playersPlace.SetActive(_platformManager.GetIndexForType(PlatformType.Active) != 0 && !_platformManager.activePlatform.hideDefaultPlatform && sceneName == "MenuEnvironment");
+            SetCollectionHidden(menuEnvironment, _platformManager.GetIndexForType(PlatformType.Active) != 0);
+            SetCollectionHidden(multiplayerEnvironment, true);
+            SetCollectionHidden(playersPlace, _platformManager.activePlatform.hideDefaultPlatform);
+            SetCollectionHidden(feet, _platformManager.activePlatform.hideDefaultPlatform && !_config.AlwaysShowFeet);
+            SetCollectionHidden(smallRings, _platformManager.activePlatform.hideSmallRings);
+            SetCollectionHidden(bigRings, _platformManager.activePlatform.hideBigRings);
+            SetCollectionHidden(visualizer, _platformManager.activePlatform.hideEQVisualizer);
+            SetCollectionHidden(towers, _platformManager.activePlatform.hideTowers);
+            SetCollectionHidden(highway, _platformManager.activePlatform.hideHighway);
+            SetCollectionHidden(backColumns, _platformManager.activePlatform.hideBackColumns);
+            SetCollectionHidden(backLasers, _platformManager.activePlatform.hideBackLasers);
+            SetCollectionHidden(doubleColorLasers, _platformManager.activePlatform.hideDoubleColorLasers);
+            SetCollectionHidden(rotatingLasers, _platformManager.activePlatform.hideRotatingLasers);
+            SetCollectionHidden(trackLights, _platformManager.activePlatform.hideTrackLights);
             CleanupEnvironment();
         }
 
@@ -84,8 +80,8 @@ namespace CustomFloorPlugin
         /// </summary>
         private void FindEnvironment()
         {
-            roots = GetRootGameObjects();
-            if (roots == null) return;
+            root = GetEnvironmentRoot();
+            if (root == null) return;
             FindMenuEnvironmnet();
             FindMultiplayerEnvironment();
             FindPlayersPlace();
@@ -103,16 +99,25 @@ namespace CustomFloorPlugin
         }
 
         /// <summary>
-        /// Finds the currently loaded environment and gets the root GameObjects of the respective scene
+        /// Activates the default PlayersPlace as well as nulling the root and the TrackLaneRings[] for the next platform
         /// </summary>
-        /// <returns>The root GameObjects of the environment scene</returns>
-        private GameObject[] GetRootGameObjects()
+        private void CleanupEnvironment()
+        {
+            _assetLoader.playersPlace.SetActive(_platformManager.GetIndexForType(PlatformType.Active) != 0 && !_platformManager.activePlatform.hideDefaultPlatform && sceneName == "MenuEnvironment");
+            _TrackLaneRings = null;
+            root = null;
+        }
+
+        /// <summary>
+        /// Gets the currently loaded <see cref="Scene"/> and returns the Environment root GameObject 
+        /// </summary>
+        private GameObject GetEnvironmentRoot()
         {
             sceneName = _gameScenesManager.GetCurrentlyLoadedSceneNames().LastOrDefault(x => x.EndsWith("Environment"));
             if (sceneName == "MultiplayerEnvironment") sceneName = "GameCore";
             Scene scene = SceneManager.GetSceneByName(sceneName);
             if (!scene.IsValid()) return null;
-            return scene.GetRootGameObjects();
+            return scene.GetRootGameObjects().FirstOrDefault(x => x.name.EndsWith("Environment") || x.name.EndsWith("LocalActivePlayerController(Clone)"));
         }
 
         /// <summary>
@@ -128,43 +133,17 @@ namespace CustomFloorPlugin
         }
 
         /// <summary>
-        /// Resets the names of all renamed objects to it's default
-        /// </summary>
-        private void CleanupEnvironment()
-        {
-            foreach (GameObject go in renamedObjects)
-                go.name = go.name.Remove(go.name.Length - renamedObjectSuffix.Length);
-            _TrackLaneRings = null;
-            roots = null;
-        }
-
-        /// <summary>
         /// Finds a GameObject by name and adds it to the provided list
         /// </summary>
         /// <param name="name">The name of the desired GameObject</param>
         /// <param name="list">The list to be added to</param>
         private bool FindAddGameObject(string name, List<GameObject> list, bool rename = false)
         {
-            GameObject go;
-            foreach (GameObject root in roots)
-            {
-                go = root.transform.Find(name)?.gameObject;
-                if (go != null)
-                {
-                    list.Add(go);
-                    if (rename)
-                    {
-                        go.name += renamedObjectSuffix;
-                        renamedObjects.Add(go);
-                    }
-                    return true;
-                }
-                else if (root.name == name)
-                {
-                    list.Add(root);
-                }
-            }
-            return false;
+            GameObject go = root.transform.Find(name)?.gameObject;
+            if (go == null) return false;
+            if (rename) go.name += "renamed";
+            list.Add(go);
+            return true;
         }
 
         private void FindMenuEnvironmnet()
@@ -199,7 +178,9 @@ namespace CustomFloorPlugin
 
                     // Only hide the other player's construction when in duel layout
                     if (FindAddGameObject("IsActiveObjects/CenterRings", multiplayerEnvironment))
+                    {
                         FindAddGameObject("IsActiveObjects/PlatformEnd", multiplayerEnvironment);
+                    }
                     else
                     {
                         FindAddGameObject("Construction", multiplayerEnvironment);
@@ -266,6 +247,7 @@ namespace CustomFloorPlugin
                 "PairLaserTrackLaneRing(Clone)" or
                 "PanelLightTrackLaneRing(Clone)" or
                 "LightLinesTrackLaneRing(Clone)" or
+                "ConeRing(Clone)" or
                 "ConeRingBig(Clone)"
                 ))
             {
@@ -279,7 +261,6 @@ namespace CustomFloorPlugin
             FindAddGameObject("BigLightsTrackLaneRings", bigRings);
             FindAddGameObject("BigCenterLightTrackLaneRing", bigRings);
             FindAddGameObject("LightsTrackLaneRing", bigRings);
-
             foreach (TrackLaneRing trackLaneRing in TrackLaneRings.Where(x =>
                 x.name is "BigTrackLaneRing(Clone)" or
                 "BigCenterLightTrackLaneRing(Clone)" or
@@ -354,8 +335,8 @@ namespace CustomFloorPlugin
                     FindAddGameObject("BottomCones", towers);
                     break;
                 case "RocketEnvironment":
-                    FindAddGameObject("RocketCar", towers);
-                    FindAddGameObject("RocketCar (1)", towers);
+                    FindAddGameObject("RocketCarL", towers);
+                    FindAddGameObject("RocketCarR", towers);
                     FindAddGameObject("RocketArena", towers);
                     FindAddGameObject("RocketArenaLight", towers);
                     FindAddGameObject("EnvLight0", towers);
@@ -445,6 +426,10 @@ namespace CustomFloorPlugin
                     FindAddGameObject("VConstruction", highway);
                     FindAddGameObject("Construction", highway);
                     break;
+                case "PanicEnvironment":
+                    FindAddGameObject("TrackMirror", highway);
+                    FindAddGameObject("TrackConstruction", highway);
+                    break;
                 case "RocketEnvironment":
                     FindAddGameObject("Mirror", highway);
                     FindAddGameObject("Construction", highway);
@@ -474,15 +459,7 @@ namespace CustomFloorPlugin
                     FindAddGameObject("TrackConstruction", highway);
                     FindAddGameObject("TrackShadow", highway);
                     FindAddGameObject("Tunnel", highway);
-                    FindAddGameObject("TunnelRing", highway);
-                    for (int i = 1; i < 7; i++)
-                        FindAddGameObject($"TunnelRing ({i})", highway);
-                    FindAddGameObject("TunnelRingShadow", highway);
-                    FindAddGameObject("TunnelRingShadow (1)", highway);
-                    for (int i = 1; i < 13; i++)
-                        FindAddGameObject($"LampShadow ({i})", highway);
-                    FindAddGameObject("ArchShadow", highway);
-                    FindAddGameObject("ArchShadow (1)", highway);
+                    FindAddGameObject("TunnelRings", highway);
                     FindAddGameObject("LinkinParkSoldier", highway);
                     FindAddGameObject("LinkinParkTextLogoL", highway);
                     FindAddGameObject("LinkinParkTextLogoR", highway);
@@ -510,6 +487,11 @@ namespace CustomFloorPlugin
         {
             switch (sceneName)
             {
+                case "GlassDesertEnvironment":
+                    FindAddGameObject("SeparatorWall", backColumns);
+                    for (int i = 1; i < 16; i++)
+                        FindAddGameObject($"SeparatorWall ({i})", backColumns);
+                    break;
                 case "OriginsEnvironment":
                     FindAddGameObject("SpectrogramEnd", backColumns, true);
                     FindAddGameObject("SpectrogramEnd", backColumns);
@@ -532,7 +514,9 @@ namespace CustomFloorPlugin
             switch (sceneName)
             {
                 case "GlassDesertEnvironment":
-                    for (int i = 9; i < 19; i++)
+                    for (int i = 9; i < 13; i++)
+                        FindAddGameObject($"LightPillar ({i})", rotatingLasers);
+                    for (int i = 19; i < 26; i++)
                         FindAddGameObject($"LightPillar ({i})", rotatingLasers);
                     break;
                 case "DefaultEnvironment":
@@ -688,6 +672,7 @@ namespace CustomFloorPlugin
                     FindAddGameObject("Window", backLasers);
                     break;
                 case "RocketEnvironment":
+                    FindAddGameObject("FrontLights", backLasers);
                     FindAddGameObject("RocketGateLight", backLasers);
                     FindAddGameObject("GateLight0", backLasers);
                     FindAddGameObject("GateLight1", backLasers);
@@ -699,8 +684,8 @@ namespace CustomFloorPlugin
                         FindAddGameObject($"Light ({i})", backLasers);
                     break;
                 case "LinkinParkEnvironment":
-                    FindAddGameObject("FrontLights", backLasers);
                     FindAddGameObject("Logo", backLasers);
+                    FindAddGameObject("LogoLight", backLasers);
                     break;
                 case "BTSEnvironment":
                     FindAddGameObject("MagicDoorSprite", backLasers);
@@ -716,14 +701,13 @@ namespace CustomFloorPlugin
             switch (sceneName)
             {
                 case "GlassDesertEnvironment":
-                    FindAddGameObject("Cube (82)", trackLights);
-                    for (int i = 85; i < 90; i++)
-                        FindAddGameObject($"Cube ({i})", trackLights);
                     FindAddGameObject("TopLaser", trackLights);
                     for (int i = 1; i < 6; i++)
                         FindAddGameObject($"TopLaser ({i})", trackLights);
                     for (int i = 4; i < 13; i++)
                         FindAddGameObject($"DownLaser ({i})", trackLights);
+                    for (int i = 0; i < 7; i++)
+                        FindAddGameObject("TopLightMesh", trackLights, true);
                     break;
                 case "TutorialEnvironment":
                     FindAddGameObject("GlowLines", trackLights);

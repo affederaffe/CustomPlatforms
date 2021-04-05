@@ -20,8 +20,10 @@ namespace CustomFloorPlugin
         public string propertyName = "_Color";
         public MaterialColorType materialColorType;
 
-        private Renderer _renderer;
         private ColorManager _colorManager;
+
+        private Renderer Renderer => _Renderer ??= GetComponent<Renderer>();
+        private Renderer _Renderer;
 
         [Inject]
         public void Construct(ColorManager colorManager)
@@ -35,12 +37,6 @@ namespace CustomFloorPlugin
             ChangeColors();
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Code Quality", "IDE0051:Remove unused private members", Justification = "Called by Unity")]
-        private void Awake()
-        {
-            _renderer = GetComponent<Renderer>();
-        }
-
         private void ChangeColors()
         {
             Color color = materialColorType switch
@@ -52,8 +48,8 @@ namespace CustomFloorPlugin
                 MaterialColorType.ObstacleColor => _colorManager.GetObstacleEffectColor(),
                 _ => new Color(0f, 0f, 0f),
             };
-            if (_renderer.material.HasProperty(propertyName))
-                _renderer.material.SetColor(propertyName, color);
+            if (Renderer.material.HasProperty(propertyName))
+                Renderer.material.SetColor(propertyName, color);
         }
     }
 }

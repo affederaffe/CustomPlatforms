@@ -13,7 +13,9 @@ namespace CustomFloorPlugin
         public string AveragePropertyName;
 
         private BasicSpectrogramData _basicSpectrogramData;
-        private Renderer _renderer;
+
+        private Renderer Renderer => _Renderer ??= GetComponent<Renderer>();
+        private Renderer _Renderer;
 
         [Inject]
         public void Construct([InjectOptional] BasicSpectrogramData basicSpectrogramData)
@@ -27,15 +29,9 @@ namespace CustomFloorPlugin
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Code Quality", "IDE0051:Remove unused private members", Justification = "Called by Unity")]
-        private void Awake()
-        {
-            _renderer = GetComponent<Renderer>();
-        }
-
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Code Quality", "IDE0051:Remove unused private members", Justification = "Called by Unity")]
         private void Update()
         {
-            if (_basicSpectrogramData != null && _renderer != null)
+            if (_basicSpectrogramData != null && Renderer != null)
             {
                 float average = 0.0f;
                 for (int i = 0; i < 64; i++)
@@ -44,7 +40,7 @@ namespace CustomFloorPlugin
                 }
                 average /= 64.0f;
 
-                foreach (Material mat in _renderer.materials)
+                foreach (Material mat in Renderer.materials)
                 {
                     mat.SetFloatArray(PropertyName, _basicSpectrogramData.ProcessedSamples);
                     mat.SetFloat(AveragePropertyName, average);

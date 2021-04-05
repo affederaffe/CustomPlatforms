@@ -16,6 +16,7 @@ namespace CustomFloorPlugin
 
         private PlatformManager _platformManager;
         private BasicSpectrogramData _basicSpectrogramData;
+
         private Animation _animation;
 
         [Inject]
