@@ -23,23 +23,23 @@ namespace CustomFloorPlugin
         private string sceneName;
         private GameObject[] roots;
 
-        private List<GameObject> menuEnvironment;
-        private List<GameObject> multiplayerEnvironment;
-        private List<GameObject> playersPlace;
-        private List<GameObject> feet;
-        private List<GameObject> smallRings;
-        private List<GameObject> bigRings;
-        private List<GameObject> visualizer;
-        private List<GameObject> towers;
-        private List<GameObject> highway;
-        private List<GameObject> backColumns;
-        private List<GameObject> doubleColorLasers;
-        private List<GameObject> backLasers;
-        private List<GameObject> rotatingLasers;
-        private List<GameObject> trackLights;
+        private readonly List<GameObject> menuEnvironment = new();
+        private readonly List<GameObject> multiplayerEnvironment = new();
+        private readonly List<GameObject> playersPlace = new();
+        private readonly List<GameObject> feet = new();
+        private readonly List<GameObject> smallRings = new();
+        private readonly List<GameObject> bigRings = new();
+        private readonly List<GameObject> visualizer = new();
+        private readonly List<GameObject> towers = new();
+        private readonly List<GameObject> highway = new();
+        private readonly List<GameObject> backColumns = new();
+        private readonly List<GameObject> doubleColorLasers = new();
+        private readonly List<GameObject> backLasers = new();
+        private readonly List<GameObject> rotatingLasers = new();
+        private readonly List<GameObject> trackLights = new();
 
         private const string renamedObjectSuffix = "renamed";
-        private List<GameObject> renamedObjects;
+        private readonly List<GameObject> renamedObjects = new();
 
         private TrackLaneRing[] TrackLaneRings => _TrackLaneRings ??= Resources.FindObjectsOfTypeAll<TrackLaneRing>();
         private TrackLaneRing[] _TrackLaneRings;
@@ -61,20 +61,21 @@ namespace CustomFloorPlugin
         internal void HideObjectsForPlatform()
         {
             FindEnvironment();
-            if (menuEnvironment != null) SetCollectionHidden(ref menuEnvironment, _platformManager.GetIndexForType(PlatformType.Active) != 0);
-            if (multiplayerEnvironment != null) SetCollectionHidden(ref multiplayerEnvironment, true);
-            if (playersPlace != null) SetCollectionHidden(ref playersPlace, _platformManager.activePlatform.hideDefaultPlatform);
-            if (feet != null) SetCollectionHidden(ref feet, _platformManager.activePlatform.hideDefaultPlatform && !_config.AlwaysShowFeet);
-            if (smallRings != null) SetCollectionHidden(ref smallRings, _platformManager.activePlatform.hideSmallRings);
-            if (bigRings != null) SetCollectionHidden(ref bigRings, _platformManager.activePlatform.hideBigRings);
-            if (visualizer != null) SetCollectionHidden(ref visualizer, _platformManager.activePlatform.hideEQVisualizer);
-            if (towers != null) SetCollectionHidden(ref towers, _platformManager.activePlatform.hideTowers);
-            if (highway != null) SetCollectionHidden(ref highway, _platformManager.activePlatform.hideHighway);
-            if (backColumns != null) SetCollectionHidden(ref backColumns, _platformManager.activePlatform.hideBackColumns);
-            if (backLasers != null) SetCollectionHidden(ref backLasers, _platformManager.activePlatform.hideBackLasers);
-            if (doubleColorLasers != null) SetCollectionHidden(ref doubleColorLasers, _platformManager.activePlatform.hideDoubleColorLasers);
-            if (rotatingLasers != null) SetCollectionHidden(ref rotatingLasers, _platformManager.activePlatform.hideRotatingLasers);
-            if (trackLights != null) SetCollectionHidden(ref trackLights, _platformManager.activePlatform.hideTrackLights);
+            if (menuEnvironment != null) SetCollectionHidden(menuEnvironment, _platformManager.GetIndexForType(PlatformType.Active) != 0);
+            if (multiplayerEnvironment != null) SetCollectionHidden(multiplayerEnvironment, true);
+            if (playersPlace != null) SetCollectionHidden(playersPlace, _platformManager.activePlatform.hideDefaultPlatform);
+            if (feet != null) SetCollectionHidden(feet, _platformManager.activePlatform.hideDefaultPlatform && !_config.AlwaysShowFeet);
+            if (smallRings != null) SetCollectionHidden(smallRings, _platformManager.activePlatform.hideSmallRings);
+            if (bigRings != null) SetCollectionHidden(bigRings, _platformManager.activePlatform.hideBigRings);
+            if (visualizer != null) SetCollectionHidden(visualizer, _platformManager.activePlatform.hideEQVisualizer);
+            if (towers != null) SetCollectionHidden(towers, _platformManager.activePlatform.hideTowers);
+            if (highway != null) SetCollectionHidden(highway, _platformManager.activePlatform.hideHighway);
+            if (backColumns != null) SetCollectionHidden(backColumns, _platformManager.activePlatform.hideBackColumns);
+            if (backLasers != null) SetCollectionHidden(backLasers, _platformManager.activePlatform.hideBackLasers);
+            if (doubleColorLasers != null) SetCollectionHidden(doubleColorLasers, _platformManager.activePlatform.hideDoubleColorLasers);
+            if (rotatingLasers != null) SetCollectionHidden(rotatingLasers, _platformManager.activePlatform.hideRotatingLasers);
+            if (trackLights != null) SetCollectionHidden(trackLights, _platformManager.activePlatform.hideTrackLights);
+            _assetLoader.playersPlace.SetActive(_platformManager.GetIndexForType(PlatformType.Active) != 0 && !_platformManager.activePlatform.hideDefaultPlatform && sceneName == "MenuEnvironment");
             CleanupEnvironment();
         }
 
@@ -84,7 +85,6 @@ namespace CustomFloorPlugin
         private void FindEnvironment()
         {
             roots = GetRootGameObjects();
-            renamedObjects = new();
             if (roots == null) return;
             FindMenuEnvironmnet();
             FindMultiplayerEnvironment();
@@ -120,11 +120,11 @@ namespace CustomFloorPlugin
         /// </summary>
         /// <param name="list">A <see cref="List{T}"/> of GameObjects</param>
         /// <param name="hidden">A boolean describing the desired hidden state</param>
-        private void SetCollectionHidden(ref List<GameObject> list, bool hidden)
+        private static void SetCollectionHidden(List<GameObject> list, bool hidden)
         {
             foreach (GameObject go in list)
                 go.SetActive(!hidden);
-            list = null;
+            list.Clear();
         }
 
         /// <summary>
@@ -133,8 +133,9 @@ namespace CustomFloorPlugin
         private void CleanupEnvironment()
         {
             foreach (GameObject go in renamedObjects)
-                go.name.Remove(go.name.Length - renamedObjectSuffix.Length);
+                go.name = go.name.Remove(go.name.Length - renamedObjectSuffix.Length);
             _TrackLaneRings = null;
+            roots = null;
         }
 
         /// <summary>
@@ -168,7 +169,6 @@ namespace CustomFloorPlugin
 
         private void FindMenuEnvironmnet()
         {
-            menuEnvironment = new List<GameObject>();
             switch (sceneName)
             {
                 case "MenuEnvironment":
@@ -190,7 +190,6 @@ namespace CustomFloorPlugin
 
         private void FindMultiplayerEnvironment()
         {
-            multiplayerEnvironment = new List<GameObject>();
             switch (sceneName)
             {
                 case "GameCore":
@@ -212,12 +211,8 @@ namespace CustomFloorPlugin
 
         private void FindPlayersPlace()
         {
-            playersPlace = new List<GameObject>();
             switch (sceneName)
             {
-                case "MenuEnvironment":
-                    playersPlace.Add(_assetLoader.playersPlace);
-                    break;
                 case "GlassDesertEnvironment":
                     FindAddGameObject("PlayersPlace", playersPlace);
                     FindAddGameObject("Collider", playersPlace);
@@ -237,7 +232,6 @@ namespace CustomFloorPlugin
 
         private void FindFeetIcon()
         {
-            feet = new List<GameObject>();
             switch (sceneName)
             {
                 case "GameCore":
@@ -254,7 +248,6 @@ namespace CustomFloorPlugin
 
         private void FindSmallRings()
         {
-            smallRings = new List<GameObject>();
             FindAddGameObject("SmallTrackLaneRings", smallRings);
             FindAddGameObject("TrackLaneRing", smallRings);
             FindAddGameObject("TriangleTrackLaneRings", smallRings);
@@ -282,7 +275,6 @@ namespace CustomFloorPlugin
 
         private void FindBigRings()
         {
-            bigRings = new List<GameObject>();
             FindAddGameObject("BigTrackLaneRings", bigRings);
             FindAddGameObject("BigLightsTrackLaneRings", bigRings);
             FindAddGameObject("BigCenterLightTrackLaneRing", bigRings);
@@ -300,7 +292,6 @@ namespace CustomFloorPlugin
 
         private void FindVisualizers()
         {
-            visualizer = new List<GameObject>();
             switch (sceneName)
             {
                 default:
@@ -311,7 +302,6 @@ namespace CustomFloorPlugin
 
         private void FindTowers()
         {
-            towers = new List<GameObject>();
             switch (sceneName)
             {
                 case "GlassDesertEnvironment":
@@ -400,7 +390,6 @@ namespace CustomFloorPlugin
 
         private void FindHighway()
         {
-            highway = new List<GameObject>();
             switch (sceneName)
             {
                 case "GlassDesertEnvironment":
@@ -519,7 +508,6 @@ namespace CustomFloorPlugin
 
         private void FindBackColumns()
         {
-            backColumns = new List<GameObject>();
             switch (sceneName)
             {
                 case "OriginsEnvironment":
@@ -541,7 +529,6 @@ namespace CustomFloorPlugin
 
         private void FindRotatingLasers()
         {
-            rotatingLasers = new List<GameObject>();
             switch (sceneName)
             {
                 case "GlassDesertEnvironment":
@@ -631,7 +618,6 @@ namespace CustomFloorPlugin
 
         private void FindDoubleColorLasers()
         {
-            doubleColorLasers = new List<GameObject>();
             switch (sceneName)
             {
                 case "TutorialEnvironment":
@@ -694,7 +680,6 @@ namespace CustomFloorPlugin
 
         private void FindBackLasers()
         {
-            backLasers = new List<GameObject>();
             switch (sceneName)
             {
                 case "PanicEnvironment":
@@ -728,7 +713,6 @@ namespace CustomFloorPlugin
 
         private void FindTrackLights()
         {
-            trackLights = new List<GameObject>();
             switch (sceneName)
             {
                 case "GlassDesertEnvironment":

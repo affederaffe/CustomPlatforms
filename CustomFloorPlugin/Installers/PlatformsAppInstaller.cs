@@ -27,10 +27,10 @@ namespace CustomFloorPlugin.Installers
             AssetLoader assetLoader = UnityEngine.Object.FindObjectOfType<AssetLoader>() ?? Container.InstantiateComponentOnNewGameObject<AssetLoader>("AssetLoader");
             Container.BindInstance(assetLoader).AsSingle();
             Container.BindInterfacesAndSelfTo<MaterialSwapper>().AsSingle();
-            Container.BindInterfacesAndSelfTo<PlatformLoader>().AsSingle();
+            Container.Bind<PlatformLoader>().AsSingle();
             PlatformManager manager = Container.InstantiateComponentOnNewGameObject<PlatformManager>("CustomPlatforms");
             Container.BindInstance(manager).AsSingle();
-            Container.BindInterfacesAndSelfTo<EnvironmentHider>().AsSingle();
+            Container.Bind<EnvironmentHider>().AsSingle();
             Container.BindInterfacesAndSelfTo<PlatformSpawner>().AsSingle();
         }
     }

@@ -165,13 +165,14 @@ namespace CustomFloorPlugin
             tubeBloomLight.SetField("_bloomFogIntensityMultiplier", 0.125f);
 
             sw.Stop();
-            _siraLog.Info($"Loaded Assets in {sw.Elapsed.Seconds}.{sw.Elapsed.Milliseconds}s");
+            _siraLog.Info($"Loaded Assets in {sw.ElapsedMilliseconds}ms");
+            _siraLog = null;
         }
 
         /// <summary>
         /// Asynchroniously creates the <see cref="Mesh"/> for the heart
         /// </summary>
-        private async Task<Mesh> CreateMeshAsync()
+        private static async Task<Mesh> CreateMeshAsync()
         {
             using Stream manifestResourceStream = Assembly.GetExecutingAssembly().GetManifestResourceStream("CustomFloorPlugin.Assets.heart.mesh");
             using StreamReader streamReader = new(manifestResourceStream);
@@ -208,7 +209,7 @@ namespace CustomFloorPlugin
         /// <summary>
         /// Asynchroniously loads and then returns a <see cref="Scene"/>
         /// </summary>
-        private async Task<Scene> LoadSceneAsync(string name)
+        private static async Task<Scene> LoadSceneAsync(string name)
         {
             TaskCompletionSource<Scene> taskSource = new();
             AsyncOperation asyncOperation = SceneManager.LoadSceneAsync(name, new LoadSceneParameters(LoadSceneMode.Additive));

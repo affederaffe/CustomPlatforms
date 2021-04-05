@@ -2,6 +2,8 @@
 
 using UnityEngine;
 
+using Zenject;
+
 
 namespace CustomFloorPlugin
 {
@@ -10,7 +12,7 @@ namespace CustomFloorPlugin
     /// Primary reason for this is the absence of proper custom <see cref="Shader"/>s (or decompiled source <see cref="Shader"/>s) and a lack of knowledge about their inner workings...<br/>
     /// Part of the documentation for this file is omited because it's a clusterfuck and under construction.
     /// </summary>
-    public class MaterialSwapper
+    public class MaterialSwapper : IInitializable
     {
         private readonly AssetLoader _assetLoader;
 
@@ -26,25 +28,17 @@ namespace CustomFloorPlugin
         private const string kRealGlowMatName = "EnvLight";
         private const string kRealOpaqueGlowMatName = "EnvLightOpaque";
 
-        private bool isInitialized;
-
         public MaterialSwapper(AssetLoader assetLoader)
         {
             _assetLoader = assetLoader;
         }
 
-        /// <summary>
-        /// Initializes needed variables<br/>
-        /// </summary>
-        private void InitIfNeeded()
+        public async void Initialize()
         {
-            if (!isInitialized)
-            {
-                isInitialized = true;
-                _dark = _assetLoader.AllMaterials.First(x => x.name == kRealDarkMatName);
-                _glow = _assetLoader.AllMaterials.First(x => x.name == kRealGlowMatName);
-                _opaqueGlow = _assetLoader.AllMaterials.First(x => x.name == kRealOpaqueGlowMatName);
-            }
+            await _assetLoader.loadAssetsTask;
+            _dark = _assetLoader.AllMaterials.First(x => x.name == kRealDarkMatName);
+            _glow = _assetLoader.AllMaterials.First(x => x.name == kRealGlowMatName);
+            _opaqueGlow = _assetLoader.AllMaterials.First(x => x.name == kRealOpaqueGlowMatName);
         }
 
         /// <summary>
@@ -53,7 +47,6 @@ namespace CustomFloorPlugin
         /// <param name="gameObject"><see cref="GameObject"/> to search for <see cref="Renderer"/>s</param>
         internal void ReplaceMaterials(GameObject gameObject)
         {
-            InitIfNeeded();
             foreach (Renderer renderer in gameObject.GetComponentsInChildren<Renderer>(true))
             {
                 ReplaceForRenderer(renderer);

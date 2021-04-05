@@ -105,12 +105,10 @@ namespace CustomFloorPlugin
             container.Inject(this);
             _materialSwapper.ReplaceMaterials(columnPrefab);
             CreateColums();
-            foreach (Transform transform in _columnTransforms)
+            foreach (INotifyPlatformEnabled notifyEnable in GetComponentsInChildren<INotifyPlatformEnabled>(true))
             {
-                foreach (INotifyPlatformEnabled notifyEnable in transform.GetComponentsInChildren<INotifyPlatformEnabled>(true))
-                {
+                if ((Object)notifyEnable != this)
                     notifyEnable.PlatformEnabled(container);
-                }
             }
         }
 

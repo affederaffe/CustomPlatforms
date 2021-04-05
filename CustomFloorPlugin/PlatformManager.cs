@@ -9,7 +9,6 @@ using CustomFloorPlugin.Configuration;
 using CustomFloorPlugin.Extensions;
 
 using IPA.Utilities;
-using IPA.Utilities.Async;
 
 using SiraUtil.Tools;
 
@@ -154,7 +153,7 @@ namespace CustomFloorPlugin
             }
 
             sw.Stop();
-            _siraLog.Info($"Loaded Platforms in {sw.Elapsed.Seconds}.{sw.Elapsed.Milliseconds}s");
+            _siraLog.Info($"Loaded Platforms in {sw.ElapsedMilliseconds}ms");
 
             return platforms;
         }
@@ -166,7 +165,6 @@ namespace CustomFloorPlugin
             defaultPlatform.platName = "Default Environment";
             defaultPlatform.platAuthor = "Beat Saber";
             defaultPlatform.icon = _assetLoader.defaultPlatformCover;
-            defaultPlatform.hideDefaultPlatform = true;
             defaultPlatform.isDescriptor = false;
             currentSingleplayerPlatform = defaultPlatform;
             currentMultiplayerPlatform = defaultPlatform;
@@ -209,33 +207,30 @@ namespace CustomFloorPlugin
         /// </summary>
         internal async Task<CustomPlatform> CreatePlatformAsync(string path)
         {
-            return await await UnityMainThreadTaskScheduler.Factory.StartNew(async () =>
+            CustomPlatform platform = await _platformLoader.LoadFromFileAsync(path);
+            CustomPlatform newPlatform = Instantiate(platform, transform);
+            Destroy(platform.gameObject);
+            newPlatform.name = platform.name;
+            newPlatform.isDescriptor = false;
+            CheckLastSelectedPlatform(newPlatform);
+
+            if (platformFilePaths.ContainsKey(newPlatform.fullPath))
             {
-                CustomPlatform platform = await _platformLoader.LoadFromFileAsync(path);
-                CustomPlatform newPlatform = Instantiate(platform, transform);
-                Destroy(platform.gameObject);
-                newPlatform.name = platform.name;
-                newPlatform.isDescriptor = false;
-                CheckLastSelectedPlatform(newPlatform);
+                await allPlatformsTask;
+                CustomPlatform descriptor = platformFilePaths[newPlatform.fullPath];
+                int index = allPlatformsTask.Result.IndexOf(descriptor);
+                if (activePlatform == descriptor)
+                    activePlatform = newPlatform;
+                platformFilePaths[descriptor.fullPath] = newPlatform;
+                allPlatformsTask.Result[index] = newPlatform;
+                Destroy(descriptor.gameObject);
+            }
+            else
+            {
+                platformFilePaths.Add(path, newPlatform);
+            }
 
-                if (platformFilePaths.ContainsKey(newPlatform.fullPath))
-                {
-                    await allPlatformsTask;
-                    CustomPlatform descriptor = platformFilePaths[newPlatform.fullPath];
-                    int index = allPlatformsTask.Result.IndexOf(descriptor);
-                    if (activePlatform == descriptor)
-                        activePlatform = newPlatform;
-                    platformFilePaths[descriptor.fullPath] = newPlatform;
-                    allPlatformsTask.Result[index] = newPlatform;
-                    Destroy(descriptor.gameObject);
-                }
-                else
-                {
-                    platformFilePaths.Add(path, newPlatform);
-                }
-
-                return newPlatform;
-            });
+            return newPlatform;
         }
 
         /// <summary>

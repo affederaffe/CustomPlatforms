@@ -86,6 +86,7 @@ namespace CustomFloorPlugin
 
         public void Dispose()
         {
+            GC.SuppressFinalize(this);
             _beatmapObjectCallbackController.beatmapEventDidTriggerEvent -= BeatmapEventDidTrigger;
             _beatmapObjectManager.noteWasCutEvent -= new BeatmapObjectManager.NoteWasCutDelegate(NoteWasCut);
             _beatmapObjectManager.noteWasMissedEvent -= NoteWasMissed;

@@ -87,7 +87,7 @@ namespace CustomFloorPlugin
         /// <summary>
         /// Asynchronously loads and <see cref="AssetBundle"/> from a <see cref="FileStream"/>
         /// </summary>
-        private async Task<AssetBundle> LoadAssetBundleFromStreamAsync(FileStream fileStream)
+        private static async Task<AssetBundle> LoadAssetBundleFromStreamAsync(FileStream fileStream)
         {
             TaskCompletionSource<AssetBundle> taskSource = new();
             AssetBundleCreateRequest assetBundleCreateRequest = AssetBundle.LoadFromStreamAsync(fileStream);
@@ -102,7 +102,7 @@ namespace CustomFloorPlugin
         /// <summary>
         /// Asynchronously loads an Asset <typeparamref name="T"/> from an <see cref="AssetBundle"/>
         /// </summary>
-        private async Task<T> LoadAssetFromAssetBundleAsync<T>(AssetBundle assetBundle, string assetName) where T : UnityEngine.Object
+        private static async Task<T> LoadAssetFromAssetBundleAsync<T>(AssetBundle assetBundle, string assetName) where T : UnityEngine.Object
         {
             TaskCompletionSource<T> taskSource = new();
             AssetBundleRequest assetBundleRequest = assetBundle.LoadAssetAsync<T>(assetName);

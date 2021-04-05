@@ -56,7 +56,7 @@ namespace CustomFloorPlugin
         /// <summary>
         /// Sets Main-<see cref="Camera"/>s <see cref="Camera.cullingMask"/>
         /// </summary>
-        private void SetCameraMasks()
+        private static void SetCameraMasks()
         {
             Camera.main.cullingMask &= ~(1 << kOnlyInThirdPerson);
             Camera.main.cullingMask |= 1 << kOnlyInHeadset;

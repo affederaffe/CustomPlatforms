@@ -26,6 +26,7 @@ namespace CustomFloorPlugin
         /// <param name="config">The config BSIPA provides</param>
         /// <param name="zenjector">The zenjector that SiraUtil passes to this plugin</param>
         [Init]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822:Mark members as static", Justification = "BSIPA")]
         public void Init(Logger logger, Config config, Zenjector zenjector)
         {
             Patcher.Patch();
@@ -38,6 +39,7 @@ namespace CustomFloorPlugin
         /// Plugin teardown, removes all Harmony Patches
         /// </summary>
         [OnExit]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822:Mark members as static", Justification = "BSIPA")]
         public void OnExit()
         {
             Patcher.Unpatch();

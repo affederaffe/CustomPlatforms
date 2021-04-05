@@ -35,7 +35,7 @@ namespace CustomFloorPlugin
         }
 
         /// <summary>
-        /// Gatekeeper function for <see cref="SongEventHandler.OnTrigger"/><br/>
+        /// Gatekeeper function for <see cref="OnTrigger"/><br/>
         /// (I refuse calling that a good implementation)<br/>
         /// (Who the fuck did this???)<br/>
         /// (Use a <see cref="Dictionary{TKey, TValue}"/> instead)

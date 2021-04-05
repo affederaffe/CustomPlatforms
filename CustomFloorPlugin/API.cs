@@ -32,8 +32,8 @@ namespace CustomFloorPlugin
         private readonly PlatformManager _platformManager;
         private readonly PlatformSpawner _platformSpawner;
         private readonly PlatformListsView _platformListsView;
+        private readonly FileSystemWatcher _fileSystemWatcher;
 
-        private FileSystemWatcher _fileSystemWatcher;
         private bool apiRequest;
 
         public API(SiraLog siraLog,
@@ -47,6 +47,7 @@ namespace CustomFloorPlugin
             _platformManager = platformManager;
             _platformSpawner = platformSpawner;
             _platformListsView = platformListsView;
+            _fileSystemWatcher = new(_config.CustomPlatformsDirectory, "*.plat");
         }
 
         private enum SubscriptionType
@@ -57,7 +58,6 @@ namespace CustomFloorPlugin
 
         public void Initialize()
         {
-            _fileSystemWatcher = new FileSystemWatcher(_config.CustomPlatformsDirectory, "*.plat");
             _fileSystemWatcher.Changed += OnFileChanged;
             _fileSystemWatcher.Created += OnFileCreated;
             _fileSystemWatcher.Deleted += OnFileDeleted;
@@ -176,16 +176,8 @@ namespace CustomFloorPlugin
         [Serializable]
         public class PlatformDownloadData
         {
-            public string[] tags;
-            public string type;
             public string name;
-            public string author;
-            public string image;
-            public string hash;
-            public string bsaber;
             public string download;
-            public string install_link;
-            public string date;
         }
 
         /// <summary>

@@ -78,9 +78,6 @@ namespace CustomFloorPlugin
                 tubeBloomLight.transform.localPosition = Vector3.zero;
                 tubeBloomLight.transform.localScale = new Vector3(1 / transform.lossyScale.x, 1 / transform.lossyScale.y, 1 / transform.lossyScale.z);
 
-                bool active = gameObject.activeSelf;
-                tubeBloomLight.gameObject.SetActive(false);
-
                 tubeBloomLightWithId = tubeBloomLight.GetComponent<TubeBloomPrePassLightWithId>();
                 tubeBloomLightWithId.SetField("_tubeBloomPrePassLight", tubeBloomLight);
                 (tubeBloomLightWithId as LightWithIdMonoBehaviour).SetField("_ID", (int)lightsID);
@@ -100,7 +97,7 @@ namespace CustomFloorPlugin
                 parasprite.GetComponent<MeshRenderer>().enabled = false;
 
                 SetColorToDefault();
-                tubeBloomLight.gameObject.SetActive(active);
+                tubeBloomLight.gameObject.SetActive(true);
             }
             else
             {
@@ -115,8 +112,7 @@ namespace CustomFloorPlugin
                 (iHeartBeatSaber as LightWithIdMonoBehaviour).SetField("_ID", (int)lightsID);
                 (iHeartBeatSaber as LightWithIdMonoBehaviour).SetField("_lightManager", _lightManager);
                 iHeartBeatSaber.GetComponent<MeshFilter>().mesh = GetComponent<MeshFilter>().mesh;
-
-                iHeartBeatSaber.gameObject.SetActive(gameObject.activeSelf);
+                iHeartBeatSaber.gameObject.SetActive(true);
             }
         }
 

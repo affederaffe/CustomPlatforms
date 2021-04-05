@@ -22,7 +22,7 @@ namespace CustomFloorPlugin.UI
         /// The string displayed in the changelog   
         /// </summary>
         [UIValue("changelog-text")]
-        public string Changelog =>
+        public static string Changelog =>
         @"  <size=150%><color=#888888>Version 6.1.2</color></size>
         - Updated for 1.14.0
         - Internal code 'cleanup'
@@ -63,7 +63,7 @@ namespace CustomFloorPlugin.UI
         /// The string displayed in the credits
         /// </summary>
         [UIValue("credits-text")]
-        public string Credits =>
+        public static string Credits =>
         @"<size=150%><color=#888888><align=center>Credits</align></color></size>
         boulders2000: This guy is just awesome
         Kyle 1413: Helped me rewrite the API

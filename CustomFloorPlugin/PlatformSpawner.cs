@@ -4,8 +4,6 @@ using System.Threading.Tasks;
 using CustomFloorPlugin.Configuration;
 using CustomFloorPlugin.Extensions;
 
-using IPA.Utilities.Async;
-
 using SiraUtil.Tools;
 
 using Zenject;
@@ -76,7 +74,6 @@ namespace CustomFloorPlugin
         private async void HandleTransistionDidFinish(ScenesTransitionSetupDataSO setupData, DiContainer container)
         {
             await _assetLoader.loadAssetsTask;
-            await _platformManager.allPlatformsTask;
             int platformIndex = 0;
             switch (setupData)
             {
@@ -173,30 +170,27 @@ namespace CustomFloorPlugin
         {
             await _assetLoader.loadAssetsTask;
             await _platformManager.allPlatformsTask;
-            await await UnityMainThreadTaskScheduler.Factory.StartNew(async () =>
+            _siraLog.Info("Switching to " + _platformManager.allPlatformsTask.Result[index].name);
+            DestroyCustomObjects();
+            _platformManager.activePlatform.gameObject.SetActive(false);
+            _platformManager.activePlatform = _platformManager.allPlatformsTask.Result[index];
+
+            if (_platformManager.activePlatform.isDescriptor)
             {
-                _siraLog.Info("Switching to " + _platformManager.allPlatformsTask.Result[index].name);
-                DestroyCustomObjects();
-                _platformManager.activePlatform.gameObject.SetActive(false);
-                _platformManager.activePlatform = _platformManager.allPlatformsTask.Result[index];
+                string platformPath = _platformManager.activePlatform.fullPath;
+                await _platformManager.CreatePlatformAsync(platformPath);
+                // Check if another platform has been spawned in the meantime and abort if that's the case
+                if (_platformManager.activePlatform.fullPath != platformPath)
+                    return;
+            }
 
-                if (_platformManager.activePlatform.isDescriptor)
-                {
-                    string platformPath = _platformManager.activePlatform.fullPath;
-                    await _platformManager.CreatePlatformAsync(platformPath);
-                    // Check if another platform has been spawned in the meantime and abort if that's the case
-                    if (_platformManager.activePlatform.fullPath != platformPath)
-                        return;
-                }
+            if (index != 0)
+            {
+                _platformManager.activePlatform.gameObject.SetActive(true);
+                SpawnCustomObjects();
+            }
 
-                if (index != 0)
-                {
-                    _platformManager.activePlatform.gameObject.SetActive(true);
-                    SpawnCustomObjects();
-                }
-
-                _environmentHider.HideObjectsForPlatform();
-            });
+            _environmentHider.HideObjectsForPlatform();
         }
 
         /// <summary>

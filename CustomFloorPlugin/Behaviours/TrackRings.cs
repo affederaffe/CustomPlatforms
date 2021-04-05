@@ -1,4 +1,6 @@
-﻿using IPA.Utilities;
+﻿using System.Linq;
+
+using IPA.Utilities;
 
 using SiraUtil.Tools;
 
@@ -77,9 +79,8 @@ namespace CustomFloorPlugin
 
         void INotifyPlatformEnabled.PlatformEnabled(DiContainer container)
         {
-            bool active = gameObject.activeSelf;
-            gameObject.SetActive(false);
             container.Inject(this);
+            gameObject.SetActive(false);
             _materialSwapper.ReplaceMaterials(trackLaneRingPrefab);
             TrackLaneRingsManager ringsManager = gameObject.AddComponent<TrackLaneRingsManager>();
             _platformManager.spawnedObjects.Add(ringsManager);
@@ -106,7 +107,7 @@ namespace CustomFloorPlugin
                 }
             }
 
-            gameObject.SetActive(active);
+            gameObject.SetActive(true);
 
             if (useRotationEffect)
             {
@@ -132,6 +133,7 @@ namespace CustomFloorPlugin
                 rotationEffectSpawner.SetField("_rotationFlexySpeed", rotationFlexySpeed);
                 rotationEffectSpawner.SetField("_trackLaneRingsRotationEffect", rotationEffect);
             }
+
             if (useStepEffect)
             {
                 TrackLaneRingsPositionStepEffectSpawner stepEffectSpawner = gameObject.AddComponent<TrackLaneRingsPositionStepEffectSpawner>();
@@ -144,17 +146,15 @@ namespace CustomFloorPlugin
                 stepEffectSpawner.SetField("_moveSpeed", moveSpeed);
             }
 
-            // If the GameObject was inactive at start, the rings won't be created, thus Rings could be null
-            if (ringsManager.Rings != null)
+            foreach (TrackLaneRing ring in ringsManager.Rings)
             {
-                foreach (TrackLaneRing ring in ringsManager.Rings)
-                {
-                    _platformManager.spawnedObjects.Add(ring.gameObject);
-                    foreach (INotifyPlatformEnabled notifyEnable in ring.GetComponentsInChildren<INotifyPlatformEnabled>(true))
-                    {
-                        notifyEnable.PlatformEnabled(container);
-                    }
-                }
+                _platformManager.spawnedObjects.Add(ring.gameObject);
+            }
+
+            foreach (INotifyPlatformEnabled notifyEnable in GetComponentsInChildren<INotifyPlatformEnabled>(true))
+            {
+                if ((Object)notifyEnable != this)
+                    notifyEnable.PlatformEnabled(container);
             }
         }
     }

@@ -81,6 +81,6 @@ namespace CustomFloorPlugin.UI
         }
 
         [UIValue("shuffle-platforms-hover-hint")]
-        public string ShufflePlatformsHoverHint => "Use a random platform\n singleplayer | menu only";
+        public static string ShufflePlatformsHoverHint => "Use a random platform\n singleplayer | menu only";
     }
 }

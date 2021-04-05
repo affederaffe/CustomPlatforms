@@ -4,6 +4,7 @@
 /// <summary>
 /// Legacy Platform.
 /// </summary>
+[System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1050:Declare types in namespaces", Justification = "Too late")]
 public class CustomPlatform : MonoBehaviour
 {
     /// <summary>

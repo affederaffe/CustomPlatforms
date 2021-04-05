@@ -111,7 +111,7 @@ namespace CustomFloorPlugin.Extensions
         private static byte[] BytesFromTexture2D(Texture2D texture, bool forceReadable)
         {
             if (texture == null || (!texture.isReadable && !forceReadable))
-                return new byte[0];
+                return System.Array.Empty<byte>();
 
             // Create readable texture by rendering onto a RenderTexture
             if (!texture.isReadable)
