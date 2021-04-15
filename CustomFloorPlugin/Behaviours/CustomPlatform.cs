@@ -10,7 +10,7 @@ namespace CustomFloorPlugin
         [Header("Platform Description")]
         public string platName = "MyCustomPlatform";
         public string platAuthor = "MyName";
-        public Sprite icon;
+        public Sprite? icon;
         [Space]
         [Header("Hide Environment")]
         public bool hideHighway = false;
@@ -25,9 +25,9 @@ namespace CustomFloorPlugin
         public bool hideRotatingLasers = false;
         public bool hideTrackLights = false;
 
-        public string platHash = "";
-        public string fullPath = "";
-        public bool isDescriptor = true;
+        [SerializeField] internal string platHash = "";
+        [SerializeField] internal string fullPath = "";
+        [SerializeField] internal bool isDescriptor = true;
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("CodeQuality", "IDE0051:Remove unused private members", Justification = "Called by Unity")]
         private void Awake()
@@ -35,9 +35,6 @@ namespace CustomFloorPlugin
             gameObject.SetActive(false);
         }
 
-        public int CompareTo(CustomPlatform platform)
-        {
-            return platName.CompareTo(platform.platName);
-        }
+        public int CompareTo(CustomPlatform platform) => platName.CompareTo(platform.platName);
     }
 }

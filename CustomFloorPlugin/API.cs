@@ -2,19 +2,15 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
+using System.Threading;
 
 using CustomFloorPlugin.Configuration;
 using CustomFloorPlugin.UI;
 
 using IPA.Loader;
+using IPA.Utilities.Async;
 
-using Newtonsoft.Json;
-
-using SiraUtil.Tools;
-
-using UnityEngine;
-using UnityEngine.Networking;
+using SiraUtil;
 
 using Zenject;
 
@@ -27,33 +23,26 @@ namespace CustomFloorPlugin
     /// </summary>
     internal class API : IInitializable, IDisposable
     {
-        private readonly SiraLog _siraLog;
+        private readonly WebClient _webClient;
         private readonly PluginConfig _config;
         private readonly PlatformManager _platformManager;
         private readonly PlatformSpawner _platformSpawner;
         private readonly PlatformListsView _platformListsView;
         private readonly FileSystemWatcher _fileSystemWatcher;
+        private bool _apiRequest;
 
-        private bool apiRequest;
-
-        public API(SiraLog siraLog,
+        public API(WebClient webClient,
                    PluginConfig config,
                    PlatformManager platformManager,
                    PlatformSpawner platformSpawner,
                    PlatformListsView platformListsView)
         {
-            _siraLog = siraLog;
+            _webClient = webClient;
             _config = config;
             _platformManager = platformManager;
             _platformSpawner = platformSpawner;
             _platformListsView = platformListsView;
             _fileSystemWatcher = new(_config.CustomPlatformsDirectory, "*.plat");
-        }
-
-        private enum SubscriptionType
-        {
-            Subscribe,
-            Unsubscribe
         }
 
         public void Initialize()
@@ -63,9 +52,9 @@ namespace CustomFloorPlugin
             _fileSystemWatcher.Deleted += OnFileDeleted;
             _fileSystemWatcher.EnableRaisingEvents = true;
             if (PluginManager.GetPlugin("SongCore") != null)
-                SubscribeToSongCoreEvent(SubscriptionType.Subscribe);
+                SubscribeToSongCoreEvent();
             if (PluginManager.GetPlugin("Cinema") != null)
-                SubscribeToCinemaEvent(SubscriptionType.Subscribe);
+                SubscribeToCinemaEvent();
         }
 
         public void Dispose()
@@ -75,9 +64,9 @@ namespace CustomFloorPlugin
             _fileSystemWatcher.Deleted -= OnFileDeleted;
             _fileSystemWatcher.Dispose();
             if (PluginManager.GetPlugin("SongCore") != null)
-                SubscribeToCinemaEvent(SubscriptionType.Unsubscribe);
+                UnsubscribeFromSongCoreEvent();
             if (PluginManager.GetPlugin("Cinema") != null)
-                SubscribeToCinemaEvent(SubscriptionType.Unsubscribe);
+                UnsubscribeFromCinemaEvent();
         }
 
         /// <summary>
@@ -85,17 +74,20 @@ namespace CustomFloorPlugin
         /// </summary>
         private async void OnFileChanged(object sender, FileSystemEventArgs e)
         {
-            if (_platformManager.platformFilePaths.TryGetValue(e.FullPath, out CustomPlatform platform))
+            await await UnityMainThreadTaskScheduler.Factory.StartNew(async () => 
             {
-                await _platformManager.allPlatformsTask;
-                bool isActivePlatform = _platformManager.activePlatform == platform;
-                await _platformManager.CreatePlatformAsync(e.FullPath);
-                if (isActivePlatform)
+                if (_platformManager.platformFilePaths.TryGetValue(e.FullPath, out CustomPlatform platform))
                 {
-                    int index = _platformManager.GetIndexForType(PlatformType.Active);
-                    await _platformSpawner.ChangeToPlatformAsync(index);
+                    bool wasActivePlatform = _platformManager.activePlatform == platform;
+                    CustomPlatform? newPlatform = await _platformManager.CreatePlatformAsync(e.FullPath);
+                    if (newPlatform == null) return;
+                    if (wasActivePlatform)
+                    {
+                        int index = _platformManager.loadPlatformsTask!.Result.IndexOf(newPlatform);
+                        await _platformSpawner.ChangeToPlatformAsync(index);
+                    }
                 }
-            }
+            });
         }
 
         /// <summary>
@@ -103,20 +95,18 @@ namespace CustomFloorPlugin
         /// </summary>
         private async void OnFileCreated(object sender, FileSystemEventArgs e)
         {
-            await _platformManager.allPlatformsTask;
-            CustomPlatform newPlatform = await _platformManager.CreatePlatformAsync(e.FullPath);
-            _platformManager.allPlatformsTask.Result.Add(newPlatform);
-            _platformListsView.AddCellForPlatform(newPlatform, true);
-            if (_platformManager.activePlatform == newPlatform)
+            await await UnityMainThreadTaskScheduler.Factory.StartNew(async () =>
             {
-                int index = _platformManager.allPlatformsTask.Result.IndexOf(newPlatform);
-                await _platformSpawner.ChangeToPlatformAsync(index);
-            }
-            if (apiRequest)
-            {
-                _platformManager.apiRequestedPlatform = newPlatform;
-                apiRequest = false;
-            }
+                CustomPlatform? newPlatform = await _platformManager.CreatePlatformAsync(e.FullPath);
+                if (newPlatform == null) return;
+                _platformManager.loadPlatformsTask!.Result.Add(newPlatform);
+                _platformListsView.AddCellForPlatform(newPlatform, true);
+                if (_apiRequest)
+                {
+                    _platformManager.apiRequestedPlatform = newPlatform;
+                    _apiRequest = false;
+                }
+            });
         }
 
         /// <summary>
@@ -124,49 +114,35 @@ namespace CustomFloorPlugin
         /// </summary>
         private async void OnFileDeleted(object sender, FileSystemEventArgs e)
         {
-            if (_platformManager.platformFilePaths.TryGetValue(e.FullPath, out CustomPlatform platform))
+            await await UnityMainThreadTaskScheduler.Factory.StartNew(async () =>
             {
-                await _platformManager.allPlatformsTask;
-                _platformListsView.RemoveCellForPlatformAsync(platform);
-                if (_platformManager.activePlatform == platform)
-                    await _platformSpawner.ChangeToPlatformAsync(0);
-                _platformManager.platformFilePaths.Remove(platform.fullPath);
-                _platformManager.allPlatformsTask.Result.Remove(platform);
-                GameObject.Destroy(platform.gameObject);
-            }
+                if (_platformManager.platformFilePaths.TryGetValue(e.FullPath, out CustomPlatform platform))
+                {
+                    await _platformManager.loadPlatformsTask!;
+                    _platformListsView.RemoveCellForPlatform(platform);
+                    if (_platformManager.activePlatform == platform)
+                        await _platformSpawner.ChangeToPlatformAsync(0);
+                    _platformManager.platformFilePaths.Remove(platform.fullPath);
+                    _platformManager.loadPlatformsTask.Result.Remove(platform);
+                    UnityEngine.Object.Destroy(platform.gameObject);
+                }
+            });
         }
 
-        /// <summary>
-        /// (Un-)Subscribes to SongCore's event, call this after checking if the plugin exists (optional dependency)
-        /// </summary>
-        private void SubscribeToSongCoreEvent(SubscriptionType subscriptionType)
-        {
-            if (subscriptionType == SubscriptionType.Subscribe)
-                SongCore.Plugin.CustomSongPlatformSelectionDidChange += HandleSongCoreEvent;
-            else
-                SongCore.Plugin.CustomSongPlatformSelectionDidChange -= HandleSongCoreEvent;
-        }
-
-        /// <summary>
-        /// (Un-)Subscribes to Cinema's event, call this after checking if the plugin exists (optional dependency)
-        /// </summary>
-        private void SubscribeToCinemaEvent(SubscriptionType subscriptionType)
-        {
-            if (subscriptionType == SubscriptionType.Subscribe)
-                BeatSaberCinema.Events.AllowCustomPlatform += HandleCinemaEvent;
-            else
-                BeatSaberCinema.Events.AllowCustomPlatform -= HandleCinemaEvent;
-        }
+        private void SubscribeToSongCoreEvent() => SongCore.Plugin.CustomSongPlatformSelectionDidChange += OnSongCoreEvent;
+        private void SubscribeToCinemaEvent() => BeatSaberCinema.Events.AllowCustomPlatform += OnCinemaEvent;
+        private void UnsubscribeFromSongCoreEvent() => SongCore.Plugin.CustomSongPlatformSelectionDidChange -= OnSongCoreEvent;
+        private void UnsubscribeFromCinemaEvent() => BeatSaberCinema.Events.AllowCustomPlatform -= OnCinemaEvent;
 
         /// <summary>
         /// Disable platform spawning as required by Cinema
         /// </summary>
-        private async void HandleCinemaEvent(bool allowPlatform)
+        private async void OnCinemaEvent(bool allowPlatform)
         {
             if (!allowPlatform)
             {
-                await _platformManager.allPlatformsTask;
-                _platformManager.apiRequestedPlatform = _platformManager.allPlatformsTask.Result[0];
+                await _platformManager.loadPlatformsTask!;
+                _platformManager.apiRequestedPlatform = _platformManager.loadPlatformsTask.Result[0];
             }
         }
 
@@ -176,8 +152,8 @@ namespace CustomFloorPlugin
         [Serializable]
         public class PlatformDownloadData
         {
-            public string name;
-            public string download;
+            public string? name;
+            public string? download;
         }
 
         /// <summary>
@@ -187,7 +163,7 @@ namespace CustomFloorPlugin
         /// <param name="name">The name of the requested platform</param>
         /// <param name="hash">The hash of the requested platform</param>
         /// <param name="level">The song the platform was requested for</param>
-        private async void HandleSongCoreEvent(bool usePlatform, string name, string hash, IPreviewBeatmapLevel level)
+        private async void OnSongCoreEvent(bool usePlatform, string name, string hash, IPreviewBeatmapLevel level)
         {
             // No platform is requested, abort
             if (!usePlatform)
@@ -199,8 +175,8 @@ namespace CustomFloorPlugin
 
             _platformManager.apiRequestedLevelId = level.levelID;
 
-            // Test if the requested platform is already downloaded
-            foreach (CustomPlatform platform in await _platformManager.allPlatformsTask)
+            // Check if the requested platform is already downloaded
+            foreach (CustomPlatform platform in await _platformManager.loadPlatformsTask!)
             {
                 if (platform.platHash == hash || platform.platName.StartsWith(name))
                 {
@@ -209,80 +185,22 @@ namespace CustomFloorPlugin
                 }
             }
 
-            if (hash != null)
-            {
-                PlatformDownloadData downloadData = await GetPlatformDownloadDataAsync("https://modelsaber.com/api/v2/get.php?type=platform&filter=hash:" + hash);
-                if (downloadData != null)
-                {
-                    byte[] platData = await DownloadPlatformAsync(downloadData);
-                    SavePlatformToFile(platData, downloadData.name);
-                }
-            }
+            string url = hash != null ? $"https://modelsaber.com/api/v2/get.php?type=platform&filter=hash:{hash}"
+                       : name != null ? $"https://modelsaber.com/api/v2/get.php?type=platform&filter=name:{name}"
+                       : throw new ArgumentNullException($"{nameof(hash)}, {nameof(name)}", "Invalid platform request");
 
-            else if (name != null)
+            WebResponse downloadDataWebResponse = await _webClient.GetAsync(url, CancellationToken.None);
+            if (downloadDataWebResponse.IsSuccessStatusCode)
             {
-                PlatformDownloadData downloadData = await GetPlatformDownloadDataAsync("https://modelsaber.com/api/v2/get.php?type=platform&filter=name:" + name);
-                if (downloadData != null)
+                PlatformDownloadData platformDownloadData = downloadDataWebResponse.ContentToJson<Dictionary<string, PlatformDownloadData>>().FirstOrDefault().Value;
+                WebResponse platDownloadWebResponse = await _webClient.GetAsync(platformDownloadData.download, CancellationToken.None);
+                if (platDownloadWebResponse.IsSuccessStatusCode)
                 {
-                    byte[] platData = await DownloadPlatformAsync(downloadData);
-                    SavePlatformToFile(platData, downloadData.name);
+                    byte[] platData = platDownloadWebResponse.ContentToBytes();
+                    _apiRequest = true;
+                    string destination = Path.Combine(_config.CustomPlatformsDirectory, platformDownloadData.name + ".plat");
+                    File.WriteAllBytes(destination, platData);
                 }
-            }
-        }
-
-        /// <summary>
-        /// Asynchronously downloads the <see cref="PlatformDownloadData"/> from modelsaber
-        /// </summary>
-        /// <param name="uri">The platforms download link</param>
-        private async Task<PlatformDownloadData> GetPlatformDownloadDataAsync(string uri)
-        {
-            TaskCompletionSource<PlatformDownloadData> taskSource = new();
-            using UnityWebRequest www = UnityWebRequest.Get(uri);
-            UnityWebRequestAsyncOperation webRequest = www.SendWebRequest();
-            webRequest.completed += delegate
-            {
-                if (www.isNetworkError || www.isHttpError)
-                {
-                    _siraLog.Error("Error downloading a platform: \n" + www.error);
-                    return;
-                }
-                Dictionary<string, PlatformDownloadData> downloadData = JsonConvert.DeserializeObject<Dictionary<string, PlatformDownloadData>>(www.downloadHandler.text);
-                taskSource.TrySetResult(downloadData.FirstOrDefault().Value);
-            };
-            return await taskSource.Task;
-        }
-
-        /// <summary>
-        /// Asynchronously downloads the .plat file from modelsaber and saves it in the CustomPlatforms directory
-        /// </summary>
-        /// <param name="data">The deserialized API response containing the download link to the .plat file</param>
-        private async Task<byte[]> DownloadPlatformAsync(PlatformDownloadData data)
-        {
-            TaskCompletionSource<byte[]> taskSource = new();
-            using UnityWebRequest www = UnityWebRequest.Get(data.download);
-            UnityWebRequestAsyncOperation webRequest = www.SendWebRequest();
-            webRequest.completed += delegate
-            {
-                if (www.isNetworkError || www.isHttpError)
-                {
-                    _siraLog.Error("Error downloading a platform: \n" + www.error);
-                    return;
-                }
-                taskSource.TrySetResult(www.downloadHandler.data);
-            };
-            return await taskSource.Task;
-        }
-
-        /// <summary>
-        /// Saves the downloaded <see cref="CustomPlatform"/>
-        /// </summary>
-        private void SavePlatformToFile(byte[] platformData, string name)
-        {
-            if (platformData != null)
-            {
-                apiRequest = true;
-                string destination = Path.Combine(_config.CustomPlatformsDirectory, name + ".plat");
-                File.WriteAllBytes(destination, platformData);
             }
         }
     }

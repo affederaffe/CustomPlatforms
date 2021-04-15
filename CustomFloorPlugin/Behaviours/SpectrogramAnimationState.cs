@@ -7,17 +7,17 @@ namespace CustomFloorPlugin
 {
     public class SpectrogramAnimationState : MonoBehaviour, INotifyPlatformEnabled
     {
-        public AnimationClip animationClip;
+        public AnimationClip? animationClip;
         [Header("0: Low Frequency, 63 High Frequency")]
         [Range(0, 63)]
         public int sample;
         [Header("Use the average of all samples, ignoring specified sample")]
         public bool averageAllSamples;
 
-        private PlatformManager _platformManager;
-        private BasicSpectrogramData _basicSpectrogramData;
+        private PlatformManager? _platformManager;
+        private BasicSpectrogramData? _basicSpectrogramData;
 
-        private Animation _animation;
+        private Animation? _animation;
 
         [Inject]
         public void Construct(PlatformManager platformManager, [InjectOptional] BasicSpectrogramData basicSpectrogramData)
@@ -40,7 +40,7 @@ namespace CustomFloorPlugin
                 if (_animation == null)
                 {
                     _animation = gameObject.AddComponent<Animation>();
-                    _platformManager.spawnedObjects.Add(_animation);
+                    _platformManager!.spawnedObjects.Add(_animation);
                     _animation.AddClip(animationClip, "clip");
                     _animation.Play("clip");
                     _animation["clip"].speed = 0;

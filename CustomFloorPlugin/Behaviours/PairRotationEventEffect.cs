@@ -13,15 +13,15 @@ namespace CustomFloorPlugin
         public SongEventType eventL;
         public SongEventType eventR;
         public SongEventType switchOverrideRandomValuesEvent;
-        public Transform tranformL;
-        public Transform tranformR;
+        public Transform? tranformL;
+        public Transform? tranformR;
         public Vector3 rotationVector;
         [Space]
         public bool useZPositionForAngleOffset;
         public float zPositionAngleOffsetScale = 1f;
 
-        private PlatformManager _platformManager;
-        private IBeatmapObjectCallbackController _beatmapObjectCallbackController;
+        private PlatformManager? _platformManager;
+        private IBeatmapObjectCallbackController? _beatmapObjectCallbackController;
 
         [Inject]
         public void Construct(PlatformManager platformManager, [InjectOptional] IBeatmapObjectCallbackController beatmapObjectCallbackController)
@@ -33,9 +33,9 @@ namespace CustomFloorPlugin
         void INotifyPlatformEnabled.PlatformEnabled(DiContainer container)
         {
             container.Inject(this);
-            if (_beatmapObjectCallbackController == null) return;
+            if (_beatmapObjectCallbackController == null || tranformL == null || tranformR == null) return;
             LightPairRotationEventEffect rotEffect = gameObject.AddComponent<LightPairRotationEventEffect>();
-            _platformManager.spawnedObjects.Add(rotEffect);
+            _platformManager!.spawnedObjects.Add(rotEffect);
             rotEffect.SetField("_beatmapObjectCallbackController", _beatmapObjectCallbackController);
             rotEffect.SetField("_eventL", (BeatmapEventType)eventL);
             rotEffect.SetField("_eventR", (BeatmapEventType)eventR);

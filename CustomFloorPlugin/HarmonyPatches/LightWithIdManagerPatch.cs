@@ -18,7 +18,7 @@ namespace CustomFloorPlugin.HarmonyPatches
 
         public static void Postfix(ref LightWithIdManager __instance)
         {
-            _lightsToUnregister.Invoke(__instance).Clear();
+            _lightsToUnregister(__instance).Clear();
         }
     }
 }

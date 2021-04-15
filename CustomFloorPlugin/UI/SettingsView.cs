@@ -21,8 +21,8 @@ namespace CustomFloorPlugin.UI
     [HotReload(RelativePathToLayout = "CustomFloorPlugin/Views/Settings.bsml")]
     internal class SettingsView : BSMLAutomaticViewController
     {
-        private PluginConfig _config;
-        private AssetLoader _assetLoader;
+        private PluginConfig? _config;
+        private AssetLoader? _assetLoader;
 
         [Inject]
         public void Construct(PluginConfig config, AssetLoader assetLoader)
@@ -38,8 +38,8 @@ namespace CustomFloorPlugin.UI
         [UIValue("always-show-feet")]
         public bool AlwaysShowFeet
         {
-            get => _config.AlwaysShowFeet;
-            set => _config.AlwaysShowFeet = value;
+            get => _config!.AlwaysShowFeet;
+            set => _config!.AlwaysShowFeet = value;
         }
 
         /// <summary>
@@ -49,12 +49,12 @@ namespace CustomFloorPlugin.UI
         [UIValue("show-heart")]
         public bool ShowHeart
         {
-            get => _config.ShowHeart;
+            get => _config!.ShowHeart;
             set
             {
-                _config.ShowHeart = value;
-                _assetLoader.heart.SetActive(value);
-                _assetLoader.heart.GetComponent<InstancedMaterialLightWithId>().ColorWasSet(Color.magenta);
+                _config!.ShowHeart = value;
+                _assetLoader!.heart!.SetActive(value);
+                _assetLoader!.heart!.GetComponent<InstancedMaterialLightWithId>().ColorWasSet(Color.magenta);
             }
         }
 
@@ -65,8 +65,8 @@ namespace CustomFloorPlugin.UI
         [UIValue("show-in-menu")]
         public bool ShowInMenu
         {
-            get => _config.ShowInMenu;
-            set => _config.ShowInMenu = value;
+            get => _config!.ShowInMenu;
+            set => _config!.ShowInMenu = value;
         }
 
         /// <summary>
@@ -76,8 +76,8 @@ namespace CustomFloorPlugin.UI
         [UIValue("shuffle-platforms")]
         public bool ShufflePlatforms
         {
-            get => _config.ShufflePlatforms;
-            set => _config.ShufflePlatforms = value;
+            get => _config!.ShufflePlatforms;
+            set => _config!.ShufflePlatforms = value;
         }
 
         [UIValue("shuffle-platforms-hover-hint")]

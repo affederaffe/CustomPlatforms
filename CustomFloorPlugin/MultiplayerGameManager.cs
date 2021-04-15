@@ -1,5 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
+
+using IPA.Utilities.Async;
 
 using UnityEngine;
 
@@ -8,7 +11,7 @@ using Zenject;
 
 namespace CustomFloorPlugin
 {
-    internal class MultiplayerGameHandler : IInitializable, IDisposable
+    internal class MultiplayerGameManager : IInitializable, IDisposable
     {
         private readonly AssetLoader _assetLoader;
         private readonly PlatformManager _platformManager;
@@ -16,7 +19,7 @@ namespace CustomFloorPlugin
         private readonly MultiplayerPlayersManager _multiplayerPlayersManager;
         private readonly DiContainer _container;
 
-        public MultiplayerGameHandler(AssetLoader assetLoader,
+        public MultiplayerGameManager(AssetLoader assetLoader,
                                      PlatformManager platformManager,
                                      PlatformSpawner platformSpawner,
                                      MultiplayerPlayersManager multiplayerPlayersManager,
@@ -34,18 +37,21 @@ namespace CustomFloorPlugin
             int platformIndex = _platformManager.GetIndexForType(PlatformType.Multiplayer);
             if (platformIndex != 0)
             {
-                _multiplayerPlayersManager.playerDidFinishEvent += HandlePlayerDidFinish;
-                await SpawnLightEffects();
+                _multiplayerPlayersManager.playerDidFinishEvent += OnPlayerDidFinish;
+                GameObject lightEffects = await SpawnLightEffects();
+                await Coroutines.AsTask(WaitForEndOfFrameCoroutine());
+                static IEnumerator<WaitForEndOfFrame> WaitForEndOfFrameCoroutine() { yield return new WaitForEndOfFrame(); }
                 await _platformSpawner.SetContainerAndShowAsync(platformIndex, _container);
+                _platformManager.spawnedObjects.Add(lightEffects);
             }
         }
 
         public void Dispose()
         {
-            _multiplayerPlayersManager.playerDidFinishEvent -= HandlePlayerDidFinish;
+            _multiplayerPlayersManager.playerDidFinishEvent -= OnPlayerDidFinish;
         }
 
-        private async void HandlePlayerDidFinish(LevelCompletionResults results)
+        private async void OnPlayerDidFinish(LevelCompletionResults results)
         {
             await _platformSpawner.ChangeToPlatformAsync(0);
         }
@@ -53,12 +59,12 @@ namespace CustomFloorPlugin
         /// <summary>
         /// Instantiates the light effects prefab for multiplayer levels
         /// </summary>
-        private async Task SpawnLightEffects()
+        private async Task<GameObject> SpawnLightEffects()
         {
-            await _assetLoader.loadAssetsTask;
+            await _assetLoader.loadAssetsTask!;
             GameObject lightEffects = _container.InstantiatePrefab(_assetLoader.lightEffects);
-            _platformManager.spawnedObjects.Add(lightEffects);
             lightEffects.SetActive(true);
+            return lightEffects;
         }
     }
 }

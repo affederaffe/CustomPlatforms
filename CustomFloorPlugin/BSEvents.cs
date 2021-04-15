@@ -21,6 +21,12 @@ namespace CustomFloorPlugin
         private readonly IBeatmapObjectCallbackController _beatmapObjectCallbackController;
         private readonly IDifficultyBeatmap _difficultyBeatmap;
         private float _lastNoteTime;
+        private int _allNotesCount;
+        private int _goodCutCount;
+        private int _badCutCount;
+        private int _missCount;
+        private int _cuttableNotes;
+        private int _highScore;
 
         public BSEvents(BeatmapObjectManager beatmapObjectManager,
                         GameEnergyCounter gameEnergyCounter,
@@ -42,35 +48,28 @@ namespace CustomFloorPlugin
             _lastNoteTime = lastNoteTime;
         }
 
-        public event Action<BeatmapEventData> BeatmapEventDidTriggerEvent;
-        public event Action GameSceneLoadedEvent;
-        public event Action LevelFinishedEvent;
-        public event Action LevelFailedEvent;
-        public event Action NewHighscore;
-        public event Action<int> NoteWasCutEvent;
-        public event Action NoteWasMissedEvent;
-        public event Action ComboDidBreakEvent;
-        public event Action<int> GoodCutCountDidChangeEvent;
-        public event Action<int> BadCutCountDidChangeEvent;
-        public event Action<int> MissCountDidChangeEvent;
-        public event Action<int, int> AllNotesCountDidChangeEvent;
-        public event Action MultiplierDidIncreaseEvent;
-        public event Action<int> ComboDidChangeEvent;
-        public event Action SabersStartCollideEvent;
-        public event Action SabersEndCollideEvent;
-        public event Action<int, int> ScoreDidChangeEvent;
-
-        private int allNotesCount = 0;
-        private int goodCutCount = 0;
-        private int badCutCount = 0;
-        private int missCount = 0;
-        private int cuttableNotes = 0;
-        private int highScore = 0;
+        public event Action<BeatmapEventData>? BeatmapEventDidTriggerEvent;
+        public event Action? GameSceneLoadedEvent;
+        public event Action? LevelFinishedEvent;
+        public event Action? LevelFailedEvent;
+        public event Action? NewHighscore;
+        public event Action<int>? NoteWasCutEvent;
+        public event Action? NoteWasMissedEvent;
+        public event Action? ComboDidBreakEvent;
+        public event Action<int>? GoodCutCountDidChangeEvent;
+        public event Action<int>? BadCutCountDidChangeEvent;
+        public event Action<int>? MissCountDidChangeEvent;
+        public event Action<int, int>? AllNotesCountDidChangeEvent;
+        public event Action? MultiplierDidIncreaseEvent;
+        public event Action<int>? ComboDidChangeEvent;
+        public event Action? SabersStartCollideEvent;
+        public event Action? SabersEndCollideEvent;
+        public event Action<int, int>? ScoreDidChangeEvent;
 
         public void Initialize()
         {
-            cuttableNotes = _difficultyBeatmap.beatmapData.cuttableNotesType - 1;
-            highScore = _playerDataModel.playerData.GetPlayerLevelStatsData(_difficultyBeatmap).highScore;
+            _cuttableNotes = _difficultyBeatmap.beatmapData.cuttableNotesType - 1;
+            _highScore = _playerDataModel.playerData.GetPlayerLevelStatsData(_difficultyBeatmap).highScore;
             _beatmapObjectCallbackController.beatmapEventDidTriggerEvent += BeatmapEventDidTrigger;
             _beatmapObjectManager.noteWasCutEvent += new BeatmapObjectManager.NoteWasCutDelegate(NoteWasCut);
             _beatmapObjectManager.noteWasMissedEvent += NoteWasMissed;
@@ -109,22 +108,22 @@ namespace CustomFloorPlugin
             if (noteController.noteData.colorType == ColorType.None || noteController.noteData.beatmapObjectType != BeatmapObjectType.Note)
                 return;
 
-            AllNotesCountDidChangeEvent?.Invoke(allNotesCount++, cuttableNotes);
+            AllNotesCountDidChangeEvent?.Invoke(_allNotesCount++, _cuttableNotes);
             if (noteCutInfo.allIsOK)
             {
                 NoteWasCutEvent?.Invoke((int)noteCutInfo.saberType);
-                GoodCutCountDidChangeEvent?.Invoke(goodCutCount++);
+                GoodCutCountDidChangeEvent?.Invoke(_goodCutCount++);
             }
             else
             {
-                BadCutCountDidChangeEvent?.Invoke(badCutCount++);
+                BadCutCountDidChangeEvent?.Invoke(_badCutCount++);
             }
             if (Mathf.Approximately(noteController.noteData.time, _lastNoteTime))
             {
                 _lastNoteTime = 0f;
                 LevelFinishedEvent?.Invoke();
                 LevelCompletionResults results = _prepareLevelCompletionResults.FillLevelCompletionResults(LevelCompletionResults.LevelEndStateType.Cleared, LevelCompletionResults.LevelEndAction.None);
-                if (results.modifiedScore > highScore)
+                if (results.modifiedScore > _highScore)
                     NewHighscore?.Invoke();
             }
         }
@@ -135,14 +134,14 @@ namespace CustomFloorPlugin
                 return;
 
             NoteWasMissedEvent?.Invoke();
-            AllNotesCountDidChangeEvent?.Invoke(allNotesCount++, cuttableNotes);
-            MissCountDidChangeEvent?.Invoke(missCount++);
+            AllNotesCountDidChangeEvent?.Invoke(_allNotesCount++, _cuttableNotes);
+            MissCountDidChangeEvent?.Invoke(_missCount++);
             if (Mathf.Approximately(noteController.noteData.time, _lastNoteTime))
             {
                 _lastNoteTime = 0f;
                 LevelFinishedEvent?.Invoke();
                 LevelCompletionResults results = _prepareLevelCompletionResults.FillLevelCompletionResults(LevelCompletionResults.LevelEndStateType.Cleared, LevelCompletionResults.LevelEndAction.None);
-                if (results.modifiedScore > highScore)
+                if (results.modifiedScore > _highScore)
                     NewHighscore?.Invoke();
             }
         }

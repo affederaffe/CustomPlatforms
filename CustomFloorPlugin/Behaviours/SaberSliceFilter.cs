@@ -14,7 +14,7 @@ namespace CustomFloorPlugin
         }
 
         public SaberType saberType;
-        public UnityEvent SaberSlice;
+        public UnityEvent? SaberSlice;
 
         void INotifyPlatformEnabled.PlatformEnabled(DiContainer container)
         {
@@ -29,7 +29,7 @@ namespace CustomFloorPlugin
         private void OnSlice(int saber)
         {
             if ((SaberType)saber == saberType)
-                SaberSlice.Invoke();
+                SaberSlice!.Invoke();
         }
     }
 }

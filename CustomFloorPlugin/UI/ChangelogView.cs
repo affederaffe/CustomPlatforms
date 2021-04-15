@@ -16,7 +16,7 @@ namespace CustomFloorPlugin.UI
     internal class ChangelogView : BSMLAutomaticViewController
     {
         [UIComponent("credits-modal")]
-        private readonly ModalView creditsModal = null;
+        private readonly ModalView? creditsModal = null;
 
         /// <summary>
         /// The string displayed in the changelog   
@@ -29,6 +29,7 @@ namespace CustomFloorPlugin.UI
         - Added 'Shuffle Platforms' option
          - Added manual config option to change your CustomPlatforms directory
         - New feature: nested components
+        - Fixed unhiding objects already hidden by Chroma
 
   <size=150%><color=#888888>Version 6.1.1</color></size>
         - Security fix: removed embedded CustomScripts
@@ -75,7 +76,7 @@ namespace CustomFloorPlugin.UI
         protected override void DidDeactivate(bool removedFromHierarchy, bool screenSystemDisabling)
         {
             base.DidDeactivate(removedFromHierarchy, screenSystemDisabling);
-            creditsModal.gameObject.SetActive(false);
+            creditsModal!.gameObject.SetActive(false);
         }
     }
 }

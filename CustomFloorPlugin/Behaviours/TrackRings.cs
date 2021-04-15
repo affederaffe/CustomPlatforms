@@ -1,6 +1,4 @@
-﻿using System.Linq;
-
-using IPA.Utilities;
+﻿using IPA.Utilities;
 
 using SiraUtil.Tools;
 
@@ -15,7 +13,7 @@ namespace CustomFloorPlugin
     {
         [Space]
         [Header("Rings")]
-        public GameObject trackLaneRingPrefab;
+        public GameObject? trackLaneRingPrefab;
         public int ringCount = 10;
         public float ringPositionStep = 2f;
         [Space]
@@ -40,10 +38,10 @@ namespace CustomFloorPlugin
         public float maxPositionStep = 2f;
         public float moveSpeed = 1f;
 
-        private SiraLog _siraLog;
-        private MaterialSwapper _materialSwapper;
-        private PlatformManager _platformManager;
-        private IBeatmapObjectCallbackController _beatmapObjectCallbackController;
+        private SiraLog? _siraLog;
+        private MaterialSwapper? _materialSwapper;
+        private PlatformManager? _platformManager;
+        private IBeatmapObjectCallbackController? _beatmapObjectCallbackController;
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Code Quality", "IDE0051:Remove unused private members", Justification = "Called by Unity")]
         private void OnDrawGizmos()
@@ -79,11 +77,12 @@ namespace CustomFloorPlugin
 
         void INotifyPlatformEnabled.PlatformEnabled(DiContainer container)
         {
+            if (trackLaneRingPrefab == null) return;
             container.Inject(this);
             gameObject.SetActive(false);
-            _materialSwapper.ReplaceMaterials(trackLaneRingPrefab);
+            _materialSwapper!.ReplaceMaterials(trackLaneRingPrefab);
             TrackLaneRingsManager ringsManager = gameObject.AddComponent<TrackLaneRingsManager>();
-            _platformManager.spawnedObjects.Add(ringsManager);
+            _platformManager!.spawnedObjects.Add(ringsManager);
 
             TrackLaneRing trackRing = trackLaneRingPrefab.AddComponent<TrackLaneRing>();
             _platformManager.spawnedObjects.Add(trackRing);
@@ -103,7 +102,7 @@ namespace CustomFloorPlugin
                     {
                         DestroyImmediate(tubeLight.transform.GetChild(0).gameObject);
                     }
-                    _siraLog.Warning("Using GameObjects as rings is deprecated. Please use Prefabs instead and re-export your Platform!");
+                    _siraLog!.Warning("Using GameObjects as rings is deprecated. Please use Prefabs instead and re-export your Platform!");
                 }
             }
 
@@ -124,7 +123,6 @@ namespace CustomFloorPlugin
                 TrackLaneRingsRotationEffectSpawner rotationEffectSpawner = gameObject.AddComponent<TrackLaneRingsRotationEffectSpawner>();
                 _platformManager.spawnedObjects.Add(rotationEffectSpawner);
                 rotationEffectSpawner.SetField("_beatmapObjectCallbackController", _beatmapObjectCallbackController);
-
                 rotationEffectSpawner.SetField("_beatmapEventType", (BeatmapEventType)rotationSongEventType);
                 rotationEffectSpawner.SetField("_rotationStep", rotationStep);
                 int timePerRing2 = rotationPropagationSpeed / ringCount;

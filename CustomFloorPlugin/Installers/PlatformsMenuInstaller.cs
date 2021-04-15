@@ -14,10 +14,10 @@ namespace CustomFloorPlugin.Installers
             Container.Bind<PlatformListsView>().FromNewComponentAsViewController().AsSingle();
             Container.Bind<ChangelogView>().FromNewComponentAsViewController().AsSingle();
             Container.Bind<SettingsView>().FromNewComponentAsViewController().AsSingle();
-            Container.Bind<PlatformListFlowCoordinator>().FromNewComponentOnNewGameObject().AsSingle();
+            Container.Bind<PlatformsFlowCoordinator>().FromNewComponentOnNewGameObject().AsSingle();
             Container.BindInterfacesTo<MenuButtonManager>().AsSingle();
             Container.BindInterfacesTo<API>().AsSingle();
-            Container.BindInterfacesTo<MultiplayerLobbyHandler>().AsSingle();
+            Container.BindInterfacesTo<MenuEnvironmentManager>().AsSingle();
         }
     }
 }

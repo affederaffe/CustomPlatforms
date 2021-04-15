@@ -8,7 +8,7 @@ namespace CustomFloorPlugin
     public class ComboReachedEvent : EventFilterBehaviour, INotifyPlatformEnabled, INotifyPlatformDisabled
     {
         public int ComboTarget = 50;
-        public UnityEvent NthComboReached;
+        public UnityEvent? NthComboReached;
 
         void INotifyPlatformEnabled.PlatformEnabled(DiContainer container)
         {
@@ -24,7 +24,7 @@ namespace CustomFloorPlugin
         {
             if (combo == ComboTarget)
             {
-                NthComboReached.Invoke();
+                NthComboReached!.Invoke();
             }
         }
     }

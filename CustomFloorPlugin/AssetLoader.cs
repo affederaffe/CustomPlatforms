@@ -2,7 +2,6 @@
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
-using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 
@@ -28,18 +27,12 @@ namespace CustomFloorPlugin
     /// </summary>
     public class AssetLoader : MonoBehaviour
     {
-        private SiraLog _siraLog;
-
-        [Inject]
-        public void Construct(SiraLog siraLog)
-        {
-            _siraLog = siraLog;
-        }
+        private SiraLog? _siraLog;
 
         /// <summary>
         /// The Task responsible for asset loading
         /// </summary>
-        internal Task loadAssetsTask;
+        internal Task? loadAssetsTask;
 
         /// <summary>
         /// Acts as a prefab for custom light sources that require meshes...<br/>
@@ -48,38 +41,53 @@ namespace CustomFloorPlugin
         /// Also:<br/>
         /// We love Beat Saber
         /// </summary>
-        internal GameObject heart;
+        internal GameObject? heart;
 
         /// <summary>
         /// The Light Source used for non-mesh lights
         /// </summary>
-        internal GameObject lightSource;
+        internal GameObject? lightSource;
 
         /// <summary>
         /// Used as a prefab for light effects in multiplayer
         /// </summary>
-        internal GameObject lightEffects;
+        internal GameObject? lightEffects;
 
         /// <summary>
         /// Used as a platform in platform preview if <see cref="CustomPlatform.hideDefaultPlatform"/> is false
         /// </summary>
-        internal GameObject playersPlace;
+        internal GameObject? playersPlace;
 
         /// <summary>
         /// The cover for the default platform
         /// </summary>
-        internal Sprite defaultPlatformCover;
+        internal Sprite? defaultPlatformCover;
 
         /// <summary>
         /// The cover used for all platforms normally missing one
         /// </summary>
-        internal Sprite fallbackCover;
+        internal Sprite? fallbackCover;
 
         /// <summary>
-        /// Reduces Resources calls
+        /// Transparent glow material for the <see cref="MaterialSwapper"/>
         /// </summary>
-        internal Material[] AllMaterials => _AllMaterials ??= Resources.FindObjectsOfTypeAll<Material>();
-        private Material[] _AllMaterials;
+        internal Material? transparentGlowMaterial;
+
+        /// <summary>
+        /// Opaque glow material for the <see cref="MaterialSwapper"/>
+        /// </summary>
+        internal Material? opaqueGlowMaterial;
+
+        /// <summary>
+        /// Simple dark environment material for the <see cref="MaterialSwapper"/>
+        /// </summary>
+        internal Material? darkEnvMaterial;
+
+        [Inject]
+        public void Construct(SiraLog siraLog)
+        {
+            _siraLog = siraLog;
+        }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("CodeQuality", "IDE0051:Remove unused private members", Justification = "Called by Unity")]
         private void Start()
@@ -92,8 +100,8 @@ namespace CustomFloorPlugin
         private void LoadSprites()
         {
             Assembly executingAssembly = Assembly.GetExecutingAssembly();
-            defaultPlatformCover = executingAssembly.GetManifestResourceStream("CustomFloorPlugin.Assets.LvlInsaneCover.png").ReadSprite();
-            fallbackCover = executingAssembly.GetManifestResourceStream("CustomFloorPlugin.Assets.FeetIcon.png").ReadSprite();
+            defaultPlatformCover = executingAssembly.GetManifestResourceStream("CustomFloorPlugin.Assets.LvlInsaneCover.png").ReadPNGToSprite();
+            fallbackCover = executingAssembly.GetManifestResourceStream("CustomFloorPlugin.Assets.FeetIcon.png").ReadPNGToSprite();
         }
 
         /// <summary>
@@ -137,43 +145,6 @@ namespace CustomFloorPlugin
             DestroyImmediate(playersPlace.GetComponentInChildren<SaberBurnMarkArea>().gameObject);
             DestroyImmediate(playersPlace.GetComponentInChildren<SaberBurnMarkSparkles>().gameObject);
 
-            Mesh mesh = await CreateMeshAsync();
-
-            heart.GetComponent<MeshFilter>().mesh = mesh;
-            heart.transform.position = new Vector3(-8f, 25f, 26f);
-            heart.transform.rotation = Quaternion.Euler(-100f, 90f, 90f);
-            heart.transform.localScale = new Vector3(25f, 25f, 25f);
-            heart.layer = 13;
-
-            //--- Temporary fix for mesh lights until Beat Games fixes glow (I have a feeling that this won't be 'temporary') ---\\
-            Material envGlowMat = AllMaterials.First(x => x.name == "EnvLightOpaque");
-            Material customGlowMat = new(envGlowMat);
-            customGlowMat.DisableKeyword("ENABLE_HEIGHT_FOG");
-            customGlowMat.name = "<3";
-            customGlowMat.color = Color.cyan;
-            heart.GetComponent<Renderer>().material = customGlowMat;
-            heart.GetComponent<MaterialPropertyBlockColorSetter>().SetField("_property", "_Color");
-            lightSource.GetComponentInChildren<ParametricBoxController>().GetComponent<Renderer>().material = customGlowMat;
-
-            InstancedMaterialLightWithId materialLightWithId = heart.GetComponent<InstancedMaterialLightWithId>();
-            materialLightWithId.SetField("_minAlpha", 0f);
-            materialLightWithId.SetField("_intensity", 1.75f);
-            materialLightWithId.ColorWasSet(Color.magenta);
-
-            TubeBloomPrePassLight tubeBloomLight = lightSource.GetComponent<TubeBloomPrePassLight>();
-            tubeBloomLight.SetField("_maxAlpha", 0.1f);
-            tubeBloomLight.SetField("_bloomFogIntensityMultiplier", 0.125f);
-
-            sw.Stop();
-            _siraLog.Info($"Loaded Assets in {sw.ElapsedMilliseconds}ms");
-            _siraLog = null;
-        }
-
-        /// <summary>
-        /// Asynchroniously creates the <see cref="Mesh"/> for the heart
-        /// </summary>
-        private static async Task<Mesh> CreateMeshAsync()
-        {
             using Stream manifestResourceStream = Assembly.GetExecutingAssembly().GetManifestResourceStream("CustomFloorPlugin.Assets.heart.mesh");
             using StreamReader streamReader = new(manifestResourceStream);
 
@@ -199,11 +170,44 @@ namespace CustomFloorPlugin
                 triangles.Add(int.Parse(s_int, NumberFormatInfo.InvariantInfo));
             }
 
-            return new Mesh()
+            Mesh mesh = new()
             {
                 vertices = vertices.ToArray(),
                 triangles = triangles.ToArray()
             };
+
+            heart.GetComponent<MeshFilter>().mesh = mesh;
+            heart.transform.position = new Vector3(-8f, 25f, 26f);
+            heart.transform.rotation = Quaternion.Euler(-100f, 90f, 90f);
+            heart.transform.localScale = new Vector3(25f, 25f, 25f);
+            heart.layer = 13;
+
+
+            Renderer buildingsRenderer = root.transform.Find("GreenDayCity/BackgroundBuildings").GetComponent<Renderer>();
+            darkEnvMaterial = buildingsRenderer.material;
+            Renderer rotLightRenderer = root.transform.Find("RotatingLasersPair/BaseL/Laser/BoxLight").GetComponent<Renderer>();
+            transparentGlowMaterial = rotLightRenderer.material;
+            Renderer lightSourceRenderer = lightSource.GetComponentInChildren<ParametricBoxController>().GetComponent<Renderer>();
+            opaqueGlowMaterial = new(lightSourceRenderer.material);
+            opaqueGlowMaterial.DisableKeyword("ENABLE_HEIGHT_FOG");
+            opaqueGlowMaterial.name = "PlatformsCustomGlow";
+            opaqueGlowMaterial.color = Color.cyan;
+
+            lightSourceRenderer.material = opaqueGlowMaterial;
+            heart.GetComponent<Renderer>().material = opaqueGlowMaterial;
+            heart.GetComponent<MaterialPropertyBlockColorSetter>().SetField("_property", "_Color");
+
+            InstancedMaterialLightWithId materialLightWithId = heart.GetComponent<InstancedMaterialLightWithId>();
+            materialLightWithId.SetField("_minAlpha", 0f);
+            materialLightWithId.SetField("_intensity", 1.825f);
+            materialLightWithId.ColorWasSet(Color.magenta);
+
+            TubeBloomPrePassLight tubeBloomLight = lightSource.GetComponent<TubeBloomPrePassLight>();
+            tubeBloomLight.SetField("_maxAlpha", 0.1f);
+            tubeBloomLight.bloomFogIntensityMultiplier = 0.125f;
+
+            sw.Stop();
+            _siraLog!.Info($"Loaded Assets in {sw.ElapsedMilliseconds}ms");
         }
 
         /// <summary>

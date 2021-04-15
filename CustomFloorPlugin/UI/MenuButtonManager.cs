@@ -14,10 +14,10 @@ namespace CustomFloorPlugin.UI
     internal class MenuButtonManager : IInitializable, IDisposable
     {
         private readonly MenuButton _menuButton;
-        private readonly PlatformListFlowCoordinator _platformListFlowCoordinator;
+        private readonly PlatformsFlowCoordinator _platformListFlowCoordinator;
         private readonly MainFlowCoordinator _mainFlowCoordinator;
 
-        public MenuButtonManager(PlatformListFlowCoordinator platformListFlowCoordinator, MainFlowCoordinator mainFlowCoordinator)
+        public MenuButtonManager(PlatformsFlowCoordinator platformListFlowCoordinator, MainFlowCoordinator mainFlowCoordinator)
         {
             _platformListFlowCoordinator = platformListFlowCoordinator;
             _mainFlowCoordinator = mainFlowCoordinator;

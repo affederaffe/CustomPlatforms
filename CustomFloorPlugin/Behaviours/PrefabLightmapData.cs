@@ -8,11 +8,11 @@ namespace CustomFloorPlugin
     public class PrefabLightmapData : MonoBehaviour
     {
         [SerializeField]
-        public Renderer[] m_Renderers;
+        public Renderer[]? m_Renderers;
         [SerializeField]
-        public Vector4[] m_LightmapOffsetScales;
+        public Vector4[]? m_LightmapOffsetScales;
         [SerializeField]
-        public Texture2D[] m_Lightmaps;
+        public Texture2D[]? m_Lightmaps;
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Code Quality", "IDE0051:Remove unused private members", Justification = "Called by Unity")]
         private void Start()

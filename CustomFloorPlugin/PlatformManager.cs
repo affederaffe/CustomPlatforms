@@ -8,8 +8,6 @@ using System.Threading.Tasks;
 using CustomFloorPlugin.Configuration;
 using CustomFloorPlugin.Extensions;
 
-using IPA.Utilities;
-
 using SiraUtil.Tools;
 
 using UnityEngine;
@@ -24,67 +22,51 @@ namespace CustomFloorPlugin
     /// </summary>
     public class PlatformManager : MonoBehaviour
     {
-        private SiraLog _siraLog;
-        private PluginConfig _config;
-        private AssetLoader _assetLoader;
-        private PlatformLoader _platformLoader;
-
-        [Inject]
-        public void Construct(SiraLog siraLog,
-                              PluginConfig config,
-                              AssetLoader assetLoader,
-                              PlatformLoader platformLoader)
-        {
-            _siraLog = siraLog;
-            _config = config;
-            _assetLoader = assetLoader;
-            _platformLoader = platformLoader;
-        }
+        private SiraLog? _siraLog;
+        private PluginConfig? _config;
+        private AssetLoader? _assetLoader;
+        private PlatformLoader? _platformLoader;
+        private string? _cacheFilePath;
 
         /// <summary>
         /// The Task responsible for platform loading
         /// </summary>
-        internal Task<List<CustomPlatform>> allPlatformsTask;
+        internal Task<List<CustomPlatform>>? loadPlatformsTask;
 
         /// <summary>
         /// Keeps track of the currently selected <see cref="PlatformType"/>
         /// </summary>
-        internal PlatformType currentPlatformType = PlatformType.Singleplayer;
+        internal PlatformType currentPlatformType;
 
         /// <summary>
         /// Keeps track of the currently selected <see cref="CustomPlatform"/>
         /// </summary>
-        internal CustomPlatform currentSingleplayerPlatform;
+        internal CustomPlatform? currentSingleplayerPlatform;
 
         /// <summary>
         /// Keeps track of the currently selected <see cref="CustomPlatform"/>
         /// </summary>
-        internal CustomPlatform currentMultiplayerPlatform;
+        internal CustomPlatform? currentMultiplayerPlatform;
 
         /// <summary>
         /// Keeps track of the currently selected <see cref="CustomPlatform"/>
         /// </summary>
-        internal CustomPlatform currentA360Platform;
+        internal CustomPlatform? currentA360Platform;
 
         /// <summary>
         /// Keeps track of the currently active <see cref="CustomPlatform"/>
         /// </summary>
-        internal CustomPlatform activePlatform;
+        internal CustomPlatform? activePlatform;
 
         /// <summary>
         /// Stores the index of an API requested <see cref="CustomPlatform"/>
         /// </summary>
-        internal CustomPlatform apiRequestedPlatform;
+        internal CustomPlatform? apiRequestedPlatform;
 
         /// <summary>
-        /// Stores the BeatmapLevel the platform was requested for
+        /// Stores the BeatmapLevelId the platform was requested for
         /// </summary>
-        internal string apiRequestedLevelId;
-
-        /// <summary>
-        /// The path used to cache platform descriptors for faster loading
-        /// </summary>
-        internal readonly string customPlatformsInfoCacheFilePath = Path.Combine(UnityGame.UserDataPath, "Custom PlatformsInfoCache.dat");
+        internal string? apiRequestedLevelId;
 
         /// <summary>
         /// Keeps track of all spawned custom objects, whichs lifetime ends on any scene transition
@@ -101,13 +83,26 @@ namespace CustomFloorPlugin
         /// </summary>
         private const byte kCacheFileVersion = 1;
 
+        [Inject]
+        public void Construct(SiraLog siraLog,
+                              PluginConfig config,
+                              AssetLoader assetLoader,
+                              PlatformLoader platformLoader)
+        {
+            _siraLog = siraLog;
+            _config = config;
+            _assetLoader = assetLoader;
+            _platformLoader = platformLoader;
+            _cacheFilePath = Path.Combine(_config.CustomPlatformsDirectory, "cache.dat");
+        }
+
         /// <summary>
         /// Initializes the <see cref="PlatformManager"/>
         /// </summary>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Code Quality", "IDE0051:Remove unused private members", Justification = "Called by Unity")]
         private void Start()
         {
-            allPlatformsTask = LoadPlatformsAsync();
+            loadPlatformsTask = LoadPlatformsAsync();
         }
 
         /// <summary>
@@ -127,7 +122,7 @@ namespace CustomFloorPlugin
             Stopwatch sw = new();
             sw.Start();
 
-            if (!Directory.Exists(_config.CustomPlatformsDirectory))
+            if (!Directory.Exists(_config!.CustomPlatformsDirectory))
                 Directory.CreateDirectory(_config.CustomPlatformsDirectory);
 
             IEnumerable<string> bundlePaths = Directory.EnumerateFiles(_config.CustomPlatformsDirectory, "*.plat");
@@ -136,24 +131,22 @@ namespace CustomFloorPlugin
             CustomPlatform defaultPlatform = CreateDefaultPlatform();
             platforms.Add(defaultPlatform);
 
-            if (File.Exists(customPlatformsInfoCacheFilePath))
+            if (File.Exists(_cacheFilePath))
             {
-                foreach (CustomPlatform platform in EnumeratePlatformDescriptorsFromFile())
-                {
-                    platforms.Add(platform);
-                }
+                platforms.AddRange(EnumeratePlatformDescriptorsFromFile());
                 bundlePaths = bundlePaths.Except(platforms.Select(x => x.fullPath));
             }
 
             // Load all remaining platforms, or all if no cache file is found
             foreach (string path in bundlePaths)
             {
-                CustomPlatform platform = await CreatePlatformAsync(path);
-                platforms.Add(platform);
+                CustomPlatform? platform = await CreatePlatformAsync(path);
+                if (platform != null)
+                    platforms.Add(platform);
             }
 
             sw.Stop();
-            _siraLog.Info($"Loaded Platforms in {sw.ElapsedMilliseconds}ms");
+            _siraLog!.Info($"Loaded Platforms in {sw.ElapsedMilliseconds}ms");
 
             return platforms;
         }
@@ -164,7 +157,7 @@ namespace CustomFloorPlugin
             defaultPlatform.transform.parent = transform;
             defaultPlatform.platName = "Default Environment";
             defaultPlatform.platAuthor = "Beat Saber";
-            defaultPlatform.icon = _assetLoader.defaultPlatformCover;
+            defaultPlatform.icon = _assetLoader!.defaultPlatformCover!;
             defaultPlatform.isDescriptor = false;
             currentSingleplayerPlatform = defaultPlatform;
             currentMultiplayerPlatform = defaultPlatform;
@@ -180,11 +173,11 @@ namespace CustomFloorPlugin
         {
             return platformType switch
             {
-                PlatformType.Singleplayer => allPlatformsTask.Result.IndexOf(currentSingleplayerPlatform),
-                PlatformType.Multiplayer => allPlatformsTask.Result.IndexOf(currentMultiplayerPlatform),
-                PlatformType.A360 => allPlatformsTask.Result.IndexOf(currentA360Platform),
-                PlatformType.API => allPlatformsTask.Result.IndexOf(apiRequestedPlatform),
-                PlatformType.Active => allPlatformsTask.Result.IndexOf(activePlatform),
+                PlatformType.Singleplayer => loadPlatformsTask!.Result.IndexOf(currentSingleplayerPlatform!),
+                PlatformType.Multiplayer => loadPlatformsTask!.Result.IndexOf(currentMultiplayerPlatform!),
+                PlatformType.A360 => loadPlatformsTask!.Result.IndexOf(currentA360Platform!),
+                PlatformType.API => loadPlatformsTask!.Result.IndexOf(apiRequestedPlatform!),
+                PlatformType.Active => loadPlatformsTask!.Result.IndexOf(activePlatform!),
                 _ => 0
             };
         }
@@ -194,20 +187,22 @@ namespace CustomFloorPlugin
         /// </summary>
         private void CheckLastSelectedPlatform(CustomPlatform platform)
         {
-            if (_config.SingleplayerPlatformPath == platform.platName + platform.platAuthor)
+            if (_config!.SingleplayerPlatformPath == platform.platName + platform.platAuthor)
                 currentSingleplayerPlatform = platform;
-            if (_config.MultiplayerPlatformPath == platform.platName + platform.platAuthor)
+            if (_config!.MultiplayerPlatformPath == platform.platName + platform.platAuthor)
                 currentMultiplayerPlatform = platform;
-            if (_config.A360PlatformPath == platform.platName + platform.platAuthor)
+            if (_config!.A360PlatformPath == platform.platName + platform.platAuthor)
                 currentA360Platform = platform;
         }
 
         /// <summary>
-        /// Asynchroniously creates a <see cref="CustomPlatform"/> by loading an <see cref="AssetBundle"/> at the given <paramref name="path"/>
+        /// Asynchroniously creates a <see cref="CustomPlatform"/> by loading an <see cref="AssetBundle"/> from the given <paramref name="path"/>
         /// </summary>
-        internal async Task<CustomPlatform> CreatePlatformAsync(string path)
+        internal async Task<CustomPlatform?> CreatePlatformAsync(string path)
         {
-            CustomPlatform platform = await _platformLoader.LoadFromFileAsync(path);
+
+            CustomPlatform? platform = await _platformLoader!.LoadFromFileAsync(path);
+            if (platform == null) return null;
             CustomPlatform newPlatform = Instantiate(platform, transform);
             Destroy(platform.gameObject);
             newPlatform.name = platform.name;
@@ -216,13 +211,11 @@ namespace CustomFloorPlugin
 
             if (platformFilePaths.ContainsKey(newPlatform.fullPath))
             {
-                await allPlatformsTask;
+                await loadPlatformsTask!;
                 CustomPlatform descriptor = platformFilePaths[newPlatform.fullPath];
-                int index = allPlatformsTask.Result.IndexOf(descriptor);
-                if (activePlatform == descriptor)
-                    activePlatform = newPlatform;
+                int index = loadPlatformsTask.Result.IndexOf(descriptor);
                 platformFilePaths[descriptor.fullPath] = newPlatform;
-                allPlatformsTask.Result[index] = newPlatform;
+                loadPlatformsTask.Result[index] = newPlatform;
                 Destroy(descriptor.gameObject);
             }
             else
@@ -238,7 +231,7 @@ namespace CustomFloorPlugin
         /// </summary>
         private IEnumerable<CustomPlatform> EnumeratePlatformDescriptorsFromFile()
         {
-            using FileStream stream = new(customPlatformsInfoCacheFilePath, FileMode.Open, FileAccess.Read);
+            using FileStream stream = new(_cacheFilePath, FileMode.Open, FileAccess.Read);
             using BinaryReader reader = new(stream, Encoding.UTF8);
 
             if (reader.ReadByte() != kCacheFileVersion)
@@ -255,7 +248,7 @@ namespace CustomFloorPlugin
                 Texture2D tex = reader.ReadTexture2D();
                 if (!File.Exists(platform.fullPath))
                 {
-                    _siraLog.Info($"File {platform.fullPath} no longer exists; skipped");
+                    _siraLog!.Info($"File {platform.fullPath} no longer exists; skipped");
                     Destroy(platform.gameObject);
                     continue;
                 }
@@ -273,23 +266,23 @@ namespace CustomFloorPlugin
         /// </summary>
         private async Task SavePlatformInfosToFileAsync()
         {
-            await allPlatformsTask;
+            await loadPlatformsTask!;
 
-            using FileStream stream = new(customPlatformsInfoCacheFilePath, FileMode.OpenOrCreate, FileAccess.Write);
-            using BinaryWriter writer = new(stream, Encoding.UTF8, true);
+            using FileStream stream = new(_cacheFilePath, FileMode.OpenOrCreate, FileAccess.Write);
+            using BinaryWriter writer = new(stream, Encoding.UTF8);
 
             writer.Write(kCacheFileVersion);
-            writer.Write(allPlatformsTask.Result.Count - 1);
-            foreach (CustomPlatform platform in allPlatformsTask.Result.Skip(1))
+            writer.Write(loadPlatformsTask.Result.Count - 1);
+            foreach (CustomPlatform platform in loadPlatformsTask.Result.Skip(1))
             {
                 writer.Write(platform.platName);
                 writer.Write(platform.platAuthor);
                 writer.Write(platform.platHash);
                 writer.Write(platform.fullPath);
-                writer.WriteTexture2D(platform.icon.texture, true);
+                writer.WriteTexture2D(platform.icon!.texture);
             }
             stream.SetLength(stream.Position);
-            File.SetAttributes(customPlatformsInfoCacheFilePath, FileAttributes.Hidden);
+            File.SetAttributes(_cacheFilePath, FileAttributes.Hidden);
         }
     }
 }

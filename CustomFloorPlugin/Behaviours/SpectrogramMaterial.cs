@@ -8,14 +8,14 @@ namespace CustomFloorPlugin
     public class SpectrogramMaterial : MonoBehaviour, INotifyPlatformEnabled
     {
         [Header("The Array property (uniform float arrayName[64])")]
-        public string PropertyName;
+        public string? PropertyName;
         [Header("The global intensity (float valueName)")]
-        public string AveragePropertyName;
+        public string? AveragePropertyName;
 
-        private BasicSpectrogramData _basicSpectrogramData;
+        private BasicSpectrogramData? _basicSpectrogramData;
 
-        private Renderer Renderer => _Renderer ??= GetComponent<Renderer>();
-        private Renderer _Renderer;
+        private Renderer Renderer => _renderer ??= GetComponent<Renderer>();
+        private Renderer? _renderer;
 
         [Inject]
         public void Construct([InjectOptional] BasicSpectrogramData basicSpectrogramData)

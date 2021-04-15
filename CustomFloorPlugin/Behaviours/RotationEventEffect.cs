@@ -15,8 +15,8 @@ namespace CustomFloorPlugin
         public SongEventType eventType;
         public Vector3 rotationVector;
 
-        private PlatformManager _platformManager;
-        private IBeatmapObjectCallbackController _beatmapObjectCallbackController;
+        private PlatformManager? _platformManager;
+        private IBeatmapObjectCallbackController? _beatmapObjectCallbackController;
 
         [Inject]
         public void Construct(PlatformManager platformManager, [InjectOptional] IBeatmapObjectCallbackController beatmapObjectCallbackController)
@@ -30,7 +30,7 @@ namespace CustomFloorPlugin
             container.Inject(this);
             if (_beatmapObjectCallbackController == null) return;
             LightRotationEventEffect rotEffect = gameObject.AddComponent<LightRotationEventEffect>();
-            _platformManager.spawnedObjects.Add(rotEffect);
+            _platformManager!.spawnedObjects.Add(rotEffect);
             rotEffect.SetField("_beatmapObjectCallbackController", _beatmapObjectCallbackController);
             rotEffect.SetField("_event", (BeatmapEventType)eventType);
             rotEffect.SetField("_rotationVector", rotationVector);

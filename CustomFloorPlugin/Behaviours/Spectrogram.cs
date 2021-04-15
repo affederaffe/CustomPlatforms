@@ -12,7 +12,7 @@ namespace CustomFloorPlugin
         /// <summary>
         /// Prefab for individual columns
         /// </summary>
-        public GameObject columnPrefab;
+        public GameObject? columnPrefab;
 
         /// <summary>
         /// The added offset between columns
@@ -42,11 +42,11 @@ namespace CustomFloorPlugin
         /// <summary>
         /// An array of all <see cref="Transform"/>s under a <see cref="Spectrogram"/>
         /// </summary>
-        private Transform[] _columnTransforms;
+        private Transform[]? _columnTransforms;
 
-        private MaterialSwapper _materialSwapper;
-        private PlatformManager _platformManager;
-        private BasicSpectrogramData _basicSpectrogramData;
+        private MaterialSwapper? _materialSwapper;
+        private PlatformManager? _platformManager;
+        private BasicSpectrogramData? _basicSpectrogramData;
 
         /// <summary>
         /// Spectogram fallback data
@@ -55,18 +55,18 @@ namespace CustomFloorPlugin
         {
             get
             {
-                if (_FallbackSamples == null)
+                if (_fallbackSamples == null)
                 {
-                    _FallbackSamples = new float[64];
+                    _fallbackSamples = new float[64];
                     for (int i = 0; i < FallbackSamples.Count; i++)
                     {
                         FallbackSamples[i] = (Mathf.Sin((float)i / 64 * 15 * Mathf.PI + 5f * Mathf.PI) + 2f) / 15f;
                     }
                 }
-                return _FallbackSamples;
+                return _fallbackSamples;
             }
         }
-        private static float[] _FallbackSamples;
+        private static float[]? _fallbackSamples;
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Code Quality", "IDE0051:Remove unused private members", Justification = "Called by Unity")]
         private void OnDrawGizmos()
@@ -102,8 +102,9 @@ namespace CustomFloorPlugin
 
         void INotifyPlatformEnabled.PlatformEnabled(DiContainer container)
         {
+            if (columnPrefab == null) return;
             container.Inject(this);
-            _materialSwapper.ReplaceMaterials(columnPrefab);
+            _materialSwapper!.ReplaceMaterials(columnPrefab);
             CreateColums();
             foreach (INotifyPlatformEnabled notifyEnable in GetComponentsInChildren<INotifyPlatformEnabled>(true))
             {
@@ -125,8 +126,8 @@ namespace CustomFloorPlugin
                 float num = processedSamples[i] * (1.5f + i * 0.075f);
                 if (num > 1f) num = 1f;
                 num = Mathf.Pow(num, 2f);
-                _columnTransforms[i].localScale = new Vector3(columnWidth, Mathf.Lerp(minHeight, maxHeight, num), columnDepth);
-                _columnTransforms[i + 64].localScale = new Vector3(columnWidth, Mathf.Lerp(minHeight, maxHeight, num), columnDepth);
+                _columnTransforms![i].localScale = new Vector3(columnWidth, Mathf.Lerp(minHeight, maxHeight, num), columnDepth);
+                _columnTransforms![i + 64].localScale = new Vector3(columnWidth, Mathf.Lerp(minHeight, maxHeight, num), columnDepth);
             }
         }
 
@@ -150,8 +151,8 @@ namespace CustomFloorPlugin
         /// <returns></returns>
         private Transform CreateColumn(Vector3 pos)
         {
-            GameObject gameObject = Instantiate(columnPrefab, transform);
-            _platformManager.spawnedObjects.Add(gameObject);
+            GameObject gameObject = Instantiate(columnPrefab!, transform);
+            _platformManager!.spawnedObjects.Add(gameObject);
             gameObject.transform.localPosition = pos;
             gameObject.transform.localScale = new Vector3(columnWidth, minHeight, columnDepth);
             return gameObject.transform;

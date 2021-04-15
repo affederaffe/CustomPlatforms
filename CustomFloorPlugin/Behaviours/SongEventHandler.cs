@@ -11,9 +11,9 @@ namespace CustomFloorPlugin
         public SongEventType eventType;
         public int value;
         public bool anyValue;
-        public UnityEvent OnTrigger;
+        public UnityEvent? OnTrigger;
 
-        private BSEvents _events;
+        private BSEvents? _events;
 
         [Inject]
         public void Construct([InjectOptional] BSEvents events)
@@ -25,13 +25,13 @@ namespace CustomFloorPlugin
         {
             container.Inject(this);
             if (_events != null)
-                _events.BeatmapEventDidTriggerEvent += HandleSongEvent;
+                _events.BeatmapEventDidTriggerEvent += OnSongEvent;
         }
 
         void INotifyPlatformDisabled.PlatformDisabled()
         {
             if (_events != null)
-                _events.BeatmapEventDidTriggerEvent -= HandleSongEvent;
+                _events.BeatmapEventDidTriggerEvent -= OnSongEvent;
         }
 
         /// <summary>
@@ -41,13 +41,13 @@ namespace CustomFloorPlugin
         /// (Use a <see cref="Dictionary{TKey, TValue}"/> instead)
         /// </summary>
         /// <param name="songEventData">Event to evaluate</param>
-        private void HandleSongEvent(BeatmapEventData songEventData)
+        private void OnSongEvent(BeatmapEventData songEventData)
         {
             if (songEventData.type == (BeatmapEventType)eventType)
             {
                 if (songEventData.value == value || anyValue)
                 {
-                    OnTrigger.Invoke();
+                    OnTrigger!.Invoke();
                 }
             }
         }

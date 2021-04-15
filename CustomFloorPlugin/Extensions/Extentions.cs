@@ -25,6 +25,9 @@ namespace CustomFloorPlugin.Extensions
             return is360;
         }
 
+        /// <summary>
+        /// Tries to grab the LevelId from the <see cref="ScenesTransitionSetupDataSO"/>
+        /// </summary>
         internal static string GetLevelId(this ScenesTransitionSetupDataSO setupData)
         {
             string levelId = (setupData as StandardLevelScenesTransitionSetupDataSO)?
@@ -49,12 +52,9 @@ namespace CustomFloorPlugin.Extensions
                 for (int i = beatmapObjectsData.Count - 1; i >= 0; i--)
                 {
                     BeatmapObjectData beatmapObjectData = beatmapObjectsData[i];
-                    if (beatmapObjectData.beatmapObjectType == BeatmapObjectType.Note && ((NoteData)beatmapObjectData).colorType != ColorType.None)
+                    if (beatmapObjectData.beatmapObjectType == BeatmapObjectType.Note && ((NoteData)beatmapObjectData).colorType != ColorType.None && beatmapObjectData.time > lastTime)
                     {
-                        if (beatmapObjectData.time > lastTime)
-                        {
-                            lastTime = beatmapObjectData.time;
-                        }
+                        lastTime = beatmapObjectData.time;
                     }
                 }
             }
@@ -62,9 +62,9 @@ namespace CustomFloorPlugin.Extensions
         }
 
         /// <summary>
-        /// Reads a <see cref="Sprite"/> from a <see cref="Stream"/>
+        /// Reads a <see cref="Sprite"/> from a <see cref="Stream"/> of a .png image
         /// </summary>
-        internal static Sprite ReadSprite(this Stream resourceStream)
+        internal static Sprite ReadPNGToSprite(this Stream resourceStream)
         {
             byte[] data = new byte[resourceStream.Length];
             resourceStream.Read(data, 0, data.Length);
@@ -85,9 +85,9 @@ namespace CustomFloorPlugin.Extensions
         /// <summary>
         /// Writes a <see cref="Texture2D"/> with a <see cref="BinaryReader"/>
         /// </summary>
-        internal static void WriteTexture2D(this BinaryWriter writer, Texture2D texture, bool forceReadable)
+        internal static void WriteTexture2D(this BinaryWriter writer, Texture2D texture)
         {
-            byte[] textureBytes = BytesFromTexture2D(texture, forceReadable);
+            byte[] textureBytes = BytesFromTexture2D(texture);
             writer.Write(textureBytes.Length);
             writer.Write(textureBytes);
         }
@@ -97,9 +97,6 @@ namespace CustomFloorPlugin.Extensions
         /// </summary>
         private static Texture2D BytesToTexture2D(byte[] bytes)
         {
-            if (bytes.Length == 0)
-                return null;
-
             Texture2D texture = new(0, 0, TextureFormat.ARGB32, false);
             texture.LoadImage(bytes);
             return texture;
@@ -108,11 +105,8 @@ namespace CustomFloorPlugin.Extensions
         /// <summary>
         /// Converts a given <see cref="Texture2D"/> to a <see cref="byte"/>[]
         /// </summary>
-        private static byte[] BytesFromTexture2D(Texture2D texture, bool forceReadable)
+        private static byte[] BytesFromTexture2D(Texture2D texture)
         {
-            if (texture == null || (!texture.isReadable && !forceReadable))
-                return System.Array.Empty<byte>();
-
             // Create readable texture by rendering onto a RenderTexture
             if (!texture.isReadable)
             {

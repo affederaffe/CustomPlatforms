@@ -3,6 +3,8 @@ using System.IO;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
 
+using SiraUtil.Tools;
+
 using UnityEngine;
 
 
@@ -13,11 +15,13 @@ namespace CustomFloorPlugin
     /// </summary>
     public class PlatformLoader
     {
+        private readonly SiraLog _siraLog;
         private readonly AssetLoader _assetLoader;
         private readonly MaterialSwapper _materialSwapper;
 
-        public PlatformLoader(AssetLoader assetLoader, MaterialSwapper materialSwapper)
+        public PlatformLoader(SiraLog siraLog, AssetLoader assetLoader, MaterialSwapper materialSwapper)
         {
+            _siraLog = siraLog;
             _assetLoader = assetLoader;
             _materialSwapper = materialSwapper;
         }
@@ -25,24 +29,31 @@ namespace CustomFloorPlugin
         /// <summary>
         /// Asynchronously loads a <see cref="CustomPlatform"/> from a specified file path
         /// </summary>
-        internal async Task<CustomPlatform> LoadFromFileAsync(string fullPath)
+        internal async Task<CustomPlatform?> LoadFromFileAsync(string fullPath)
         {
             if (!File.Exists(fullPath))
-                throw new FileNotFoundException("File could not be found", fullPath);
+            {
+                _siraLog.Error("File could not be found:\n" + fullPath);
+                return null;
+            }
 
             using FileStream fileStream = File.OpenRead(fullPath);
 
             AssetBundle assetBundle = await LoadAssetBundleFromStreamAsync(fileStream);
 
             if (assetBundle == null)
-                throw new FileLoadException("File could not be loaded", fullPath);
+            {
+                _siraLog.Error("File could not be loaded:\n" + fullPath);
+                return null;
+            }
 
             GameObject platformPrefab = await LoadAssetFromAssetBundleAsync<GameObject>(assetBundle, "_CustomPlatform");
 
             if (platformPrefab == null)
             {
                 assetBundle.Unload(true);
-                throw new FileLoadException("Platform GameObject could not be loaded", fullPath);
+                _siraLog.Error("Platform GameObject could not be loaded:\n" + fullPath);
+                return null;
             }
 
             assetBundle.Unload(false);
@@ -61,12 +72,13 @@ namespace CustomFloorPlugin
                     customPlatform.platAuthor = legacyPlatform.platAuthor;
                     customPlatform.hideDefaultPlatform = true;
                     // Remove old platform data
-                    GameObject.Destroy(legacyPlatform);
+                    UnityEngine.Object.Destroy(legacyPlatform);
                 }
                 else
                 {
                     // No customplatform component, abort
-                    GameObject.Destroy(platformPrefab);
+                    UnityEngine.Object.Destroy(platformPrefab);
+                    _siraLog.Error("The AssetBundle does not contain a CustomPlatform:\n" + fullPath);
                     return null;
                 }
             }
@@ -77,7 +89,7 @@ namespace CustomFloorPlugin
             customPlatform.fullPath = fullPath;
             customPlatform.name = customPlatform.platName + " by " + customPlatform.platAuthor;
             if (customPlatform.icon == null)
-                customPlatform.icon = _assetLoader.fallbackCover;
+                customPlatform.icon = _assetLoader.fallbackCover!;
 
             _materialSwapper.ReplaceMaterials(customPlatform.gameObject);
 

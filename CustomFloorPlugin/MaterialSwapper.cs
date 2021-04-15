@@ -1,8 +1,4 @@
-﻿using System.Linq;
-
-using UnityEngine;
-
-using Zenject;
+﻿using UnityEngine;
 
 
 namespace CustomFloorPlugin
@@ -12,33 +8,13 @@ namespace CustomFloorPlugin
     /// Primary reason for this is the absence of proper custom <see cref="Shader"/>s (or decompiled source <see cref="Shader"/>s) and a lack of knowledge about their inner workings...<br/>
     /// Part of the documentation for this file is omited because it's a clusterfuck and under construction.
     /// </summary>
-    public class MaterialSwapper : IInitializable
+    public class MaterialSwapper
     {
         private readonly AssetLoader _assetLoader;
-
-        private Material _dark;
-        private Material _glow;
-        private Material _opaqueGlow;
-
-        private const string kFakeDarkMatName = "_dark_replace (Instance)";
-        private const string kFakeGlowMatName = "_transparent_glow_replace (Instance)";
-        private const string kFakeOpaqueGlowMatName = "_glow_replace (Instance)";
-
-        private const string kRealDarkMatName = "DarkEnvironmentSimple";
-        private const string kRealGlowMatName = "EnvLight";
-        private const string kRealOpaqueGlowMatName = "EnvLightOpaque";
 
         public MaterialSwapper(AssetLoader assetLoader)
         {
             _assetLoader = assetLoader;
-        }
-
-        public async void Initialize()
-        {
-            await _assetLoader.loadAssetsTask;
-            _dark = _assetLoader.AllMaterials.First(x => x.name == kRealDarkMatName);
-            _glow = _assetLoader.AllMaterials.First(x => x.name == kRealGlowMatName);
-            _opaqueGlow = _assetLoader.AllMaterials.First(x => x.name == kRealOpaqueGlowMatName);
         }
 
         /// <summary>
@@ -65,20 +41,20 @@ namespace CustomFloorPlugin
             {
                 if (materialsCopy[i] != null)
                 {
-                    if (materialsCopy[i].name == kFakeDarkMatName)
+                    switch (materialsCopy[i].name)
                     {
-                        materialsCopy[i] = _dark;
-                        materialsDidChange = true;
-                    }
-                    else if (materialsCopy[i].name == kFakeGlowMatName)
-                    {
-                        materialsCopy[i] = _glow;
-                        materialsDidChange = true;
-                    }
-                    else if (materialsCopy[i].name == kFakeOpaqueGlowMatName)
-                    {
-                        materialsCopy[i] = _opaqueGlow;
-                        materialsDidChange = true;
+                        case "_dark_replace (Instance)":
+                            materialsCopy[i] = _assetLoader.darkEnvMaterial!;
+                            materialsDidChange = true;
+                            break;
+                        case "_transparent_glow_replace (Instance)":
+                            materialsCopy[i] = _assetLoader.transparentGlowMaterial!;
+                            materialsDidChange = true;
+                            break;
+                        case "_glow_replace (Instance)":
+                            materialsCopy[i] = _assetLoader.opaqueGlowMaterial!;
+                            materialsDidChange = true;
+                            break;
                     }
                 }
             }

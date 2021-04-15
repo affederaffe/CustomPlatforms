@@ -20,10 +20,10 @@ namespace CustomFloorPlugin
         public string propertyName = "_Color";
         public MaterialColorType materialColorType;
 
-        private ColorManager _colorManager;
+        private ColorManager? _colorManager;
 
-        private Renderer Renderer => _Renderer ??= GetComponent<Renderer>();
-        private Renderer _Renderer;
+        private Renderer Renderer => _renderer ??= GetComponent<Renderer>();
+        private Renderer? _renderer;
 
         [Inject]
         public void Construct(ColorManager colorManager)
@@ -39,17 +39,16 @@ namespace CustomFloorPlugin
 
         private void ChangeColors()
         {
-            Color color = materialColorType switch
+            if (!Renderer.material.HasProperty(propertyName)) return;
+            Renderer.material.SetColor(propertyName, materialColorType switch
             {
-                MaterialColorType.SaberColorA => _colorManager.ColorForSaberType(SaberType.SaberA),
-                MaterialColorType.SaberColorB => _colorManager.ColorForSaberType(SaberType.SaberB),
-                MaterialColorType.ColorTypeA => _colorManager.ColorForType(ColorType.ColorA),
-                MaterialColorType.ColorTypeB => _colorManager.ColorForType(ColorType.ColorB),
-                MaterialColorType.ObstacleColor => _colorManager.GetObstacleEffectColor(),
-                _ => new Color(0f, 0f, 0f),
-            };
-            if (Renderer.material.HasProperty(propertyName))
-                Renderer.material.SetColor(propertyName, color);
+                MaterialColorType.SaberColorA => _colorManager!.ColorForSaberType(SaberType.SaberA),
+                MaterialColorType.SaberColorB => _colorManager!.ColorForSaberType(SaberType.SaberB),
+                MaterialColorType.ColorTypeA => _colorManager!.ColorForType(ColorType.ColorA),
+                MaterialColorType.ColorTypeB => _colorManager!.ColorForType(ColorType.ColorB),
+                MaterialColorType.ObstacleColor => _colorManager!.GetObstacleEffectColor(),
+                _ => Color.white,
+            });
         }
     }
 }

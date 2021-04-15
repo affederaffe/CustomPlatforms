@@ -17,7 +17,7 @@ namespace CustomFloorPlugin.Installers
             }
             if (Container.HasBinding<MultiplayerPlayersManager>())
             {
-                Container.BindInterfacesTo<MultiplayerGameHandler>().AsSingle();
+                Container.BindInterfacesTo<MultiplayerGameManager>().AsSingle();
             }
         }
     }

@@ -17,15 +17,15 @@ namespace CustomFloorPlugin
             Combo
         }
 
-        public EventType eventType = EventType.AllNotes;
-        public TextMeshPro tmPro;
+        public EventType eventType;
+        public TextMeshPro? tmPro;
 
-        private string startText;
+        private string? _startText;
 
         void INotifyPlatformEnabled.PlatformEnabled(DiContainer container)
         {
             if (tmPro == null) return;
-            startText = tmPro.text;
+            _startText = tmPro.text;
             switch (eventType)
             {
                 case EventType.AllNotes:
@@ -52,7 +52,7 @@ namespace CustomFloorPlugin
         void INotifyPlatformDisabled.PlatformDisabled()
         {
             if (tmPro == null) return;
-            tmPro.text = startText;
+            tmPro.text = _startText;
             switch (eventType)
             {
                 case EventType.AllNotes:
@@ -76,34 +76,11 @@ namespace CustomFloorPlugin
             }
         }
 
-        private void OnAllNotesCountChanged(int allNotes, int cuttableNotes)
-        {
-            tmPro.text = $"{allNotes} | {cuttableNotes}";
-        }
-
-        private void OnGoodCutCountChanged(int goodCuts)
-        {
-            tmPro.text = goodCuts.ToString();
-        }
-
-        private void OnBadCutCountChanged(int badCuts)
-        {
-            tmPro.text = badCuts.ToString();
-        }
-
-        private void OnMissCountChanged(int misses)
-        {
-            tmPro.text = misses.ToString();
-        }
-
-        private void OnScoreChanged(int rawScore, int modifiedScore)
-        {
-            tmPro.text = $"{rawScore} | {modifiedScore}";
-        }
-
-        private void OnComboChanged(int combo)
-        {
-            tmPro.text = combo.ToString();
-        }
+        private void OnAllNotesCountChanged(int allNotes, int cuttableNotes) => tmPro!.text = $"{allNotes} | {cuttableNotes}";
+        private void OnGoodCutCountChanged(int goodCuts) => tmPro!.text = goodCuts.ToString();
+        private void OnBadCutCountChanged(int badCuts) => tmPro!.text = badCuts.ToString();
+        private void OnMissCountChanged(int misses) => tmPro!.text = misses.ToString();
+        private void OnScoreChanged(int rawScore, int modifiedScore) => tmPro!.text = $"{rawScore} | {modifiedScore}";
+        private void OnComboChanged(int combo) => tmPro!.text = combo.ToString();
     }
 }
