@@ -14,11 +14,9 @@ namespace CustomFloorPlugin.HarmonyPatches
     [HarmonyPatch(typeof(LightWithIdManager), nameof(LightWithIdManager.LateUpdate))]
     internal class LightWithIdManagerPatch
     {
-        private static readonly AccessTools.FieldRef<LightWithIdManager, List<ILightWithId>> _lightsToUnregister = AccessTools.FieldRefAccess<LightWithIdManager, List<ILightWithId>>("_lightsToUnregister");
-
-        public static void Postfix(ref LightWithIdManager __instance)
+        public static void Postfix(ref List<ILightWithId> ____lightsToUnregister)
         {
-            _lightsToUnregister(__instance).Clear();
+            ____lightsToUnregister.Clear();
         }
     }
 }

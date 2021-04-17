@@ -38,10 +38,10 @@ namespace CustomFloorPlugin
             if (platformIndex != 0)
             {
                 _multiplayerPlayersManager.playerDidFinishEvent += OnPlayerDidFinish;
-                GameObject lightEffects = await SpawnLightEffects();
                 await Coroutines.AsTask(WaitForEndOfFrameCoroutine());
                 static IEnumerator<WaitForEndOfFrame> WaitForEndOfFrameCoroutine() { yield return new WaitForEndOfFrame(); }
                 await _platformSpawner.SetContainerAndShowAsync(platformIndex, _container);
+                GameObject lightEffects = await SpawnLightEffects();
                 _platformManager.spawnedObjects.Add(lightEffects);
             }
         }

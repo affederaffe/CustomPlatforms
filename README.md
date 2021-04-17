@@ -8,7 +8,7 @@
 ### Manual Method
 
 * Ensure your game is patched with BSIPA (ModAssistant does this for you)
-* Place the CustomPlatformsX.Y.Z.dll in your Beat Saber\Plugins directory
+* Place the CustomPlatforms.dll in your Beat Saber\Plugins directory
 
 After a relaunch, your Beat Saber folder should look like this:
 
@@ -26,7 +26,7 @@ After a relaunch, your Beat Saber folder should look like this:
 ## Controls
 
 Visit the Platforms Menu page ingame to do things like:
-* Change your platform for different gamemmodes
+* Change your platform for different gamemodes
 * View the changelog
 * Always show feet, to mark the center of the room
 * Hide the :heart: that CustomPlatforms uses as a cloneable light source
@@ -43,10 +43,10 @@ A possible source for platforms is [modelsaber](https://modelsaber.com/Platforms
 There's a comprehensive guide at https://bsmg.wiki/models/platforms-guide.html written by Emma.
 The following are the basic steps:
 
-1. Download the Unity project from https://github.com/affederaffe/CustomPlatformsUnityProject, unzip it.
+1. Download the Unity project from [releases](https://github.com/affederaffe/CustomPlatforms/releases/latest), unzip it.
 
 2. Open the Unity project
-The project was created and tested in version 2019.3.15f1, other versions may not be supported.
+The project was created and tested in version [2019.4.18f1](https://unity3d.com/get-unity/download/archive), other versions may not be supported.
 
 3. Create an empty GameObject and attach a "Custom Platform" component to it
 Fill out the fields for your name and the name of the platform.  You can also toggle the visibility of default environment parts if you need to make room for your platform.
@@ -54,7 +54,6 @@ Add an icon for your platform by importing an image, settings it to Sprite/UI in
 
 4. Create your custom platform as a child of this root object
 You can use most of the built in Unity components, custom shaders and materials, custom meshes, animators, etc.
-If you want to use your own scripts, you have to write a mod or use an existing one and add it as requirement or suggestion.
 
 1. When you are finished, select the root object you attached the "Custom Platform" component to.
 In the inspector, click "Export". Navigate to your CustomPlatforms folder, and press save.

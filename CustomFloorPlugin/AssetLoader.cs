@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
@@ -145,10 +146,61 @@ namespace CustomFloorPlugin
             DestroyImmediate(playersPlace.GetComponentInChildren<SaberBurnMarkArea>().gameObject);
             DestroyImmediate(playersPlace.GetComponentInChildren<SaberBurnMarkSparkles>().gameObject);
 
+            ValueTuple<Vector3[], int[]> meshData = await Task.Run(CreateMeshData);
+            Mesh mesh = new() // TIL the Mesh constructor is not thread-safe
+            {
+                vertices = meshData.Item1,
+                triangles = meshData.Item2
+            };
+
+            heart.GetComponent<MeshFilter>().mesh = mesh;
+            heart.transform.position = new Vector3(-8f, 25f, 26f);
+            heart.transform.rotation = Quaternion.Euler(-100f, 90f, 90f);
+            heart.transform.localScale = new Vector3(25f, 25f, 25f);
+            heart.layer = 13;
+
+            Renderer buildingsRenderer = root.transform.Find("GreenDayCity/BackgroundBuildings").GetComponent<Renderer>(); // "DarkEnvironmentSimple" Material
+            darkEnvMaterial = buildingsRenderer.material;
+            Renderer rotLightRenderer = root.transform.Find("RotatingLasersPair/BaseL/Laser/BoxLight").GetComponent<Renderer>(); // "EnvLight" Material
+            transparentGlowMaterial = rotLightRenderer.material;
+            Renderer lightSourceRenderer = lightSource.GetComponentInChildren<ParametricBoxController>().GetComponent<Renderer>(); // "EnvLightOpaque" Material
+            opaqueGlowMaterial = new(lightSourceRenderer.material);
+            opaqueGlowMaterial.DisableKeyword("ENABLE_HEIGHT_FOG");
+            opaqueGlowMaterial.name = "PlatformsCustomGlow";
+            opaqueGlowMaterial.color = Color.cyan;
+
+            lightSourceRenderer.material = opaqueGlowMaterial;
+            heart.GetComponent<Renderer>().material = opaqueGlowMaterial;
+            heart.GetComponent<MaterialPropertyBlockColorSetter>().SetField("_property", "_Color");
+
+            InstancedMaterialLightWithId materialLightWithId = heart.GetComponent<InstancedMaterialLightWithId>();
+            materialLightWithId.SetField("_minAlpha", 0f);
+            materialLightWithId.SetField("_intensity", 1.825f);
+            materialLightWithId.ColorWasSet(Color.magenta);
+
+            TubeBloomPrePassLight tubeBloomLight = lightSource.GetComponent<TubeBloomPrePassLight>();
+            tubeBloomLight.SetField("_maxAlpha", 0.1f);
+            tubeBloomLight.bloomFogIntensityMultiplier = 0.125f;
+
+            foreach (LightSwitchEventEffect lightSwitchEventEffect in lightEffects.GetComponents<LightSwitchEventEffect>())
+            {
+                lightSwitchEventEffect.SetField("_lightIsOn", false);
+                lightSwitchEventEffect.SetField("_initialized", false);
+            }
+
+            sw.Stop();
+            _siraLog!.Info($"Loaded Assets in {sw.ElapsedMilliseconds}ms");
+        }
+
+        /// <summary>
+        /// Creates the heart's <see cref="Mesh"/>data
+        /// </summary>
+        private static ValueTuple<Vector3[], int[]> CreateMeshData()
+        {
             using Stream manifestResourceStream = Assembly.GetExecutingAssembly().GetManifestResourceStream("CustomFloorPlugin.Assets.heart.mesh");
             using StreamReader streamReader = new(manifestResourceStream);
 
-            string meshfile = await streamReader.ReadToEndAsync();
+            string meshfile = streamReader.ReadToEnd();
             string[] dimension1 = meshfile.Split('|');
             string[][] dimension2 = new string[][] { dimension1[0].Split('/'), dimension1[1].Split('/') };
             string[][] string_vector3s = new string[dimension2[0].Length][];
@@ -170,44 +222,7 @@ namespace CustomFloorPlugin
                 triangles.Add(int.Parse(s_int, NumberFormatInfo.InvariantInfo));
             }
 
-            Mesh mesh = new()
-            {
-                vertices = vertices.ToArray(),
-                triangles = triangles.ToArray()
-            };
-
-            heart.GetComponent<MeshFilter>().mesh = mesh;
-            heart.transform.position = new Vector3(-8f, 25f, 26f);
-            heart.transform.rotation = Quaternion.Euler(-100f, 90f, 90f);
-            heart.transform.localScale = new Vector3(25f, 25f, 25f);
-            heart.layer = 13;
-
-
-            Renderer buildingsRenderer = root.transform.Find("GreenDayCity/BackgroundBuildings").GetComponent<Renderer>();
-            darkEnvMaterial = buildingsRenderer.material;
-            Renderer rotLightRenderer = root.transform.Find("RotatingLasersPair/BaseL/Laser/BoxLight").GetComponent<Renderer>();
-            transparentGlowMaterial = rotLightRenderer.material;
-            Renderer lightSourceRenderer = lightSource.GetComponentInChildren<ParametricBoxController>().GetComponent<Renderer>();
-            opaqueGlowMaterial = new(lightSourceRenderer.material);
-            opaqueGlowMaterial.DisableKeyword("ENABLE_HEIGHT_FOG");
-            opaqueGlowMaterial.name = "PlatformsCustomGlow";
-            opaqueGlowMaterial.color = Color.cyan;
-
-            lightSourceRenderer.material = opaqueGlowMaterial;
-            heart.GetComponent<Renderer>().material = opaqueGlowMaterial;
-            heart.GetComponent<MaterialPropertyBlockColorSetter>().SetField("_property", "_Color");
-
-            InstancedMaterialLightWithId materialLightWithId = heart.GetComponent<InstancedMaterialLightWithId>();
-            materialLightWithId.SetField("_minAlpha", 0f);
-            materialLightWithId.SetField("_intensity", 1.825f);
-            materialLightWithId.ColorWasSet(Color.magenta);
-
-            TubeBloomPrePassLight tubeBloomLight = lightSource.GetComponent<TubeBloomPrePassLight>();
-            tubeBloomLight.SetField("_maxAlpha", 0.1f);
-            tubeBloomLight.bloomFogIntensityMultiplier = 0.125f;
-
-            sw.Stop();
-            _siraLog!.Info($"Loaded Assets in {sw.ElapsedMilliseconds}ms");
+            return new ValueTuple<Vector3[], int[]>(vertices.ToArray(), triangles.ToArray());
         }
 
         /// <summary>

@@ -37,7 +37,7 @@ namespace CustomFloorPlugin
         private string? _sceneName;
         private GameObject? _root;
 
-        private TrackLaneRing[] TrackLaneRings => _trackLaneRings ??= Resources.FindObjectsOfTypeAll<TrackLaneRing>();
+        private TrackLaneRing[] TrackLaneRings => _trackLaneRings ??= Object.FindObjectsOfType<TrackLaneRing>();
         private TrackLaneRing[]? _trackLaneRings;
 
         public EnvironmentHider(PluginConfig config,

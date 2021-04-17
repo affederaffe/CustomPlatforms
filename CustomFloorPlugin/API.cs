@@ -159,7 +159,7 @@ namespace CustomFloorPlugin
         /// <summary>
         /// Asynchronously downloads a <see cref="CustomPlatform"/> from modelsaber if the selected level requires it
         /// </summary>
-        /// <param name="usePlatform">Wether the selected song requests a platform or not</param>
+        /// <param name="usePlatform">Whether the selected song requests a platform or not</param>
         /// <param name="name">The name of the requested platform</param>
         /// <param name="hash">The hash of the requested platform</param>
         /// <param name="level">The song the platform was requested for</param>

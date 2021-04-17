@@ -11,8 +11,8 @@ namespace CustomFloorPlugin.Installers
 {
     internal class PlatformsAppInstaller : Installer
     {
-        private readonly PluginConfig _config;
         private readonly Logger _logger;
+        private readonly PluginConfig _config;
 
         public PlatformsAppInstaller(Logger logger, PluginConfig config)
         {

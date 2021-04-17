@@ -44,7 +44,7 @@ namespace CustomFloorPlugin
 
         private async void OnConnected()
         {
-            _platformSpawner.IsMultiplayer = true;
+            _platformSpawner.isMultiplayer = true;
             await _assetLoader.loadAssetsTask!;
             _assetLoader.heart!.SetActive(false);
             await _platformSpawner.ChangeToPlatformAsync(0);
@@ -52,7 +52,7 @@ namespace CustomFloorPlugin
 
         private async void OnDisconnected(DisconnectedReason reason)
         {
-            _platformSpawner.IsMultiplayer = false;
+            _platformSpawner.isMultiplayer = false;
             await _assetLoader.loadAssetsTask!;
             _assetLoader.heart!.SetActive(_config.ShowHeart);
             _assetLoader.heart.GetComponent<InstancedMaterialLightWithId>().ColorWasSet(Color.magenta);

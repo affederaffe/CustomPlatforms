@@ -24,7 +24,7 @@ namespace CustomFloorPlugin
         private readonly GameScenesManager _gameScenesManager;
         private readonly Random _random;
         private DiContainer _container;
-        internal bool IsMultiplayer { get; set; }
+        internal bool isMultiplayer;
 
         internal PlatformSpawner(DiContainer container,
                                  SiraLog siraLog,
@@ -82,8 +82,7 @@ namespace CustomFloorPlugin
             {
                 case null:
                 case MenuScenesTransitionSetupDataSO:
-                    if (IsMultiplayer)
-                        return;
+                    if (isMultiplayer) return;
                     _assetLoader.heart!.SetActive(_config.ShowHeart);
                     _assetLoader.heart.GetComponent<InstancedMaterialLightWithId>().ColorWasSet(UnityEngine.Color.magenta);
                     if (_config.ShowInMenu)
@@ -104,7 +103,6 @@ namespace CustomFloorPlugin
                 case AppInitScenesTransitionSetupDataSO:
                 case HealthWarningScenesTransitionSetupDataSO:
                 case MultiplayerLevelScenesTransitionSetupDataSO:
-                    // Multiplayer levels are handled by the MultiplayerGameHelper because this event doesn't provide the GameplayCore DiContainer for multiplayer levels.
                     return;
                 default:
                     _assetLoader.heart!.SetActive(false);
