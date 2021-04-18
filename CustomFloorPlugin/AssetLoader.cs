@@ -175,7 +175,7 @@ namespace CustomFloorPlugin
 
             InstancedMaterialLightWithId materialLightWithId = heart.GetComponent<InstancedMaterialLightWithId>();
             materialLightWithId.SetField("_minAlpha", 0f);
-            materialLightWithId.SetField("_intensity", 1.825f);
+            materialLightWithId.SetField("_intensity", 1.675f);
             materialLightWithId.ColorWasSet(Color.magenta);
 
             TubeBloomPrePassLight tubeBloomLight = lightSource.GetComponent<TubeBloomPrePassLight>();

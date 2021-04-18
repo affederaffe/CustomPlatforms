@@ -6,7 +6,7 @@ using Zenject;
 namespace CustomFloorPlugin
 {
     [RequireComponent(typeof(Renderer))]
-    public class ColorMaterial : MonoBehaviour, INotifyPlatformEnabled
+    public class ColorMaterial : MonoBehaviour, INotifyPlatformEnabled, INotifyPlatformDisabled
     {
         public enum MaterialColorType
         {
@@ -21,23 +21,30 @@ namespace CustomFloorPlugin
         public MaterialColorType materialColorType;
 
         private ColorManager? _colorManager;
+        private LightWithIdManager? _lightWithIdManager;
 
         private Renderer Renderer => _renderer ??= GetComponent<Renderer>();
         private Renderer? _renderer;
 
         [Inject]
-        public void Construct(ColorManager colorManager)
+        public void Construct(ColorManager colorManager, LightWithIdManager lightWithIdManager)
         {
             _colorManager = colorManager;
+            _lightWithIdManager = lightWithIdManager;
         }
 
         void INotifyPlatformEnabled.PlatformEnabled(DiContainer container)
         {
             container.Inject(this);
-            ChangeColors();
+            _lightWithIdManager!.didChangeSomeColorsThisFrameEvent += OnColorsDidChange;
         }
 
-        private void ChangeColors()
+        void INotifyPlatformDisabled.PlatformDisabled()
+        {
+            _lightWithIdManager!.didChangeSomeColorsThisFrameEvent -= OnColorsDidChange;
+        }
+
+        private void OnColorsDidChange()
         {
             if (!Renderer.material.HasProperty(propertyName)) return;
             Renderer.material.SetColor(propertyName, materialColorType switch

@@ -7,9 +7,9 @@ namespace CustomFloorPlugin
 {
     public class TextEventFilter : EventFilterBehaviour, INotifyPlatformEnabled, INotifyPlatformDisabled
     {
-        public enum EventType
+        public enum CounterType
         {
-            AllNotes,
+            AnyCuts,
             GoodCuts,
             BadCuts,
             Misses,
@@ -17,70 +17,54 @@ namespace CustomFloorPlugin
             Combo
         }
 
-        public EventType eventType;
-        public TextMeshPro? tmPro;
+        public CounterType eventType;
+        public TextMeshPro? textMeshPro;
 
+        private BSEvents? _events;
         private string? _startText;
+
+        [Inject]
+        public void Construct([InjectOptional] BSEvents events)
+        {
+            _events = events;
+        }
 
         void INotifyPlatformEnabled.PlatformEnabled(DiContainer container)
         {
-            if (tmPro == null) return;
-            _startText = tmPro.text;
+            container.Inject(this);
+            if (_events == null) return;
+            _startText = textMeshPro!.text;
             switch (eventType)
             {
-                case EventType.AllNotes:
-                    EventManager.OnAllNotesCountChanged.AddListener(OnAllNotesCountChanged);
-                    break;
-                case EventType.GoodCuts:
-                    EventManager.OnGoodCutCountChanged.AddListener(OnGoodCutCountChanged);
-                    break;
-                case EventType.BadCuts:
-                    EventManager.OnBadCutCountChanged.AddListener(OnBadCutCountChanged);
-                    break;
-                case EventType.Misses:
-                    EventManager.OnMissCountChanged.AddListener(OnMissCountChanged);
-                    break;
-                case EventType.Score:
-                    EventManager.OnScoreChanged.AddListener(OnScoreChanged);
-                    break;
-                case EventType.Combo:
-                    EventManager.OnComboChanged.AddListener(OnComboChanged);
-                    break;
+                case CounterType.AnyCuts: _events.AllNotesCountDidChangeEvent += OnAllNotesCountDidChange; break;
+                case CounterType.GoodCuts: _events.GoodCutCountDidChangeEvent += OnGoodCutCountDidChange; break;
+                case CounterType.BadCuts: _events.BadCutCountDidChangeEvent += OnBadCutCountDidChange; break;
+                case CounterType.Misses: _events.MissCountDidChangeEvent += OnMissCountDidChange; break;
+                case CounterType.Score: _events.ScoreDidChangeEvent += OnScoreDidChange; break;
+                case CounterType.Combo: _events.ComboDidChangeEvent += OnComboDidChange; break;
             }
         }
 
         void INotifyPlatformDisabled.PlatformDisabled()
         {
-            if (tmPro == null) return;
-            tmPro.text = _startText;
+            if (_events == null) return;
+            textMeshPro!.text = _startText!;
             switch (eventType)
             {
-                case EventType.AllNotes:
-                    EventManager.OnAllNotesCountChanged.RemoveListener(OnAllNotesCountChanged);
-                    break;
-                case EventType.GoodCuts:
-                    EventManager.OnGoodCutCountChanged.RemoveListener(OnGoodCutCountChanged);
-                    break;
-                case EventType.BadCuts:
-                    EventManager.OnBadCutCountChanged.RemoveListener(OnBadCutCountChanged);
-                    break;
-                case EventType.Misses:
-                    EventManager.OnMissCountChanged.RemoveListener(OnMissCountChanged);
-                    break;
-                case EventType.Score:
-                    EventManager.OnScoreChanged.RemoveListener(OnScoreChanged);
-                    break;
-                case EventType.Combo:
-                    EventManager.OnComboChanged.RemoveListener(OnComboChanged);
-                    break;
+                case CounterType.AnyCuts: _events.AllNotesCountDidChangeEvent -= OnAllNotesCountDidChange; break;
+                case CounterType.GoodCuts: _events.GoodCutCountDidChangeEvent -= OnGoodCutCountDidChange; break;
+                case CounterType.BadCuts: _events.BadCutCountDidChangeEvent -= OnBadCutCountDidChange; break;
+                case CounterType.Misses: _events.MissCountDidChangeEvent -= OnMissCountDidChange; break;
+                case CounterType.Score: _events.ScoreDidChangeEvent -= OnScoreDidChange; break;
+                case CounterType.Combo: _events.ComboDidChangeEvent -= OnComboDidChange; break;
             }
         }
 
-        private void OnAllNotesCountChanged(int allNotes, int cuttableNotes) => tmPro!.text = $"{allNotes} | {cuttableNotes}";
-        private void OnGoodCutCountChanged(int goodCuts) => tmPro!.text = goodCuts.ToString();
-        private void OnBadCutCountChanged(int badCuts) => tmPro!.text = badCuts.ToString();
-        private void OnMissCountChanged(int misses) => tmPro!.text = misses.ToString();
-        private void OnScoreChanged(int rawScore, int modifiedScore) => tmPro!.text = $"{rawScore} | {modifiedScore}";
-        private void OnComboChanged(int combo) => tmPro!.text = combo.ToString();
+        private void OnAllNotesCountDidChange(int anyCuts, int cuttableNotes) => textMeshPro!.text = $"{anyCuts} | {cuttableNotes}";
+        private void OnGoodCutCountDidChange(int goodCuts) => textMeshPro!.text = $"{goodCuts}";
+        private void OnBadCutCountDidChange(int badCuts) => textMeshPro!.text = $"{badCuts}";
+        private void OnMissCountDidChange(int misses) => textMeshPro!.text = $"{misses}";
+        private void OnScoreDidChange(int rawScore, int modifiedScore) => textMeshPro!.text = $"{rawScore} | {modifiedScore}";
+        private void OnComboDidChange(int combo) => textMeshPro!.text = $"{combo}";
     }
 }

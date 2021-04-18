@@ -21,11 +21,11 @@ namespace CustomFloorPlugin
         private readonly IBeatmapObjectCallbackController _beatmapObjectCallbackController;
         private readonly IDifficultyBeatmap _difficultyBeatmap;
         private float _lastNoteTime;
-        private int _allNotesCount;
+        private int _anyCutCount;
         private int _goodCutCount;
         private int _badCutCount;
         private int _missCount;
-        private int _cuttableNotes;
+        private int _cuttableNotesCount;
         private int _highScore;
 
         public BSEvents(BeatmapObjectManager beatmapObjectManager,
@@ -68,7 +68,7 @@ namespace CustomFloorPlugin
 
         public void Initialize()
         {
-            _cuttableNotes = _difficultyBeatmap.beatmapData.cuttableNotesType - 1;
+            _cuttableNotesCount = _difficultyBeatmap.beatmapData.cuttableNotesType - 1;
             _highScore = _playerDataModel.playerData.GetPlayerLevelStatsData(_difficultyBeatmap).highScore;
             _beatmapObjectCallbackController.beatmapEventDidTriggerEvent += BeatmapEventDidTrigger;
             _beatmapObjectManager.noteWasCutEvent += new BeatmapObjectManager.NoteWasCutDelegate(NoteWasCut);
@@ -108,7 +108,7 @@ namespace CustomFloorPlugin
             if (noteController.noteData.colorType == ColorType.None || noteController.noteData.beatmapObjectType != BeatmapObjectType.Note)
                 return;
 
-            AllNotesCountDidChangeEvent?.Invoke(_allNotesCount++, _cuttableNotes);
+            AllNotesCountDidChangeEvent?.Invoke(_anyCutCount++, _cuttableNotesCount);
             if (noteCutInfo.allIsOK)
             {
                 NoteWasCutEvent?.Invoke((int)noteCutInfo.saberType);
@@ -134,7 +134,7 @@ namespace CustomFloorPlugin
                 return;
 
             NoteWasMissedEvent?.Invoke();
-            AllNotesCountDidChangeEvent?.Invoke(_allNotesCount++, _cuttableNotes);
+            AllNotesCountDidChangeEvent?.Invoke(_anyCutCount++, _cuttableNotesCount);
             MissCountDidChangeEvent?.Invoke(_missCount++);
             if (Mathf.Approximately(noteController.noteData.time, _lastNoteTime))
             {
