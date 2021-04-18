@@ -32,7 +32,7 @@ namespace CustomFloorPlugin.UI
         }
 
         /// <summary>
-        /// Determines if the feet icon == shown even if the platform would normally hide them<br/>
+        /// Determines if the feet icon is shown even if the platform would normally hide them<br/>
         /// Forwards the current choice to the UI, and the new choice to the plugin
         /// </summary>
         [UIValue("always-show-feet")]

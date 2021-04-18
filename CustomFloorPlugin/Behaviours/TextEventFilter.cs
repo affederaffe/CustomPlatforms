@@ -32,7 +32,8 @@ namespace CustomFloorPlugin
         void INotifyPlatformEnabled.PlatformEnabled(DiContainer container)
         {
             container.Inject(this);
-            if (_events == null) return;
+            if (_events == null)
+                return;
             _startText = textMeshPro!.text;
             switch (eventType)
             {
@@ -47,7 +48,8 @@ namespace CustomFloorPlugin
 
         void INotifyPlatformDisabled.PlatformDisabled()
         {
-            if (_events == null) return;
+            if (_events == null)
+                return;
             textMeshPro!.text = _startText!;
             switch (eventType)
             {

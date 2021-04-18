@@ -9,8 +9,8 @@ namespace CustomFloorPlugin
     {
         public enum SaberType
         {
-            RightSaber,
-            LeftSaber
+            LeftSaber,
+            RightSaber
         }
 
         public SaberType saberType;

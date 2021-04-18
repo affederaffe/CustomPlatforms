@@ -80,7 +80,8 @@ namespace CustomFloorPlugin
                 {
                     bool wasActivePlatform = _platformManager.activePlatform == platform;
                     CustomPlatform? newPlatform = await _platformManager.CreatePlatformAsync(e.FullPath);
-                    if (newPlatform == null) return;
+                    if (newPlatform == null)
+                        return;
                     if (wasActivePlatform)
                     {
                         int index = _platformManager.loadPlatformsTask!.Result.IndexOf(newPlatform);
@@ -98,7 +99,8 @@ namespace CustomFloorPlugin
             await await UnityMainThreadTaskScheduler.Factory.StartNew(async () =>
             {
                 CustomPlatform? newPlatform = await _platformManager.CreatePlatformAsync(e.FullPath);
-                if (newPlatform == null) return;
+                if (newPlatform == null)
+                    return;
                 _platformManager.loadPlatformsTask!.Result.Add(newPlatform);
                 _platformListsView.AddCellForPlatform(newPlatform, true);
                 if (_apiRequest)

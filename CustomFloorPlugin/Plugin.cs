@@ -1,5 +1,4 @@
 ﻿using CustomFloorPlugin.Configuration;
-using CustomFloorPlugin.HarmonyPatches;
 using CustomFloorPlugin.Installers;
 
 using IPA;
@@ -29,20 +28,9 @@ namespace CustomFloorPlugin
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822:Mark members as static", Justification = "BSIPA")]
         public void Init(Logger logger, Config config, Zenjector zenjector)
         {
-            Patcher.Patch();
             zenjector.OnApp<PlatformsAppInstaller>().WithParameters(logger, config.Generated<PluginConfig>());
             zenjector.OnMenu<PlatformsMenuInstaller>();
             zenjector.OnGame<PlatformsGameInstaller>(false);
-        }
-
-        /// <summary>
-        /// Plugin teardown, removes all Harmony Patches
-        /// </summary>
-        [OnExit]
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822:Mark members as static", Justification = "BSIPA")]
-        public void OnExit()
-        {
-            Patcher.Unpatch();
         }
     }
 }

@@ -82,7 +82,8 @@ namespace CustomFloorPlugin
             {
                 case null:
                 case MenuScenesTransitionSetupDataSO:
-                    if (isMultiplayer) return;
+                    if (isMultiplayer) 
+                        return;
                     _assetLoader.heart!.SetActive(_config.ShowHeart);
                     _assetLoader.heart.GetComponent<InstancedMaterialLightWithId>().ColorWasSet(UnityEngine.Color.magenta);
                     if (_config.ShowInMenu)
@@ -212,13 +213,6 @@ namespace CustomFloorPlugin
             foreach (INotifyPlatformDisabled notifyDisable in _platformManager.activePlatform!.GetComponentsInChildren<INotifyPlatformDisabled>(true))
             {
                 notifyDisable.PlatformDisabled();
-            }
-
-            while (_platformManager.spawnedObjects.Count != 0)
-            {
-                UnityEngine.Object gameObject = _platformManager.spawnedObjects[0];
-                _platformManager.spawnedObjects.RemoveAt(0);
-                UnityEngine.Object.Destroy(gameObject);
             }
         }
     }

@@ -19,6 +19,8 @@ namespace CustomFloorPlugin
         private readonly MultiplayerPlayersManager _multiplayerPlayersManager;
         private readonly DiContainer _container;
 
+        private GameObject? _lightEffects;
+
         public MultiplayerGameManager(AssetLoader assetLoader,
                                      PlatformManager platformManager,
                                      PlatformSpawner platformSpawner,
@@ -41,14 +43,15 @@ namespace CustomFloorPlugin
                 await Coroutines.AsTask(WaitForEndOfFrameCoroutine());
                 static IEnumerator<WaitForEndOfFrame> WaitForEndOfFrameCoroutine() { yield return new WaitForEndOfFrame(); }
                 await _platformSpawner.SetContainerAndShowAsync(platformIndex, _container);
-                GameObject lightEffects = await SpawnLightEffects();
-                _platformManager.spawnedObjects.Add(lightEffects);
+                _lightEffects = await SpawnLightEffects();
             }
         }
 
         public void Dispose()
         {
             _multiplayerPlayersManager.playerDidFinishEvent -= OnPlayerDidFinish;
+            if (_lightEffects != null)
+                UnityEngine.Object.Destroy(_lightEffects);
         }
 
         private async void OnPlayerDidFinish(LevelCompletionResults results)

@@ -15,26 +15,31 @@ namespace CustomFloorPlugin
         public SongEventType eventType;
         public Vector3 rotationVector;
 
-        private PlatformManager? _platformManager;
         private IBeatmapObjectCallbackController? _beatmapObjectCallbackController;
 
+        private LightRotationEventEffect? _lightRotationEventEffect;
+
         [Inject]
-        public void Construct(PlatformManager platformManager, [InjectOptional] IBeatmapObjectCallbackController beatmapObjectCallbackController)
+        public void Construct([InjectOptional] IBeatmapObjectCallbackController beatmapObjectCallbackController)
         {
-            _platformManager = platformManager;
             _beatmapObjectCallbackController = beatmapObjectCallbackController;
         }
 
         void INotifyPlatformEnabled.PlatformEnabled(DiContainer container)
         {
             container.Inject(this);
-            if (_beatmapObjectCallbackController == null) return;
-            LightRotationEventEffect rotEffect = gameObject.AddComponent<LightRotationEventEffect>();
-            _platformManager!.spawnedObjects.Add(rotEffect);
-            rotEffect.SetField("_beatmapObjectCallbackController", _beatmapObjectCallbackController);
-            rotEffect.SetField("_event", (BeatmapEventType)eventType);
-            rotEffect.SetField("_rotationVector", rotationVector);
-            rotEffect.SetField("_transform", transform);
+            if (_beatmapObjectCallbackController == null)
+                return;
+
+            if (_lightRotationEventEffect == null)
+            {
+                _lightRotationEventEffect = gameObject.AddComponent<LightRotationEventEffect>();
+                _lightRotationEventEffect.SetField("_event", (BeatmapEventType)eventType);
+                _lightRotationEventEffect.SetField("_rotationVector", rotationVector);
+                _lightRotationEventEffect.SetField("_transform", transform);
+            }
+
+            _lightRotationEventEffect.SetField("_beatmapObjectCallbackController", _beatmapObjectCallbackController);
         }
     }
 }

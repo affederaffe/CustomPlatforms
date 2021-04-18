@@ -14,15 +14,13 @@ namespace CustomFloorPlugin
         [Header("Use the average of all samples, ignoring specified sample")]
         public bool averageAllSamples;
 
-        private PlatformManager? _platformManager;
         private BasicSpectrogramData? _basicSpectrogramData;
 
         private Animation? _animation;
 
         [Inject]
-        public void Construct(PlatformManager platformManager, [InjectOptional] BasicSpectrogramData basicSpectrogramData)
+        public void Construct([InjectOptional] BasicSpectrogramData basicSpectrogramData)
         {
-            _platformManager = platformManager;
             _basicSpectrogramData = basicSpectrogramData;
         }
 
@@ -36,15 +34,10 @@ namespace CustomFloorPlugin
         {
             if (animationClip != null)
             {
-                _animation = GetComponent<Animation>();
-                if (_animation == null)
-                {
-                    _animation = gameObject.AddComponent<Animation>();
-                    _platformManager!.spawnedObjects.Add(_animation);
-                    _animation.AddClip(animationClip, "clip");
-                    _animation.Play("clip");
-                    _animation["clip"].speed = 0;
-                }
+                _animation = GetComponent<Animation>() ?? gameObject.AddComponent<Animation>();
+                _animation.AddClip(animationClip, "clip");
+                _animation.Play("clip");
+                _animation["clip"].speed = 0;
 
                 if (_basicSpectrogramData != null)
                 {

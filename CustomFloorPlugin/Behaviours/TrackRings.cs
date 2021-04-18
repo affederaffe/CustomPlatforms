@@ -9,7 +9,7 @@ using Zenject;
 
 namespace CustomFloorPlugin
 {
-    public class TrackRings : MonoBehaviour, INotifyPlatformEnabled
+    public class TrackRings : MonoBehaviour, INotifyPlatformEnabled, INotifyPlatformDisabled
     {
         [Space]
         [Header("Rings")]
@@ -40,8 +40,11 @@ namespace CustomFloorPlugin
 
         private SiraLog? _siraLog;
         private MaterialSwapper? _materialSwapper;
-        private PlatformManager? _platformManager;
         private IBeatmapObjectCallbackController? _beatmapObjectCallbackController;
+
+        private TrackLaneRingsManager? _trackLaneRingsManager;
+        private TrackLaneRingsRotationEffectSpawner? _trackLaneRingsRotationEffectSpawner;
+        private TrackLaneRingsPositionStepEffectSpawner? _trackLaneRingsPositionStepEffectSpawner;
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Code Quality", "IDE0051:Remove unused private members", Justification = "Called by Unity")]
         private void OnDrawGizmos()
@@ -67,92 +70,112 @@ namespace CustomFloorPlugin
         }
 
         [Inject]
-        public void Construct(SiraLog siraLog, MaterialSwapper materialSwapper, PlatformManager platformManager, [InjectOptional] IBeatmapObjectCallbackController beatmapObjectCallbackController)
+        public void Construct(SiraLog siraLog, MaterialSwapper materialSwapper, [InjectOptional] IBeatmapObjectCallbackController beatmapObjectCallbackController)
         {
             _siraLog = siraLog;
             _materialSwapper = materialSwapper;
-            _platformManager = platformManager;
             _beatmapObjectCallbackController = beatmapObjectCallbackController;
         }
 
         void INotifyPlatformEnabled.PlatformEnabled(DiContainer container)
         {
-            if (trackLaneRingPrefab == null) return;
+            if (trackLaneRingPrefab == null)
+                return;
             container.Inject(this);
-            gameObject.SetActive(false);
-            _materialSwapper!.ReplaceMaterials(trackLaneRingPrefab);
-            TrackLaneRingsManager ringsManager = gameObject.AddComponent<TrackLaneRingsManager>();
-            _platformManager!.spawnedObjects.Add(ringsManager);
 
-            TrackLaneRing trackRing = trackLaneRingPrefab.AddComponent<TrackLaneRing>();
-            _platformManager.spawnedObjects.Add(trackRing);
-            ringsManager.SetField("_trackLaneRingPrefab", trackRing);
-            ringsManager.SetField("_ringCount", ringCount);
-            ringsManager.SetField("_ringPositionStep", ringPositionStep);
-            ringsManager.SetField("_spawnAsChildren", true);
-
-            // Check if a TrackRing is using an in-scene GameObject rather than a prefab, which would result in spawning TubeLights twice.
-            // (looking at you, JumpGate)
-            // Sometimes I just want to scrap everything :)
-            if (trackLaneRingPrefab.scene.name != null)
+            if (_trackLaneRingsManager == null)
             {
-                foreach (TubeLight tubeLight in trackLaneRingPrefab.GetComponentsInChildren<TubeLight>())
+                gameObject.SetActive(false);
+                _materialSwapper!.ReplaceMaterials(trackLaneRingPrefab);
+                TrackLaneRing trackLaneRing = trackLaneRingPrefab.AddComponent<TrackLaneRing>();
+                _trackLaneRingsManager = gameObject.AddComponent<TrackLaneRingsManager>();
+                _trackLaneRingsManager.SetField("_trackLaneRingPrefab", trackLaneRing);
+                _trackLaneRingsManager.SetField("_ringCount", ringCount);
+                _trackLaneRingsManager.SetField("_ringPositionStep", ringPositionStep);
+                _trackLaneRingsManager.SetField("_spawnAsChildren", true);
+
+                // Check if a TrackRing is using an in-scene GameObject rather than a prefab, which would result in spawning TubeLights twice.
+                // (looking at you, JumpGate)
+                // Who the hell thought using in scene objects was a good idea?!
+                if (trackLaneRingPrefab.scene.name != null)
                 {
-                    while (tubeLight.transform.childCount != 0)
+                    foreach (TubeLight tubeLight in trackLaneRingPrefab.GetComponentsInChildren<TubeLight>())
                     {
-                        DestroyImmediate(tubeLight.transform.GetChild(0).gameObject);
+                        while (tubeLight.transform.childCount != 0)
+                        {
+                            DestroyImmediate(tubeLight.transform.GetChild(0).gameObject);
+                        }
+                        _siraLog!.Warning("Using GameObjects as rings is deprecated. Please use Prefabs instead and re-export your Platform!");
                     }
-                    _siraLog!.Warning("Using GameObjects as rings is deprecated. Please use Prefabs instead and re-export your Platform!");
                 }
+
+                gameObject.SetActive(true);
             }
 
-            gameObject.SetActive(true);
-
-            if (useRotationEffect)
+            if (useRotationEffect && _trackLaneRingsRotationEffectSpawner != null)
             {
-                TrackLaneRingsRotationEffect rotationEffect = gameObject.AddComponent<TrackLaneRingsRotationEffect>();
-                _platformManager.spawnedObjects.Add(rotationEffect);
-                rotationEffect.SetField("_trackLaneRingsManager", ringsManager);
-                rotationEffect.SetField("_startupRotationAngle", startupRotationAngle);
-                rotationEffect.SetField("_startupRotationStep", startupRotationStep);
+                _trackLaneRingsRotationEffectSpawner!.SetField("_beatmapObjectCallbackController", _beatmapObjectCallbackController);
+                try { _trackLaneRingsRotationEffectSpawner!.Start(); } catch { }
+            }
+            else if (useRotationEffect)
+            {
+                TrackLaneRingsRotationEffect trackLaneRingsRotationEffect = gameObject.AddComponent<TrackLaneRingsRotationEffect>();
+                trackLaneRingsRotationEffect.SetField("_trackLaneRingsManager", _trackLaneRingsManager);
+                trackLaneRingsRotationEffect.SetField("_startupRotationAngle", startupRotationAngle);
+                trackLaneRingsRotationEffect.SetField("_startupRotationStep", startupRotationStep);
                 int timePerRing = startupRotationPropagationSpeed / ringCount;
                 float ringsPerFrame = Time.fixedDeltaTime / timePerRing;
-                rotationEffect.SetField("_startupRotationPropagationSpeed", Mathf.Max((int)ringsPerFrame, 1));
-                rotationEffect.SetField("_startupRotationFlexySpeed", startupRotationFlexySpeed);
+                trackLaneRingsRotationEffect.SetField("_startupRotationPropagationSpeed", Mathf.Max((int)ringsPerFrame, 1));
+                trackLaneRingsRotationEffect.SetField("_startupRotationFlexySpeed", startupRotationFlexySpeed);
 
-                TrackLaneRingsRotationEffectSpawner rotationEffectSpawner = gameObject.AddComponent<TrackLaneRingsRotationEffectSpawner>();
-                _platformManager.spawnedObjects.Add(rotationEffectSpawner);
-                rotationEffectSpawner.SetField("_beatmapObjectCallbackController", _beatmapObjectCallbackController);
-                rotationEffectSpawner.SetField("_beatmapEventType", (BeatmapEventType)rotationSongEventType);
-                rotationEffectSpawner.SetField("_rotationStep", rotationStep);
+                _trackLaneRingsRotationEffectSpawner = gameObject.AddComponent<TrackLaneRingsRotationEffectSpawner>();
+                _trackLaneRingsRotationEffectSpawner.SetField("_beatmapEventType", (BeatmapEventType)rotationSongEventType);
+                _trackLaneRingsRotationEffectSpawner.SetField("_rotationStep", rotationStep);
                 int timePerRing2 = rotationPropagationSpeed / ringCount;
                 float ringsPerFrame2 = Time.fixedDeltaTime / timePerRing2;
-                rotationEffectSpawner.SetField("_rotationPropagationSpeed", Mathf.Max((int)ringsPerFrame2, 1));
-                rotationEffectSpawner.SetField("_rotationFlexySpeed", rotationFlexySpeed);
-                rotationEffectSpawner.SetField("_trackLaneRingsRotationEffect", rotationEffect);
+                _trackLaneRingsRotationEffectSpawner.SetField("_rotationPropagationSpeed", Mathf.Max((int)ringsPerFrame2, 1));
+                _trackLaneRingsRotationEffectSpawner.SetField("_rotationFlexySpeed", rotationFlexySpeed);
+                _trackLaneRingsRotationEffectSpawner.SetField("_trackLaneRingsRotationEffect", trackLaneRingsRotationEffect);
             }
 
-            if (useStepEffect)
+            if (useStepEffect && _trackLaneRingsPositionStepEffectSpawner != null)
             {
-                TrackLaneRingsPositionStepEffectSpawner stepEffectSpawner = gameObject.AddComponent<TrackLaneRingsPositionStepEffectSpawner>();
-                _platformManager.spawnedObjects.Add(stepEffectSpawner);
-                stepEffectSpawner.SetField("_beatmapObjectCallbackController", _beatmapObjectCallbackController);
-                stepEffectSpawner.SetField("_trackLaneRingsManager", ringsManager);
-                stepEffectSpawner.SetField("_beatmapEventType", (BeatmapEventType)stepSongEventType);
-                stepEffectSpawner.SetField("_minPositionStep", minPositionStep);
-                stepEffectSpawner.SetField("_maxPositionStep", maxPositionStep);
-                stepEffectSpawner.SetField("_moveSpeed", moveSpeed);
+                _trackLaneRingsPositionStepEffectSpawner.SetField("_beatmapObjectCallbackController", _beatmapObjectCallbackController);
+                try { _trackLaneRingsPositionStepEffectSpawner.Start(); } catch { }
             }
-
-            foreach (TrackLaneRing ring in ringsManager.Rings)
+            else if (useStepEffect)
             {
-                _platformManager.spawnedObjects.Add(ring.gameObject);
+                _trackLaneRingsPositionStepEffectSpawner = gameObject.AddComponent<TrackLaneRingsPositionStepEffectSpawner>();
+                _trackLaneRingsPositionStepEffectSpawner.SetField("_trackLaneRingsManager", _trackLaneRingsManager);
+                _trackLaneRingsPositionStepEffectSpawner.SetField("_beatmapEventType", (BeatmapEventType)stepSongEventType);
+                _trackLaneRingsPositionStepEffectSpawner.SetField("_minPositionStep", minPositionStep);
+                _trackLaneRingsPositionStepEffectSpawner.SetField("_maxPositionStep", maxPositionStep);
+                _trackLaneRingsPositionStepEffectSpawner.SetField("_moveSpeed", moveSpeed);
             }
 
             foreach (INotifyPlatformEnabled notifyEnable in GetComponentsInChildren<INotifyPlatformEnabled>(true))
             {
                 if ((Object)notifyEnable != this)
                     notifyEnable.PlatformEnabled(container);
+            }
+        }
+
+        void INotifyPlatformDisabled.PlatformDisabled()
+        {
+            if (useRotationEffect)
+            {
+                _trackLaneRingsRotationEffectSpawner!.OnDestroy();
+            }
+
+            if (useStepEffect)
+            {
+                _trackLaneRingsPositionStepEffectSpawner!.OnDestroy();
+            }
+
+            foreach (INotifyPlatformDisabled notifyDisable in GetComponentsInChildren<INotifyPlatformDisabled>(true))
+            {
+                if ((Object)notifyDisable != this)
+                    notifyDisable.PlatformDisabled();
             }
         }
     }

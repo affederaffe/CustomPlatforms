@@ -69,11 +69,6 @@ namespace CustomFloorPlugin
         internal string? apiRequestedLevelId;
 
         /// <summary>
-        /// Keeps track of all spawned custom objects, whichs lifetime ends on any scene transition
-        /// </summary>
-        internal readonly List<Object> spawnedObjects = new();
-
-        /// <summary>
         /// Keeps track of which <see cref="AssetBundle"/> has loaded a <see cref="CustomPlatform"/>
         /// </summary>
         internal readonly Dictionary<string, CustomPlatform> platformFilePaths = new();
@@ -141,7 +136,7 @@ namespace CustomFloorPlugin
             foreach (string path in bundlePaths)
             {
                 CustomPlatform? platform = await CreatePlatformAsync(path);
-                if (platform != null)
+                if (platform != null) 
                     platforms.Add(platform);
             }
 
@@ -202,7 +197,8 @@ namespace CustomFloorPlugin
         {
 
             CustomPlatform? platform = await _platformLoader!.LoadFromFileAsync(path);
-            if (platform == null) return null;
+            if (platform == null) 
+                return null;
             CustomPlatform newPlatform = Instantiate(platform, transform);
             Destroy(platform.gameObject);
             newPlatform.name = platform.name;

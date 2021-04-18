@@ -163,7 +163,8 @@ namespace CustomFloorPlugin.UI
 
         internal void AddCellForPlatform(CustomPlatform platform, bool forceReload)
         {
-            if (allListTables == null) return;
+            if (allListTables == null)
+                return;
             CustomListTableData.CustomCellInfo cell = new(platform.platName, platform.platAuthor, platform.icon);
             _platformCellPairs!.Add(platform, cell);
             foreach (CustomListTableData listTable in allListTables)
@@ -176,7 +177,8 @@ namespace CustomFloorPlugin.UI
 
         internal void RemoveCellForPlatform(CustomPlatform platform)
         {
-            if (allListTables == null) return;
+            if (allListTables == null)
+                return;
             CustomListTableData.CustomCellInfo cell = _platformCellPairs![platform];
             for (int i = 0; i < allListTables.Length; i++)
             {

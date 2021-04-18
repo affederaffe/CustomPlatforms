@@ -7,7 +7,7 @@ using Zenject;
 
 namespace CustomFloorPlugin
 {
-    public class Spectrogram : MonoBehaviour, INotifyPlatformEnabled
+    public class Spectrogram : MonoBehaviour, INotifyPlatformEnabled, INotifyPlatformDisabled
     {
         /// <summary>
         /// Prefab for individual columns
@@ -40,33 +40,12 @@ namespace CustomFloorPlugin
         public float columnDepth = 1f;
 
         /// <summary>
-        /// An array of all <see cref="Transform"/>s under a <see cref="Spectrogram"/>
+        /// 
         /// </summary>
         private Transform[]? _columnTransforms;
 
         private MaterialSwapper? _materialSwapper;
-        private PlatformManager? _platformManager;
         private BasicSpectrogramData? _basicSpectrogramData;
-
-        /// <summary>
-        /// Spectogram fallback data
-        /// </summary>
-        private static IList<float> FallbackSamples
-        {
-            get
-            {
-                if (_fallbackSamples == null)
-                {
-                    _fallbackSamples = new float[64];
-                    for (int i = 0; i < FallbackSamples.Count; i++)
-                    {
-                        FallbackSamples[i] = (Mathf.Sin((float)i / 64 * 15 * Mathf.PI + 5f * Mathf.PI) + 2f) / 15f;
-                    }
-                }
-                return _fallbackSamples;
-            }
-        }
-        private static float[]? _fallbackSamples;
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Code Quality", "IDE0051:Remove unused private members", Justification = "Called by Unity")]
         private void OnDrawGizmos()
@@ -93,23 +72,32 @@ namespace CustomFloorPlugin
         }
 
         [Inject]
-        public void Construct(MaterialSwapper materialSwapper, PlatformManager platformManager, [InjectOptional] BasicSpectrogramData basicSpectrogramData)
+        public void Construct(MaterialSwapper materialSwapper, [InjectOptional] BasicSpectrogramData basicSpectrogramData)
         {
             _materialSwapper = materialSwapper;
-            _platformManager = platformManager;
             _basicSpectrogramData = basicSpectrogramData;
         }
 
         void INotifyPlatformEnabled.PlatformEnabled(DiContainer container)
         {
-            if (columnPrefab == null) return;
+            if (columnPrefab == null)
+                return;
             container.Inject(this);
             _materialSwapper!.ReplaceMaterials(columnPrefab);
-            CreateColums();
+            if (_columnTransforms == null) CreateColums();
             foreach (INotifyPlatformEnabled notifyEnable in GetComponentsInChildren<INotifyPlatformEnabled>(true))
             {
                 if ((Object)notifyEnable != this)
                     notifyEnable.PlatformEnabled(container);
+            }
+        }
+
+        void INotifyPlatformDisabled.PlatformDisabled()
+        {
+            foreach (INotifyPlatformDisabled notifyDisable in GetComponentsInChildren<INotifyPlatformDisabled>(true))
+            {
+                if ((Object)notifyDisable != this)
+                    notifyDisable.PlatformDisabled();
             }
         }
 
@@ -152,10 +140,25 @@ namespace CustomFloorPlugin
         private Transform CreateColumn(Vector3 pos)
         {
             GameObject gameObject = Instantiate(columnPrefab!, transform);
-            _platformManager!.spawnedObjects.Add(gameObject);
             gameObject.transform.localPosition = pos;
             gameObject.transform.localScale = new Vector3(columnWidth, minHeight, columnDepth);
             return gameObject.transform;
+        }
+
+        /// <summary>
+        /// Spectogram fallback data
+        /// </summary>
+        private static IList<float> FallbackSamples => _fallbackSamples ??= CreateFallbackSamples();
+        private static float[]? _fallbackSamples;
+
+        private static float[] CreateFallbackSamples()
+        {
+            float[] samples = new float[64];
+            for (int i = 0; i < samples.Length; i++)
+            {
+                samples[i] = (Mathf.Sin((float)i / 64 * 15 * Mathf.PI + 5f * Mathf.PI) + 2f) / 15f;
+            }
+            return samples;
         }
     }
 }

@@ -46,7 +46,8 @@ namespace CustomFloorPlugin
 
         private void OnColorsDidChange()
         {
-            if (!Renderer.material.HasProperty(propertyName)) return;
+            if (!Renderer.material.HasProperty(propertyName))
+                return;
             Renderer.material.SetColor(propertyName, materialColorType switch
             {
                 MaterialColorType.SaberColorA => _colorManager!.ColorForSaberType(SaberType.SaberA),

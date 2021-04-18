@@ -29,7 +29,7 @@ namespace CustomFloorPlugin.UI
         - Added 'Shuffle Platforms' option
          - Added manual config option to change your CustomPlatforms directory
         - New feature: nested components
-        - Fixed unhiding objects already hidden by Chroma
+        - Fixed issue with Chroma's environment removal
 
   <size=150%><color=#888888>Version 6.1.1</color></size>
         - Security fix: removed embedded CustomScripts
@@ -71,7 +71,7 @@ namespace CustomFloorPlugin.UI
         Dakari: Compatibility with Cinema
         AkaRaiden: Features for platform makers
         Nicolas: Faster platform loading
-<size=125%><align=center>CustomPlatforms developed by affederaffe</align></size>";
+        <size=125%><align=center>CustomPlatforms developed by affederaffe</align></size>";
 
         protected override void DidDeactivate(bool removedFromHierarchy, bool screenSystemDisabling)
         {
