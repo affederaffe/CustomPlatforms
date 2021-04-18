@@ -85,8 +85,8 @@ namespace CustomFloorPlugin
 
             if (_trackLaneRingsManager == null)
             {
-                gameObject.SetActive(false);
                 _materialSwapper!.ReplaceMaterials(trackLaneRingPrefab);
+                gameObject.SetActive(false);
                 TrackLaneRing trackLaneRing = trackLaneRingPrefab.AddComponent<TrackLaneRing>();
                 _trackLaneRingsManager = gameObject.AddComponent<TrackLaneRingsManager>();
                 _trackLaneRingsManager.SetField("_trackLaneRingPrefab", trackLaneRing);
@@ -108,8 +108,6 @@ namespace CustomFloorPlugin
                         _siraLog!.Warning("Using GameObjects as rings is deprecated. Please use Prefabs instead and re-export your Platform!");
                     }
                 }
-
-                gameObject.SetActive(true);
             }
 
             if (useRotationEffect && _trackLaneRingsRotationEffectSpawner != null)
@@ -129,6 +127,7 @@ namespace CustomFloorPlugin
                 trackLaneRingsRotationEffect.SetField("_startupRotationFlexySpeed", startupRotationFlexySpeed);
 
                 _trackLaneRingsRotationEffectSpawner = gameObject.AddComponent<TrackLaneRingsRotationEffectSpawner>();
+                _trackLaneRingsRotationEffectSpawner.SetField("_beatmapObjectCallbackController", _beatmapObjectCallbackController);
                 _trackLaneRingsRotationEffectSpawner.SetField("_beatmapEventType", (BeatmapEventType)rotationSongEventType);
                 _trackLaneRingsRotationEffectSpawner.SetField("_rotationStep", rotationStep);
                 int timePerRing2 = rotationPropagationSpeed / ringCount;
@@ -146,12 +145,15 @@ namespace CustomFloorPlugin
             else if (useStepEffect)
             {
                 _trackLaneRingsPositionStepEffectSpawner = gameObject.AddComponent<TrackLaneRingsPositionStepEffectSpawner>();
+                _trackLaneRingsPositionStepEffectSpawner.SetField("_beatmapObjectCallbackController", _beatmapObjectCallbackController);
                 _trackLaneRingsPositionStepEffectSpawner.SetField("_trackLaneRingsManager", _trackLaneRingsManager);
                 _trackLaneRingsPositionStepEffectSpawner.SetField("_beatmapEventType", (BeatmapEventType)stepSongEventType);
                 _trackLaneRingsPositionStepEffectSpawner.SetField("_minPositionStep", minPositionStep);
                 _trackLaneRingsPositionStepEffectSpawner.SetField("_maxPositionStep", maxPositionStep);
                 _trackLaneRingsPositionStepEffectSpawner.SetField("_moveSpeed", moveSpeed);
             }
+
+            gameObject.SetActive(true);
 
             foreach (INotifyPlatformEnabled notifyEnable in GetComponentsInChildren<INotifyPlatformEnabled>(true))
             {

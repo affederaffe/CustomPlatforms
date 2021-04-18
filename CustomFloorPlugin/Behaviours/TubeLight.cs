@@ -11,12 +11,33 @@ namespace CustomFloorPlugin
     [RequireComponent(typeof(MeshRenderer))]
     public class TubeLight : MonoBehaviour, INotifyPlatformEnabled, INotifyPlatformDisabled
     {
+        public enum LightsID
+        {
+            Static = 0,
+            BackLights = 1,
+            BigRingLights = 2,
+            LeftLasers = 3,
+            RightLasers = 4,
+            TrackAndBottom = 5,
+            Unused5 = 6,
+            Unused6 = 7,
+            Unused7 = 8,
+            RingsRotationEffect = 9,
+            RingsStepEffect = 10,
+            Unused10 = 11,
+            Unused11 = 12,
+            RingSpeedLeft = 13,
+            RingSpeedRight = 14,
+            Unused14 = 15,
+            Unused15 = 16
+        }
+
         public float width = 0.5f;
         public float length = 1f;
         [Range(0, 1)]
         public float center = 0.5f;
         public Color color = Color.white;
-        public LightsID lightsID = LightsID.Static;
+        public LightsID lightsID;
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("CodeQuality", "IDE0051:Remove unused private members", Justification = "Called by Unity")]
         private void OnDrawGizmos()
@@ -28,29 +49,30 @@ namespace CustomFloorPlugin
         }
 
         private AssetLoader? _assetLoader;
-        private LightWithIdManager? _lightManager;
+        private LightWithIdManager? _lightWithIdManager;
 
         private TubeBloomPrePassLight? _tubeBloomLight;
         private TubeBloomPrePassLightWithId? _tubeBloomLightWithId;
         private InstancedMaterialLightWithId? _iHeartBeatSaber;
 
         [Inject]
-        public void Construct(AssetLoader assetLoader, LightWithIdManager lightManager)
+        public void Construct(AssetLoader assetLoader, LightWithIdManager lightWithIdManager)
         {
             _assetLoader = assetLoader;
-            _lightManager = lightManager;
+            _lightWithIdManager = lightWithIdManager;
         }
 
         void INotifyPlatformEnabled.PlatformEnabled(DiContainer container)
         {
+            UnregisterLight();
             container.Inject(this);
             GetComponent<MeshRenderer>().enabled = false;
             if (GetComponent<MeshFilter>().mesh.vertexCount == 0)
             {
                 if (_tubeBloomLightWithId != null)
                 {
-                    _tubeBloomLightWithId.__SetIsUnRegistered();
-                    _lightManager!.RegisterLight(_tubeBloomLightWithId);
+                    _lightWithIdManager!.RegisterLight(_tubeBloomLightWithId);
+                    (_tubeBloomLightWithId as LightWithIdMonoBehaviour).SetField("_lightManager", _lightWithIdManager);
                 }
                 else
                 {
@@ -72,19 +94,18 @@ namespace CustomFloorPlugin
                     parasprite.Init();
                     parasprite.GetComponent<MeshRenderer>().enabled = false;
                     (_tubeBloomLightWithId as LightWithIdMonoBehaviour).SetField("_ID", (int)lightsID);
+                    (_tubeBloomLightWithId as LightWithIdMonoBehaviour).SetField("_lightManager", _lightWithIdManager);
                     _tubeBloomLight.color = color * 0.9f;
                     _tubeBloomLight.Refresh();
-                }
-
-                (_tubeBloomLightWithId as LightWithIdMonoBehaviour).SetField("_lightManager", _lightManager);
-                _tubeBloomLightWithId.gameObject.SetActive(true);
+                    _tubeBloomLightWithId.gameObject.SetActive(true);
+                }                  
             }
             else
             {
                 if (_iHeartBeatSaber != null)
                 {
-                    _iHeartBeatSaber.__SetIsUnRegistered();
-                    _lightManager!.RegisterLight(_iHeartBeatSaber);
+                    _lightWithIdManager!.RegisterLight(_iHeartBeatSaber);
+                    (_iHeartBeatSaber as LightWithIdMonoBehaviour).SetField("_lightManager", _lightWithIdManager);
                 }
                 else
                 {
@@ -95,23 +116,27 @@ namespace CustomFloorPlugin
                     _iHeartBeatSaber.transform.rotation = transform.rotation;
                     _iHeartBeatSaber.GetComponent<MeshFilter>().mesh = GetComponent<MeshFilter>().mesh;
                     (_iHeartBeatSaber as LightWithIdMonoBehaviour).SetField("_ID", (int)lightsID);
+                    (_iHeartBeatSaber as LightWithIdMonoBehaviour).SetField("_lightManager", _lightWithIdManager);
+                    _iHeartBeatSaber.gameObject.SetActive(true);
                 }
-
-                (_iHeartBeatSaber as LightWithIdMonoBehaviour).SetField("_lightManager", _lightManager);
-                _iHeartBeatSaber.gameObject.SetActive(true);
             }
         }
 
         void INotifyPlatformDisabled.PlatformDisabled()
         {
+            UnregisterLight();
+        }
+
+        private void UnregisterLight()
+        {
             if (_tubeBloomLight != null)
             {
                 _tubeBloomLight.InvokeMethod<object, BloomPrePassLight>("UnregisterLight");
-                _lightManager!.UnregisterLight(_tubeBloomLightWithId);
+                _lightWithIdManager!.UnregisterLight(_tubeBloomLightWithId);
             }
             else if (_iHeartBeatSaber != null)
             {
-                _lightManager!.UnregisterLight(_iHeartBeatSaber);
+                _lightWithIdManager!.UnregisterLight(_iHeartBeatSaber);
             }
         }
     }

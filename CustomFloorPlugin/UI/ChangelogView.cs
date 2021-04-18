@@ -71,7 +71,7 @@ namespace CustomFloorPlugin.UI
         Dakari: Compatibility with Cinema
         AkaRaiden: Features for platform makers
         Nicolas: Faster platform loading
-        <size=125%><align=center>CustomPlatforms developed by affederaffe</align></size>";
+<size=125%><align=center>CustomPlatforms developed by affederaffe</align></size>";
 
         protected override void DidDeactivate(bool removedFromHierarchy, bool screenSystemDisabling)
         {
