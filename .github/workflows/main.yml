@@ -2,15 +2,12 @@ name: Build
 
 on:
   push:
-    branches:
-      - master
-      - dev
+    branches: ["**"]
     paths: 
       - 'CustomFloorPlugin/**'
       - '.github/workflows/main.yml'
   pull_request:
-    branches:
-      - dev
+    branches: ["**"]
     paths:  
       - 'CustomFloorPlugin/**'
       - '.github/workflows/main.yml'
