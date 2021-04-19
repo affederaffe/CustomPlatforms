@@ -41,12 +41,4 @@ jobs:
       uses: actions/upload-artifact@v1
       with:
         name: ${{ steps.Build.outputs.filename }}
-        path: ./CustomFloorPlugin/bin/Release/Final
-    - name: CopyPDB
-      working-directory: ./CustomFloorPlugin/bin/Release
-      run: cp ${{ steps.Build.outputs.assemblyname }}.pdb Final/Plugins/${{ steps.Build.outputs.assemblyname }}.pdb
-    - name: Upload Artifact With PDB
-      uses: actions/upload-artifact@v1
-      with:
-        name: ${{ steps.Build.outputs.filename }}_WithPDB
-        path: ./CustomFloorPlugin/bin/Release/Final
+        path: ${{ steps.Build.outputs.artifactpath }}
