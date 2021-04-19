@@ -74,9 +74,6 @@
     <Reference Include="UnityEngine.UI">
       <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\UnityEngine.UI.dll</HintPath>
     </Reference>
-    <Reference Include="UnityEngine.UnityWebRequestModule">
-      <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\UnityEngine.UnityWebRequestModule.dll</HintPath>
-    </Reference>
     <Reference Include="Unity.ProBuilder">
       <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\Unity.ProBuilder.dll</HintPath>
     </Reference>
@@ -121,9 +118,6 @@
     </Reference>
     <Reference Include="Newtonsoft.Json">
      <HintPath>$(BeatSaberDir)\Libs\Newtonsoft.Json.dll</HintPath>
-   </Reference>
-   <Reference Include="HarmonyLib">
-     <HintPath>$(BeatSaberDir)\Libs\0Harmony.dll</HintPath>
    </Reference>
     <Reference Include="BSML">
       <HintPath>$(BeatSaberDir)\Plugins\BSML.dll</HintPath>
