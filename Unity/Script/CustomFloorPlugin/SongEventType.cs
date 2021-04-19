@@ -1,9 +1,6 @@
 ﻿namespace CustomFloorPlugin
 {
-    /// <summary>
-    /// A reference for SongEvent IDs from 2+ years ago. Warning outdated
-    /// </summary>
-    public enum SongEventType
+    public enum SongEventType 
     {
         BackLights = 0,
         BigRingLights = 1,
