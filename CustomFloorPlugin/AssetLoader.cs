@@ -174,6 +174,7 @@ namespace CustomFloorPlugin
             heart.GetComponent<MaterialPropertyBlockColorSetter>().SetField("_property", "_Color");
 
             InstancedMaterialLightWithId materialLightWithId = heart.GetComponent<InstancedMaterialLightWithId>();
+            materialLightWithId.SetField("_intensity", 1.375f);
             materialLightWithId.SetField("_minAlpha", 0f);
             materialLightWithId.ColorWasSet(Color.magenta);
 
