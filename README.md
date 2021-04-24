@@ -73,5 +73,5 @@ In the inspector, click "Export". Navigate to your CustomPlatforms folder, and p
 #### Tiruialon - (Top-Cat)
   - Thank you for your contributions!
  
-#### Boulders2000 - (Bug Hunter)
+#### boulders2000 - (Bug Hunter)
   - Stopped counting how many bugreports he sent.
