@@ -35,7 +35,6 @@ namespace CustomFloorPlugin
         public Color color = Color.white;
         public LightsID lightsID = LightsID.Static;
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Code Quality", "IDE0051:Remove unused private members", Justification = "Called by Unity")]
         private void OnDrawGizmos() 
         {
             Gizmos.color = color;

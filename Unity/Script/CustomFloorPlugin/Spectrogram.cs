@@ -12,7 +12,6 @@ namespace CustomFloorPlugin
         public float columnWidth = 1f;
         public float columnDepth = 1f;
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Code Quality", "IDE0051:Remove unused private members", Justification = "Called by Unity")]
         private void OnDrawGizmos() 
         {
             Gizmos.matrix = transform.localToWorldMatrix;
