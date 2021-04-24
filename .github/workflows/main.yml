@@ -37,8 +37,15 @@ jobs:
       env:
         BUILDTEXT: Filename=${{ steps.Build.outputs.filename }}
         ASSEMBLYNAME: AssemblyName=${{ steps.Build.outputs.assemblyname }}
-    - name: Upload Artifact
-      uses: actions/upload-artifact@v1
+    - name: Unity Project
+      run: zip -r UnityProject.zip ./Unity/CustomPlatforms
+    - name: Upload Plugin Artifact
+      uses: actions/upload-artifact@v2
       with:
         name: ${{ steps.Build.outputs.filename }}
         path: ${{ steps.Build.outputs.artifactpath }}
+    - name: Upload Unity Project Artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: Unity Project
+        path: UnityProject.zip
