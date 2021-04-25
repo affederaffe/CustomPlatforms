@@ -100,7 +100,7 @@ namespace CustomFloorPlugin
         }
 
         /// <summary>
-        /// Automaticly save the descriptors on exit
+        /// Automatically save the descriptors on exit
         /// </summary>
         private async void OnDestroy()
         {

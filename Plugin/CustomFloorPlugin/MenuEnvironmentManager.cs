@@ -43,14 +43,14 @@ namespace CustomFloorPlugin
         private async void OnConnected()
         {
             _platformSpawner.IsMultiplayer = true;
-            _assetLoader.SetPlayersPlaceActive(false);
+            _assetLoader.SetHeartActive(false);
             await _platformSpawner.ChangeToPlatformAsync(0);
         }
 
         private async void OnDisconnected(DisconnectedReason reason)
         {
             _platformSpawner.IsMultiplayer = false;
-            _assetLoader.SetPlayersPlaceActive(_config.ShowHeart);
+            _assetLoader.SetHeartActive(_config.ShowHeart);
             if (_config.ShowInMenu)
             {
                 int platformIndex = _config.ShufflePlatforms

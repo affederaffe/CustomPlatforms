@@ -35,7 +35,7 @@ namespace CustomFloorPlugin
         internal readonly Sprite FallbackCover;
 
         /// <summary>
-        /// The heart, just because I can
+        /// The old heart, just because I can
         /// </summary>
         private GameObject? _heart;
 
@@ -57,6 +57,10 @@ namespace CustomFloorPlugin
             _playersPlace = await CreatePlayersPlace();
         }
 
+        /// <summary>
+        /// (De-)Activates the heart
+        /// </summary>
+        /// <param name="value">The desired state</param>
         internal void SetHeartActive(bool value)
         {
             if (_heart == null) return;
@@ -71,6 +75,10 @@ namespace CustomFloorPlugin
             }
         }
         
+        /// <summary>
+        /// (De-)Activates the players place replacement
+        /// </summary>
+        /// <param name="value">The desired state</param>
         internal void SetPlayersPlaceActive(bool value)
         {
             if (_playersPlace == null) return;

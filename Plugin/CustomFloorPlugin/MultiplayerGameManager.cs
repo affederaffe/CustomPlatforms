@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
+using IPA.Utilities;
 using IPA.Utilities.Async;
 
 using UnityEngine;
@@ -12,22 +13,25 @@ namespace CustomFloorPlugin
 {
     internal class MultiplayerGameManager : IInitializable, IDisposable
     {
+        private readonly DiContainer _container;
         private readonly PlatformManager _platformManager;
         private readonly PlatformSpawner _platformSpawner;
         private readonly MultiplayerPlayersManager _multiplayerPlayersManager;
-        private readonly DiContainer _container;
+        private readonly ColorScheme _colorScheme;
 
-        //private GameObject? _lightEffects;
+        private GameObject? _lightEffects;
         
-        public MultiplayerGameManager(PlatformManager platformManager,
+        public MultiplayerGameManager(DiContainer container, 
+                                     PlatformManager platformManager,
                                      PlatformSpawner platformSpawner,
                                      MultiplayerPlayersManager multiplayerPlayersManager,
-                                     DiContainer container)
+                                     ColorScheme colorScheme)
         {
+            _container = container;
             _platformManager = platformManager;
             _platformSpawner = platformSpawner;
             _multiplayerPlayersManager = multiplayerPlayersManager;
-            _container = container;
+            _colorScheme = colorScheme;
         }
 
         public async void Initialize()
@@ -39,15 +43,15 @@ namespace CustomFloorPlugin
                 await Coroutines.AsTask(WaitForEndOfFrameCoroutine());
                 static IEnumerator<WaitForEndOfFrame> WaitForEndOfFrameCoroutine() { yield return new WaitForEndOfFrame(); }
                 await _platformSpawner.SetContainerAndShowAsync(platformIndex, _container);
-                //_lightEffects = SpawnLightEffects();
+                _lightEffects = CreateLightEffects();
             }
         }
 
         public void Dispose()
         {
             _multiplayerPlayersManager.playerDidFinishEvent -= OnPlayerDidFinish;
-            /*if (_lightEffects != null)
-                UnityEngine.Object.Destroy(_lightEffects);*/
+            if (_lightEffects != null)
+                UnityEngine.Object.Destroy(_lightEffects);
         }
 
         private async void OnPlayerDidFinish(LevelCompletionResults results)
@@ -55,28 +59,55 @@ namespace CustomFloorPlugin
             await _platformSpawner.ChangeToPlatformAsync(0);
         }
 
-        /*/// <summary>
+        /// <summary>
         /// Creates <see cref="LightSwitchEventEffect"/>s
         /// </summary>
-        private GameObject SpawnLightEffects()
+        private GameObject CreateLightEffects()
         {
             GameObject lightEffects = new("LightEffects");
+            lightEffects.SetActive(false);
+
+            Color normalColor = new(1f, 1f, 1f, 0.7490196f);
+            Color highlightColor = Color.white;
+            Color boostColor = new(1f, 1f, 1f, 0.8f);
+            MultipliedColorSO lightColor0 = CreateMultipliedColorSOForColors(_colorScheme.environmentColor0, normalColor);
+            MultipliedColorSO lightColor1 = CreateMultipliedColorSOForColors(_colorScheme.environmentColor1, normalColor);
+            MultipliedColorSO highlightColor0 = CreateMultipliedColorSOForColors(_colorScheme.environmentColor0, highlightColor);
+            MultipliedColorSO highlightColor1 = CreateMultipliedColorSOForColors(_colorScheme.environmentColor1, highlightColor);
+            MultipliedColorSO lightColor0Boost = CreateMultipliedColorSOForColors(_colorScheme.environmentColor0Boost, boostColor);
+            MultipliedColorSO lightColor1Boost = CreateMultipliedColorSOForColors(_colorScheme.environmentColor1Boost, boostColor);
+            MultipliedColorSO highlightColor0Boost = CreateMultipliedColorSOForColors(_colorScheme.environmentColor0Boost, highlightColor);
+            MultipliedColorSO highlightColor1Boost = CreateMultipliedColorSOForColors(_colorScheme.environmentColor1Boost, highlightColor);
+            
             for (int i = 0; i < 5; i++)
             {
                 LightSwitchEventEffect lse = _container.InstantiateComponent<LightSwitchEventEffect>(lightEffects);
                 lse.SetField("_lightsID", i+1);
                 lse.SetField("_event", (BeatmapEventType)i);
                 lse.SetField("_colorBoostEvent", BeatmapEventType.Event5);
-                lse.SetField("_lightColor0", );
-                lse.SetField("_lightColor1");
-                lse.SetField("_highlightColor0");
-                lse.SetField("_highlightColor1");
-                lse.SetField("_lightColor0Boost");
-                lse.SetField("_lightColor1Boost");
-                lse.SetField("_highlightColor0Boost);
-                lse.SetField("_highlightColor1Boost");
+                lse.SetField("_lightColor0", (ColorSO)lightColor0);
+                lse.SetField("_lightColor1", (ColorSO)lightColor1);
+                lse.SetField("_highlightColor0", (ColorSO)highlightColor0);
+                lse.SetField("_highlightColor1", (ColorSO)highlightColor1);
+                lse.SetField("_lightColor0Boost", (ColorSO)lightColor0Boost);
+                lse.SetField("_lightColor1Boost", (ColorSO)lightColor1Boost);
+                lse.SetField("_highlightColor0Boost", (ColorSO)highlightColor0Boost);
+                lse.SetField("_highlightColor1Boost", (ColorSO)highlightColor1Boost);
             }
+            lightEffects.SetActive(true);
             return lightEffects;
-        }*/
+        }
+
+        private MultipliedColorSO CreateMultipliedColorSOForColors(Color baseColor, Color boostColor)
+        {
+            SimpleColorSO simpleColor = ScriptableObject.CreateInstance<SimpleColorSO>();
+            simpleColor.hideFlags &= ~HideFlags.DontUnloadUnusedAsset;
+            simpleColor.SetColor(baseColor);
+            MultipliedColorSO multipliedColor = ScriptableObject.CreateInstance<MultipliedColorSO>();
+            multipliedColor.hideFlags &= ~HideFlags.DontUnloadUnusedAsset;
+            multipliedColor.SetField("_multiplierColor", boostColor);
+            multipliedColor.SetField("_baseColor", simpleColor);
+            return multipliedColor;
+        }
     }
 }

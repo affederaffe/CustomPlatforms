@@ -100,7 +100,9 @@ namespace CustomFloorPlugin
         /// </summary>
         private void CleanupEnvironment()
         {
-            _assetLoader.SetPlayersPlaceActive(!_platformManager.ActivePlatform!.hideDefaultPlatform && _sceneName == "MenuEnvironment");
+            _assetLoader.SetPlayersPlaceActive(_platformManager.GetIndexForType(PlatformType.Active) != 0 &&
+                                               !_platformManager.ActivePlatform!.hideDefaultPlatform &&
+                                               _sceneName == "MenuEnvironment");
             _trackLaneRings = null;
             _root = null;
         }

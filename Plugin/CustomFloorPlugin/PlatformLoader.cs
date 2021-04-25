@@ -65,7 +65,7 @@ namespace CustomFloorPlugin
                 global::CustomPlatform legacyPlatform = platformPrefab.GetComponent<global::CustomPlatform>();
                 if (legacyPlatform != null)
                 {
-                    // Replace legacyplatform component with up to date one
+                    // Replace legacy platform component with up to date one
                     customPlatform = platformPrefab.AddComponent<CustomPlatform>();
                     customPlatform.platName = legacyPlatform.platName;
                     customPlatform.platAuthor = legacyPlatform.platAuthor;
@@ -75,7 +75,7 @@ namespace CustomFloorPlugin
                 }
                 else
                 {
-                    // No customplatform component, abort
+                    // No CustomPlatform component, abort
                     UnityEngine.Object.Destroy(platformPrefab);
                     _siraLog.Error("The AssetBundle does not contain a CustomPlatform:\n" + fullPath);
                     return null;

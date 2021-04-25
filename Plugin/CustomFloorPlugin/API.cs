@@ -191,7 +191,7 @@ namespace CustomFloorPlugin
             if (!platDownloadWebResponse.IsSuccessStatusCode) return;
             byte[] platData = platDownloadWebResponse.ContentToBytes();
             _apiRequest = true;
-            string destination = Path.Combine(_config.CustomPlatformsDirectory, platformDownloadData.name + ".plat");
+            string destination = Path.Combine(_config.CustomPlatformsDirectory, $"{platformDownloadData.name}.plat");
             File.WriteAllBytes(destination, platData);
         }
     }
