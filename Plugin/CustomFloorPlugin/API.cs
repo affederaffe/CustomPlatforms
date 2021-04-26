@@ -29,6 +29,7 @@ namespace CustomFloorPlugin
         private readonly PlatformSpawner _platformSpawner;
         private readonly PlatformListsView _platformListsView;
         private readonly FileSystemWatcher _fileSystemWatcher;
+        
         private bool _apiRequest;
 
         public API(WebClient webClient,

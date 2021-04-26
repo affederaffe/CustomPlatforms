@@ -11,7 +11,7 @@ using UnityEngine;
 namespace CustomFloorPlugin
 {
     /// <summary>
-    /// Loads AssetBundles containing CustomPlatorms
+    /// Loads AssetBundles containing CustomPlatforms
     /// </summary>
     public class PlatformLoader
     {
@@ -86,10 +86,11 @@ namespace CustomFloorPlugin
             byte[] hash = md5.ComputeHash(fileStream);
             customPlatform.platHash = BitConverter.ToString(hash).Replace("-", string.Empty).ToLowerInvariant();
             customPlatform.fullPath = fullPath;
-            customPlatform.name = customPlatform.platName + " by " + customPlatform.platAuthor;
+            customPlatform.name = $"{customPlatform.platName} by {customPlatform.platAuthor}";
             if (customPlatform.icon == null)
                 customPlatform.icon = _assetLoader.FallbackCover!;
 
+            await _materialSwapper.LoadMaterialsTask;
             _materialSwapper.ReplaceMaterials(customPlatform.gameObject);
 
             return customPlatform;

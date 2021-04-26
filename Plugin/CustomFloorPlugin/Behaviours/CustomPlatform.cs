@@ -34,9 +34,8 @@ namespace CustomFloorPlugin
             gameObject.SetActive(false);
         }
 
-        public int CompareTo(CustomPlatform? other)
+        public int CompareTo(CustomPlatform other)
         {
-            if (other == null) return 0;
             return string.Compare(platName, other.platName, StringComparison.Ordinal);
         }
     }

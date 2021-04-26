@@ -72,6 +72,7 @@ namespace CustomFloorPlugin
             _beatmapObjectCallbackController = beatmapObjectCallbackController;
         }
 
+        // ReSharper disable once CognitiveComplexity
         public void PlatformEnabled(DiContainer container)
         {
             if (trackLaneRingPrefab == null) return;
@@ -92,7 +93,7 @@ namespace CustomFloorPlugin
             if (useRotationEffect && _trackLaneRingsRotationEffectSpawner != null)
             {
                 _trackLaneRingsRotationEffectSpawner.SetField("_beatmapObjectCallbackController", _beatmapObjectCallbackController);
-                try { _trackLaneRingsRotationEffectSpawner.Start(); } catch { }
+                try { _trackLaneRingsRotationEffectSpawner.Start(); } catch { /* Suppresses a NullReferenceException */ }
             }
             else if (useRotationEffect)
             {
@@ -119,7 +120,7 @@ namespace CustomFloorPlugin
             if (useStepEffect && _trackLaneRingsPositionStepEffectSpawner != null)
             {
                 _trackLaneRingsPositionStepEffectSpawner.SetField("_beatmapObjectCallbackController", _beatmapObjectCallbackController);
-                try { _trackLaneRingsPositionStepEffectSpawner.Start(); } catch { }
+                try { _trackLaneRingsPositionStepEffectSpawner.Start(); } catch { /* Suppresses a NullReferenceException */ }
             }
             else if (useStepEffect)
             {

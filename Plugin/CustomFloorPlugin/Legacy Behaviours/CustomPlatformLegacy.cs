@@ -4,6 +4,7 @@
 /// <summary>
 /// Legacy Platform.
 /// </summary>
+// ReSharper disable once CheckNamespace
 public class CustomPlatform : MonoBehaviour
 {
     /// <summary>

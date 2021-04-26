@@ -1,4 +1,5 @@
 ﻿using UnityEngine.Events;
+using UnityEngine.Serialization;
 
 using Zenject;
 
@@ -7,24 +8,24 @@ namespace CustomFloorPlugin
 {
     public class EveryNthComboFilter : EventFilterBehaviour, INotifyPlatformEnabled, INotifyPlatformDisabled
     {
-        public int ComboStep = 50;
-        public UnityEvent? NthComboReached;
+        [FormerlySerializedAs("ComboStep")] public int comboStep = 50;
+        [FormerlySerializedAs("NthComboReached")] public UnityEvent? nThComboReached;
 
         public void PlatformEnabled(DiContainer container)
         {
-            EventManager.OnComboChanged.AddListener(OnComboStep);
+            EventManager.onComboChanged.AddListener(OnComboStep);
         }
 
         public void PlatformDisabled()
         {
-            EventManager.OnComboChanged.RemoveListener(OnComboStep);
+            EventManager.onComboChanged.RemoveListener(OnComboStep);
         }
 
         private void OnComboStep(int combo)
         {
-            if (combo % ComboStep == 0 && combo != 0)
+            if (combo % comboStep == 0 && combo != 0)
             {
-                NthComboReached!.Invoke();
+                nThComboReached!.Invoke();
             }
         }
     }

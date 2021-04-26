@@ -79,7 +79,7 @@ namespace CustomFloorPlugin
             if (columnPrefab == null) return;
             container.Inject(this);
             _materialSwapper!.ReplaceMaterials(columnPrefab);
-            if (_columnTransforms == null) CreateColums();
+            if (_columnTransforms == null) CreateColumns();
             foreach (INotifyPlatformEnabled notifyEnable in GetComponentsInChildren<INotifyPlatformEnabled>(true))
             {
                 if ((Object)notifyEnable != this)
@@ -102,6 +102,7 @@ namespace CustomFloorPlugin
         /// </summary>
         private void Update()
         {
+            // ReSharper disable once Unity.NoNullPropagation
             IList<float> processedSamples = _basicSpectrogramData?.ProcessedSamples ?? FallbackSamples;
             for (int i = 0; i < processedSamples.Count; i++)
             {
@@ -116,7 +117,7 @@ namespace CustomFloorPlugin
         /// <summary>
         /// Creates all Columns using the <see cref="columnPrefab"/>
         /// </summary>
-        private void CreateColums()
+        private void CreateColumns()
         {
             _columnTransforms = new Transform[128];
             for (int i = 0; i < 64; i++)

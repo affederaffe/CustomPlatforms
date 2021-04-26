@@ -195,8 +195,7 @@ namespace CustomFloorPlugin
         {
 
             CustomPlatform? platform = await _platformLoader!.LoadFromFileAsync(path);
-            if (platform == null) 
-                return null;
+            if (platform == null) return null;
             CustomPlatform newPlatform = Instantiate(platform, transform);
             Destroy(platform.gameObject);
             newPlatform.name = platform.name;
@@ -246,7 +245,7 @@ namespace CustomFloorPlugin
                     continue;
                 }
                 platform.icon = Sprite.Create(tex, new Rect(0f, 0f, tex.width, tex.height), Vector2.zero);
-                platform.name = platform.platName + " by " + platform.platAuthor;
+                platform.name = $"{platform.platName} by {platform.platAuthor}";
                 platform.transform.SetParent(transform);
                 CheckLastSelectedPlatform(platform);
                 PlatformFilePaths.Add(platform.fullPath, platform);

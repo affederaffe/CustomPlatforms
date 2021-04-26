@@ -13,25 +13,26 @@ namespace CustomFloorPlugin
     /// Primary reason for this is the absence of proper custom <see cref="Shader"/>s (or decompiled source <see cref="Shader"/>s) and a lack of knowledge about their inner workings...<br/>
     /// Part of the documentation for this file is omitted because it's a clusterfuck and under construction.
     /// </summary>
-    public class MaterialSwapper
+    public class MaterialSwapper : IInitializable
     {
-        private readonly GameScenesManager _gameScenesManager;
         private readonly TaskCompletionSource<(Material, Material, Material)> _taskSource;
-
+        
         internal readonly Task<(Material DarkEnvSimpleMaterial, Material TransparentGlowMaterial, Material OpaqueGlowMaterial)> LoadMaterialsTask;
 
-        public MaterialSwapper(GameScenesManager gameScenesManager)
+        public MaterialSwapper()
         {
-            _gameScenesManager = gameScenesManager;
-            _gameScenesManager.installEarlyBindingsEvent += OnInstallEarlyBindings;
             _taskSource = new();
             LoadMaterialsTask = _taskSource.Task;
         }
-
-        private void OnInstallEarlyBindings(ScenesTransitionSetupDataSO setupData, DiContainer container)
+        
+        public async void Initialize()
         {
-            _gameScenesManager.installEarlyBindingsEvent -= OnInstallEarlyBindings;
-            Material[] materials = Resources.FindObjectsOfTypeAll<Material>();
+            Material[]? materials = null;
+            while (materials == null)
+            {
+                await Task.Delay(1000);
+                materials = Resources.FindObjectsOfTypeAll<Material>();
+            }
             Material darkEnvSimpleMaterial = materials.First(x => x.name == "DarkEnvironmentSimple");
             Material transparentGlowMaterial = materials.First(x => x.name == "EnvLight");
             Material opaqueGlowMaterial = materials.First(x => x.name == "EnvLightOpaque");

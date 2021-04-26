@@ -23,7 +23,7 @@ namespace CustomFloorPlugin.UI
         /// </summary>
         [UIValue("changelog-text")]
         public static string Changelog =>
-        @"  <size=150%><color=#888888>Version 6.1.2</color></size>
+        $@"  <size=150%><color=#888888>Version 6.1.2</color></size>
         - Updated for 1.14.0
         - Internal code 'cleanup'
         - Added 'Shuffle Platforms' option
@@ -41,7 +41,7 @@ namespace CustomFloorPlugin.UI
         - Fixed a bug where the credits environment wouldn't be hidden
 
   <size=150%><color=#888888>Version 6.0.0</color></size>
-        - Basicly a complete rewrite of the plugin and updated for 1.13.2
+        - Basically a complete rewrite of the plugin and updated for 1.13.2
         - Platforms can now be used in the menu
          - Redesigned menu, moved settings section here and added a changelog
         - Removed environment override setting because it's implemented in 
@@ -50,14 +50,14 @@ namespace CustomFloorPlugin.UI
         - Removed BS Utils as a dependency
         - Simplified custom scripts
         - You can now select platforms for multi-, singleplayer and 
-           360°-levels seperately
+           360°-levels separately
         - Revived the API, mappers can specify a platform for their songs again
          - Compatibility with Cinema: When a video is played, the default platform 
            will be used, if not configured otherwise
         - Platforms installed while the game is running 
-           are automaticly loaded now
+           are automatically loaded now
         - Also platforms are now loaded lazily, that means the startup time
-           decreased drasticly
+           decreased drastically
         - Fixed so many bugs I can't even count them";
 
         /// <summary>

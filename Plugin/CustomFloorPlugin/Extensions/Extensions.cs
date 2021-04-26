@@ -9,7 +9,7 @@ namespace CustomFloorPlugin.Extensions
     /// <summary>
     /// This class holds extensions
     /// </summary>
-    internal static class Extentions
+    internal static class Extensions
     {
         /// <summary>
         /// Checks if a <see cref="ScenesTransitionSetupDataSO"/> transitions to a 360° level

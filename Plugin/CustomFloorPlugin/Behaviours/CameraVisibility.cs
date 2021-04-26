@@ -52,15 +52,6 @@ namespace CustomFloorPlugin
             SetCameraMasks();
         }
 
-        /// <summary>
-        /// Sets Main-<see cref="Camera"/>s <see cref="Camera.cullingMask"/>
-        /// </summary>
-        private static void SetCameraMasks()
-        {
-            Camera.main.cullingMask &= ~(1 << kOnlyInThirdPerson);
-            Camera.main.cullingMask |= 1 << kOnlyInHeadset;
-        }
-
         // Recursively set the layer of an object and all children in its hierarchy
         private void SetChildrenToLayer(GameObject go, int layer)
         {
@@ -69,6 +60,19 @@ namespace CustomFloorPlugin
             {
                 SetChildrenToLayer(child.gameObject, layer);
             }
+        }
+        
+        private static readonly Camera mainCamera = Camera.main!;
+        
+        /// <summary>
+        /// Sets Main-<see cref="Camera"/>s <see cref="Camera.cullingMask"/>
+        /// </summary>
+        private static void SetCameraMasks()
+        {
+            int cullingMask = mainCamera.cullingMask;
+            cullingMask &= ~(1 << kOnlyInThirdPerson);
+            cullingMask |= 1 << kOnlyInHeadset;
+            mainCamera.cullingMask = cullingMask;
         }
     }
 }

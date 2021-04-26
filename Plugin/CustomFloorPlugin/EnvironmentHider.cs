@@ -264,6 +264,7 @@ namespace CustomFloorPlugin
             }
         }
 
+        // ReSharper disable once CognitiveComplexity
         private void FindTowers()
         {
             switch (_sceneName)
@@ -352,6 +353,8 @@ namespace CustomFloorPlugin
             }
         }
 
+        // ReSharper disable once CognitiveComplexity
+        // ReSharper disable once CyclomaticComplexity
         private void FindHighway()
         {
             switch (_sceneName)
@@ -508,6 +511,8 @@ namespace CustomFloorPlugin
             }
         }
 
+        // ReSharper disable once CognitiveComplexity
+        // ReSharper disable once CyclomaticComplexity
         private void FindRotatingLasers()
         {
             switch (_sceneName)
@@ -599,6 +604,8 @@ namespace CustomFloorPlugin
             }
         }
 
+        // ReSharper disable once CognitiveComplexity
+        // ReSharper disable once CyclomaticComplexity
         private void FindDoubleColorLasers()
         {
             switch (_sceneName)
@@ -695,6 +702,8 @@ namespace CustomFloorPlugin
             }
         }
 
+        // ReSharper disable once CognitiveComplexity
+        // ReSharper disable once CyclomaticComplexity
         private void FindTrackLights()
         {
             switch (_sceneName)

@@ -79,6 +79,7 @@ namespace CustomFloorPlugin.UI
         /// <param name="idx">Cell index of the users selection</param>
         [UIAction("singleplayer-select")]
         // ReSharper disable once UnusedMember.Local
+        // ReSharper disable once UnusedParameter.Local
         private async void SingleplayerSelect(TableView _, int idx)
         {
             await _platformSpawner!.SetPlatformAndShowAsync(idx, PlatformType.Singleplayer);
@@ -91,6 +92,7 @@ namespace CustomFloorPlugin.UI
         /// <param name="idx">Cell index of the users selection</param>
         [UIAction("multiplayer-select")]
         // ReSharper disable once UnusedMember.Local
+        // ReSharper disable once UnusedParameter.Local
         private async void MultiplayerSelect(TableView _, int idx)
         {
             await _platformSpawner!.SetPlatformAndShowAsync(idx, PlatformType.Multiplayer);
@@ -104,6 +106,7 @@ namespace CustomFloorPlugin.UI
         [UIAction("a360-select")]
        
         // ReSharper disable once UnusedMember.Local
+        // ReSharper disable once UnusedParameter.Local
         private async void A360Select(TableView _, int idx)
         {
             await _platformSpawner!.SetPlatformAndShowAsync(idx, PlatformType.A360);

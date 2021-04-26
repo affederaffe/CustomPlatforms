@@ -1,4 +1,5 @@
 ﻿using UnityEngine.Events;
+using UnityEngine.Serialization;
 
 using Zenject;
 
@@ -14,22 +15,22 @@ namespace CustomFloorPlugin
         }
 
         public SaberType saberType;
-        public UnityEvent? SaberSlice;
+        [FormerlySerializedAs("SaberSlice")] public UnityEvent? saberSlice;
 
         public void PlatformEnabled(DiContainer container)
         {
-            EventManager.OnSpecificSlice.AddListener(OnSlice);
+            EventManager.onSpecificSlice.AddListener(OnSlice);
         }
 
         public void PlatformDisabled()
         {
-            EventManager.OnComboChanged.RemoveListener(OnSlice);
+            EventManager.onComboChanged.RemoveListener(OnSlice);
         }
 
         private void OnSlice(int saber)
         {
             if ((SaberType)saber == saberType)
-                SaberSlice!.Invoke();
+                saberSlice!.Invoke();
         }
     }
 }

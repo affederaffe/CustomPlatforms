@@ -12,7 +12,7 @@ using Zenject;
 namespace CustomFloorPlugin
 {
     /// <summary>
-    /// Handles platform spawing and despawning
+    /// Handles platform spawning and despawning
     /// </summary>
     internal class PlatformSpawner : IInitializable, IDisposable
     {
@@ -62,7 +62,7 @@ namespace CustomFloorPlugin
         internal int RandomPlatformIndex => _random.Next(0, _platformManager.LoadPlatformsTask!.Result.Count);
 
         /// <summary>
-        /// Automaticly clean up all custom objects
+        /// Automatically clean up all custom objects
         /// </summary>
         private async void OnTransitionDidStart(float aheadTime)
         {
@@ -94,6 +94,10 @@ namespace CustomFloorPlugin
                     _assetLoader.SetHeartActive(false);
                     platformIndex = setupData.Is360Level()
                         ? _platformManager.GetIndexForType(PlatformType.A360)
+                        : _platformManager.APIRequestedPlatform != null &&
+                          (_platformManager.APIRequestedLevelId == setupData.GetLevelId() ||
+                           _platformManager.GetIndexForType(PlatformType.API) == 0)
+                        ? _platformManager.GetIndexForType(PlatformType.API)
                         : _config.ShufflePlatforms
                         ? RandomPlatformIndex
                         : _platformManager.GetIndexForType(PlatformType.Singleplayer);
@@ -105,21 +109,6 @@ namespace CustomFloorPlugin
                 default:
                     _assetLoader.SetHeartActive(false);
                     break;
-            }
-
-            // Handle possible API request
-            if (_platformManager.APIRequestedPlatform != null)
-            {
-                int apiIndex = _platformManager.GetIndexForType(PlatformType.API);
-                if (_platformManager.APIRequestedLevelId == setupData!.GetLevelId())
-                {
-                    platformIndex = apiIndex;
-                }
-                else if (apiIndex == 0)
-                {
-                    platformIndex = apiIndex;
-                    _platformManager.APIRequestedPlatform = null;
-                }
             }
 
             await SetContainerAndShowAsync(platformIndex, container);

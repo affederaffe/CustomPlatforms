@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Serialization;
 
 using Zenject;
 
@@ -8,9 +9,9 @@ namespace CustomFloorPlugin
     public class SpectrogramMaterial : MonoBehaviour, INotifyPlatformEnabled
     {
         [Header("The Array property (uniform float arrayName[64])")]
-        public string? PropertyName;
+        [FormerlySerializedAs("PropertyName")] public string? propertyName;
         [Header("The global intensity (float valueName)")]
-        public string? AveragePropertyName;
+        [FormerlySerializedAs("AveragePropertyName")] public string? averagePropertyName;
 
         private BasicSpectrogramData? _basicSpectrogramData;
 
@@ -41,8 +42,8 @@ namespace CustomFloorPlugin
 
                 foreach (Material mat in Renderer.materials)
                 {
-                    mat.SetFloatArray(PropertyName, _basicSpectrogramData.ProcessedSamples);
-                    mat.SetFloat(AveragePropertyName, average);
+                    mat.SetFloatArray(propertyName, _basicSpectrogramData.ProcessedSamples);
+                    mat.SetFloat(averagePropertyName, average);
                 }
             }
         }

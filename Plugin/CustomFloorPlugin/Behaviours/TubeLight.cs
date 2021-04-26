@@ -69,6 +69,7 @@ namespace CustomFloorPlugin
             if (mesh.vertexCount == 0)
             {
                 float y = (0.5f - center) * length * 2;
+                mesh.triangles = triangles;
                 mesh.vertices = new Vector3[]
                 {
                     new(-width, (y-length)/2, -width),
@@ -80,8 +81,6 @@ namespace CustomFloorPlugin
                     new(width, (y-length)/2, width),
                     new(-width, (y-length)/2, width),
                 };
-
-                mesh.triangles = triangles;
             }
 
             if (_instancedMaterialLightWithId == null)

@@ -3,8 +3,6 @@ using BeatSaberMarkupLanguage.ViewControllers;
 
 using CustomFloorPlugin.Configuration;
 
-using UnityEngine;
-
 using Zenject;
 
 

@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.Serialization;
 
 using Zenject;
 
@@ -11,7 +12,7 @@ namespace CustomFloorPlugin
         public SongEventType eventType;
         public int value;
         public bool anyValue;
-        public UnityEvent? OnTrigger;
+        [FormerlySerializedAs("OnTrigger")] public UnityEvent? onTrigger;
 
         private BSEvents? _events;
 
@@ -35,7 +36,7 @@ namespace CustomFloorPlugin
         }
 
         /// <summary>
-        /// Gatekeeper function for <see cref="OnTrigger"/><br/>
+        /// Gatekeeper function for <see cref="onTrigger"/><br/>
         /// (I refuse calling that a good implementation)<br/>
         /// (Who the fuck did this???)<br/>
         /// (Use a <see cref="System.Collections.Generic.Dictionary{TKey, TValue}"/> instead)
@@ -47,7 +48,7 @@ namespace CustomFloorPlugin
             {
                 if (songEventData.value == value || anyValue)
                 {
-                    OnTrigger!.Invoke();
+                    onTrigger!.Invoke();
                 }
             }
         }
