@@ -74,11 +74,11 @@ namespace CustomFloorPlugin
             _basicSpectrogramData = basicSpectrogramData;
         }
 
-        public void PlatformEnabled(DiContainer container)
+        public async void PlatformEnabled(DiContainer container)
         {
             if (columnPrefab == null) return;
             container.Inject(this);
-            _materialSwapper!.ReplaceMaterials(columnPrefab);
+            await _materialSwapper!.ReplaceMaterials(columnPrefab);
             if (_columnTransforms == null) CreateColumns();
             foreach (INotifyPlatformEnabled notifyEnable in GetComponentsInChildren<INotifyPlatformEnabled>(true))
             {
@@ -102,15 +102,11 @@ namespace CustomFloorPlugin
         /// </summary>
         private void Update()
         {
-            // ReSharper disable once Unity.NoNullPropagation
-            IList<float> processedSamples = _basicSpectrogramData?.ProcessedSamples ?? FallbackSamples;
+            IList<float> processedSamples = _basicSpectrogramData != null ? _basicSpectrogramData.ProcessedSamples : FallbackSamples;
             for (int i = 0; i < processedSamples.Count; i++)
             {
-                float num = processedSamples[i] * (1.5f + i * 0.075f);
-                if (num > 1f) num = 1f;
-                num = Mathf.Pow(num, 2f);
-                _columnTransforms![i].localScale = new Vector3(columnWidth, Mathf.Lerp(minHeight, maxHeight, num), columnDepth);
-                _columnTransforms![i + 64].localScale = new Vector3(columnWidth, Mathf.Lerp(minHeight, maxHeight, num), columnDepth);
+                _columnTransforms![i].localScale = new Vector3(columnWidth, Mathf.Lerp(minHeight, maxHeight, processedSamples[i]), columnDepth);
+                _columnTransforms![i + 64].localScale = new Vector3(columnWidth, Mathf.Lerp(minHeight, maxHeight, processedSamples[i]), columnDepth);
             }
         }
 
@@ -131,7 +127,7 @@ namespace CustomFloorPlugin
         /// Creates a column and returns its <see cref="Transform"/>
         /// </summary>
         /// <param name="pos">Where to create the column(local space <see cref="Vector3"/> offset)</param>
-        /// <returns></returns>
+        /// <returns>The <see cref="Transform"/> of the created column</returns>
         private Transform CreateColumn(Vector3 pos)
         {
             GameObject column = Instantiate(columnPrefab!, transform);
@@ -150,9 +146,7 @@ namespace CustomFloorPlugin
         {
             float[] samples = new float[64];
             for (int i = 0; i < samples.Length; i++)
-            {
-                samples[i] = (Mathf.Sin((float)i / 64 * 15 * Mathf.PI + 5f * Mathf.PI) + 2f) / 15f;
-            }
+                samples[i] = (Mathf.Sin(0.4f * i - 0.5f * Mathf.PI) + 1) / 2;
             return samples;
         }
     }

@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 
 using IPA.Utilities;
-using IPA.Utilities.Async;
 
 using UnityEngine;
 
@@ -40,8 +38,7 @@ namespace CustomFloorPlugin
             if (platformIndex != 0)
             {
                 _multiplayerPlayersManager.playerDidFinishEvent += OnPlayerDidFinish;
-                await Coroutines.AsTask(WaitForEndOfFrameCoroutine());
-                static IEnumerator<WaitForEndOfFrame> WaitForEndOfFrameCoroutine() { yield return new WaitForEndOfFrame(); }
+                await Helpers.AsyncHelper.WaitForEndOfFrameAsync();
                 await _platformSpawner.SetContainerAndShowAsync(platformIndex, _container);
                 _lightEffects = CreateLightEffects();
             }

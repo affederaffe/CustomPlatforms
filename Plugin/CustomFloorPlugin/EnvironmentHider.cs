@@ -100,7 +100,7 @@ namespace CustomFloorPlugin
         /// </summary>
         private void CleanupEnvironment()
         {
-            _assetLoader.SetPlayersPlaceActive(_platformManager.GetIndexForType(PlatformType.Active) != 0 &&
+            _assetLoader.TogglePlayersPlace(_platformManager.GetIndexForType(PlatformType.Active) != 0 &&
                                                !_platformManager.ActivePlatform!.hideDefaultPlatform &&
                                                _sceneName == "MenuEnvironment");
             _trackLaneRings = null;
@@ -156,7 +156,6 @@ namespace CustomFloorPlugin
             {
                 case "MenuEnvironment":
                 case "Credits":
-                    FindAddGameObject("MenuFogRing", _menuEnvironment);
                     FindAddGameObject("NearBuildingLeft", _menuEnvironment);
                     FindAddGameObject("NearBuildingRight", _menuEnvironment);
                     FindAddGameObject("NearBuildingLeft (1)", _menuEnvironment);
@@ -165,6 +164,7 @@ namespace CustomFloorPlugin
                     FindAddGameObject("DefaultEnvironment/Ground", _menuEnvironment);
                     FindAddGameObject("DefaultEnvironment/PlayersPlace", _menuEnvironment);
                     FindAddGameObject("DefaultEnvironment/PileOfNotes", _menuEnvironment);
+                    FindAddGameObject("DefaultEnvironment/MenuFogRing", _menuEnvironment);
                     FindAddGameObject("DefaultEnvironment/NeonLights", _menuEnvironment);
                     FindAddGameObject("DefaultEnvironment/Notes", _menuEnvironment);
                     break;

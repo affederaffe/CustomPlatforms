@@ -4,7 +4,7 @@ using System.IO;
 using UnityEngine;
 
 
-namespace CustomFloorPlugin.Extensions
+namespace CustomFloorPlugin.Helpers
 {
     /// <summary>
     /// This class holds extensions

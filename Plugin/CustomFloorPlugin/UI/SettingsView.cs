@@ -51,7 +51,7 @@ namespace CustomFloorPlugin.UI
             set
             {
                 _config!.ShowHeart = value;
-                _assetLoader!.SetHeartActive(value);
+                _assetLoader!.ToggleHeart(value);
             }
         }
 

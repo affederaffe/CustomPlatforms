@@ -33,7 +33,7 @@ namespace CustomFloorPlugin
         {
             if (!File.Exists(fullPath))
             {
-                _siraLog.Error("File could not be found:\n" + fullPath);
+                _siraLog.Error($"File could not be found:\n{fullPath}");
                 return null;
             }
 
@@ -42,7 +42,7 @@ namespace CustomFloorPlugin
 
             if (assetBundle == null)
             {
-                _siraLog.Error("File could not be loaded:\n" + fullPath);
+                _siraLog.Error($"File could not be loaded:\n{fullPath}");
                 return null;
             }
 
@@ -51,7 +51,7 @@ namespace CustomFloorPlugin
             if (platformPrefab == null)
             {
                 assetBundle.Unload(true);
-                _siraLog.Error("Platform GameObject could not be loaded:\n" + fullPath);
+                _siraLog.Error($"Platform GameObject could not be loaded:\n{fullPath}");
                 return null;
             }
 
@@ -77,7 +77,7 @@ namespace CustomFloorPlugin
                 {
                     // No CustomPlatform component, abort
                     UnityEngine.Object.Destroy(platformPrefab);
-                    _siraLog.Error("The AssetBundle does not contain a CustomPlatform:\n" + fullPath);
+                    _siraLog.Error($"The AssetBundle does not contain a CustomPlatform:\n{fullPath}");
                     return null;
                 }
             }
@@ -90,8 +90,7 @@ namespace CustomFloorPlugin
             if (customPlatform.icon == null)
                 customPlatform.icon = _assetLoader.FallbackCover!;
 
-            await _materialSwapper.LoadMaterialsTask;
-            _materialSwapper.ReplaceMaterials(customPlatform.gameObject);
+            await _materialSwapper.ReplaceMaterials(customPlatform.gameObject);
 
             return customPlatform;
         }

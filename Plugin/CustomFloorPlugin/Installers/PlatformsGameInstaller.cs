@@ -1,4 +1,4 @@
-﻿using CustomFloorPlugin.Extensions;
+﻿using CustomFloorPlugin.Helpers;
 
 using Zenject;
 

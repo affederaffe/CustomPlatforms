@@ -73,14 +73,14 @@ namespace CustomFloorPlugin
         }
 
         // ReSharper disable once CognitiveComplexity
-        public void PlatformEnabled(DiContainer container)
+        public async void PlatformEnabled(DiContainer container)
         {
             if (trackLaneRingPrefab == null) return;
             container.Inject(this);
 
             if (_trackLaneRingsManager == null)
             { 
-                _materialSwapper!.ReplaceMaterials(trackLaneRingPrefab);
+                await _materialSwapper!.ReplaceMaterials(trackLaneRingPrefab);
                 gameObject.SetActive(false);
                 TrackLaneRing trackLaneRing = trackLaneRingPrefab.AddComponent<TrackLaneRing>();
                 _trackLaneRingsManager = gameObject.AddComponent<TrackLaneRingsManager>();

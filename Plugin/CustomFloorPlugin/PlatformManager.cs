@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 using CustomFloorPlugin.Configuration;
-using CustomFloorPlugin.Extensions;
+using CustomFloorPlugin.Helpers;
 
 using SiraUtil.Tools;
 
@@ -139,7 +139,7 @@ namespace CustomFloorPlugin
             }
 
             sw.Stop();
-            _siraLog!.Info($"Loaded Platforms in {sw.ElapsedMilliseconds}ms");
+            _siraLog!.Info($"Loaded Platforms in {sw.ElapsedMilliseconds.ToString()}ms");
 
             return platforms;
         }

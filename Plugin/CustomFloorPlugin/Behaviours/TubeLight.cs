@@ -59,7 +59,7 @@ namespace CustomFloorPlugin
             _lightWithIdManager = lightWithIdManager;
         }
 
-        public void PlatformEnabled(DiContainer container)
+        public async void PlatformEnabled(DiContainer container)
         {
             container.Inject(this);
             gameObject.SetActive(false);
@@ -69,7 +69,6 @@ namespace CustomFloorPlugin
             if (mesh.vertexCount == 0)
             {
                 float y = (0.5f - center) * length * 2;
-                mesh.triangles = triangles;
                 mesh.vertices = new Vector3[]
                 {
                     new(-width, (y-length)/2, -width),
@@ -81,11 +80,13 @@ namespace CustomFloorPlugin
                     new(width, (y-length)/2, width),
                     new(-width, (y-length)/2, width),
                 };
+                mesh.triangles = triangles;
             }
 
             if (_instancedMaterialLightWithId == null)
             {
-                GetComponent<Renderer>().material = _materialSwapper!.LoadMaterialsTask.Result.OpaqueGlowMaterial!;
+                await _materialSwapper!.LoadMaterialsTask;
+                GetComponent<Renderer>().material = _materialSwapper.LoadMaterialsTask.Result.OpaqueGlowMaterial;
                 MaterialPropertyBlockController materialPropertyBlockController = gameObject.AddComponent<MaterialPropertyBlockController>();
                 materialPropertyBlockController.SetField("_renderers", new[] { GetComponent<Renderer>() });
                 MaterialPropertyBlockColorSetter materialPropertyBlockColorSetter = gameObject.AddComponent<MaterialPropertyBlockColorSetter>();

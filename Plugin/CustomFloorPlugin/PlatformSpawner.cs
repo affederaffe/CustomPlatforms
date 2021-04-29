@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 
 using CustomFloorPlugin.Configuration;
-using CustomFloorPlugin.Extensions;
+using CustomFloorPlugin.Helpers;
 
 using SiraUtil.Tools;
 
@@ -24,6 +24,7 @@ namespace CustomFloorPlugin
         private readonly GameScenesManager _gameScenesManager;
         private readonly Random _random;
         private DiContainer _container;
+        
         internal bool IsMultiplayer;
 
         internal PlatformSpawner(DiContainer container,
@@ -82,7 +83,7 @@ namespace CustomFloorPlugin
                 case null:
                 case MenuScenesTransitionSetupDataSO:
                     if (IsMultiplayer) return;
-                    _assetLoader.SetHeartActive(_config.ShowHeart);
+                    _assetLoader.ToggleHeart(_config.ShowHeart);
                     if (_config.ShowInMenu)
                         platformIndex = _config.ShufflePlatforms
                             ? RandomPlatformIndex
@@ -91,7 +92,7 @@ namespace CustomFloorPlugin
                 case StandardLevelScenesTransitionSetupDataSO:
                 case MissionLevelScenesTransitionSetupDataSO:
                 case TutorialScenesTransitionSetupDataSO:
-                    _assetLoader.SetHeartActive(false);
+                    _assetLoader.ToggleHeart(false);
                     platformIndex = setupData.Is360Level()
                         ? _platformManager.GetIndexForType(PlatformType.A360)
                         : _platformManager.APIRequestedPlatform != null &&
@@ -107,7 +108,7 @@ namespace CustomFloorPlugin
                 case MultiplayerLevelScenesTransitionSetupDataSO:
                     return;
                 default:
-                    _assetLoader.SetHeartActive(false);
+                    _assetLoader.ToggleHeart(false);
                     break;
             }
 
@@ -159,8 +160,7 @@ namespace CustomFloorPlugin
         {
             await _platformManager.LoadPlatformsTask!;
             // Avoid changing the platform unnecessarily
-            if (_platformManager.ActivePlatform == _platformManager.LoadPlatformsTask.Result[index])
-                return;
+            if (_platformManager.ActivePlatform == _platformManager.LoadPlatformsTask.Result[index]) return;
             _siraLog.Info("Switching to " + _platformManager.LoadPlatformsTask.Result[index].name);
             DestroyCustomObjects();
             _platformManager.ActivePlatform!.gameObject.SetActive(false);
@@ -169,7 +169,11 @@ namespace CustomFloorPlugin
             if (_platformManager.ActivePlatform.isDescriptor)
             {
                 CustomPlatform? platform = await _platformManager.CreatePlatformAsync(_platformManager.ActivePlatform.fullPath);
-                if (platform == null) return;
+                if (platform == null)
+                {
+                    await ChangeToPlatformAsync(0);
+                    return;
+                }
                 // Check if another platform has been spawned in the meantime and abort if that's the case
                 if (_platformManager.ActivePlatform.fullPath != platform.fullPath) return;
                 _platformManager.ActivePlatform = platform;
