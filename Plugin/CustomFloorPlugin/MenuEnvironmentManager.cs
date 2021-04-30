@@ -7,6 +7,9 @@ using Zenject;
 
 namespace CustomFloorPlugin
 {
+    /// <summary>
+    /// (Un-)Hides the menu environment when connecting to a multiplayer lobby
+    /// </summary>
     internal class MenuEnvironmentManager : IInitializable, IDisposable
     {
         private readonly PluginConfig _config; 
@@ -40,6 +43,10 @@ namespace CustomFloorPlugin
             _multiplayerSessionManager.disconnectedEvent -= OnDisconnected;
         }
 
+        /// <summary>
+        /// Deactivates the heart and changes to the default platform when connecting to a lobby
+        /// because using a platform there looks terrible
+        /// </summary>
         private async void OnConnected()
         {
             _platformSpawner.IsMultiplayer = true;
@@ -47,6 +54,9 @@ namespace CustomFloorPlugin
             await _platformSpawner.ChangeToPlatformAsync(0);
         }
 
+        /// <summary>
+        /// Reactivates platform and heart if needed
+        /// </summary>
         private async void OnDisconnected(DisconnectedReason reason)
         {
             _platformSpawner.IsMultiplayer = false;

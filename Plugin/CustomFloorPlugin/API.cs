@@ -8,6 +8,7 @@ using CustomFloorPlugin.Configuration;
 using CustomFloorPlugin.UI;
 
 using IPA.Loader;
+using IPA.Utilities;
 using IPA.Utilities.Async;
 
 using SiraUtil;
@@ -52,8 +53,10 @@ namespace CustomFloorPlugin
             _fileSystemWatcher.Created += OnFileCreated;
             _fileSystemWatcher.Deleted += OnFileDeleted;
             _fileSystemWatcher.EnableRaisingEvents = true;
-            if (PluginManager.GetPlugin("SongCore") != null) SubscribeToSongCoreEvent();
-            if (PluginManager.GetPlugin("Cinema") != null) SubscribeToCinemaEvent();
+            if (PluginManager.GetPlugin("SongCore") != null)
+                SubscribeToSongCoreEvent();
+            if (PluginManager.GetPlugin("Cinema") != null)
+                SubscribeToCinemaEvent();
         }
 
         public void Dispose()
@@ -62,8 +65,10 @@ namespace CustomFloorPlugin
             _fileSystemWatcher.Created -= OnFileCreated;
             _fileSystemWatcher.Deleted -= OnFileDeleted;
             _fileSystemWatcher.Dispose();
-            if (PluginManager.GetPlugin("SongCore") != null) UnsubscribeFromSongCoreEvent();
-            if (PluginManager.GetPlugin("Cinema") != null) UnsubscribeFromCinemaEvent();
+            if (PluginManager.GetPlugin("SongCore") != null)
+                UnsubscribeFromSongCoreEvent();
+            if (PluginManager.GetPlugin("Cinema") != null)
+                UnsubscribeFromCinemaEvent();
         }
 
         /// <summary>
@@ -71,20 +76,23 @@ namespace CustomFloorPlugin
         /// </summary>
         private async void OnFileChanged(object sender, FileSystemEventArgs e)
         {
-            await await UnityMainThreadTaskScheduler.Factory.StartNew(async () => 
+            if (!UnityGame.OnMainThread)
             {
-                if (_platformManager.PlatformFilePaths.TryGetValue(e.FullPath, out CustomPlatform? platform))
+                await UnityMainThreadTaskScheduler.Factory.StartNew(() => OnFileChanged(sender, e));
+                return;
+            }
+            
+            if (_platformManager.PlatformFilePaths.TryGetValue(e.FullPath, out CustomPlatform platform))
+            {
+                bool wasActivePlatform = _platformManager.ActivePlatform == platform;
+                CustomPlatform? newPlatform = await _platformManager.CreatePlatformAsync(e.FullPath);
+                if (newPlatform == null) return;
+                if (wasActivePlatform)
                 {
-                    bool wasActivePlatform = _platformManager.ActivePlatform == platform;
-                    CustomPlatform? newPlatform = await _platformManager.CreatePlatformAsync(e.FullPath);
-                    if (newPlatform == null) return;
-                    if (wasActivePlatform)
-                    {
-                        int index = _platformManager.LoadPlatformsTask!.Result.IndexOf(newPlatform);
-                        await _platformSpawner.ChangeToPlatformAsync(index);
-                    }
+                    int index = _platformManager.PlatformsLoadingTask!.Result.IndexOf(newPlatform);
+                    await _platformSpawner.ChangeToPlatformAsync(index);
                 }
-            });
+            }
         }
 
         /// <summary>
@@ -92,18 +100,21 @@ namespace CustomFloorPlugin
         /// </summary>
         private async void OnFileCreated(object sender, FileSystemEventArgs e)
         {
-            await await UnityMainThreadTaskScheduler.Factory.StartNew(async () =>
+            if (!UnityGame.OnMainThread)
             {
-                CustomPlatform? newPlatform = await _platformManager.CreatePlatformAsync(e.FullPath);
-                if (newPlatform == null) return;
-                _platformManager.LoadPlatformsTask!.Result.Add(newPlatform);
-                _platformListsView.AddCellForPlatform(newPlatform, true);
-                if (_apiRequest)
-                {
-                    _platformManager.APIRequestedPlatform = newPlatform;
-                    _apiRequest = false;
-                }
-            });
+                await UnityMainThreadTaskScheduler.Factory.StartNew(() => OnFileCreated(sender, e));
+                return;
+            }
+            
+            CustomPlatform? newPlatform = await _platformManager.CreatePlatformAsync(e.FullPath);
+            if (newPlatform == null) return;
+            _platformManager.PlatformsLoadingTask!.Result.Add(newPlatform);
+            _platformListsView.AddCellForPlatform(newPlatform, true);
+            if (_apiRequest)
+            {
+                _platformManager.APIRequestedPlatform = newPlatform;
+                _apiRequest = false;
+            }
         }
 
         /// <summary>
@@ -111,18 +122,21 @@ namespace CustomFloorPlugin
         /// </summary>
         private async void OnFileDeleted(object sender, FileSystemEventArgs e)
         {
-            await await UnityMainThreadTaskScheduler.Factory.StartNew(async () =>
+            if (!UnityGame.OnMainThread)
             {
-                if (_platformManager.PlatformFilePaths.TryGetValue(e.FullPath, out CustomPlatform? platform))
-                {
-                    await _platformManager.LoadPlatformsTask!;
-                    _platformListsView.RemoveCellForPlatform(platform);
-                    if (_platformManager.ActivePlatform == platform) await _platformSpawner.ChangeToPlatformAsync(0);
-                    _platformManager.PlatformFilePaths.Remove(platform.fullPath);
-                    _platformManager.LoadPlatformsTask.Result.Remove(platform);
-                    UnityEngine.Object.Destroy(platform.gameObject);
-                }
-            });
+                await UnityMainThreadTaskScheduler.Factory.StartNew(() => OnFileDeleted(sender, e));
+                return;
+            }
+                
+            if (_platformManager.PlatformFilePaths.TryGetValue(e.FullPath, out CustomPlatform platform))
+            {
+                await _platformManager.PlatformsLoadingTask!;
+                _platformListsView.RemoveCellForPlatform(platform);
+                if (_platformManager.ActivePlatform == platform) await _platformSpawner.ChangeToPlatformAsync(0);
+                _platformManager.PlatformFilePaths.Remove(platform.fullPath);
+                _platformManager.PlatformsLoadingTask.Result.Remove(platform);
+                UnityEngine.Object.Destroy(platform.gameObject);
+            }
         }
 
         private void SubscribeToSongCoreEvent() => SongCore.Plugin.CustomSongPlatformSelectionDidChange += OnSongCoreEvent;
@@ -137,8 +151,8 @@ namespace CustomFloorPlugin
         {
             if (!allowPlatform)
             {
-                await _platformManager.LoadPlatformsTask!;
-                _platformManager.APIRequestedPlatform = _platformManager.LoadPlatformsTask.Result[0];
+                await _platformManager.PlatformsLoadingTask!;
+                _platformManager.APIRequestedPlatform = _platformManager.PlatformsLoadingTask.Result[0];
             }
         }
 
@@ -172,7 +186,7 @@ namespace CustomFloorPlugin
             _platformManager.APIRequestedLevelId = level.levelID;
 
             // Check if the requested platform is already downloaded
-            foreach (CustomPlatform platform in await _platformManager.LoadPlatformsTask!)
+            foreach (CustomPlatform platform in await _platformManager.PlatformsLoadingTask!)
             {
                 if (platform.platHash == hash || platform.platName.StartsWith(name ?? string.Empty))
                 {

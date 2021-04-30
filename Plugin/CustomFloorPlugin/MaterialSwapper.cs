@@ -17,16 +17,18 @@ namespace CustomFloorPlugin
     { 
         private readonly TaskCompletionSource<(Material, Material, Material)> _taskSource;
         
-        internal readonly Task<(Material DarkEnvSimpleMaterial, Material TransparentGlowMaterial, Material OpaqueGlowMaterial)> LoadMaterialsTask;
+        internal readonly Task<(Material DarkEnvSimpleMaterial, Material TransparentGlowMaterial, Material OpaqueGlowMaterial)> MaterialsLoadingTask;
 
         public MaterialSwapper()
         {
             _taskSource = new();
-            LoadMaterialsTask = _taskSource.Task;
+            MaterialsLoadingTask = _taskSource.Task;
         }
 
         public async void Initialize()
         {
+            // Some people had black screens because the Materials couldn't be found,
+            // therefore this ensures they are
             Material? darkEnvSimpleMaterial;
             Material? transparentGlowMaterial;
             Material? opaqueGlowMaterial;
@@ -50,7 +52,7 @@ namespace CustomFloorPlugin
         /// <param name="gameObject"><see cref="GameObject"/> to search for <see cref="Renderer"/>s</param>
         internal async Task ReplaceMaterials(GameObject gameObject)
         {
-            await LoadMaterialsTask;
+            await MaterialsLoadingTask;
             foreach (Renderer renderer in gameObject.GetComponentsInChildren<Renderer>(true))
             {
                 ReplaceForRenderer(renderer);
@@ -72,15 +74,15 @@ namespace CustomFloorPlugin
                     switch (materialsCopy[i].name)
                     {
                         case "_dark_replace (Instance)":
-                            materialsCopy[i] = LoadMaterialsTask.Result.DarkEnvSimpleMaterial;
+                            materialsCopy[i] = MaterialsLoadingTask.Result.DarkEnvSimpleMaterial;
                             materialsDidChange = true;
                             break;
                         case "_transparent_glow_replace (Instance)":
-                            materialsCopy[i] = LoadMaterialsTask.Result.TransparentGlowMaterial!;
+                            materialsCopy[i] = MaterialsLoadingTask.Result.TransparentGlowMaterial!;
                             materialsDidChange = true;
                             break;
                         case "_glow_replace (Instance)":
-                            materialsCopy[i] = LoadMaterialsTask.Result.OpaqueGlowMaterial!;
+                            materialsCopy[i] = MaterialsLoadingTask.Result.OpaqueGlowMaterial!;
                             materialsDidChange = true;
                             break;
                     }

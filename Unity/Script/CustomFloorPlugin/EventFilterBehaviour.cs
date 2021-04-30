@@ -7,6 +7,6 @@ namespace CustomFloorPlugin
     public class EventFilterBehaviour : MonoBehaviour 
     {
         protected EventManager EventManager => _eventManager ??= GetComponent<EventManager>();
-        private EventManager _eventManager;
+        private EventManager? _eventManager;
     }
 }

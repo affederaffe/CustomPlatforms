@@ -16,14 +16,14 @@ namespace CustomFloorPlugin
     public class PlatformLoader
     {
         private readonly SiraLog _siraLog;
-        private readonly AssetLoader _assetLoader;
         private readonly MaterialSwapper _materialSwapper;
+        private readonly AssetLoader _assetLoader;
 
-        public PlatformLoader(SiraLog siraLog, AssetLoader assetLoader, MaterialSwapper materialSwapper)
+        public PlatformLoader(SiraLog siraLog, MaterialSwapper materialSwapper, AssetLoader assetLoader)
         {
             _siraLog = siraLog;
-            _assetLoader = assetLoader;
             _materialSwapper = materialSwapper;
+            _assetLoader = assetLoader;
         }
 
         /// <summary>
@@ -88,7 +88,7 @@ namespace CustomFloorPlugin
             customPlatform.fullPath = fullPath;
             customPlatform.name = $"{customPlatform.platName} by {customPlatform.platAuthor}";
             if (customPlatform.icon == null)
-                customPlatform.icon = _assetLoader.FallbackCover!;
+                customPlatform.icon = _assetLoader.FallbackCover;
 
             await _materialSwapper.ReplaceMaterials(customPlatform.gameObject);
 

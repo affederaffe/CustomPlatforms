@@ -16,6 +16,6 @@ namespace CustomFloorPlugin
         }
 
         public CounterType eventType;
-        public TextMeshPro textMeshPro;
+        public TextMeshPro? textMeshPro;
     }
 }

@@ -31,7 +31,8 @@ namespace CustomFloorPlugin.UI
         - Updated for 1.14.0
         - Internal code 'cleanup'
         - Added 'Shuffle Platforms' option
-         - Added manual config option to change your CustomPlatforms directory
+        - Added manual config option to change your
+           CustomPlatforms directory
         - New feature: nested components
         - Fixed issue with Chroma's environment removal
 
@@ -47,18 +48,20 @@ namespace CustomFloorPlugin.UI
   <size=150%><color=#888888>Version 6.0.0</color></size>
         - Basically a complete rewrite of the plugin and updated for 1.13.2
         - Platforms can now be used in the menu
-         - Redesigned menu, moved settings section here and added a changelog
-        - Removed environment override setting because it's implemented in 
+        - Redesigned menu, moved settings section here
+           and added a changelog
+        - Removed environment override setting because it's implemented in
            the base game itself
         - Added light effects in multiplayer
         - Removed BS Utils as a dependency
         - Simplified custom scripts
-        - You can now select platforms for multi-, singleplayer and 
+        - You can now select platforms for multi-, singleplayer and
            360°-levels separately
         - Revived the API, mappers can specify a platform for their songs again
-         - Compatibility with Cinema: When a video is played, the default platform 
+        - Compatibility with Cinema:
+           When a video is played, the default platform
            will be used, if not configured otherwise
-        - Platforms installed while the game is running 
+        - Platforms installed while the game is running
            are automatically loaded now
         - Also platforms are now loaded lazily, that means the startup time
            decreased drastically

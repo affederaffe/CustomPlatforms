@@ -1,4 +1,5 @@
 using UnityEngine.Events;
+using UnityEngine.Serialization;
 
 
 namespace CustomFloorPlugin 
@@ -11,7 +12,7 @@ namespace CustomFloorPlugin
             LeftSaber
         }
 
-        public SaberType saberType = SaberType.LeftSaber;
-        public UnityEvent SaberSlice;
+        public SaberType saberType;
+        [FormerlySerializedAs("SaberSlice")] public UnityEvent? saberSlice;
     }
 }

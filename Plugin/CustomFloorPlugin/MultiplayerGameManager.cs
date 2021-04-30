@@ -51,13 +51,16 @@ namespace CustomFloorPlugin
                 UnityEngine.Object.Destroy(_lightEffects);
         }
 
+        /// <summary>
+        /// Automatically change to the default platform when the player fails or finishes for a bette view
+        /// </summary>
         private async void OnPlayerDidFinish(LevelCompletionResults results)
         {
             await _platformSpawner.ChangeToPlatformAsync(0);
         }
 
         /// <summary>
-        /// Creates <see cref="LightSwitchEventEffect"/>s
+        /// Creates <see cref="LightSwitchEventEffect"/>s, without them lighting is a little boring
         /// </summary>
         private GameObject CreateLightEffects()
         {
@@ -95,6 +98,9 @@ namespace CustomFloorPlugin
             return lightEffects;
         }
 
+        /// <summary>
+        /// Helper function to create a <see cref="MultipliedColorSO"/>
+        /// </summary>
         private MultipliedColorSO CreateMultipliedColorSOForColors(Color baseColor, Color boostColor)
         {
             SimpleColorSO simpleColor = ScriptableObject.CreateInstance<SimpleColorSO>();

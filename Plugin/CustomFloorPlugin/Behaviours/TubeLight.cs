@@ -39,14 +39,6 @@ namespace CustomFloorPlugin
         public Color color = Color.cyan;
         public LightsID lightsID;
 
-        private void OnDrawGizmos()
-        {
-            Gizmos.color = color;
-            Gizmos.matrix = transform.localToWorldMatrix;
-            Vector3 cubeCenter = Vector3.up * (0.5f - center) * length;
-            Gizmos.DrawCube(cubeCenter, new Vector3(2 * width, length, 2 * width));
-        }
-
         private MaterialSwapper? _materialSwapper;
         private LightWithIdManager? _lightWithIdManager;
 
@@ -85,8 +77,8 @@ namespace CustomFloorPlugin
 
             if (_instancedMaterialLightWithId == null)
             {
-                await _materialSwapper!.LoadMaterialsTask;
-                GetComponent<Renderer>().material = _materialSwapper.LoadMaterialsTask.Result.OpaqueGlowMaterial;
+                await _materialSwapper!.MaterialsLoadingTask;
+                GetComponent<Renderer>().material = _materialSwapper.MaterialsLoadingTask.Result.OpaqueGlowMaterial;
                 MaterialPropertyBlockController materialPropertyBlockController = gameObject.AddComponent<MaterialPropertyBlockController>();
                 materialPropertyBlockController.SetField("_renderers", new[] { GetComponent<Renderer>() });
                 MaterialPropertyBlockColorSetter materialPropertyBlockColorSetter = gameObject.AddComponent<MaterialPropertyBlockColorSetter>();

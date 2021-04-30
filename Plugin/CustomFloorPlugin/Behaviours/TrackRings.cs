@@ -5,6 +5,7 @@ using UnityEngine;
 using Zenject;
 
 
+
 namespace CustomFloorPlugin
 {
     public class TrackRings : MonoBehaviour, INotifyPlatformEnabled, INotifyPlatformDisabled
@@ -43,28 +44,6 @@ namespace CustomFloorPlugin
         private TrackLaneRingsRotationEffectSpawner? _trackLaneRingsRotationEffectSpawner;
         private TrackLaneRingsPositionStepEffectSpawner? _trackLaneRingsPositionStepEffectSpawner;
 
-        private void OnDrawGizmos()
-        {
-            Gizmos.matrix = transform.localToWorldMatrix;
-            Gizmos.color = Color.blue;
-            for (int i = 0; i < ringCount; i++)
-            {
-                Vector3 zOffset = i * ringPositionStep * Vector3.forward;
-                if (trackLaneRingPrefab != null)
-                {
-                    foreach (Renderer r in trackLaneRingPrefab.GetComponentsInChildren<Renderer>())
-                    {
-                        Bounds bounds = r.bounds;
-                        Gizmos.DrawCube(zOffset + bounds.center, bounds.size);
-                    }
-                }
-                else
-                {
-                    Gizmos.DrawCube(zOffset, Vector3.one * 0.5f);
-                }
-            }
-        }
-
         [Inject]
         public void Construct(MaterialSwapper materialSwapper, [InjectOptional] IBeatmapObjectCallbackController beatmapObjectCallbackController)
         {
@@ -90,10 +69,59 @@ namespace CustomFloorPlugin
                 _trackLaneRingsManager.SetField("_spawnAsChildren", true);
             }
 
-            if (useRotationEffect && _trackLaneRingsRotationEffectSpawner != null)
+            if (useRotationEffect)
+            {
+                if (_trackLaneRingsRotationEffectSpawner == null)
+                {
+                    TrackLaneRingsRotationEffect trackLaneRingsRotationEffect = gameObject.AddComponent<TrackLaneRingsRotationEffect>();
+                    trackLaneRingsRotationEffect.SetField("_trackLaneRingsManager", _trackLaneRingsManager);
+                    trackLaneRingsRotationEffect.SetField("_startupRotationAngle", startupRotationAngle);
+                    trackLaneRingsRotationEffect.SetField("_startupRotationStep", startupRotationStep);
+                    int timePerRing = startupRotationPropagationSpeed / ringCount;
+                    float ringsPerFrame = Time.fixedDeltaTime / timePerRing;
+                    trackLaneRingsRotationEffect.SetField("_startupRotationPropagationSpeed", Mathf.Max((int)ringsPerFrame, 1));
+                    trackLaneRingsRotationEffect.SetField("_startupRotationFlexySpeed", startupRotationFlexySpeed);
+
+                    _trackLaneRingsRotationEffectSpawner = gameObject.AddComponent<TrackLaneRingsRotationEffectSpawner>();
+                    _trackLaneRingsRotationEffectSpawner.SetField("_beatmapObjectCallbackController", _beatmapObjectCallbackController);
+                    _trackLaneRingsRotationEffectSpawner.SetField("_beatmapEventType", (BeatmapEventType)rotationSongEventType);
+                    _trackLaneRingsRotationEffectSpawner.SetField("_rotationStep", rotationStep);
+                    int timePerRing2 = rotationPropagationSpeed / ringCount;
+                    float ringsPerFrame2 = Time.fixedDeltaTime / timePerRing2;
+                    _trackLaneRingsRotationEffectSpawner.SetField("_rotationPropagationSpeed", Mathf.Max((int)ringsPerFrame2, 1));
+                    _trackLaneRingsRotationEffectSpawner.SetField("_rotationFlexySpeed", rotationFlexySpeed);
+                    _trackLaneRingsRotationEffectSpawner.SetField("_trackLaneRingsRotationEffect", trackLaneRingsRotationEffect);
+                }
+                else if (_beatmapObjectCallbackController != null)
+                {
+                    _trackLaneRingsRotationEffectSpawner.SetField("_beatmapObjectCallbackController", _beatmapObjectCallbackController);
+                    _trackLaneRingsRotationEffectSpawner.Start();
+                }
+            }
+
+            if (useStepEffect)
+            {
+                if (_trackLaneRingsPositionStepEffectSpawner == null)
+                {
+                    _trackLaneRingsPositionStepEffectSpawner = gameObject.AddComponent<TrackLaneRingsPositionStepEffectSpawner>();
+                    _trackLaneRingsPositionStepEffectSpawner.SetField("_beatmapObjectCallbackController", _beatmapObjectCallbackController);
+                    _trackLaneRingsPositionStepEffectSpawner.SetField("_trackLaneRingsManager", _trackLaneRingsManager);
+                    _trackLaneRingsPositionStepEffectSpawner.SetField("_beatmapEventType", (BeatmapEventType)stepSongEventType);
+                    _trackLaneRingsPositionStepEffectSpawner.SetField("_minPositionStep", minPositionStep);
+                    _trackLaneRingsPositionStepEffectSpawner.SetField("_maxPositionStep", maxPositionStep);
+                    _trackLaneRingsPositionStepEffectSpawner.SetField("_moveSpeed", moveSpeed);
+                }
+                else if (_beatmapObjectCallbackController != null)
+                {
+                    _trackLaneRingsPositionStepEffectSpawner.SetField("_beatmapObjectCallbackController", _beatmapObjectCallbackController);
+                    _trackLaneRingsPositionStepEffectSpawner.Start();
+                }
+            }
+            
+            /*if (useRotationEffect && _trackLaneRingsRotationEffectSpawner != null && _beatmapObjectCallbackController != null)
             {
                 _trackLaneRingsRotationEffectSpawner.SetField("_beatmapObjectCallbackController", _beatmapObjectCallbackController);
-                try { _trackLaneRingsRotationEffectSpawner.Start(); } catch { /* Suppresses a NullReferenceException */ }
+                _trackLaneRingsRotationEffectSpawner.Start();
             }
             else if (useRotationEffect)
             {
@@ -117,10 +145,10 @@ namespace CustomFloorPlugin
                 _trackLaneRingsRotationEffectSpawner.SetField("_trackLaneRingsRotationEffect", trackLaneRingsRotationEffect);
             }
 
-            if (useStepEffect && _trackLaneRingsPositionStepEffectSpawner != null)
+            if (useStepEffect && _trackLaneRingsPositionStepEffectSpawner != null && _beatmapObjectCallbackController != null)
             {
                 _trackLaneRingsPositionStepEffectSpawner.SetField("_beatmapObjectCallbackController", _beatmapObjectCallbackController);
-                try { _trackLaneRingsPositionStepEffectSpawner.Start(); } catch { /* Suppresses a NullReferenceException */ }
+                _trackLaneRingsPositionStepEffectSpawner.Start();
             }
             else if (useStepEffect)
             {
@@ -131,7 +159,7 @@ namespace CustomFloorPlugin
                 _trackLaneRingsPositionStepEffectSpawner.SetField("_minPositionStep", minPositionStep);
                 _trackLaneRingsPositionStepEffectSpawner.SetField("_maxPositionStep", maxPositionStep);
                 _trackLaneRingsPositionStepEffectSpawner.SetField("_moveSpeed", moveSpeed);
-            }
+            }*/
 
             gameObject.SetActive(true);
 

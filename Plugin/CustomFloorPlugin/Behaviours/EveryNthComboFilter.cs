@@ -9,7 +9,7 @@ namespace CustomFloorPlugin
     public class EveryNthComboFilter : EventFilterBehaviour, INotifyPlatformEnabled, INotifyPlatformDisabled
     {
         [FormerlySerializedAs("ComboStep")] public int comboStep = 50;
-        [FormerlySerializedAs("NthComboReached")] public UnityEvent? nThComboReached;
+        [FormerlySerializedAs("NthComboReached")] public UnityEvent? nthComboReached;
 
         public void PlatformEnabled(DiContainer container)
         {
@@ -25,7 +25,7 @@ namespace CustomFloorPlugin
         {
             if (combo % comboStep == 0 && combo != 0)
             {
-                nThComboReached!.Invoke();
+                nthComboReached!.Invoke();
             }
         }
     }

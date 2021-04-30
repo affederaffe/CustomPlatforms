@@ -8,7 +8,7 @@ using Zenject;
 namespace CustomFloorPlugin.UI
 {
     /// <summary>
-    /// Instatiable custom <see cref="FlowCoordinator"/> used by BSML
+    /// Instantiable custom <see cref="FlowCoordinator"/> used by BSML
     /// </summary>
     internal class PlatformsFlowCoordinator : FlowCoordinator
     {

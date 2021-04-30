@@ -84,11 +84,11 @@ namespace CustomFloorPlugin
             }
         }
 
-        private void OnAllNotesCountDidChange(int anyCuts, int cuttableNotes) => textMeshPro!.text = $"{anyCuts} | {cuttableNotes}";
-        private void OnGoodCutCountDidChange(int goodCuts) => textMeshPro!.text = $"{goodCuts}";
-        private void OnBadCutCountDidChange(int badCuts) => textMeshPro!.text = $"{badCuts}";
-        private void OnMissCountDidChange(int misses) => textMeshPro!.text = $"{misses}";
-        private void OnScoreDidChange(int rawScore, int modifiedScore) => textMeshPro!.text = $"{rawScore} | {modifiedScore}";
-        private void OnComboDidChange(int combo) => textMeshPro!.text = $"{combo}";
+        private void OnAllNotesCountDidChange(int anyCuts, int cuttableNotes) => textMeshPro!.text = $"{anyCuts.ToString()} | {cuttableNotes.ToString()}";
+        private void OnGoodCutCountDidChange(int goodCuts) => textMeshPro!.text = $"{goodCuts.ToString()}";
+        private void OnBadCutCountDidChange(int badCuts) => textMeshPro!.text = $"{badCuts.ToString()}";
+        private void OnMissCountDidChange(int misses) => textMeshPro!.text = $"{misses.ToString()}";
+        private void OnScoreDidChange(int rawScore, int modifiedScore) => textMeshPro!.text = $"{rawScore.ToString()} | {modifiedScore.ToString()}";
+        private void OnComboDidChange(int combo) => textMeshPro!.text = $"{combo.ToString()}";
     }
 }

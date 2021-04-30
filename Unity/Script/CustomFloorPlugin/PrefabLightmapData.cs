@@ -1,17 +1,13 @@
 ﻿using UnityEngine;
+using UnityEngine.Serialization;
 
 
 namespace CustomFloorPlugin
 {
     public class PrefabLightmapData : MonoBehaviour
     {
-        [SerializeField]
-        public Renderer[] m_Renderers;
-
-        [SerializeField]
-        public Vector4[] m_LightmapOffsetScales;
-
-        [SerializeField]
-        public Texture2D[] m_Lightmaps;
+        [FormerlySerializedAs("m_Renderers")] public Renderer[]? renderers;
+        [FormerlySerializedAs("m_LightmapOffsetScales")] public Vector4[]? lightmapOffsetScales;
+        [FormerlySerializedAs("m_Lightmaps")] public Texture2D[]? lightmaps;
     }
 }

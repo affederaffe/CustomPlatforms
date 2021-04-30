@@ -8,19 +8,19 @@ namespace CustomFloorPlugin
         [Header("Platform Description")]
         public string platName = "MyCustomPlatform";
         public string platAuthor = "MyName";
-        public Sprite icon;
+        public Sprite? icon;
         [Space]
         [Header("Hide Environment")]
-        public bool hideHighway = false;
-        public bool hideTowers = false;
-        public bool hideDefaultPlatform = false;
-        public bool hideEQVisualizer = false;
-        public bool hideSmallRings = false;
-        public bool hideBigRings = false;
-        public bool hideBackColumns = false;
-        public bool hideBackLasers = false;
-        public bool hideDoubleColorLasers = false;
-        public bool hideRotatingLasers = false;
-        public bool hideTrackLights = false;
+        public bool hideHighway;
+        public bool hideTowers;
+        public bool hideDefaultPlatform;
+        public bool hideEQVisualizer;
+        public bool hideSmallRings;
+        public bool hideBigRings;
+        public bool hideBackColumns;
+        public bool hideBackLasers;
+        public bool hideDoubleColorLasers;
+        public bool hideRotatingLasers;
+        public bool hideTrackLights;
     }
 }

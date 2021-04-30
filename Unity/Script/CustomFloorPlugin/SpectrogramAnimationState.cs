@@ -5,7 +5,7 @@ namespace CustomFloorPlugin
 {
     public class SpectrogramAnimationState : MonoBehaviour 
     {
-        public AnimationClip animationClip;
+        public AnimationClip? animationClip;
 
         [Header("0: Low Frequency, 63 High Frequency")]
         [Range(0f, 63f)]

@@ -1,21 +1,21 @@
 ﻿<vertical child-align="UpperCenter" child-control-height="false" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="https://monkeymanboy.github.io/BSML-Docs/ https://raw.githubusercontent.com/monkeymanboy/BSML-Docs/gh-pages/BSMLSchema.xsd">
   
   <horizontal bg="panel-fade-gradient" bg-color="#db3eef" pref-width="100">
-    <label text="Changelog" align="Center" font-size="6"></label>
+    <label text="Changelog" align="Center" font-size="6"/>
   </horizontal>
 
   <horizontal preferred-height="60">
-    <text-page size-delta-y="60" text="~changelog-text" rich-text="true"></text-page>
+    <text-page size-delta-y="60" text="~changelog-text" rich-text="true"/>
   </horizontal>
 
   <horizontal>
-    <button-with-icon icon="CustomFloorPlugin.Assets.heart.png" click-event="open-credits" hover-hint="Credits" pref-height="12" pref-width="12"></button-with-icon>
+    <button-with-icon icon="CustomFloorPlugin.Assets.heart.png" click-event="open-credits" hover-hint="Credits" pref-height="12" pref-width="12"/>
   </horizontal>
   
   <modal id="credits-modal" show-event="open-credits" clickerino-offerino-closerino="true" move-to-center="true">
     <horizontal>
       <vertical bg="round-rect-panel" pref-width="71">
-        <text text="~credits-text" rich-text="true"></text>
+        <text text="~credits-text" rich-text="true"/>
       </vertical>
     </horizontal>
   </modal>

@@ -17,48 +17,48 @@ namespace CustomFloorPlugin
         private BasicSpectrogramData? _basicSpectrogramData;
 
         private Animation? _animation;
+        private bool _hasSpectrogramData;
 
         [Inject]
         public void Construct([InjectOptional] BasicSpectrogramData basicSpectrogramData)
         {
             _basicSpectrogramData = basicSpectrogramData;
+            _animation = GetComponent<Animation>() ?? gameObject.AddComponent<Animation>();
         }
 
         public void PlatformEnabled(DiContainer container)
         {
+            if (animationClip == null) enabled = false;
             container.Inject(this);
+            _hasSpectrogramData = _basicSpectrogramData != null;
         }
 
         private void Update()
         {
-            if (animationClip != null)
+            _animation!.AddClip(animationClip, "clip");
+            _animation.Play("clip");
+            _animation["clip"].speed = 0;
+
+            if (_hasSpectrogramData)
             {
-                _animation = GetComponent<Animation>() ?? gameObject.AddComponent<Animation>();
-                _animation.AddClip(animationClip, "clip");
-                _animation.Play("clip");
-                _animation["clip"].speed = 0;
-
-                if (_basicSpectrogramData != null)
+                float average = 0.0f;
+                for (int i = 0; i < 64; i++)
                 {
-                    float average = 0.0f;
-                    for (int i = 0; i < 64; i++)
-                    {
-                        average += _basicSpectrogramData.ProcessedSamples[i];
-                    }
-                    average /= 64.0f;
-
-                    float value = averageAllSamples ? average : _basicSpectrogramData.ProcessedSamples[sample];
-
-                    value *= 5f;
-                    if (value > 1f)
-                    {
-                        value = 1f;
-                    }
-                    value = Mathf.Pow(value, 2f);
-
-                    _animation["clip"].time = value * _animation["clip"].length;
-
+                    average += _basicSpectrogramData!.ProcessedSamples[i];
                 }
+                average /= 64.0f;
+
+                float value = averageAllSamples ? average : _basicSpectrogramData!.ProcessedSamples[sample];
+
+                value *= 5f;
+                if (value > 1f)
+                {
+                    value = 1f;
+                }
+                value = Mathf.Pow(value, 2f);
+
+                _animation["clip"].time = value * _animation["clip"].length;
+
             }
         }
     }

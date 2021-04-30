@@ -50,19 +50,6 @@ namespace CustomFloorPlugin
         public void PlatformEnabled(DiContainer container)
         {
             container.Inject(this);
-            SubscribeToEvents();
-        }
-
-        public void PlatformDisabled()
-        {
-            UnsubscribeFromEvents();
-        }
-
-        /// <summary>
-        /// Subscribes platform specific Actions from game Events
-        /// </summary>
-        private void SubscribeToEvents()
-        {
             if (_events == null) return;
             _events.BeatmapEventDidTriggerEvent += LightEventCallBack;
             _events.GameSceneLoadedEvent += onLevelStart!.Invoke;
@@ -84,10 +71,7 @@ namespace CustomFloorPlugin
             _events.AllNotesCountDidChangeEvent += onAllNotesCountChanged.Invoke;
         }
 
-        /// <summary>
-        /// Unsubscribes platform specific Actions to game Events
-        /// </summary>
-        private void UnsubscribeFromEvents()
+        public void PlatformDisabled()
         {
             if (_events == null) return;
             _events.BeatmapEventDidTriggerEvent -= LightEventCallBack;

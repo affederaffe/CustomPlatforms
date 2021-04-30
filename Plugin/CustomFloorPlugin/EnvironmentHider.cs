@@ -58,7 +58,7 @@ namespace CustomFloorPlugin
         {
             FindEnvironment();
             SetCollectionHidden(_menuEnvironment, _platformManager.GetIndexForType(PlatformType.Active) != 0);
-            SetCollectionHidden(_playersPlace, _platformManager!.ActivePlatform!.hideDefaultPlatform);
+            SetCollectionHidden(_playersPlace, _platformManager.ActivePlatform!.hideDefaultPlatform);
             SetCollectionHidden(_feet, _platformManager.ActivePlatform.hideDefaultPlatform && !_config.AlwaysShowFeet);
             SetCollectionHidden(_smallRings, _platformManager.ActivePlatform.hideSmallRings);
             SetCollectionHidden(_bigRings, _platformManager.ActivePlatform.hideBigRings);
@@ -127,11 +127,9 @@ namespace CustomFloorPlugin
         /// <param name="hidden">A boolean describing the desired hidden state</param>
         private void SetCollectionHidden(List<GameObject> list, bool hidden)
         {
-            bool isMenu = _sceneName == "MenuEnvironment";
-            foreach (GameObject go in list.Where(go => isMenu || go.activeSelf)) // Don't hide objects that are already hidden by Chroma
-            {
-                go.SetActive(!hidden);
-            }
+            IEnumerable<GameObject> gameObjects = _sceneName == "MenuEnvironment" ? list : list.Where(x => x.activeSelf);
+            foreach (GameObject gameObject in gameObjects)
+                gameObject.SetActive(!hidden);
             list.Clear();
         }
 

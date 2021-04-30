@@ -33,7 +33,7 @@ namespace CustomFloorPlugin
         [Range(0, 1)]
         public float center = 0.5f;
         public Color color = Color.white;
-        public LightsID lightsID = LightsID.Static;
+        public LightsID lightsID;
 
         private void OnDrawGizmos() 
         {

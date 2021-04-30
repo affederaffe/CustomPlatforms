@@ -34,20 +34,20 @@ namespace CustomFloorPlugin
         /// <summary>
         /// The old heart, to remind everyone that this plugin is some legacy garbage
         /// </summary>
-        private readonly Task<GameObject> _heartTask;
+        private readonly Task<GameObject> _heartLoadingTask;
 
         /// <summary>
         /// Used as a players place replacement in platform preview
         /// </summary>
-        private readonly Task<GameObject> _playersPlaceTask;
+        private readonly Task<GameObject> _playersPlaceLoadingTask;
 
         public AssetLoader(MaterialSwapper materialSwapper)
         {
             _materialSwapper = materialSwapper;
-            _heartTask = CreateHeart();
-            _playersPlaceTask = CreatePlayersPlace();
-            DefaultPlatformCover = GetEmbeddedResource("CustomFloorPlugin.Assets.LvlInsaneCover.png").ReadPNGToSprite();
-            FallbackCover = GetEmbeddedResource("CustomFloorPlugin.Assets.FeetIcon.png").ReadPNGToSprite();
+            _heartLoadingTask = CreateHeart();
+            _playersPlaceLoadingTask = CreatePlayersPlace();
+            DefaultPlatformCover = GetEmbeddedResource("CustomFloorPlugin.Assets.LvlInsaneCover.png").ReadSprite();
+            FallbackCover = GetEmbeddedResource("CustomFloorPlugin.Assets.FeetIcon.png").ReadSprite();
         }
 
         /// <summary>
@@ -56,15 +56,15 @@ namespace CustomFloorPlugin
         /// <param name="value">The desired state</param>
         internal async void ToggleHeart(bool value)
         {
-            await _heartTask!;
+            await _heartLoadingTask!;
             if (value)
             {
-                _heartTask.Result.SetActive(true);
-                _heartTask.Result.GetComponent<InstancedMaterialLightWithId>().ColorWasSet(Color.magenta);
+                _heartLoadingTask.Result.SetActive(true);
+                _heartLoadingTask.Result.GetComponent<InstancedMaterialLightWithId>().ColorWasSet(Color.magenta);
             }
             else
             {
-                _heartTask.Result.SetActive(false);
+                _heartLoadingTask.Result.SetActive(false);
             }
         }
         
@@ -74,15 +74,15 @@ namespace CustomFloorPlugin
         /// <param name="value">The desired state</param>
         internal async void TogglePlayersPlace(bool value)
         {
-            await _playersPlaceTask!;
+            await _playersPlaceLoadingTask!;
             if (value)
             {
-                _playersPlaceTask.Result.SetActive(true);
-                _playersPlaceTask.Result.GetComponentInChildren<InstancedMaterialLightWithId>().ColorWasSet(Color.cyan);
+                _playersPlaceLoadingTask.Result.SetActive(true);
+                _playersPlaceLoadingTask.Result.GetComponentInChildren<InstancedMaterialLightWithId>().ColorWasSet(Color.cyan);
             }
             else
             {
-                _playersPlaceTask.Result.SetActive(false);
+                _playersPlaceLoadingTask.Result.SetActive(false);
             }
         }
 
@@ -98,8 +98,8 @@ namespace CustomFloorPlugin
             GameObject heart = new("<3");
             heart.SetActive(false);
             MeshRenderer meshRenderer = heart.AddComponent<MeshRenderer>();
-            await _materialSwapper.LoadMaterialsTask;
-            meshRenderer.material = _materialSwapper.LoadMaterialsTask.Result.OpaqueGlowMaterial;
+            await _materialSwapper.MaterialsLoadingTask;
+            meshRenderer.material = _materialSwapper.MaterialsLoadingTask.Result.OpaqueGlowMaterial;
             MeshFilter meshFilter = heart.AddComponent<MeshFilter>();
             meshFilter.mesh = mesh;
             heart.transform.position = new Vector3(-8f, 25f, 26f);
@@ -122,8 +122,8 @@ namespace CustomFloorPlugin
             GameObject playersPlaceCube = GameObject.CreatePrimitive(PrimitiveType.Cube);
             playersPlaceCube.SetActive(false);
             MeshRenderer cubeRenderer = playersPlaceCube.GetComponent<MeshRenderer>();
-            await _materialSwapper.LoadMaterialsTask;
-            cubeRenderer.material = _materialSwapper.LoadMaterialsTask.Result.DarkEnvSimpleMaterial!;
+            await _materialSwapper.MaterialsLoadingTask;
+            cubeRenderer.material = _materialSwapper.MaterialsLoadingTask.Result.DarkEnvSimpleMaterial;
             cubeRenderer.material.color = Color.black;
             playersPlaceCube.transform.position = new Vector3(0f, -12.5f, 0f);
             playersPlaceCube.transform.localScale = new Vector3(3f, 25f, 2f);
@@ -132,7 +132,7 @@ namespace CustomFloorPlugin
             GameObject playersPlaceFrame = new("Frame");
             playersPlaceFrame.transform.SetParent(playersPlaceCube.transform);
             MeshRenderer frameRenderer = playersPlaceFrame.AddComponent<MeshRenderer>();
-            frameRenderer.material = _materialSwapper.LoadMaterialsTask.Result.OpaqueGlowMaterial;
+            frameRenderer.material = _materialSwapper.MaterialsLoadingTask.Result.OpaqueGlowMaterial;
             MeshFilter meshFilter = playersPlaceFrame.AddComponent<MeshFilter>();
             meshFilter.mesh = mesh;
             AddLight(frameRenderer).ColorWasSet(Color.blue);

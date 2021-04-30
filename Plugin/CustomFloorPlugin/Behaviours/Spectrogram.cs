@@ -43,29 +43,7 @@ namespace CustomFloorPlugin
         private BasicSpectrogramData? _basicSpectrogramData;
         
         private Transform[]? _columnTransforms;
-
-        private void OnDrawGizmos()
-        {
-            Gizmos.matrix = transform.localToWorldMatrix;
-            Gizmos.color = Color.green;
-
-            for (int i = -64; i < 64; i++)
-            {
-                Vector3 zOffset = i * separator;
-                if (columnPrefab != null)
-                {
-                    foreach (Renderer r in columnPrefab.GetComponentsInChildren<Renderer>())
-                    {
-                        Bounds bounds = r.bounds;
-                        Gizmos.DrawCube(zOffset + bounds.center, bounds.size);
-                    }
-                }
-                else
-                {
-                    Gizmos.DrawCube(zOffset, Vector3.one * 0.5f);
-                }
-            }
-        }
+        private bool _hasSpectrogramData;
 
         [Inject]
         public void Construct(MaterialSwapper materialSwapper, [InjectOptional] BasicSpectrogramData basicSpectrogramData)
@@ -79,7 +57,8 @@ namespace CustomFloorPlugin
             if (columnPrefab == null) return;
             container.Inject(this);
             await _materialSwapper!.ReplaceMaterials(columnPrefab);
-            if (_columnTransforms == null) CreateColumns();
+            _hasSpectrogramData = _basicSpectrogramData != null;
+            _columnTransforms ??= CreateColumns();
             foreach (INotifyPlatformEnabled notifyEnable in GetComponentsInChildren<INotifyPlatformEnabled>(true))
             {
                 if ((Object)notifyEnable != this)
@@ -102,7 +81,7 @@ namespace CustomFloorPlugin
         /// </summary>
         private void Update()
         {
-            IList<float> processedSamples = _basicSpectrogramData != null ? _basicSpectrogramData.ProcessedSamples : FallbackSamples;
+            IList<float> processedSamples = _hasSpectrogramData ? _basicSpectrogramData!.ProcessedSamples : FallbackSamples;
             for (int i = 0; i < processedSamples.Count; i++)
             {
                 _columnTransforms![i].localScale = new Vector3(columnWidth, Mathf.Lerp(minHeight, maxHeight, processedSamples[i]), columnDepth);
@@ -113,14 +92,15 @@ namespace CustomFloorPlugin
         /// <summary>
         /// Creates all Columns using the <see cref="columnPrefab"/>
         /// </summary>
-        private void CreateColumns()
+        private Transform[] CreateColumns()
         {
-            _columnTransforms = new Transform[128];
+            Transform[] columnTransforms = new Transform[128];
             for (int i = 0; i < 64; i++)
             {
-                _columnTransforms[i] = CreateColumn(separator * i);
-                _columnTransforms[i + 64] = CreateColumn(-separator * (i + 1));
+                columnTransforms[i] = CreateColumn(separator * i);
+                columnTransforms[i + 64] = CreateColumn(-separator * (i + 1));
             }
+            return columnTransforms;
         }
 
         /// <summary>

@@ -7,7 +7,7 @@ namespace CustomFloorPlugin
     {
         [Space]
         [Header("Rings")]
-        public GameObject trackLaneRingPrefab;
+        public GameObject? trackLaneRingPrefab;
         public int ringCount = 10;
         public float ringPositionStep = 2f;
         [Space]

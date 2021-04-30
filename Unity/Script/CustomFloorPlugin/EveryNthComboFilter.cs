@@ -1,11 +1,12 @@
 ﻿using UnityEngine.Events;
+using UnityEngine.Serialization;
 
 
 namespace CustomFloorPlugin 
 {
     public class EveryNthComboFilter : EventFilterBehaviour 
     {
-        public int ComboStep = 50;
-        public UnityEvent NthComboReached;
+        [FormerlySerializedAs("ComboStep")] public int comboStep = 50;
+        [FormerlySerializedAs("NthComboReached")] public UnityEvent? nthComboReached;
     }
 }
