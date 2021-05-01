@@ -1,9 +1,11 @@
 ﻿using TMPro;
 
+using UnityEngine;
+
 
 namespace CustomFloorPlugin
 {
-    public class TextEventFilter : EventFilterBehaviour
+    public class TextEventFilter : MonoBehaviour
     {
         public enum CounterType
         {
@@ -15,7 +17,7 @@ namespace CustomFloorPlugin
             Combo
         }
 
-        public CounterType eventType;
+        public CounterType counterType;
         public TextMeshPro? textMeshPro;
     }
 }

@@ -29,9 +29,9 @@ public class PrefabLightmapDataEditor : MonoBehaviour
 
             GenerateLightmapInfo(gameObject, renderers, lightmapOffsetScales, lightmaps);
 
-            instance.m_Renderers = renderers.ToArray();
-            instance.m_LightmapOffsetScales = lightmapOffsetScales.ToArray();
-            instance.m_Lightmaps = lightmaps.ToArray();
+            instance.renderers = renderers.ToArray();
+            instance.lightmapOffsetScales = lightmapOffsetScales.ToArray();
+            instance.lightmaps = lightmaps.ToArray();
 
             var targetPrefab = PrefabUtility.GetCorrespondingObjectFromSource(gameObject);
             if (targetPrefab != null)

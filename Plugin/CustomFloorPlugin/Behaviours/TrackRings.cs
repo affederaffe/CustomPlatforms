@@ -60,6 +60,7 @@ namespace CustomFloorPlugin
             if (_trackLaneRingsManager == null)
             { 
                 await _materialSwapper!.ReplaceMaterials(trackLaneRingPrefab);
+                trackLaneRingPrefab.layer = 14;
                 gameObject.SetActive(false);
                 TrackLaneRing trackLaneRing = trackLaneRingPrefab.AddComponent<TrackLaneRing>();
                 _trackLaneRingsManager = gameObject.AddComponent<TrackLaneRingsManager>();
@@ -117,49 +118,6 @@ namespace CustomFloorPlugin
                     _trackLaneRingsPositionStepEffectSpawner.Start();
                 }
             }
-            
-            /*if (useRotationEffect && _trackLaneRingsRotationEffectSpawner != null && _beatmapObjectCallbackController != null)
-            {
-                _trackLaneRingsRotationEffectSpawner.SetField("_beatmapObjectCallbackController", _beatmapObjectCallbackController);
-                _trackLaneRingsRotationEffectSpawner.Start();
-            }
-            else if (useRotationEffect)
-            {
-                TrackLaneRingsRotationEffect trackLaneRingsRotationEffect = gameObject.AddComponent<TrackLaneRingsRotationEffect>();
-                trackLaneRingsRotationEffect.SetField("_trackLaneRingsManager", _trackLaneRingsManager);
-                trackLaneRingsRotationEffect.SetField("_startupRotationAngle", startupRotationAngle);
-                trackLaneRingsRotationEffect.SetField("_startupRotationStep", startupRotationStep);
-                int timePerRing = startupRotationPropagationSpeed / ringCount;
-                float ringsPerFrame = Time.fixedDeltaTime / timePerRing;
-                trackLaneRingsRotationEffect.SetField("_startupRotationPropagationSpeed", Mathf.Max((int)ringsPerFrame, 1));
-                trackLaneRingsRotationEffect.SetField("_startupRotationFlexySpeed", startupRotationFlexySpeed);
-
-                _trackLaneRingsRotationEffectSpawner = gameObject.AddComponent<TrackLaneRingsRotationEffectSpawner>();
-                _trackLaneRingsRotationEffectSpawner.SetField("_beatmapObjectCallbackController", _beatmapObjectCallbackController);
-                _trackLaneRingsRotationEffectSpawner.SetField("_beatmapEventType", (BeatmapEventType)rotationSongEventType);
-                _trackLaneRingsRotationEffectSpawner.SetField("_rotationStep", rotationStep);
-                int timePerRing2 = rotationPropagationSpeed / ringCount;
-                float ringsPerFrame2 = Time.fixedDeltaTime / timePerRing2;
-                _trackLaneRingsRotationEffectSpawner.SetField("_rotationPropagationSpeed", Mathf.Max((int)ringsPerFrame2, 1));
-                _trackLaneRingsRotationEffectSpawner.SetField("_rotationFlexySpeed", rotationFlexySpeed);
-                _trackLaneRingsRotationEffectSpawner.SetField("_trackLaneRingsRotationEffect", trackLaneRingsRotationEffect);
-            }
-
-            if (useStepEffect && _trackLaneRingsPositionStepEffectSpawner != null && _beatmapObjectCallbackController != null)
-            {
-                _trackLaneRingsPositionStepEffectSpawner.SetField("_beatmapObjectCallbackController", _beatmapObjectCallbackController);
-                _trackLaneRingsPositionStepEffectSpawner.Start();
-            }
-            else if (useStepEffect)
-            {
-                _trackLaneRingsPositionStepEffectSpawner = gameObject.AddComponent<TrackLaneRingsPositionStepEffectSpawner>();
-                _trackLaneRingsPositionStepEffectSpawner.SetField("_beatmapObjectCallbackController", _beatmapObjectCallbackController);
-                _trackLaneRingsPositionStepEffectSpawner.SetField("_trackLaneRingsManager", _trackLaneRingsManager);
-                _trackLaneRingsPositionStepEffectSpawner.SetField("_beatmapEventType", (BeatmapEventType)stepSongEventType);
-                _trackLaneRingsPositionStepEffectSpawner.SetField("_minPositionStep", minPositionStep);
-                _trackLaneRingsPositionStepEffectSpawner.SetField("_maxPositionStep", maxPositionStep);
-                _trackLaneRingsPositionStepEffectSpawner.SetField("_moveSpeed", moveSpeed);
-            }*/
 
             gameObject.SetActive(true);
 

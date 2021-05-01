@@ -1,11 +1,13 @@
 ﻿using TMPro;
 
+using UnityEngine;
+
 using Zenject;
 
 
 namespace CustomFloorPlugin
 {
-    public class TextEventFilter : EventFilterBehaviour, INotifyPlatformEnabled, INotifyPlatformDisabled
+    public class TextEventFilter : MonoBehaviour, INotifyPlatformEnabled, INotifyPlatformDisabled
     {
         public enum CounterType
         {
@@ -17,7 +19,7 @@ namespace CustomFloorPlugin
             Combo
         }
 
-        public CounterType eventType;
+        public CounterType counterType;
         public TextMeshPro? textMeshPro;
 
         private BSEvents? _events;
@@ -32,9 +34,9 @@ namespace CustomFloorPlugin
         public void PlatformEnabled(DiContainer container)
         {
             container.Inject(this);
-            if (_events == null) return;
+            if (_events == null || textMeshPro == null) return;
             _startText = textMeshPro!.text;
-            switch (eventType)
+            switch (counterType)
             {
                 case CounterType.AnyCuts:
                     _events.AllNotesCountDidChangeEvent += OnAllNotesCountDidChange;
@@ -59,9 +61,9 @@ namespace CustomFloorPlugin
 
         public void PlatformDisabled()
         {
-            if (_events == null) return;
+            if (_events == null || textMeshPro == null) return;
             textMeshPro!.text = _startText!;
-            switch (eventType)
+            switch (counterType)
             {
                 case CounterType.AnyCuts:
                     _events.AllNotesCountDidChangeEvent -= OnAllNotesCountDidChange;

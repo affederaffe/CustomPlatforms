@@ -96,13 +96,13 @@ namespace CustomFloorPlugin
         }
 
         /// <summary>
-        /// Activates the default PlayersPlace as well as nulling the root and the TrackLaneRings[] for the next platform
+        /// (De-)Activates the PlayersPlace replacement as well as preparing for the next platform
         /// </summary>
         private void CleanupEnvironment()
         {
             _assetLoader.TogglePlayersPlace(_platformManager.GetIndexForType(PlatformType.Active) != 0 &&
-                                               !_platformManager.ActivePlatform!.hideDefaultPlatform &&
-                                               _sceneName == "MenuEnvironment");
+                                            !_platformManager.ActivePlatform!.hideDefaultPlatform &&
+                                            _sceneName == "MenuEnvironment");
             _trackLaneRings = null;
             _root = null;
         }
@@ -208,47 +208,86 @@ namespace CustomFloorPlugin
             }
         }
 
+        // ReSharper disable once CognitiveComplexity
+        // ReSharper disable once CyclomaticComplexity
         private void FindSmallRings()
         {
-            FindAddGameObject("SmallTrackLaneRings", _smallRings);
-            FindAddGameObject("TrackLaneRing", _smallRings);
-            FindAddGameObject("TriangleTrackLaneRings", _smallRings);
-            FindAddGameObject("PanelsTrackLaneRing", _smallRings);
-            FindAddGameObject("Panels4TrackLaneRing", _smallRings);
-            FindAddGameObject("PairLaserTrackLaneRing", _smallRings);
-            FindAddGameObject("PanelLightTrackLaneRing", _smallRings);
-            FindAddGameObject("LightLinesTrackLaneRing", _smallRings);
-            FindAddGameObject("DistantRings", _smallRings);
-            foreach (TrackLaneRing trackLaneRing in TrackLaneRings.Where(x =>
-                x.name is "TrackLaneRing(Clone)" or
-                "SmallTrackLaneRing(Clone)" or
-                "TriangleTrackLaneRing(Clone)" or
-                "PanelsTrackLaneRing(Clone)" or
-                "Panels4TrackLaneRing(Clone)" or
-                "PairLaserTrackLaneRing(Clone)" or
-                "PanelLightTrackLaneRing(Clone)" or
-                "LightLinesTrackLaneRing(Clone)" or
-                "ConeRing(Clone)" or
-                "ConeRingBig(Clone)"
-                ))
+            switch (_sceneName)
             {
-                _smallRings.Add(trackLaneRing.gameObject);
+                case "DefaultEnvironment":
+                case "NiceEnvironment":
+                case "MonstercatEnvironment":
+                case "CrabRaveEnvironment":
+                    FindAddGameObject("SmallTrackLaneRings", _smallRings);
+                    foreach (TrackLaneRing ring in TrackLaneRings.Where(x => x.name == "SmallTrackLaneRing(Clone)"))
+                        _smallRings.Add(ring.gameObject);
+                    break;
+                case "TriangleEnvironment":
+                    FindAddGameObject("TriangleTrackLaneRings", _smallRings);
+                    foreach (TrackLaneRing ring in TrackLaneRings.Where(x => x.name == "TriangleTrackLaneRing(Clone)"))
+                        _smallRings.Add(ring.gameObject);
+                    break;
+                case "DragonsEnvironment":
+                    FindAddGameObject("PanelsTrackLaneRings", _smallRings);
+                    foreach (TrackLaneRing ring in TrackLaneRings.Where(x => x.name == "PanelsTrackLaneRing(Clone)"))
+                        _smallRings.Add(ring.gameObject);
+                    break;
+                case "PanicEnvironment":
+                    FindAddGameObject("Panels4TrackLaneRings", _smallRings);
+                    foreach (TrackLaneRing ring in TrackLaneRings.Where(x => x.name == "Panels4TrackLaneRing(Clone)"))
+                        _smallRings.Add(ring.gameObject);
+                    break;
+                case "GreenDayEnvironment":
+                    FindAddGameObject("LightLinesTrackLaneRings", _smallRings);
+                    foreach (TrackLaneRing ring in TrackLaneRings.Where(x => x.name == "LightLinesTrackLaneRing(Clone)"))
+                        _smallRings.Add(ring.gameObject);
+                    break;
+                case "TimbalandEnvironment":
+                    FindAddGameObject("PairLaserTrackLaneRings", _smallRings);
+                    foreach (TrackLaneRing ring in TrackLaneRings.Where(x => x.name == "PairLaserTrackLaneRing(Clone)"))
+                        _smallRings.Add(ring.gameObject);
+                    break;
+                case "FitBeatEnvironment":
+                    FindAddGameObject("PanelsLightsTrackLaneRings", _smallRings);
+                    foreach (TrackLaneRing ring in TrackLaneRings.Where(x => x.name == "PanelLightTrackLaneRing(Clone)"))
+                        _smallRings.Add(ring.gameObject);
+                    break;
+                case "KaleidoscopeEnvironment":
+                    FindAddGameObject("SmallTrackLaneRings", _smallRings);
+                    foreach (TrackLaneRing ring in TrackLaneRings.Where(x => x.name == "ConeRing(Clone)"))
+                        _smallRings.Add(ring.gameObject);
+                    break;
             }
         }
 
+        // ReSharper disable once CognitiveComplexity
         private void FindBigRings()
         {
-            FindAddGameObject("BigTrackLaneRings", _bigRings);
-            FindAddGameObject("BigLightsTrackLaneRings", _bigRings);
-            FindAddGameObject("BigCenterLightTrackLaneRing", _bigRings);
-            FindAddGameObject("LightsTrackLaneRing", _bigRings);
-            foreach (TrackLaneRing trackLaneRing in TrackLaneRings.Where(x =>
-                x.name is "BigTrackLaneRing(Clone)" or
-                "BigCenterLightTrackLaneRing(Clone)" or
-                "LightsTrackLaneRing(Clone)"
-                ))
+            switch (_sceneName)
             {
-                _bigRings.Add(trackLaneRing.gameObject);
+                case "DefaultEnvironment":
+                case "TriangleEnvironment":
+                case "NiceEnvironment":
+                case "BigMirrorEnvironment":
+                    FindAddGameObject("BigTrackLaneRings", _bigRings);
+                    foreach (TrackLaneRing ring in TrackLaneRings.Where(x => x.name == "BigTrackLaneRing(Clone)"))
+                        _bigRings.Add(ring.gameObject);
+                    break;
+                case "OriginsEnvironment":
+                    FindAddGameObject("BigLightsTrackLaneRings", _bigRings);
+                    foreach (TrackLaneRing ring in TrackLaneRings.Where(x => x.name == "LightsTrackLaneRing(Clone)"))
+                        _bigRings.Add(ring.gameObject);
+                    break;
+                case "FitBeatEnvironment":
+                    FindAddGameObject("BigCenterLightsTrackLaneRings", _bigRings);
+                    foreach (TrackLaneRing ring in TrackLaneRings.Where(x => x.name == "BigCenterLightTrackLaneRing(Clone)"))
+                        _bigRings.Add(ring.gameObject);
+                    break;
+                case "KaleidoscopeEnvironment":
+                    FindAddGameObject("DistantRings", _bigRings);
+                    foreach (TrackLaneRing ring in TrackLaneRings.Where(x => x.name == "ConeRingBig(Clone)"))
+                        _bigRings.Add(ring.gameObject);
+                    break;
             }
         }
 

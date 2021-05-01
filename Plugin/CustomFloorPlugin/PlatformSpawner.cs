@@ -67,7 +67,7 @@ namespace CustomFloorPlugin
         /// </summary>
         private async void OnTransitionDidStart(float aheadTime)
         {
-            await Task.Delay(TimeSpan.FromSeconds(aheadTime*0.9f));
+            await Task.Delay(TimeSpan.FromSeconds(aheadTime*0.75f));
             await ChangeToPlatformAsync(0);
         }
 

@@ -1,4 +1,5 @@
-﻿using UnityEngine.Events;
+﻿using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.Serialization;
 
 using Zenject;
@@ -6,7 +7,7 @@ using Zenject;
 
 namespace CustomFloorPlugin
 {
-    public class SaberSliceFilter : EventFilterBehaviour, INotifyPlatformEnabled, INotifyPlatformDisabled
+    public class SaberSliceFilter : MonoBehaviour, INotifyPlatformEnabled, INotifyPlatformDisabled
     {
         public enum SaberType
         {
@@ -17,14 +18,25 @@ namespace CustomFloorPlugin
         public SaberType saberType;
         [FormerlySerializedAs("SaberSlice")] public UnityEvent? saberSlice;
 
+        private BSEvents? _events;
+        
+        [Inject]
+        public void Construct([InjectOptional] BSEvents events)
+        {
+            _events = events;
+        }
+        
         public void PlatformEnabled(DiContainer container)
         {
-            EventManager.onSpecificSlice.AddListener(OnSlice);
+            container.Inject(this);
+            if (_events == null) return;
+            _events.NoteWasCutEvent += OnSlice;
         }
 
         public void PlatformDisabled()
         {
-            EventManager.onComboChanged.RemoveListener(OnSlice);
+            if (_events == null) return;
+            _events.NoteWasCutEvent -= OnSlice;
         }
 
         private void OnSlice(int saber)

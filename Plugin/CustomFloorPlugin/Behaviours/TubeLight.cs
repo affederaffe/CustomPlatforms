@@ -51,7 +51,7 @@ namespace CustomFloorPlugin
             _lightWithIdManager = lightWithIdManager;
         }
 
-        public async void PlatformEnabled(DiContainer container)
+        public void PlatformEnabled(DiContainer container)
         {
             container.Inject(this);
             gameObject.SetActive(false);
@@ -77,8 +77,7 @@ namespace CustomFloorPlugin
 
             if (_instancedMaterialLightWithId == null)
             {
-                await _materialSwapper!.MaterialsLoadingTask;
-                GetComponent<Renderer>().material = _materialSwapper.MaterialsLoadingTask.Result.OpaqueGlowMaterial;
+                GetComponent<Renderer>().material = _materialSwapper!.MaterialsLoadingTask.Result.OpaqueGlowMaterial;
                 MaterialPropertyBlockController materialPropertyBlockController = gameObject.AddComponent<MaterialPropertyBlockController>();
                 materialPropertyBlockController.SetField("_renderers", new[] { GetComponent<Renderer>() });
                 MaterialPropertyBlockColorSetter materialPropertyBlockColorSetter = gameObject.AddComponent<MaterialPropertyBlockColorSetter>();
@@ -89,6 +88,7 @@ namespace CustomFloorPlugin
                 _instancedMaterialLightWithId.SetField("_intensity", 1.4f);
                 ((LightWithIdMonoBehaviour)_instancedMaterialLightWithId).SetField("_ID", (int)lightsID);
                 _instancedMaterialLightWithId.ColorWasSet(color);
+                gameObject.layer = 13;
             }
 
             ((LightWithIdMonoBehaviour)_instancedMaterialLightWithId).SetField("_lightManager", _lightWithIdManager);

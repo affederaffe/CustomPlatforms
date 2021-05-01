@@ -35,6 +35,7 @@ namespace CustomFloorPlugin
 
         public void PlatformEnabled(DiContainer container)
         {
+            if (!Renderer.material.HasProperty(propertyName)) return;
             container.Inject(this);
             _lightWithIdManager!.didChangeSomeColorsThisFrameEvent += OnColorsDidChange;
         }
@@ -46,7 +47,6 @@ namespace CustomFloorPlugin
 
         private void OnColorsDidChange()
         {
-            if (!Renderer.material.HasProperty(propertyName)) return;
             Renderer.material.SetColor(propertyName, materialColorType switch
             {
                 MaterialColorType.SaberColorA => _colorManager!.ColorForSaberType(SaberType.SaberA),

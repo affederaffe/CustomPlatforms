@@ -14,10 +14,12 @@ namespace CustomFloorPlugin
     /// Part of the documentation for this file is omitted because it's a clusterfuck and under construction.
     /// </summary>
     public class MaterialSwapper : IInitializable
-    { 
-        private readonly TaskCompletionSource<(Material, Material, Material)> _taskSource;
+    {
+        internal readonly Task<(Material DarkEnvSimpleMaterial,
+                Material TransparentGlowMaterial,
+                Material OpaqueGlowMaterial)> MaterialsLoadingTask;
         
-        internal readonly Task<(Material DarkEnvSimpleMaterial, Material TransparentGlowMaterial, Material OpaqueGlowMaterial)> MaterialsLoadingTask;
+         private readonly TaskCompletionSource<(Material, Material, Material)> _taskSource;
 
         public MaterialSwapper()
         {
@@ -27,8 +29,6 @@ namespace CustomFloorPlugin
 
         public async void Initialize()
         {
-            // Some people had black screens because the Materials couldn't be found,
-            // therefore this ensures they are
             Material? darkEnvSimpleMaterial;
             Material? transparentGlowMaterial;
             Material? opaqueGlowMaterial;
@@ -39,11 +39,15 @@ namespace CustomFloorPlugin
                 darkEnvSimpleMaterial = materials.FirstOrDefault(x => x.name == "DarkEnvironmentSimple");
                 transparentGlowMaterial = materials.FirstOrDefault(x => x.name == "EnvLight");
                 opaqueGlowMaterial = materials.FirstOrDefault(x => x.name == "EnvLightOpaque");
-            } while (darkEnvSimpleMaterial == null || transparentGlowMaterial == null || opaqueGlowMaterial == null);
+            } while (darkEnvSimpleMaterial == null ||
+                     transparentGlowMaterial == null ||
+                     opaqueGlowMaterial == null);
 
             opaqueGlowMaterial = new(opaqueGlowMaterial);
             opaqueGlowMaterial.DisableKeyword("ENABLE_HEIGHT_FOG");
-            _taskSource.TrySetResult((darkEnvSimpleMaterial, transparentGlowMaterial, opaqueGlowMaterial));
+            _taskSource.TrySetResult((darkEnvSimpleMaterial,
+                                      transparentGlowMaterial,
+                                      opaqueGlowMaterial));
         }
 
         /// <summary>

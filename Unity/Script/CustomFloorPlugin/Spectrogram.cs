@@ -1,9 +1,9 @@
 ﻿using UnityEngine;
 
 
-namespace CustomFloorPlugin 
+namespace CustomFloorPlugin
 {
-    public class Spectrogram : MonoBehaviour 
+    public class Spectrogram : MonoBehaviour
     {
         public GameObject? columnPrefab;
         public Vector3 separator = Vector3.forward;
@@ -11,7 +11,7 @@ namespace CustomFloorPlugin
         public float maxHeight = 10f;
         public float columnWidth = 1f;
         public float columnDepth = 1f;
-
+        
         private void OnDrawGizmos()
         {
             Gizmos.matrix = transform.localToWorldMatrix;

@@ -87,8 +87,7 @@ namespace CustomFloorPlugin
             customPlatform.platHash = BitConverter.ToString(hash).Replace("-", string.Empty).ToLowerInvariant();
             customPlatform.fullPath = fullPath;
             customPlatform.name = $"{customPlatform.platName} by {customPlatform.platAuthor}";
-            if (customPlatform.icon == null)
-                customPlatform.icon = _assetLoader.FallbackCover;
+            if (customPlatform.icon == null) customPlatform.icon = _assetLoader.FallbackCover;
 
             await _materialSwapper.ReplaceMaterials(customPlatform.gameObject);
 

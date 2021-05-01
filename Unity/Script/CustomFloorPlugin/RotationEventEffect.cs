@@ -1,9 +1,9 @@
 ﻿using UnityEngine;
 
 
-namespace CustomFloorPlugin 
+namespace CustomFloorPlugin
 {
-    public class RotationEventEffect : MonoBehaviour 
+    public class RotationEventEffect : MonoBehaviour
     {
         public SongEventType eventType;
         public Vector3 rotationVector;

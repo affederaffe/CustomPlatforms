@@ -47,8 +47,7 @@ namespace CustomFloorPlugin
         public void Dispose()
         {
             _multiplayerPlayersManager.playerDidFinishEvent -= OnPlayerDidFinish;
-            if (_lightEffects != null)
-                UnityEngine.Object.Destroy(_lightEffects);
+            if (_lightEffects != null) UnityEngine.Object.Destroy(_lightEffects);
         }
 
         /// <summary>

@@ -57,6 +57,7 @@ namespace CustomFloorPlugin
             if (columnPrefab == null) return;
             container.Inject(this);
             await _materialSwapper!.ReplaceMaterials(columnPrefab);
+            columnPrefab.layer = 14;
             _hasSpectrogramData = _basicSpectrogramData != null;
             _columnTransforms ??= CreateColumns();
             foreach (INotifyPlatformEnabled notifyEnable in GetComponentsInChildren<INotifyPlatformEnabled>(true))

@@ -127,7 +127,7 @@ namespace CustomFloorPlugin
             cubeRenderer.material.color = Color.black;
             playersPlaceCube.transform.position = new Vector3(0f, -12.5f, 0f);
             playersPlaceCube.transform.localScale = new Vector3(3f, 25f, 2f);
-            playersPlaceCube.name = "PlayersPlace";
+            playersPlaceCube.name = "PlayersPlaceReplacement";
             
             GameObject playersPlaceFrame = new("Frame");
             playersPlaceFrame.transform.SetParent(playersPlaceCube.transform);
@@ -139,6 +139,13 @@ namespace CustomFloorPlugin
 
             return playersPlaceCube;
         }
+
+        private static Stream GetEmbeddedResource(string name) =>
+            Assembly.GetManifestResourceStream(name) ??
+            throw new InvalidOperationException($"No embedded resource found: {name}");
+        
+        private static Assembly Assembly => _assembly ??= Assembly.GetExecutingAssembly();
+        private static Assembly? _assembly;
 
         private static InstancedMaterialLightWithId AddLight(Renderer renderer)
         {
@@ -185,12 +192,5 @@ namespace CustomFloorPlugin
 
             return (vertices.ToArray(), triangles.ToArray());
         }
-
-        private static Stream GetEmbeddedResource(string name) =>
-            Assembly.GetManifestResourceStream(name) ??
-            throw new InvalidOperationException($"No embedded resource found: {name}");
-        
-        private static Assembly Assembly => _assembly ??= Assembly.GetExecutingAssembly();
-        private static Assembly? _assembly;
     }
 }

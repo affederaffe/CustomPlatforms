@@ -9,7 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4173764587969738}
-  m_Layer: 0
+  m_Layer: 14
   m_Name: Spectrogram
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -42,7 +42,7 @@ GameObject:
   - component: {fileID: 4536339818372784}
   - component: {fileID: 33445136513305222}
   - component: {fileID: 23210502861434970}
-  m_Layer: 0
+  m_Layer: 14
   m_Name: Cube
   m_TagString: Untagged
   m_Icon: {fileID: 0}

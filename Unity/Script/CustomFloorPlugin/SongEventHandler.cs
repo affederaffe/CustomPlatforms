@@ -3,9 +3,9 @@ using UnityEngine.Events;
 using UnityEngine.Serialization;
 
 
-namespace CustomFloorPlugin 
+namespace CustomFloorPlugin
 {
-    public class SongEventHandler : MonoBehaviour 
+    public class SongEventHandler : MonoBehaviour
     {
         public SongEventType eventType;
         public int value;

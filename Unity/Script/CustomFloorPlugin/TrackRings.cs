@@ -1,9 +1,9 @@
 ﻿using UnityEngine;
 
 
-namespace CustomFloorPlugin 
+namespace CustomFloorPlugin
 {
-    public class TrackRings : MonoBehaviour 
+    public class TrackRings : MonoBehaviour
     {
         [Space]
         [Header("Rings")]
@@ -12,26 +12,26 @@ namespace CustomFloorPlugin
         public float ringPositionStep = 2f;
         [Space]
         [Header("Rotation Effect")]
-        public bool useRotationEffect = false;
+        public bool useRotationEffect;
         public SongEventType rotationSongEventType = SongEventType.RingsRotationEffect;
         [Space]
         public float rotationStep = 5f;
         public int rotationPropagationSpeed = 1;
         public float rotationFlexySpeed = 1f;
         [Space]
-        public float startupRotationAngle = 0f;
+        public float startupRotationAngle;
         public float startupRotationStep = 10f;
         public int startupRotationPropagationSpeed = 10;
         public float startupRotationFlexySpeed = 0.5f;
         [Space]
         [Header("Step Effect")]
-        public bool useStepEffect = false;
+        public bool useStepEffect;
         public SongEventType stepSongEventType = SongEventType.RingsStepEffect;
         [Space]
         public float minPositionStep = 1f;
         public float maxPositionStep = 2f;
         public float moveSpeed = 1f;
-
+        
         private void OnDrawGizmos() 
         {
             Gizmos.matrix = transform.localToWorldMatrix;

@@ -1,15 +1,16 @@
+﻿using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.Serialization;
 
 
-namespace CustomFloorPlugin 
+namespace CustomFloorPlugin
 {
-    public class SaberSliceFilter : EventFilterBehaviour 
+    public class SaberSliceFilter : MonoBehaviour
     {
         public enum SaberType
         {
-            RightSaber,
-            LeftSaber
+            LeftSaber,
+            RightSaber
         }
 
         public SaberType saberType;

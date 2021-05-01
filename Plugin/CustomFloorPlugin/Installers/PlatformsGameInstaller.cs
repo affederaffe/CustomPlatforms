@@ -1,6 +1,4 @@
-﻿using CustomFloorPlugin.Helpers;
-
-using Zenject;
+﻿using Zenject;
 
 
 namespace CustomFloorPlugin.Installers
@@ -10,15 +8,9 @@ namespace CustomFloorPlugin.Installers
         public override void InstallBindings()
         {
             if (Container.HasBinding<GameplayCoreSceneSetupData>())
-            {
-                GameplayCoreSceneSetupData sceneSetupData = Container.Resolve<GameplayCoreSceneSetupData>();
-                float lastNoteTime = sceneSetupData.difficultyBeatmap.beatmapData.GetLastNoteTime();
-                Container.BindInterfacesAndSelfTo<BSEvents>().AsSingle().WithArguments(lastNoteTime);
-            }
+                Container.BindInterfacesAndSelfTo<BSEvents>().AsSingle();
             if (Container.HasBinding<MultiplayerPlayersManager>())
-            {
                 Container.BindInterfacesTo<MultiplayerGameManager>().AsSingle();
-            }
         }
     }
 }

@@ -5,9 +5,9 @@ using UnityEngine.Events;
 using UnityEngine.Serialization;
 
 
-namespace CustomFloorPlugin 
+namespace CustomFloorPlugin
 {
-    public class EventManager : MonoBehaviour 
+    public class EventManager : MonoBehaviour
     {
         [Serializable] public class ComboChangedEvent : UnityEvent<int> { }
         [Serializable] public class OnSpecificSliceEvent : UnityEvent<int> { }

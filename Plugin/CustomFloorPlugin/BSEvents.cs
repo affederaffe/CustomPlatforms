@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 using UnityEngine;
 
@@ -14,6 +15,7 @@ namespace CustomFloorPlugin
     {
         private readonly BeatmapObjectManager _beatmapObjectManager;
         private readonly GameEnergyCounter _gameEnergyCounter;
+        private readonly GameplayCoreSceneSetupData _gameplayCoreSceneSetupData;
         private readonly ObstacleSaberSparkleEffectManager _obstacleSaberSparkleEffectManager;
         private readonly ScoreController _scoreController;
         private readonly PlayerDataModel _playerDataModel;
@@ -30,22 +32,22 @@ namespace CustomFloorPlugin
 
         public BSEvents(BeatmapObjectManager beatmapObjectManager,
                         GameEnergyCounter gameEnergyCounter,
+                        GameplayCoreSceneSetupData gameplayCoreSceneSetupData,
                         ObstacleSaberSparkleEffectManager obstacleSaberSparkleEffectManager,
                         ScoreController scoreController, PlayerDataModel playerDataModel,
                         PrepareLevelCompletionResults prepareLevelCompletionResults,
                         IBeatmapObjectCallbackController beatmapObjectCallbackController,
-                        IDifficultyBeatmap difficultyBeatmap,
-                        float lastNoteTime)
+                        IDifficultyBeatmap difficultyBeatmap)
         {
             _beatmapObjectManager = beatmapObjectManager;
             _gameEnergyCounter = gameEnergyCounter;
+            _gameplayCoreSceneSetupData = gameplayCoreSceneSetupData;
             _obstacleSaberSparkleEffectManager = obstacleSaberSparkleEffectManager;
             _scoreController = scoreController;
             _playerDataModel = playerDataModel;
             _prepareLevelCompletionResults = prepareLevelCompletionResults;
             _beatmapObjectCallbackController = beatmapObjectCallbackController;
             _difficultyBeatmap = difficultyBeatmap;
-            _lastNoteTime = lastNoteTime;
         }
 
         public event Action<BeatmapEventData>? BeatmapEventDidTriggerEvent;
@@ -70,6 +72,7 @@ namespace CustomFloorPlugin
         {
             _cuttableNotesCount = _difficultyBeatmap.beatmapData.cuttableNotesType - 1;
             _highScore = _playerDataModel.playerData.GetPlayerLevelStatsData(_difficultyBeatmap).highScore;
+            _lastNoteTime = GetLastNoteTime();
             _beatmapObjectCallbackController.beatmapEventDidTriggerEvent += BeatmapEventDidTrigger;
             _beatmapObjectManager.noteWasCutEvent += NoteWasCut;
             _beatmapObjectManager.noteWasMissedEvent += NoteWasMissed;
@@ -96,6 +99,24 @@ namespace CustomFloorPlugin
             _scoreController.comboBreakingEventHappenedEvent -= ComboDidBreak;
             _scoreController.multiplierDidChangeEvent -= MultiplierDidChange;
             _scoreController.scoreDidChangeEvent -= ScoreDidChange;
+        }
+
+        private float GetLastNoteTime()
+        {
+            float lastNoteTime = 0f;
+            foreach (IReadonlyBeatmapLineData beatmapLineData in _gameplayCoreSceneSetupData.difficultyBeatmap.beatmapData.beatmapLinesData)
+            {
+                IReadOnlyList<BeatmapObjectData> beatmapObjectsData = beatmapLineData.beatmapObjectsData;
+                for (int i = beatmapObjectsData.Count - 1; i >= 0; i--)
+                {
+                    BeatmapObjectData beatmapObjectData = beatmapObjectsData[i];
+                    if (beatmapObjectData.beatmapObjectType == BeatmapObjectType.Note && ((NoteData)beatmapObjectData).colorType != ColorType.None && beatmapObjectData.time > lastNoteTime)
+                    {
+                        lastNoteTime = beatmapObjectData.time;
+                    }
+                }
+            }
+            return lastNoteTime;
         }
 
         private void BeatmapEventDidTrigger(BeatmapEventData eventData)
@@ -129,7 +150,6 @@ namespace CustomFloorPlugin
         private void NoteWasMissed(NoteController noteController)
         {
             if (noteController.noteData.colorType == ColorType.None || noteController.noteData.beatmapObjectType != BeatmapObjectType.Note) return;
-
             NoteWasMissedEvent?.Invoke();
             AllNotesCountDidChangeEvent?.Invoke(_anyCutCount++, _cuttableNotesCount);
             MissCountDidChangeEvent?.Invoke(_missCount++);
