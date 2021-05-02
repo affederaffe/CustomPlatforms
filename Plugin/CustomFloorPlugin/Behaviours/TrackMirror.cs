@@ -15,6 +15,7 @@ namespace CustomFloorPlugin
         public bool enableDirt;
         public Texture? dirtTexture;
         public float dirtIntensity;
+        public Color tintColor = Color.white;
 
         private Mirror? _mirror;
 
@@ -37,7 +38,8 @@ namespace CustomFloorPlugin
             mirrorMaterial.EnableKeyword("ETC1_EXTERNAL_ALPHA");
             mirrorMaterial.EnableKeyword("_EMISSION");
             mirrorMaterial.SetTexture(normalTexId, normalTexture);
-            mirrorMaterial.SetFloat(intensityId, bumpIntensity);
+            mirrorMaterial.SetFloat(bumpIntensityId, bumpIntensity);
+            mirrorMaterial.SetColor(tintColorId, tintColor);
             if (enableDirt)
             {
                 mirrorMaterial.EnableKeyword("ENABLE_DIRT");
@@ -50,8 +52,19 @@ namespace CustomFloorPlugin
         private Material CreateNoMirrorMaterial()
         {
             Material noMirrorMaterial = new(NoMirrorShader);
+            noMirrorMaterial.EnableKeyword("DIFFUSE");
+            noMirrorMaterial.EnableKeyword("ENABLE_DIFFUSE");
+            noMirrorMaterial.EnableKeyword("ENABLE_FOG");
+            noMirrorMaterial.EnableKeyword("ENABLE_SPECULAR");
+            noMirrorMaterial.EnableKeyword("FOG");
+            noMirrorMaterial.EnableKeyword("SPECULAR");
+            noMirrorMaterial.EnableKeyword("_EMISSION");
+            noMirrorMaterial.EnableKeyword("_ENABLE_FOG_TINT");
+            noMirrorMaterial.EnableKeyword("_RIMLIGHT_NONE");
+            noMirrorMaterial.SetColor(colorId, new Color(0.25f, 0.25f, 0.25f, 0f));
             if (enableDirt)
             {
+                noMirrorMaterial.EnableKeyword("DIRT");
                 noMirrorMaterial.EnableKeyword("ENABLE_DIRT");
                 noMirrorMaterial.SetTexture(dirtTexId, dirtTexture);
                 noMirrorMaterial.SetFloat(dirtIntensityId, dirtIntensity);
@@ -67,8 +80,10 @@ namespace CustomFloorPlugin
         private static Shader? _noMirrorShader;
         
         private static readonly int normalTexId = Shader.PropertyToID("_NormalTex");
-        private static readonly int intensityId = Shader.PropertyToID("_BumpIntensity");
+        private static readonly int bumpIntensityId = Shader.PropertyToID("_BumpIntensity");
         private static readonly int dirtTexId = Shader.PropertyToID("_DirtTex");
         private static readonly int dirtIntensityId = Shader.PropertyToID("_DirtIntensity");
+        private static readonly int tintColorId = Shader.PropertyToID("_TintColor");
+        private static readonly int colorId = Shader.PropertyToID("_Color");
     }
 }

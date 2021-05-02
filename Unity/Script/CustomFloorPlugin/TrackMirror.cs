@@ -11,5 +11,6 @@ namespace CustomFloorPlugin
        public bool enableDirt;
        public Texture? dirtTexture;
        public float dirtIntensity;
+       public Color tintColor = Color.white;
     }
 }
