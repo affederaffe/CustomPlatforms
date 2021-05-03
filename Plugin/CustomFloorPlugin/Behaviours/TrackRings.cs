@@ -5,7 +5,6 @@ using UnityEngine;
 using Zenject;
 
 
-
 namespace CustomFloorPlugin
 {
     public class TrackRings : MonoBehaviour, INotifyPlatformEnabled, INotifyPlatformDisabled
@@ -61,13 +60,15 @@ namespace CustomFloorPlugin
             { 
                 await _materialSwapper!.ReplaceMaterials(trackLaneRingPrefab);
                 trackLaneRingPrefab.layer = 14;
-                gameObject.SetActive(false);
+                bool activeSelf = gameObject.activeSelf;
+                if (activeSelf) gameObject.SetActive(false);
                 TrackLaneRing trackLaneRing = trackLaneRingPrefab.AddComponent<TrackLaneRing>();
                 _trackLaneRingsManager = gameObject.AddComponent<TrackLaneRingsManager>();
                 _trackLaneRingsManager.SetField("_trackLaneRingPrefab", trackLaneRing);
                 _trackLaneRingsManager.SetField("_ringCount", ringCount);
                 _trackLaneRingsManager.SetField("_ringPositionStep", ringPositionStep);
                 _trackLaneRingsManager.SetField("_spawnAsChildren", true);
+                if (activeSelf) gameObject.SetActive(true);
             }
 
             if (useRotationEffect)
@@ -118,8 +119,6 @@ namespace CustomFloorPlugin
                     _trackLaneRingsPositionStepEffectSpawner.Start();
                 }
             }
-
-            gameObject.SetActive(true);
 
             foreach (INotifyPlatformEnabled notifyEnable in GetComponentsInChildren<INotifyPlatformEnabled>(true))
             {

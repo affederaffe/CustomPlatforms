@@ -54,7 +54,6 @@ namespace CustomFloorPlugin
         public void PlatformEnabled(DiContainer container)
         {
             container.Inject(this);
-            gameObject.SetActive(false);
 
             // Using 2 different light types was a mistake
             Mesh mesh = GetComponent<MeshFilter>().mesh;
@@ -77,6 +76,8 @@ namespace CustomFloorPlugin
 
             if (_instancedMaterialLightWithId == null)
             {
+                bool activeSelf = gameObject.activeSelf;
+                if (activeSelf) gameObject.SetActive(false);
                 GetComponent<Renderer>().material = _materialSwapper!.MaterialsLoadingTask.Result.OpaqueGlowMaterial;
                 MaterialPropertyBlockController materialPropertyBlockController = gameObject.AddComponent<MaterialPropertyBlockController>();
                 materialPropertyBlockController.SetField("_renderers", new[] { GetComponent<Renderer>() });
@@ -89,10 +90,10 @@ namespace CustomFloorPlugin
                 ((LightWithIdMonoBehaviour)_instancedMaterialLightWithId).SetField("_ID", (int)lightsID);
                 _instancedMaterialLightWithId.ColorWasSet(color);
                 gameObject.layer = 13;
+                if (activeSelf) gameObject.SetActive(true);
             }
 
             ((LightWithIdMonoBehaviour)_instancedMaterialLightWithId).SetField("_lightManager", _lightWithIdManager);
-            gameObject.SetActive(true);
         }
 
         private static readonly int[] triangles = {

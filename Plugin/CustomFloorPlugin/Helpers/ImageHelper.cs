@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace CustomFloorPlugin.Helpers
 {
-    public static class ImageHelper
+    internal static class ImageHelper
     {
         internal static Sprite ReadSprite(this Stream stream)
         {

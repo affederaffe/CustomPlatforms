@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace CustomFloorPlugin.Helpers
 {
-    public static class AsyncHelper
+    internal static class AsyncHelper
     {
         private static WaitForEndOfFrame WaitForEndOfFrame => _waitForEndOfFrame ??= new WaitForEndOfFrame();
         private static WaitForEndOfFrame? _waitForEndOfFrame;
