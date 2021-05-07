@@ -5318,8 +5318,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1347656306}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: -0.055, z: 58}
-  m_LocalScale: {x: 5, y: 0.1, z: 100}
+  m_LocalPosition: {x: 0, y: -0.25075, z: 58}
+  m_LocalScale: {x: 5, y: 0.5, z: 100}
   m_Children: []
   m_Father: {fileID: 400170777}
   m_RootOrder: 1
@@ -6060,6 +6060,7 @@ GameObject:
   - component: {fileID: 1564148221}
   - component: {fileID: 1564148220}
   - component: {fileID: 1564148219}
+  - component: {fileID: 1564148222}
   m_Layer: 4
   m_Name: Mirror
   m_TagString: Untagged
@@ -6094,9 +6095,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   normalTexture: {fileID: 2800000, guid: c74cbbb468ca1a54dac73471ef963c71, type: 3}
-  bumpIntensity: 0.15
+  normalUVScale: {x: 1, y: 20}
+  normalUVOffset: {x: 1, y: 1}
+  bumpIntensity: 0.075
   enableDirt: 1
   dirtTexture: {fileID: 2800000, guid: 7f991d096d63ccf42a4298d37a2cc442, type: 3}
+  dirtUVScale: {x: 1, y: 20}
+  dirtUVOffset: {x: 1, y: 1}
   dirtIntensity: 1
   tintColor: {r: 0.49019608, g: 0, b: 1, a: 1}
 --- !u!23 &1564148220
@@ -6146,6 +6151,20 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1564148217}
   m_Mesh: {fileID: 10209, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &1564148222
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1564148217}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: -129337644, guid: ef0b7a4a35889bb49a4d2b880d5c9138, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  propertyName: _TintColor
+  materialColorType: 2
 --- !u!1 &1568751912
 GameObject:
   m_ObjectHideFlags: 0
