@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -139,7 +140,7 @@ namespace CustomFloorPlugin
             }
 
             sw.Stop();
-            _siraLog!.Info($"Loaded Platforms in {sw.ElapsedMilliseconds.ToString()}ms");
+            _siraLog!.Info($"Loaded Platforms in {sw.ElapsedMilliseconds.ToString(NumberFormatInfo.InvariantInfo)}ms");
 
             return platforms;
         }
@@ -183,11 +184,11 @@ namespace CustomFloorPlugin
         /// </summary>
         private void CheckLastSelectedPlatform(CustomPlatform platform)
         {
-            if (_config!.SingleplayerPlatformPath == platform.platName + platform.platAuthor)
+            if (_config!.SingleplayerPlatHash == platform.platHash)
                 CurrentSingleplayerPlatform = platform;
-            if (_config!.MultiplayerPlatformPath == platform.platName + platform.platAuthor)
+            if (_config!.MultiplayerPlatHash == platform.platHash)
                 CurrentMultiplayerPlatform = platform;
-            if (_config!.A360PlatformPath == platform.platName + platform.platAuthor)
+            if (_config!.A360PlatHash == platform.platHash)
                 CurrentA360Platform = platform;
         }
 
@@ -260,7 +261,7 @@ namespace CustomFloorPlugin
         private async Task SavePlatformInfosToFileAsync()
         {
             await PlatformsLoadingTask!;
-            
+
             using FileStream stream = new(_cacheFilePath!, FileMode.OpenOrCreate, FileAccess.Write);
             using BinaryWriter writer = new(stream, Encoding.UTF8);
 
@@ -274,6 +275,7 @@ namespace CustomFloorPlugin
                 writer.Write(platform.fullPath);
                 writer.WriteSprite(platform.icon!);
             }
+
             stream.SetLength(stream.Position);
             File.SetAttributes(_cacheFilePath!, FileAttributes.Hidden);
         }

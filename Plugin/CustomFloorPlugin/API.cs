@@ -30,7 +30,7 @@ namespace CustomFloorPlugin
         private readonly PlatformSpawner _platformSpawner;
         private readonly PlatformListsView _platformListsView;
         private readonly FileSystemWatcher _fileSystemWatcher;
-        
+
         private bool _apiRequest;
 
         public API(WebClient webClient,
@@ -81,7 +81,7 @@ namespace CustomFloorPlugin
                 await UnityMainThreadTaskScheduler.Factory.StartNew(() => OnFileChanged(sender, e));
                 return;
             }
-            
+
             if (_platformManager.PlatformFilePaths.TryGetValue(e.FullPath, out CustomPlatform platform))
             {
                 bool wasActivePlatform = _platformManager.ActivePlatform == platform;
@@ -105,7 +105,7 @@ namespace CustomFloorPlugin
                 await UnityMainThreadTaskScheduler.Factory.StartNew(() => OnFileCreated(sender, e));
                 return;
             }
-            
+
             CustomPlatform? newPlatform = await _platformManager.CreatePlatformAsync(e.FullPath);
             if (newPlatform == null) return;
             _platformManager.PlatformsLoadingTask!.Result.Add(newPlatform);
@@ -127,7 +127,7 @@ namespace CustomFloorPlugin
                 await UnityMainThreadTaskScheduler.Factory.StartNew(() => OnFileDeleted(sender, e));
                 return;
             }
-                
+
             if (_platformManager.PlatformFilePaths.TryGetValue(e.FullPath, out CustomPlatform platform))
             {
                 await _platformManager.PlatformsLoadingTask!;
@@ -188,7 +188,7 @@ namespace CustomFloorPlugin
             // Check if the requested platform is already downloaded
             foreach (CustomPlatform platform in await _platformManager.PlatformsLoadingTask!)
             {
-                if (platform.platHash == hash || platform.platName.StartsWith(name ?? string.Empty))
+                if (platform.platHash == hash || platform.platName.StartsWith(name ?? string.Empty, StringComparison.Ordinal))
                 {
                     _platformManager.APIRequestedPlatform = platform;
                     return;

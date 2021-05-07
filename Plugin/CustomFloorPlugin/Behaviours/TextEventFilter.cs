@@ -1,4 +1,6 @@
-﻿using TMPro;
+﻿using System.Globalization;
+
+using TMPro;
 
 using UnityEngine;
 
@@ -86,11 +88,11 @@ namespace CustomFloorPlugin
             }
         }
 
-        private void OnAllNotesCountDidChange(int anyCuts, int cuttableNotes) => textMeshPro!.text = $"{anyCuts.ToString()} | {cuttableNotes.ToString()}";
-        private void OnGoodCutCountDidChange(int goodCuts) => textMeshPro!.text = $"{goodCuts.ToString()}";
-        private void OnBadCutCountDidChange(int badCuts) => textMeshPro!.text = $"{badCuts.ToString()}";
-        private void OnMissCountDidChange(int misses) => textMeshPro!.text = $"{misses.ToString()}";
-        private void OnScoreDidChange(int rawScore, int modifiedScore) => textMeshPro!.text = $"{rawScore.ToString()} | {modifiedScore.ToString()}";
-        private void OnComboDidChange(int combo) => textMeshPro!.text = $"{combo.ToString()}";
+        private void OnAllNotesCountDidChange(int anyCuts, int cuttableNotes) => textMeshPro!.text = $"{anyCuts.ToString(NumberFormatInfo.InvariantInfo)} | {cuttableNotes.ToString(NumberFormatInfo.InvariantInfo)}";
+        private void OnGoodCutCountDidChange(int goodCuts) => textMeshPro!.text = $"{goodCuts.ToString(NumberFormatInfo.InvariantInfo)}";
+        private void OnBadCutCountDidChange(int badCuts) => textMeshPro!.text = $"{badCuts.ToString(NumberFormatInfo.InvariantInfo)}";
+        private void OnMissCountDidChange(int misses) => textMeshPro!.text = $"{misses.ToString(NumberFormatInfo.InvariantInfo)}";
+        private void OnScoreDidChange(int rawScore, int modifiedScore) => textMeshPro!.text = $"{rawScore.ToString(NumberFormatInfo.InvariantInfo)} | {modifiedScore.ToString(NumberFormatInfo.InvariantInfo)}";
+        private void OnComboDidChange(int combo) => textMeshPro!.text = $"{combo.ToString(NumberFormatInfo.InvariantInfo)}";
     }
 }

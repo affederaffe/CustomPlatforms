@@ -12,7 +12,7 @@ namespace CustomFloorPlugin.Helpers
     {
         private static WaitForEndOfFrame WaitForEndOfFrame => _waitForEndOfFrame ??= new WaitForEndOfFrame();
         private static WaitForEndOfFrame? _waitForEndOfFrame;
-        
+
         /// <summary>
         /// Waits one frame via a Coroutine
         /// </summary>

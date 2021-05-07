@@ -25,7 +25,7 @@ namespace CustomFloorPlugin.UI
         private PluginConfig? _config;
         private PlatformManager? _platformManager;
         private PlatformSpawner? _platformSpawner;
-        
+
         private Dictionary<CustomPlatform, CustomListTableData.CustomCellInfo>? _platformCellPairs;
 
         /// <summary>
@@ -45,7 +45,7 @@ namespace CustomFloorPlugin.UI
         /// </summary>
         [UIComponent("a360-platforms-list")]
         private readonly CustomListTableData? _a360PlatformListTable = null;
-        
+
         /// <summary>
         /// An <see cref="System.Array"/> of all <see cref="CustomListTableData"/>s
         /// </summary>
@@ -65,7 +65,7 @@ namespace CustomFloorPlugin.UI
             }
         }
         private bool _loadingIndicatorActive = true;
-        
+
         [Inject]
         public void Construct(PluginConfig config, PlatformSpawner platformSpawner, PlatformManager platformManager)
         {

@@ -18,8 +18,8 @@ namespace CustomFloorPlugin
         internal readonly Task<(Material DarkEnvSimpleMaterial,
                                 Material TransparentGlowMaterial,
                                 Material OpaqueGlowMaterial)> MaterialsLoadingTask;
-        
-         private readonly TaskCompletionSource<(Material, Material, Material)> _taskSource;
+
+        private readonly TaskCompletionSource<(Material, Material, Material)> _taskSource;
 
         public MaterialSwapper()
         {
@@ -39,15 +39,9 @@ namespace CustomFloorPlugin
                 darkEnvSimpleMaterial = materials.FirstOrDefault(x => x.name == "DarkEnvironmentSimple");
                 transparentGlowMaterial = materials.FirstOrDefault(x => x.name == "EnvLight");
                 opaqueGlowMaterial = materials.FirstOrDefault(x => x.name == "EnvLightOpaque");
-            } while (darkEnvSimpleMaterial == null ||
-                     transparentGlowMaterial == null ||
-                     opaqueGlowMaterial == null);
-
-            opaqueGlowMaterial = new(opaqueGlowMaterial);
+            } while (darkEnvSimpleMaterial == null || transparentGlowMaterial == null || opaqueGlowMaterial == null);
             opaqueGlowMaterial.DisableKeyword("ENABLE_HEIGHT_FOG");
-            _taskSource.TrySetResult((darkEnvSimpleMaterial,
-                                      transparentGlowMaterial,
-                                      opaqueGlowMaterial));
+            _taskSource.TrySetResult((darkEnvSimpleMaterial, transparentGlowMaterial, opaqueGlowMaterial));
         }
 
         /// <summary>
@@ -58,9 +52,7 @@ namespace CustomFloorPlugin
         {
             await MaterialsLoadingTask;
             foreach (Renderer renderer in gameObject.GetComponentsInChildren<Renderer>(true))
-            {
                 ReplaceForRenderer(renderer);
-            }
         }
 
         /// <summary>
@@ -73,29 +65,24 @@ namespace CustomFloorPlugin
             bool materialsDidChange = false;
             for (int i = 0; i < materialsCopy.Length; i++)
             {
-                if (materialsCopy[i] != null)
+                switch (materialsCopy[i].name)
                 {
-                    switch (materialsCopy[i].name)
-                    {
-                        case "_dark_replace (Instance)":
-                            materialsCopy[i] = MaterialsLoadingTask.Result.DarkEnvSimpleMaterial;
-                            materialsDidChange = true;
-                            break;
-                        case "_transparent_glow_replace (Instance)":
-                            materialsCopy[i] = MaterialsLoadingTask.Result.TransparentGlowMaterial!;
-                            materialsDidChange = true;
-                            break;
-                        case "_glow_replace (Instance)":
-                            materialsCopy[i] = MaterialsLoadingTask.Result.OpaqueGlowMaterial!;
-                            materialsDidChange = true;
-                            break;
-                    }
+                    case "_dark_replace (Instance)":
+                        materialsCopy[i] = MaterialsLoadingTask.Result.DarkEnvSimpleMaterial;
+                        materialsDidChange = true;
+                        break;
+                    case "_transparent_glow_replace (Instance)":
+                        materialsCopy[i] = MaterialsLoadingTask.Result.TransparentGlowMaterial!;
+                        materialsDidChange = true;
+                        break;
+                    case "_glow_replace (Instance)":
+                        materialsCopy[i] = MaterialsLoadingTask.Result.OpaqueGlowMaterial!;
+                        materialsDidChange = true;
+                        break;
                 }
             }
             if (materialsDidChange)
-            {
                 renderer.sharedMaterials = materialsCopy;
-            }
         }
     }
 }

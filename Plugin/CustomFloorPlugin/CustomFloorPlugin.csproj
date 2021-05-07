@@ -6,6 +6,7 @@
     <LangVersion>9</LangVersion>
     <Nullable>enable</Nullable>
     <RootNamespace>CustomFloorPlugin</RootNamespace>
+    <OutputName>CustomPlatforms</OutputName>
     <LocalRefsDir Condition="Exists('..\Refs')">..\Refs</LocalRefsDir>
     <BeatSaberDir>$(LocalRefsDir)</BeatSaberDir>
     <AppOutputBase>$(MSBuildProjectDirectory)\</AppOutputBase>
@@ -55,7 +56,7 @@
   </ItemGroup>
 
   <ItemGroup>
-   <Reference Include="UnityEngine">
+    <Reference Include="UnityEngine">
       <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\UnityEngine.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.AudioModule">
@@ -80,8 +81,8 @@
       <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\Unity.ProBuilder.dll</HintPath>
     </Reference>
     <Reference Include="Unity.TextMeshPro">
-     <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\Unity.TextMeshPro.dll</HintPath>
-   </Reference>
+      <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\Unity.TextMeshPro.dll</HintPath>
+    </Reference>
     <Reference Include="BGNet">
       <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\BGNet.dll</HintPath>
     </Reference>
@@ -119,8 +120,8 @@
       <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\IPA.Loader.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json">
-     <HintPath>$(BeatSaberDir)\Libs\Newtonsoft.Json.dll</HintPath>
-   </Reference>
+      <HintPath>$(BeatSaberDir)\Libs\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="BSML">
       <HintPath>$(BeatSaberDir)\Plugins\BSML.dll</HintPath>
     </Reference>
@@ -128,10 +129,11 @@
       <HintPath>$(BeatSaberDir)\Plugins\SiraUtil.dll</HintPath>
     </Reference>
     <Reference Include="SongCore">
-     <HintPath>$(BeatSaberDir)\Plugins\SongCore.dll</HintPath>
-   </Reference>
-   <Reference Include="BeatSaberCinema">
-     <HintPath>$(BeatSaberDir)\Plugins\BeatSaberCinema.dll</HintPath>
-   </Reference>
+      <HintPath>$(BeatSaberDir)\Plugins\SongCore.dll</HintPath>
+    </Reference>
+    <Reference Include="BeatSaberCinema">
+      <HintPath>$(BeatSaberDir)\Plugins\BeatSaberCinema.dll</HintPath>
+    </Reference>
   </ItemGroup>
+
 </Project>

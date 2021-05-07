@@ -37,7 +37,7 @@
     </GetCommitInfo>
     <PropertyGroup>
       <!--Build name for artifact/zip file-->
-      <ArtifactName>$(AssemblyName)</ArtifactName>
+      <ArtifactName>$(OutputName)</ArtifactName>
       <ArtifactName Condition="'$(PluginVersion)' != ''">$(ArtifactName)-$(PluginVersion)</ArtifactName>
       <ArtifactName Condition="'$(GameVersion)' != ''">$(ArtifactName)-bs$(GameVersion)</ArtifactName>
       <ArtifactName Condition="'$(CommitHash)' != '' AND '$(CommitHash)' != 'local'">$(ArtifactName)-$(CommitHash)</ArtifactName>
@@ -47,15 +47,15 @@
   <Target Name="BuildForCI" AfterTargets="Build" DependsOnTargets="GetProjectInfo" Condition="'$(ContinuousIntegrationBuild)' == 'True' AND '$(BSMTTaskAssembly)' != ''">
     <PropertyGroup>
       <!--Set 'ArtifactName' if it failed before.-->
-      <ArtifactName Condition="'$(ArtifactName)' == ''">$(AssemblyName)</ArtifactName>
+      <ArtifactName Condition="'$(ArtifactName)' == ''">$(OutputName)</ArtifactName>
     </PropertyGroup>
     <Message Text="Building for CI" Importance="high" />
     <Message Text="PluginVersion: $(PluginVersion), AssemblyVersion: $(AssemblyVersion), GameVersion: $(GameVersion)" Importance="high" />
     <Message Text="::set-output name=filename::$(ArtifactName)" Importance="high" />
-    <Message Text="::set-output name=assemblyname::$(AssemblyName)" Importance="high" />
+    <Message Text="::set-output name=assemblyname::$(OutputName)" Importance="high" />
     <Message Text="::set-output name=artifactpath::$(ProjectDir)$(ArtifactDestination)" Importance="high" />
-    <Message Text="Copying '$(OutputAssemblyName).dll' to '$(ProjectDir)$(ArtifactDestination)\Plugins\CustomPlatforms.dll'" Importance="high" />
-    <Copy SourceFiles="$(OutputAssemblyName).dll" DestinationFiles="$(ProjectDir)$(ArtifactDestination)\Plugins\CustomPlatforms.dll" />
+    <Message Text="Copying '$(OutputAssemblyName).dll' to '$(ProjectDir)$(ArtifactDestination)\Plugins\$(OutputName).dll'" Importance="high" />
+    <Copy SourceFiles="$(OutputAssemblyName).dll" DestinationFiles="$(ProjectDir)$(ArtifactDestination)\Plugins\$(OutputName).dll" />
   </Target>
   <!--Creates a BeatMods compliant zip file with the release.-->
   <Target Name="ZipRelease" AfterTargets="Build" Condition="'$(DisableZipRelease)' != 'True' AND '$(Configuration)' == 'Release' AND '$(BSMTTaskAssembly)' != ''">
@@ -65,9 +65,9 @@
       <DestinationDirectory>$(OutDir)zip\</DestinationDirectory>
     </PropertyGroup>
     <ItemGroup>
-      <OldZips Include="$(DestinationDirectory)$(AssemblyName)*.zip"/>
+      <OldZips Include="$(DestinationDirectory)$(OutputName)*.zip"/>
     </ItemGroup>
-    <Copy SourceFiles="$(OutputAssemblyName).dll" DestinationFiles="$(ArtifactDestination)\Plugins\CustomPlatforms.dll" />
+    <Copy SourceFiles="$(OutputAssemblyName).dll" DestinationFiles="$(ArtifactDestination)\Plugins\$(OutputName).dll" />
     <Message Text="PluginVersion: $(PluginVersion), AssemblyVersion: $(AssemblyVersion), GameVersion: $(GameVersion)" Importance="high" />
     <Delete Files="@(OldZips)" TreatErrorsAsWarnings="true" ContinueOnError="true" />
     <ZipDir SourceDirectory="$(ArtifactDestination)" DestinationFile="$(DestinationDirectory)$(ArtifactName).zip" />
@@ -94,8 +94,8 @@
     </PropertyGroup>
     <Warning Text="$(CopyToPluginsError)" Condition="'$(CopyToPluginsError)' != ''" />
     <Message Text="Copying '$(OutputAssemblyName).dll' to '$(PluginDir)'." Importance="high" Condition="$(CanCopyToPlugins)" />
-    <Copy SourceFiles="$(OutputAssemblyName).dll" DestinationFiles="$(PluginDir)\CustomPlatforms.dll" Condition="$(CanCopyToPlugins)"  />
-    <Copy SourceFiles="$(OutputAssemblyName).pdb" DestinationFiles="$(PluginDir)\CustomPlatforms.pdb" Condition="'$(CanCopyToPlugins)' == 'True' AND Exists('$(OutputAssemblyName).pdb')"  />
+    <Copy SourceFiles="$(OutputAssemblyName).dll" DestinationFiles="$(PluginDir)\$(OutputName).dll" Condition="$(CanCopyToPlugins)"  />
+    <Copy SourceFiles="$(OutputAssemblyName).pdb" DestinationFiles="$(PluginDir)\$(OutputName).pdb" Condition="'$(CanCopyToPlugins)' == 'True' AND Exists('$(OutputAssemblyName).pdb')"  />
     <Warning Text="Beat Saber is running, restart the game to use the latest build." Condition="'$(IsRunning)' == 'True'" />
   </Target>
 </Project>

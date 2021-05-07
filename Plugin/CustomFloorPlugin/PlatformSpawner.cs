@@ -22,9 +22,9 @@ namespace CustomFloorPlugin
         private readonly PlatformManager _platformManager;
         private readonly GameScenesManager _gameScenesManager;
         private readonly Random _random;
-        
+
         internal bool IsMultiplayer;
-        
+
         private DiContainer _container;
 
         internal PlatformSpawner(DiContainer container,
@@ -45,6 +45,11 @@ namespace CustomFloorPlugin
             _random = new Random();
         }
 
+        /// <summary>
+        /// Returns a random index of all platforms
+        /// </summary>
+        internal int RandomPlatformIndex => _random.Next(0, _platformManager.PlatformsLoadingTask!.Result.Count);
+
         public void Initialize()
         {
             _gameScenesManager.transitionDidStartEvent += OnTransitionDidStart;
@@ -58,16 +63,11 @@ namespace CustomFloorPlugin
         }
 
         /// <summary>
-        /// Returns a random index of all platforms
-        /// </summary>
-        internal int RandomPlatformIndex => _random.Next(0, _platformManager.PlatformsLoadingTask!.Result.Count);
-
-        /// <summary>
         /// Automatically clean up all custom objects
         /// </summary>
         private async void OnTransitionDidStart(float aheadTime)
         {
-            await Task.Delay(TimeSpan.FromSeconds(aheadTime*0.75f));
+            await Task.Delay(TimeSpan.FromSeconds(aheadTime * 0.75f));
             await ChangeToPlatformAsync(0);
         }
 
@@ -108,6 +108,7 @@ namespace CustomFloorPlugin
                     _assetLoader.ToggleHeart(false);
                     break;
             }
+
             await SetContainerAndShowAsync(platformIndex, container);
         }
 
@@ -134,17 +135,18 @@ namespace CustomFloorPlugin
             {
                 case PlatformType.Singleplayer:
                     _platformManager.CurrentSingleplayerPlatform = _platformManager.PlatformsLoadingTask.Result[index];
-                    _config.SingleplayerPlatformPath = _platformManager.CurrentSingleplayerPlatform.platName + _platformManager.CurrentSingleplayerPlatform.platAuthor;
+                    _config.SingleplayerPlatHash = _platformManager.CurrentSingleplayerPlatform.platHash;
                     break;
                 case PlatformType.Multiplayer:
                     _platformManager.CurrentMultiplayerPlatform = _platformManager.PlatformsLoadingTask.Result[index];
-                    _config.MultiplayerPlatformPath = _platformManager.CurrentMultiplayerPlatform.platName + _platformManager.CurrentMultiplayerPlatform.platAuthor;
+                    _config.MultiplayerPlatHash = _platformManager.CurrentMultiplayerPlatform.platHash;
                     break;
                 case PlatformType.A360:
                     _platformManager.CurrentA360Platform = _platformManager.PlatformsLoadingTask.Result[index];
-                    _config.A360PlatformPath = _platformManager.CurrentA360Platform.platName + _platformManager.CurrentA360Platform.platAuthor;
+                    _config.A360PlatHash = _platformManager.CurrentA360Platform.platHash;
                     break;
             }
+
             await ChangeToPlatformAsync(index);
         }
 
@@ -186,9 +188,7 @@ namespace CustomFloorPlugin
         private void SpawnCustomObjects()
         {
             foreach (INotifyPlatformEnabled notifyEnable in _platformManager.ActivePlatform!.GetComponentsInChildren<INotifyPlatformEnabled>(true))
-            {
                 notifyEnable.PlatformEnabled(_container);
-            }
         }
 
         /// <summary>
@@ -197,9 +197,7 @@ namespace CustomFloorPlugin
         private void DestroyCustomObjects()
         {
             foreach (INotifyPlatformDisabled notifyDisable in _platformManager.ActivePlatform!.GetComponentsInChildren<INotifyPlatformDisabled>(true))
-            {
                 notifyDisable.PlatformDisabled();
-            }
         }
     }
 }

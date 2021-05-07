@@ -38,10 +38,10 @@ namespace CustomFloorPlugin
         /// Depth of the individual columns, always applies
         /// </summary>
         public float columnDepth = 1f;
-        
+
         private MaterialSwapper? _materialSwapper;
         private BasicSpectrogramData? _basicSpectrogramData;
-        
+
         private Transform[]? _columnTransforms;
         private bool _hasSpectrogramData;
 

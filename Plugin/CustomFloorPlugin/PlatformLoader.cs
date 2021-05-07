@@ -77,7 +77,7 @@ namespace CustomFloorPlugin
                 {
                     // No CustomPlatform component, abort
                     UnityEngine.Object.Destroy(platformPrefab);
-                    _siraLog.Error($"The AssetBundle does not contain a CustomPlatform:\n{fullPath}");
+                    _siraLog.Error($"AssetBundle does not contain a CustomPlatform:\n{fullPath}");
                     return null;
                 }
             }

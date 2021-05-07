@@ -116,6 +116,7 @@ namespace CustomFloorPlugin
                     }
                 }
             }
+
             return lastNoteTime;
         }
 
@@ -169,7 +170,7 @@ namespace CustomFloorPlugin
         private void ComboDidChange(int combo) => ComboDidChangeEvent?.Invoke(combo);
         private void ComboDidBreak() => ComboDidBreakEvent?.Invoke();
         private void ScoreDidChange(int rawScore, int modifiedScore) => ScoreDidChangeEvent?.Invoke(rawScore, modifiedScore);
-        
+
         private void MultiplierDidChange(int multiplier, float progress)
         {
             if (multiplier > 1 && progress < 0.1f)

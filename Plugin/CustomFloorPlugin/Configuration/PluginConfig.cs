@@ -14,9 +14,9 @@ namespace CustomFloorPlugin.Configuration
         public virtual bool ShowHeart { get; set; } = true;
         public virtual bool ShowInMenu { get; set; }
         public virtual bool ShufflePlatforms { get; set; }
-        public virtual string SingleplayerPlatformPath { get; set; } = string.Empty;
-        public virtual string MultiplayerPlatformPath { get; set; } = string.Empty;
-        public virtual string A360PlatformPath { get; set; } = string.Empty;
+        public virtual string SingleplayerPlatHash { get; set; } = string.Empty;
+        public virtual string MultiplayerPlatHash { get; set; } = string.Empty;
+        public virtual string A360PlatHash { get; set; } = string.Empty;
         public virtual string CustomPlatformsDirectory { get; } = Path.Combine(UnityGame.InstallPath, "CustomPlatforms");
     }
 }

@@ -13,13 +13,13 @@ namespace CustomFloorPlugin
         [FormerlySerializedAs("NthComboReached")] public UnityEvent? nthComboReached;
 
         private BSEvents? _events;
-        
+
         [Inject]
         public void Construct([InjectOptional] BSEvents events)
         {
             _events = events;
         }
-        
+
         public void PlatformEnabled(DiContainer container)
         {
             container.Inject(this);

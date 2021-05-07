@@ -5,7 +5,7 @@ namespace CustomFloorPlugin
 {
     public class CameraVisibility : MonoBehaviour
     {
-        public enum VisibilityMode 
+        public enum VisibilityMode
         {
             Default,
             HeadsetOnly,
@@ -61,9 +61,9 @@ namespace CustomFloorPlugin
                 SetChildrenToLayer(child.gameObject, layer);
             }
         }
-        
+
         private static readonly Camera mainCamera = Camera.main!;
-        
+
         /// <summary>
         /// Sets Main-<see cref="Camera"/>s <see cref="Camera.cullingMask"/>
         /// </summary>

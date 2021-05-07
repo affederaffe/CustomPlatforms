@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Reflection;
@@ -67,7 +66,7 @@ namespace CustomFloorPlugin
                 _heartLoadingTask.Result.SetActive(false);
             }
         }
-        
+
         /// <summary>
         /// (De-)Activates the players place replacement
         /// </summary>
@@ -128,7 +127,7 @@ namespace CustomFloorPlugin
             playersPlaceCube.transform.position = new Vector3(0f, -12.5f, 0f);
             playersPlaceCube.transform.localScale = new Vector3(3f, 25f, 2f);
             playersPlaceCube.name = "PlayersPlaceReplacement";
-            
+
             GameObject playersPlaceFrame = new("Frame");
             playersPlaceFrame.transform.SetParent(playersPlaceCube.transform);
             MeshRenderer frameRenderer = playersPlaceFrame.AddComponent<MeshRenderer>();
@@ -143,7 +142,7 @@ namespace CustomFloorPlugin
         private static Stream GetEmbeddedResource(string name) =>
             Assembly.GetManifestResourceStream(name) ??
             throw new InvalidOperationException($"No embedded resource found: {name}");
-        
+
         private static Assembly Assembly => _assembly ??= Assembly.GetExecutingAssembly();
         private static Assembly? _assembly;
 
@@ -168,29 +167,27 @@ namespace CustomFloorPlugin
             string meshFile = streamReader.ReadToEnd();
             string[] dimension1 = meshFile.Split('|');
             string[][] dimension2 = { dimension1[0].Split('/'), dimension1[1].Split('/') };
-            string[][] strVector3S = new string[dimension2[0].Length][];
 
             int i = 0;
+            string[][] strVector3S = new string[dimension2[0].Length][];
             foreach (string vector3 in dimension2[0])
-            {
                 strVector3S[i++] = vector3.Split(',');
-            }
 
-            List<Vector3> vertices = new();
-            List<int> triangles = new();
+            i = 0;
+            Vector3[] vertices = new Vector3[strVector3S.Length];
             foreach (string[] strVector3 in strVector3S)
             {
-                vertices.Add(new Vector3(float.Parse(strVector3[0], NumberFormatInfo.InvariantInfo),
+                vertices[i++] = new Vector3(float.Parse(strVector3[0], NumberFormatInfo.InvariantInfo),
                     float.Parse(strVector3[1], NumberFormatInfo.InvariantInfo),
-                    float.Parse(strVector3[2], NumberFormatInfo.InvariantInfo)));
-            }
-            
-            foreach (string strInt in dimension2[1])
-            {
-                triangles.Add(int.Parse(strInt, NumberFormatInfo.InvariantInfo));
+                    float.Parse(strVector3[2], NumberFormatInfo.InvariantInfo));
             }
 
-            return (vertices.ToArray(), triangles.ToArray());
+            i = 0;
+            int[] triangles = new int[dimension2[1].Length];
+            foreach (string strInt in dimension2[1])
+                triangles[i++] = int.Parse(strInt, NumberFormatInfo.InvariantInfo);
+
+            return (vertices, triangles);
         }
     }
 }

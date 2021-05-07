@@ -14,7 +14,7 @@ namespace CustomFloorPlugin.Helpers
             Texture2D tex = BytesToTexture2D(data);
             return Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), Vector2.zero);
         }
-        
+
         internal static Sprite ReadSprite(this BinaryReader binaryReader)
         {
             Texture2D tex = BytesToTexture2D(binaryReader.ReadBytes(binaryReader.ReadInt32()));

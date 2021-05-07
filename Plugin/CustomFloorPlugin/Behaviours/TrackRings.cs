@@ -57,7 +57,7 @@ namespace CustomFloorPlugin
             container.Inject(this);
 
             if (_trackLaneRingsManager == null)
-            { 
+            {
                 await _materialSwapper!.ReplaceMaterials(trackLaneRingPrefab);
                 trackLaneRingPrefab.layer = 14;
                 bool activeSelf = gameObject.activeSelf;

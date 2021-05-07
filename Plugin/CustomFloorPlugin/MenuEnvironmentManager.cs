@@ -12,7 +12,7 @@ namespace CustomFloorPlugin
     /// </summary>
     internal class MenuEnvironmentManager : IInitializable, IDisposable
     {
-        private readonly PluginConfig _config; 
+        private readonly PluginConfig _config;
         private readonly AssetLoader _assetLoader;
         private readonly PlatformManager _platformManager;
         private readonly PlatformSpawner _platformSpawner;

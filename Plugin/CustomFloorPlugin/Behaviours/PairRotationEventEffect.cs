@@ -14,7 +14,7 @@ namespace CustomFloorPlugin
         public SongEventType eventR;
         public SongEventType switchOverrideRandomValuesEvent;
         public Transform? transformL;
-        public Transform? transformR; 
+        public Transform? transformR;
         public Vector3 rotationVector;
         [Space]
         public bool useZPositionForAngleOffset;

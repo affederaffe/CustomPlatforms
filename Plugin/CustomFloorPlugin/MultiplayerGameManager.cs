@@ -18,8 +18,8 @@ namespace CustomFloorPlugin
         private readonly ColorScheme _colorScheme;
 
         private GameObject? _lightEffects;
-        
-        public MultiplayerGameManager(DiContainer container, 
+
+        public MultiplayerGameManager(DiContainer container,
                                      PlatformManager platformManager,
                                      PlatformSpawner platformSpawner,
                                      MultiplayerPlayersManager multiplayerPlayersManager,
@@ -47,7 +47,8 @@ namespace CustomFloorPlugin
         public void Dispose()
         {
             _multiplayerPlayersManager.playerDidFinishEvent -= OnPlayerDidFinish;
-            if (_lightEffects != null) UnityEngine.Object.Destroy(_lightEffects);
+            if (_lightEffects != null)
+                UnityEngine.Object.Destroy(_lightEffects);
         }
 
         /// <summary>
@@ -77,11 +78,11 @@ namespace CustomFloorPlugin
             MultipliedColorSO lightColor1Boost = CreateMultipliedColorSOForColors(_colorScheme.environmentColor1Boost, boostColor);
             MultipliedColorSO highlightColor0Boost = CreateMultipliedColorSOForColors(_colorScheme.environmentColor0Boost, highlightColor);
             MultipliedColorSO highlightColor1Boost = CreateMultipliedColorSOForColors(_colorScheme.environmentColor1Boost, highlightColor);
-            
+
             for (int i = 0; i < 5; i++)
             {
                 LightSwitchEventEffect lse = _container.InstantiateComponent<LightSwitchEventEffect>(lightEffects);
-                lse.SetField("_lightsID", i+1);
+                lse.SetField("_lightsID", i + 1);
                 lse.SetField("_event", (BeatmapEventType)i);
                 lse.SetField("_colorBoostEvent", BeatmapEventType.Event5);
                 lse.SetField("_lightColor0", (ColorSO)lightColor0);
@@ -100,7 +101,7 @@ namespace CustomFloorPlugin
         /// <summary>
         /// Helper function to create a <see cref="MultipliedColorSO"/>
         /// </summary>
-        private MultipliedColorSO CreateMultipliedColorSOForColors(Color baseColor, Color boostColor)
+        private static MultipliedColorSO CreateMultipliedColorSOForColors(Color baseColor, Color boostColor)
         {
             SimpleColorSO simpleColor = ScriptableObject.CreateInstance<SimpleColorSO>();
             simpleColor.hideFlags &= ~HideFlags.DontUnloadUnusedAsset;

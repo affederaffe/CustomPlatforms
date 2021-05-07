@@ -16,7 +16,7 @@ namespace CustomFloorPlugin
     /// Different callbacks will be notified throughout the games lifespan, and can be used as hooks.
     /// </summary>
     [Plugin(RuntimeOptions.DynamicInit)]
-    internal class Plugin
+    public class Plugin
     {
         /// <summary>
         /// Initializes the Plugin 
@@ -34,4 +34,4 @@ namespace CustomFloorPlugin
             zenjector.OnGame<PlatformsGameInstaller>(false);
         }
     }
-} 
+}
