@@ -60,15 +60,14 @@ namespace CustomFloorPlugin
             {
                 await _materialSwapper!.ReplaceMaterials(trackLaneRingPrefab);
                 trackLaneRingPrefab.layer = 14;
-                bool activeSelf = gameObject.activeSelf;
-                if (activeSelf) gameObject.SetActive(false);
+                gameObject.SetActive(false);
                 TrackLaneRing trackLaneRing = trackLaneRingPrefab.AddComponent<TrackLaneRing>();
                 _trackLaneRingsManager = gameObject.AddComponent<TrackLaneRingsManager>();
                 _trackLaneRingsManager.SetField("_trackLaneRingPrefab", trackLaneRing);
                 _trackLaneRingsManager.SetField("_ringCount", ringCount);
                 _trackLaneRingsManager.SetField("_ringPositionStep", ringPositionStep);
                 _trackLaneRingsManager.SetField("_spawnAsChildren", true);
-                if (activeSelf) gameObject.SetActive(true);
+                gameObject.SetActive(true);
             }
 
             if (useRotationEffect)

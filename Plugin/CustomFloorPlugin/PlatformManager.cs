@@ -184,11 +184,11 @@ namespace CustomFloorPlugin
         /// </summary>
         private void CheckLastSelectedPlatform(CustomPlatform platform)
         {
-            if (_config!.SingleplayerPlatHash == platform.platHash)
+            if (_config!.SingleplayerPlatformPath == platform.fullPath)
                 CurrentSingleplayerPlatform = platform;
-            if (_config!.MultiplayerPlatHash == platform.platHash)
+            if (_config!.MultiplayerPlatformPath == platform.fullPath)
                 CurrentMultiplayerPlatform = platform;
-            if (_config!.A360PlatHash == platform.platHash)
+            if (_config!.A360PlatformPath == platform.fullPath)
                 CurrentA360Platform = platform;
         }
 

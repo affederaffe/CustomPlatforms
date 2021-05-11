@@ -85,9 +85,11 @@ namespace CustomFloorPlugin
                     if (IsMultiplayer) return;
                     _assetLoader.ToggleHeart(_config.ShowHeart);
                     if (_config.ShowInMenu)
+                    {
                         platformIndex = _config.ShufflePlatforms
                             ? RandomPlatformIndex
                             : _platformManager.GetIndexForType(PlatformType.Singleplayer);
+                    }
                     break;
                 case StandardLevelScenesTransitionSetupDataSO:
                 case MissionLevelScenesTransitionSetupDataSO:
@@ -97,8 +99,7 @@ namespace CustomFloorPlugin
                     int apiIndex = _platformManager.GetIndexForType(PlatformType.API);
                     platformIndex = difficultyBeatmap?.parentDifficultyBeatmapSet.beatmapCharacteristic.requires360Movement ?? false
                         ? _platformManager.GetIndexForType(PlatformType.A360)
-                        : _platformManager.APIRequestedPlatform != null &&
-                          (_platformManager.APIRequestedLevelId == difficultyBeatmap?.level.levelID || apiIndex == 0)
+                        : _platformManager.APIRequestedPlatform != null && (_platformManager.APIRequestedLevelId == difficultyBeatmap?.level.levelID || apiIndex == 0)
                         ? apiIndex
                         : _config.ShufflePlatforms
                         ? RandomPlatformIndex
@@ -135,15 +136,15 @@ namespace CustomFloorPlugin
             {
                 case PlatformType.Singleplayer:
                     _platformManager.CurrentSingleplayerPlatform = _platformManager.PlatformsLoadingTask.Result[index];
-                    _config.SingleplayerPlatHash = _platformManager.CurrentSingleplayerPlatform.platHash;
+                    _config.SingleplayerPlatformPath = _platformManager.CurrentSingleplayerPlatform.fullPath;
                     break;
                 case PlatformType.Multiplayer:
                     _platformManager.CurrentMultiplayerPlatform = _platformManager.PlatformsLoadingTask.Result[index];
-                    _config.MultiplayerPlatHash = _platformManager.CurrentMultiplayerPlatform.platHash;
+                    _config.MultiplayerPlatformPath = _platformManager.CurrentMultiplayerPlatform.fullPath;
                     break;
                 case PlatformType.A360:
                     _platformManager.CurrentA360Platform = _platformManager.PlatformsLoadingTask.Result[index];
-                    _config.A360PlatHash = _platformManager.CurrentA360Platform.platHash;
+                    _config.A360PlatformPath = _platformManager.CurrentA360Platform.fullPath;
                     break;
             }
 

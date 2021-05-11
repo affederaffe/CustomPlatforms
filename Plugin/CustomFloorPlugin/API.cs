@@ -201,7 +201,7 @@ namespace CustomFloorPlugin
 
             WebResponse downloadDataWebResponse = await _webClient.GetAsync(url, CancellationToken.None);
             if (!downloadDataWebResponse.IsSuccessStatusCode) return;
-            PlatformDownloadData platformDownloadData = downloadDataWebResponse.ContentToJson<Dictionary<string, PlatformDownloadData>>().FirstOrDefault().Value;
+            PlatformDownloadData platformDownloadData = downloadDataWebResponse.ContentToJson<Dictionary<string, PlatformDownloadData>>().First().Value;
             WebResponse platDownloadWebResponse = await _webClient.GetAsync(platformDownloadData.download, CancellationToken.None);
             if (!platDownloadWebResponse.IsSuccessStatusCode) return;
             byte[] platData = platDownloadWebResponse.ContentToBytes();

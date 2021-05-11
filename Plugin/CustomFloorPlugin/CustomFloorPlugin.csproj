@@ -38,7 +38,6 @@
     <EmbeddedResource Include="Views\PlatformLists.bsml" />
     <EmbeddedResource Include="Views\Settings.bsml" />
     <EmbeddedResource Include="Views\Changelog.bsml" />
-    <None Remove="Assets\playersplace.mesh" />
     <EmbeddedResource Include="Assets\playersplace.mesh" />
   </ItemGroup>
 
