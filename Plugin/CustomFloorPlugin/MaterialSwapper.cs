@@ -23,7 +23,7 @@ namespace CustomFloorPlugin
 
         public MaterialSwapper()
         {
-            _taskSource = new();
+            _taskSource = new TaskCompletionSource<(Material, Material, Material)>();
             MaterialsLoadingTask = _taskSource.Task;
         }
 
@@ -41,7 +41,7 @@ namespace CustomFloorPlugin
                 opaqueGlowMaterial = materials.FirstOrDefault(x => x.name == "EnvLightOpaque");
             } while (darkEnvSimpleMaterial == null || transparentGlowMaterial == null || opaqueGlowMaterial == null);
             opaqueGlowMaterial.DisableKeyword("ENABLE_HEIGHT_FOG");
-            _taskSource.TrySetResult((darkEnvSimpleMaterial, transparentGlowMaterial, opaqueGlowMaterial));
+            _taskSource.SetResult((darkEnvSimpleMaterial, transparentGlowMaterial, opaqueGlowMaterial));
         }
 
         /// <summary>
@@ -50,37 +50,38 @@ namespace CustomFloorPlugin
         /// <param name="gameObject"><see cref="GameObject"/> to search for <see cref="Renderer"/>s</param>
         internal async Task ReplaceMaterials(GameObject gameObject)
         {
-            await MaterialsLoadingTask;
             foreach (Renderer renderer in gameObject.GetComponentsInChildren<Renderer>(true))
-                ReplaceForRenderer(renderer);
+                await ReplaceForRenderer(renderer);
         }
 
         /// <summary>
         /// Replaces all fake <see cref="Material"/>s on a given <see cref="Renderer"/>
         /// </summary>
         /// <param name="renderer">What <see cref="Renderer"/> to replace materials for</param>
-        private void ReplaceForRenderer(Renderer renderer)
+        private async Task ReplaceForRenderer(Renderer renderer)
         {
             Material[] materialsCopy = renderer.materials;
+            (Material darkEnvSimpleMaterial, Material transparentGlowMaterial, Material opaqueGlowMaterial) = await MaterialsLoadingTask;
             bool materialsDidChange = false;
             for (int i = 0; i < materialsCopy.Length; i++)
             {
                 switch (materialsCopy[i].name)
                 {
                     case "_dark_replace (Instance)":
-                        materialsCopy[i] = MaterialsLoadingTask.Result.DarkEnvSimpleMaterial;
+                        materialsCopy[i] = darkEnvSimpleMaterial;
                         materialsDidChange = true;
                         break;
                     case "_transparent_glow_replace (Instance)":
-                        materialsCopy[i] = MaterialsLoadingTask.Result.TransparentGlowMaterial!;
+                        materialsCopy[i] = transparentGlowMaterial;
                         materialsDidChange = true;
                         break;
                     case "_glow_replace (Instance)":
-                        materialsCopy[i] = MaterialsLoadingTask.Result.OpaqueGlowMaterial!;
+                        materialsCopy[i] = opaqueGlowMaterial;
                         materialsDidChange = true;
                         break;
                 }
             }
+
             if (materialsDidChange)
                 renderer.sharedMaterials = materialsCopy;
         }

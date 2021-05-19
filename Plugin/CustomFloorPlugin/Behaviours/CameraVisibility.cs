@@ -10,7 +10,7 @@ namespace CustomFloorPlugin
             Default,
             HeadsetOnly,
             ThirdPersonOnly
-        };
+        }
 
         public VisibilityMode visibilityMode;
         public bool affectChildren;
@@ -28,7 +28,6 @@ namespace CustomFloorPlugin
         private void Awake()
         {
             int layer = gameObject.layer;
-
             switch (visibilityMode)
             {
                 case VisibilityMode.Default:
@@ -40,14 +39,11 @@ namespace CustomFloorPlugin
                     layer = kOnlyInThirdPerson;
                     break;
             }
+
             if (affectChildren)
-            {
                 SetChildrenToLayer(gameObject, layer);
-            }
             else
-            {
                 gameObject.layer = layer;
-            }
 
             SetCameraMasks();
         }
@@ -57,9 +53,7 @@ namespace CustomFloorPlugin
         {
             go.layer = layer;
             foreach (Transform child in transform)
-            {
                 SetChildrenToLayer(child.gameObject, layer);
-            }
         }
 
         private static readonly Camera mainCamera = Camera.main!;

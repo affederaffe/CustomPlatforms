@@ -29,14 +29,14 @@ namespace CustomFloorPlugin
         public void PlatformEnabled(DiContainer container)
         {
             container.Inject(this);
-            if (_events == null) return;
-            _events.NoteWasCutEvent += OnSlice;
+            if (_events != null)
+                _events.NoteWasCutEvent += OnSlice;
         }
 
         public void PlatformDisabled()
         {
-            if (_events == null) return;
-            _events.NoteWasCutEvent -= OnSlice;
+            if (_events != null)
+                _events.NoteWasCutEvent -= OnSlice;
         }
 
         private void OnSlice(int saber)

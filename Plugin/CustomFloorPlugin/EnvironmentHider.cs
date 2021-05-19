@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 
@@ -7,8 +6,6 @@ using CustomFloorPlugin.Configuration;
 
 using UnityEngine;
 using UnityEngine.SceneManagement;
-
-using Object = UnityEngine.Object;
 
 
 namespace CustomFloorPlugin
@@ -58,12 +55,12 @@ namespace CustomFloorPlugin
         /// <summary>
         /// Hide world objects as required by the active platform
         /// </summary>
-        internal void HideObjectsForPlatform()
+        internal async void HideObjectsForPlatform()
         {
             if (TryGetEnvironmentRoot(out _root))
             {
                 FindEnvironment();
-                SetCollectionHidden(_menuEnvironment, _platformManager.GetIndexForType(PlatformType.Active) != 0);
+                SetCollectionHidden(_menuEnvironment, await _platformManager.GetIndexForTypeAsync(PlatformType.Active) != 0);
                 SetCollectionHidden(_playersPlace, _platformManager.ActivePlatform!.hideDefaultPlatform);
                 SetCollectionHidden(_feet, _platformManager.ActivePlatform.hideDefaultPlatform && !_config.AlwaysShowFeet);
                 SetCollectionHidden(_smallRings, _platformManager.ActivePlatform.hideSmallRings);
@@ -103,9 +100,9 @@ namespace CustomFloorPlugin
         /// <summary>
         /// (De-)Activates the PlayersPlace replacement as well as preparing for the next platform
         /// </summary>
-        private void CleanupEnvironment()
+        private async void CleanupEnvironment()
         {
-            _assetLoader.TogglePlayersPlace(_platformManager.GetIndexForType(PlatformType.Active) != 0 &&
+            _assetLoader.TogglePlayersPlace(await _platformManager.GetIndexForTypeAsync(PlatformType.Active) != 0 &&
                                             !_platformManager.ActivePlatform!.hideDefaultPlatform &&
                                             _sceneName == "MenuEnvironment");
             _trackLaneRings = null;
@@ -118,11 +115,11 @@ namespace CustomFloorPlugin
         private bool TryGetEnvironmentRoot(out GameObject? root)
         {
             root = null;
-            _sceneName = _gameScenesManager.GetCurrentlyLoadedSceneNames().Last(x => x.EndsWith("Environment", StringComparison.Ordinal));
+            _sceneName = _gameScenesManager.GetCurrentlyLoadedSceneNames().Last(x => x.EndsWith("Environment", System.StringComparison.Ordinal));
             if (_sceneName == "MultiplayerEnvironment") _sceneName = "GameCore";
             Scene scene = SceneManager.GetSceneByName(_sceneName);
             if (!scene.IsValid()) return false;
-            root = scene.GetRootGameObjects().First(x => x.name.EndsWith("Environment", StringComparison.Ordinal) || x.name.EndsWith("LocalActivePlayerController(Clone)", StringComparison.Ordinal));
+            root = scene.GetRootGameObjects().First(x => x.name.EndsWith("Environment", System.StringComparison.Ordinal) || x.name.EndsWith("LocalActivePlayerController(Clone)", System.StringComparison.Ordinal));
             return true;
         }
 
@@ -875,8 +872,10 @@ namespace CustomFloorPlugin
                     for (int i = 2; i < 22; i++)
                         FindAddGameObject($"LaserTop ({i.ToString(NumberFormatInfo.InvariantInfo)})", _trackLights);
                     FindAddGameObject("LaserL", _trackLights);
+                    // ReSharper disable once StringLiteralTypo
                     FindAddGameObject("LarerR", _trackLights);
                     FindAddGameObject("LaserL (2)", _trackLights);
+                    // ReSharper disable once StringLiteralTypo
                     FindAddGameObject("LarerR (2)", _trackLights);
                     break;
                 case "BTSEnvironment":

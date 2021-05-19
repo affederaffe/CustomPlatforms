@@ -17,13 +17,11 @@ namespace CustomFloorPlugin
     {
         private readonly SiraLog _siraLog;
         private readonly MaterialSwapper _materialSwapper;
-        private readonly AssetLoader _assetLoader;
 
-        public PlatformLoader(SiraLog siraLog, MaterialSwapper materialSwapper, AssetLoader assetLoader)
+        public PlatformLoader(SiraLog siraLog, MaterialSwapper materialSwapper)
         {
             _siraLog = siraLog;
             _materialSwapper = materialSwapper;
-            _assetLoader = assetLoader;
         }
 
         /// <summary>
@@ -38,6 +36,7 @@ namespace CustomFloorPlugin
             }
 
             using FileStream fileStream = File.OpenRead(fullPath);
+
             AssetBundle assetBundle = await LoadAssetBundleFromStreamAsync(fileStream);
 
             if (assetBundle == null)
@@ -87,7 +86,6 @@ namespace CustomFloorPlugin
             customPlatform.platHash = BitConverter.ToString(hash).Replace("-", string.Empty).ToLowerInvariant();
             customPlatform.fullPath = fullPath;
             customPlatform.name = $"{customPlatform.platName} by {customPlatform.platAuthor}";
-            if (customPlatform.icon == null) customPlatform.icon = _assetLoader.FallbackCover;
 
             await _materialSwapper.ReplaceMaterials(customPlatform.gameObject);
 
@@ -104,8 +102,9 @@ namespace CustomFloorPlugin
             assetBundleCreateRequest.completed += delegate
             {
                 AssetBundle assetBundle = assetBundleCreateRequest.assetBundle;
-                taskSource.TrySetResult(assetBundle);
+                taskSource.SetResult(assetBundle);
             };
+
             return await taskSource.Task;
         }
 
@@ -119,8 +118,9 @@ namespace CustomFloorPlugin
             assetBundleRequest.completed += delegate
             {
                 T asset = (T)assetBundleRequest.asset;
-                taskSource.TrySetResult(asset);
+                taskSource.SetResult(asset);
             };
+
             return await taskSource.Task;
         }
     }

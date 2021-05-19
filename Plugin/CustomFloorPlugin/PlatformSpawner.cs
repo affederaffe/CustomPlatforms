@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 using CustomFloorPlugin.Configuration;
@@ -23,9 +24,9 @@ namespace CustomFloorPlugin
         private readonly GameScenesManager _gameScenesManager;
         private readonly Random _random;
 
-        internal bool IsMultiplayer;
-
         private DiContainer _container;
+
+        internal bool IsMultiplayer { private get; set; }
 
         internal PlatformSpawner(DiContainer container,
                                  SiraLog siraLog,
@@ -45,11 +46,6 @@ namespace CustomFloorPlugin
             _random = new Random();
         }
 
-        /// <summary>
-        /// Returns a random index of all platforms
-        /// </summary>
-        internal int RandomPlatformIndex => _random.Next(0, _platformManager.PlatformsLoadingTask!.Result.Count);
-
         public void Initialize()
         {
             _gameScenesManager.transitionDidStartEvent += OnTransitionDidStart;
@@ -60,6 +56,15 @@ namespace CustomFloorPlugin
         {
             _gameScenesManager.transitionDidStartEvent -= OnTransitionDidStart;
             _gameScenesManager.transitionDidFinishEvent -= OnTransitionDidFinish;
+        }
+
+        /// <summary>
+        /// Returns a random index of all platforms
+        /// </summary>
+        internal async Task<int> GetRandomPlatformIndexAsync()
+        {
+            List<CustomPlatform> allPlatforms = await _platformManager.PlatformsLoadingTask;
+            return _random.Next(0, allPlatforms.Count);
         }
 
         /// <summary>
@@ -76,7 +81,6 @@ namespace CustomFloorPlugin
         /// </summary> 
         private async void OnTransitionDidFinish(ScenesTransitionSetupDataSO setupData, DiContainer container)
         {
-            await _platformManager.PlatformsLoadingTask!;
             int platformIndex = 0;
             switch (setupData)
             {
@@ -87,8 +91,8 @@ namespace CustomFloorPlugin
                     if (_config.ShowInMenu)
                     {
                         platformIndex = _config.ShufflePlatforms
-                            ? RandomPlatformIndex
-                            : _platformManager.GetIndexForType(PlatformType.Singleplayer);
+                            ? await GetRandomPlatformIndexAsync()
+                            : await _platformManager.GetIndexForTypeAsync(PlatformType.Singleplayer);
                     }
                     break;
                 case StandardLevelScenesTransitionSetupDataSO:
@@ -96,14 +100,14 @@ namespace CustomFloorPlugin
                 case TutorialScenesTransitionSetupDataSO:
                     _assetLoader.ToggleHeart(false);
                     IDifficultyBeatmap? difficultyBeatmap = (setupData as StandardLevelScenesTransitionSetupDataSO)?.difficultyBeatmap;
-                    int apiIndex = _platformManager.GetIndexForType(PlatformType.API);
+                    int apiIndex = await _platformManager.GetIndexForTypeAsync(PlatformType.API);
                     platformIndex = difficultyBeatmap?.parentDifficultyBeatmapSet.beatmapCharacteristic.requires360Movement ?? false
-                        ? _platformManager.GetIndexForType(PlatformType.A360)
+                        ? await _platformManager.GetIndexForTypeAsync(PlatformType.A360)
                         : _platformManager.APIRequestedPlatform != null && (_platformManager.APIRequestedLevelId == difficultyBeatmap?.level.levelID || apiIndex == 0)
                         ? apiIndex
                         : _config.ShufflePlatforms
-                        ? RandomPlatformIndex
-                        : _platformManager.GetIndexForType(PlatformType.Singleplayer);
+                        ? await GetRandomPlatformIndexAsync()
+                        : await _platformManager.GetIndexForTypeAsync(PlatformType.Singleplayer);
                     break;
                 default:
                     _assetLoader.ToggleHeart(false);
@@ -131,19 +135,19 @@ namespace CustomFloorPlugin
         /// <param name="platformType">Specify for which game mode the platform should be used</param>
         internal async Task SetPlatformAndShowAsync(int index, PlatformType platformType)
         {
-            await _platformManager.PlatformsLoadingTask!;
+            List<CustomPlatform> allPlatforms = await _platformManager.PlatformsLoadingTask;
             switch (platformType)
             {
                 case PlatformType.Singleplayer:
-                    _platformManager.CurrentSingleplayerPlatform = _platformManager.PlatformsLoadingTask.Result[index];
+                    _platformManager.CurrentSingleplayerPlatform = allPlatforms[index];
                     _config.SingleplayerPlatformPath = _platformManager.CurrentSingleplayerPlatform.fullPath;
                     break;
                 case PlatformType.Multiplayer:
-                    _platformManager.CurrentMultiplayerPlatform = _platformManager.PlatformsLoadingTask.Result[index];
+                    _platformManager.CurrentMultiplayerPlatform = allPlatforms[index];
                     _config.MultiplayerPlatformPath = _platformManager.CurrentMultiplayerPlatform.fullPath;
                     break;
                 case PlatformType.A360:
-                    _platformManager.CurrentA360Platform = _platformManager.PlatformsLoadingTask.Result[index];
+                    _platformManager.CurrentA360Platform = allPlatforms[index];
                     _config.A360PlatformPath = _platformManager.CurrentA360Platform.fullPath;
                     break;
             }
@@ -157,13 +161,12 @@ namespace CustomFloorPlugin
         /// <param name="index">The index of the new <see cref="CustomPlatform"/> in the list of all platforms</param>
         internal async Task ChangeToPlatformAsync(int index)
         {
-            await _platformManager.PlatformsLoadingTask!;
+            List<CustomPlatform> allPlatforms = await _platformManager.PlatformsLoadingTask;
             // Avoid changing the platform unnecessarily
-            if (_platformManager.ActivePlatform == _platformManager.PlatformsLoadingTask.Result[index]) return;
-            _siraLog.Info($"Switching to {_platformManager.PlatformsLoadingTask.Result[index].name}");
+            if (_platformManager.ActivePlatform == allPlatforms[index]) return;
             DestroyCustomObjects();
             _platformManager.ActivePlatform!.gameObject.SetActive(false);
-            _platformManager.ActivePlatform = _platformManager.PlatformsLoadingTask.Result[index];
+            _platformManager.ActivePlatform = allPlatforms[index];
 
             if (_platformManager.ActivePlatform.isDescriptor)
             {
@@ -173,11 +176,11 @@ namespace CustomFloorPlugin
                     await ChangeToPlatformAsync(0);
                     return;
                 }
-                // Check if another platform has been spawned in the meantime and abort if that's the case
-                if (_platformManager.ActivePlatform.fullPath != platform.fullPath) return;
+
                 _platformManager.ActivePlatform = platform;
             }
 
+            _siraLog.Info($"Switching to {_platformManager.ActivePlatform.name}");
             _platformManager.ActivePlatform.gameObject.SetActive(true);
             SpawnCustomObjects();
             _environmentHider.HideObjectsForPlatform();

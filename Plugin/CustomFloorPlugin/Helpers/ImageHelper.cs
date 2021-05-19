@@ -7,23 +7,35 @@ namespace CustomFloorPlugin.Helpers
 {
     internal static class ImageHelper
     {
-        internal static Sprite ReadSprite(this Stream stream)
+        internal static Texture2D ReadTexture2D(this Stream stream)
         {
-            byte[] data = new byte[stream.Length];
-            stream.Read(data, 0, data.Length);
-            Texture2D tex = BytesToTexture2D(data);
-            return Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), Vector2.zero);
+            byte[] array = new byte[stream.Length];
+            stream.Read(array, 0, array.Length);
+            return BytesToTexture2D(array);
         }
 
-        internal static Sprite ReadSprite(this BinaryReader binaryReader)
+        internal static Texture2D ReadTexture2D(this BinaryReader binaryReader)
         {
-            Texture2D tex = BytesToTexture2D(binaryReader.ReadBytes(binaryReader.ReadInt32()));
-            return Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), Vector2.zero);
+            byte[] bytes = binaryReader.ReadBytes(binaryReader.ReadInt32());
+            return BytesToTexture2D(bytes);
         }
 
-        internal static void WriteSprite(this BinaryWriter binaryWriter, Sprite sprite)
+        internal static Sprite ToSprite(this Texture2D texture2D)
         {
+            Sprite sprite = Sprite.Create(texture2D, new Rect(0, 0, texture2D.width, texture2D.height), Vector2.zero);
+            return sprite;
+        }
+
+        internal static void WriteSprite(this BinaryWriter binaryWriter, Sprite? sprite)
+        {
+            if (sprite == null)
+            {
+                binaryWriter.Write(false);
+                return;
+            }
+
             byte[] textureBytes = BytesFromTexture2D(sprite.texture);
+            binaryWriter.Write(true);
             binaryWriter.Write(textureBytes.Length);
             binaryWriter.Write(textureBytes);
         }
@@ -58,6 +70,7 @@ namespace CustomFloorPlugin.Helpers
                 RenderTexture.active = null;
                 RenderTexture.ReleaseTemporary(renderTexture);
             }
+
             return texture.EncodeToPNG();
         }
     }

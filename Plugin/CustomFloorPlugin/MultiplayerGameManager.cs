@@ -34,7 +34,7 @@ namespace CustomFloorPlugin
 
         public async void Initialize()
         {
-            int platformIndex = _platformManager.GetIndexForType(PlatformType.Multiplayer);
+            int platformIndex = await _platformManager.GetIndexForTypeAsync(PlatformType.Multiplayer);
             if (platformIndex != 0)
             {
                 _multiplayerPlayersManager.playerDidFinishEvent += OnPlayerDidFinish;

@@ -11,7 +11,7 @@ namespace CustomFloorPlugin
     /// <summary>
     /// Should be pretty self-explanatory, this is a giant wrapper for many events Beat Saber uses
     /// </summary>
-    public class BSEvents : IInitializable, IDisposable
+    public sealed class BSEvents : IInitializable, IDisposable
     {
         private readonly BeatmapObjectManager _beatmapObjectManager;
         private readonly GameEnergyCounter _gameEnergyCounter;
@@ -88,7 +88,6 @@ namespace CustomFloorPlugin
 
         public void Dispose()
         {
-            GC.SuppressFinalize(this);
             _beatmapObjectCallbackController.beatmapEventDidTriggerEvent -= BeatmapEventDidTrigger;
             _beatmapObjectManager.noteWasCutEvent -= NoteWasCut;
             _beatmapObjectManager.noteWasMissedEvent -= NoteWasMissed;
@@ -111,9 +110,7 @@ namespace CustomFloorPlugin
                 {
                     BeatmapObjectData beatmapObjectData = beatmapObjectsData[i];
                     if (beatmapObjectData.beatmapObjectType == BeatmapObjectType.Note && ((NoteData)beatmapObjectData).colorType != ColorType.None && beatmapObjectData.time > lastNoteTime)
-                    {
                         lastNoteTime = beatmapObjectData.time;
-                    }
                 }
             }
 
@@ -174,9 +171,7 @@ namespace CustomFloorPlugin
         private void MultiplierDidChange(int multiplier, float progress)
         {
             if (multiplier > 1 && progress < 0.1f)
-            {
                 MultiplierDidIncreaseEvent?.Invoke();
-            }
         }
     }
 }

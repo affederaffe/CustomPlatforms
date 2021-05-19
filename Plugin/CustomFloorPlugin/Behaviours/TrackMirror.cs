@@ -54,6 +54,7 @@ namespace CustomFloorPlugin
                 mirrorMaterial.SetTextureOffset(dirtTexId, dirtUVOffset);
                 mirrorMaterial.SetFloat(dirtIntensityId, dirtIntensity);
             }
+
             return mirrorMaterial;
         }
 
@@ -78,6 +79,7 @@ namespace CustomFloorPlugin
                 noMirrorMaterial.SetTextureOffset(dirtTexId, dirtUVOffset);
                 noMirrorMaterial.SetFloat(dirtIntensityId, dirtIntensity);
             }
+
             return noMirrorMaterial;
         }
 

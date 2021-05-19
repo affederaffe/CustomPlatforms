@@ -47,9 +47,7 @@ namespace CustomFloorPlugin
             if (songEventData.type == (BeatmapEventType)eventType)
             {
                 if (songEventData.value == value || anyValue)
-                {
                     onTrigger!.Invoke();
-                }
             }
         }
     }

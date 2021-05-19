@@ -9,7 +9,7 @@ namespace CustomFloorPlugin
 {
     [RequireComponent(typeof(MeshFilter))]
     [RequireComponent(typeof(MeshRenderer))]
-    public class TubeLight : MonoBehaviour, INotifyPlatformEnabled
+    public class TubeLight : MonoBehaviour, INotifyPlatformEnabled, INotifyPlatformDisabled
     {
         public enum LightsID
         {
@@ -45,18 +45,18 @@ namespace CustomFloorPlugin
         private InstancedMaterialLightWithId? _instancedMaterialLightWithId;
 
         [Inject]
-        public void Construct(MaterialSwapper materialSwapper, LightWithIdManager lightWithIdManager)
+        public void Construct(MaterialSwapper materialSwapper, [InjectOptional] LightWithIdManager lightWithIdManager)
         {
             _materialSwapper = materialSwapper;
             _lightWithIdManager = lightWithIdManager;
         }
 
-        public void PlatformEnabled(DiContainer container)
+        public async void PlatformEnabled(DiContainer container)
         {
             container.Inject(this);
-
             bool activeSelf = gameObject.activeSelf;
-            if (activeSelf) gameObject.SetActive(false);
+            if (activeSelf)
+                gameObject.SetActive(false);
 
             if (_instancedMaterialLightWithId == null)
             {
@@ -76,10 +76,12 @@ namespace CustomFloorPlugin
                         new(width, (y-length)/2, width),
                         new(-width, (y-length)/2, width),
                     };
+
                     mesh.triangles = triangles;
                 }
 
-                GetComponent<Renderer>().material = _materialSwapper!.MaterialsLoadingTask.Result.OpaqueGlowMaterial;
+                (_, _, Material opaqueGlowMaterial) = await _materialSwapper!.MaterialsLoadingTask;
+                GetComponent<Renderer>().material = opaqueGlowMaterial;
                 MaterialPropertyBlockController materialPropertyBlockController = gameObject.AddComponent<MaterialPropertyBlockController>();
                 materialPropertyBlockController.SetField("_renderers", new[] { GetComponent<Renderer>() });
                 MaterialPropertyBlockColorSetter materialPropertyBlockColorSetter = gameObject.AddComponent<MaterialPropertyBlockColorSetter>();
@@ -94,7 +96,13 @@ namespace CustomFloorPlugin
             }
 
             ((LightWithIdMonoBehaviour)_instancedMaterialLightWithId).SetField("_lightManager", _lightWithIdManager);
-            if (activeSelf) gameObject.SetActive(true);
+            if (activeSelf)
+                gameObject.SetActive(true);
+        }
+
+        public void PlatformDisabled()
+        {
+            _instancedMaterialLightWithId!.ColorWasSet(color);
         }
 
         private static readonly int[] triangles = {

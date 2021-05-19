@@ -12,12 +12,12 @@ namespace CustomFloorPlugin
     public class EventManager : MonoBehaviour, INotifyPlatformEnabled, INotifyPlatformDisabled
     {
         [Serializable] public class ComboChangedEvent : UnityEvent<int> { }
-        [Serializable] public class OnSpecificSliceEvent : UnityEvent<int> { }
-        [Serializable] public class OnScoreChangedEvent : UnityEvent<int, int> { }
-        [Serializable] public class OnGoodCutCountChangedEvent : UnityEvent<int> { }
-        [Serializable] public class OnBadCutCountChangedEvent : UnityEvent<int> { }
-        [Serializable] public class OnMissCountChangedEvent : UnityEvent<int> { }
-        [Serializable] public class OnAllNotesCountChangedEvent : UnityEvent<int, int> { }
+        [Serializable] public class SpecificSliceEvent : UnityEvent<int> { }
+        [Serializable] public class ScoreChangedEvent : UnityEvent<int, int> { }
+        [Serializable] public class GoodCutCountChangedEvent : UnityEvent<int> { }
+        [Serializable] public class BadCutCountChangedEvent : UnityEvent<int> { }
+        [Serializable] public class MissCountChangedEvent : UnityEvent<int> { }
+        [Serializable] public class AllNotesCountChangedEvent : UnityEvent<int, int> { }
 
         [FormerlySerializedAs("OnSlice")] public UnityEvent? onSlice;
         [FormerlySerializedAs("OnMiss")] public UnityEvent? onMiss;
@@ -32,12 +32,12 @@ namespace CustomFloorPlugin
         [FormerlySerializedAs("OnRedLightOn")] public UnityEvent? onRedLightOn;
         [FormerlySerializedAs("OnNewHighscore")] public UnityEvent? onNewHighscore;
         [FormerlySerializedAs("OnComboChanged")] public ComboChangedEvent onComboChanged = new();
-        [FormerlySerializedAs("OnSpecificSlice")] public OnSpecificSliceEvent onSpecificSlice = new();
-        [FormerlySerializedAs("OnScoreChanged")] public OnScoreChangedEvent onScoreChanged = new();
-        [FormerlySerializedAs("OnGoodCutCountChanged")] public OnGoodCutCountChangedEvent onGoodCutCountChanged = new();
-        [FormerlySerializedAs("OnBadCutCountChanged")] public OnBadCutCountChangedEvent onBadCutCountChangedEvent = new();
-        [FormerlySerializedAs("OnMissCountChanged")] public OnMissCountChangedEvent onMissCountChanged = new();
-        [FormerlySerializedAs("OnAllNotesCountChanged")] public OnAllNotesCountChangedEvent onAllNotesCountChanged = new();
+        [FormerlySerializedAs("OnSpecificSlice")] public SpecificSliceEvent onSpecificSlice = new();
+        [FormerlySerializedAs("OnScoreChanged")] public ScoreChangedEvent onScoreChanged = new();
+        [FormerlySerializedAs("OnGoodCutCountChanged")] public GoodCutCountChangedEvent onGoodCutCountChanged = new();
+        [FormerlySerializedAs("OnBadCutCountChanged")] public BadCutCountChangedEvent onBadCutCountChangedEvent = new();
+        [FormerlySerializedAs("OnMissCountChanged")] public MissCountChangedEvent onMissCountChanged = new();
+        [FormerlySerializedAs("OnAllNotesCountChanged")] public AllNotesCountChangedEvent onAllNotesCountChanged = new();
 
         private BSEvents? _events;
 
@@ -107,16 +107,15 @@ namespace CustomFloorPlugin
         /// </summary>
         private void LightEventCallBack(BeatmapEventData songEvent)
         {
-            if ((int)songEvent.type < 5)
+            if ((int)songEvent.type >= 5) return;
+            switch (songEvent.value)
             {
-                if (songEvent.value is > 0 and < 4)
-                {
+                case > 0 and < 4:
                     onBlueLightOn!.Invoke();
-                }
-                if (songEvent.value is > 4 and < 8)
-                {
+                    break;
+                case > 4 and < 8:
                     onRedLightOn!.Invoke();
-                }
+                    break;
             }
         }
     }

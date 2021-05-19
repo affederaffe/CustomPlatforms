@@ -128,8 +128,10 @@ namespace CustomFloorPlugin
 
         public void PlatformDisabled()
         {
-            if (_trackLaneRingsRotationEffectSpawner != null) _trackLaneRingsRotationEffectSpawner.OnDestroy();
-            if (_trackLaneRingsPositionStepEffectSpawner != null) _trackLaneRingsPositionStepEffectSpawner.OnDestroy();
+            if (_trackLaneRingsRotationEffectSpawner != null)
+                _trackLaneRingsRotationEffectSpawner.OnDestroy();
+            if (_trackLaneRingsPositionStepEffectSpawner != null)
+                _trackLaneRingsPositionStepEffectSpawner.OnDestroy();
 
             foreach (INotifyPlatformDisabled notifyDisable in GetComponentsInChildren<INotifyPlatformDisabled>(true))
             {

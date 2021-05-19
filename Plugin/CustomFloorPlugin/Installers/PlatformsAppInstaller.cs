@@ -27,8 +27,7 @@ namespace CustomFloorPlugin.Installers
             Container.BindInterfacesAndSelfTo<MaterialSwapper>().AsSingle();
             Container.BindInterfacesAndSelfTo<AssetLoader>().AsSingle();
             Container.Bind<PlatformLoader>().AsSingle();
-            PlatformManager manager = Container.InstantiateComponentOnNewGameObject<PlatformManager>("CustomPlatforms");
-            Container.BindInstance(manager).AsSingle();
+            Container.BindInterfacesAndSelfTo<PlatformManager>().AsSingle();
             Container.Bind<EnvironmentHider>().AsSingle();
             Container.BindInterfacesAndSelfTo<PlatformSpawner>().AsSingle();
         }

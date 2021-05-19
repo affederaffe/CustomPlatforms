@@ -17,7 +17,6 @@ namespace CustomFloorPlugin
         private BasicSpectrogramData? _basicSpectrogramData;
 
         private Animation? _animation;
-        private bool _hasSpectrogramData;
 
         [Inject]
         public void Construct([InjectOptional] BasicSpectrogramData basicSpectrogramData)
@@ -28,38 +27,34 @@ namespace CustomFloorPlugin
 
         public void PlatformEnabled(DiContainer container)
         {
-            if (animationClip == null) enabled = false;
             container.Inject(this);
-            _hasSpectrogramData = _basicSpectrogramData != null;
+            enabled = animationClip != null && _basicSpectrogramData != null;
+            if (_animation == null)
+            {
+                _animation = gameObject.AddComponent<Animation>();
+                _animation.AddClip(animationClip, "clip");
+            }
+
+            _animation.Play("clip");
+            _animation["clip"].speed = 0;
         }
 
         private void Update()
         {
-            _animation!.AddClip(animationClip, "clip");
-            _animation.Play("clip");
-            _animation["clip"].speed = 0;
+            float average = 0f;
+            for (int i = 0; i < 64; i++)
+                average += _basicSpectrogramData!.ProcessedSamples[i];
+            average /= 64.0f;
 
-            if (_hasSpectrogramData)
-            {
-                float average = 0.0f;
-                for (int i = 0; i < 64; i++)
-                {
-                    average += _basicSpectrogramData!.ProcessedSamples[i];
-                }
-                average /= 64.0f;
+            float value = averageAllSamples ? average : _basicSpectrogramData!.ProcessedSamples[sample];
 
-                float value = averageAllSamples ? average : _basicSpectrogramData!.ProcessedSamples[sample];
+            value *= 5f;
+            if (value > 1f)
+                value = 1f;
 
-                value *= 5f;
-                if (value > 1f)
-                {
-                    value = 1f;
-                }
-                value = Mathf.Pow(value, 2f);
+            value = Mathf.Pow(value, 2f);
 
-                _animation["clip"].time = value * _animation["clip"].length;
-
-            }
+            _animation!["clip"].time = value * _animation!["clip"].length;
         }
     }
 }
