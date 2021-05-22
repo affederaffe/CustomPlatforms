@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>net48</TargetFramework>
     <OutputType>Library</OutputType>
-    <LangVersion>latest</LangVersion>
+    <LangVersion>9</LangVersion>
     <Nullable>enable</Nullable>
     <RootNamespace>CustomFloorPlugin</RootNamespace>
     <LocalRefsDir Condition="Exists('..\Refs')">..\Refs</LocalRefsDir>
