@@ -114,7 +114,7 @@ namespace CustomFloorPlugin
 
         private async Task<GameObject> CreatePlayersPlaceAsync()
         {
-            (Vector3[] vertices, int[] triangles) = await Task.Run(() => ParseMesh("CustomFloorPlugin.Assets.Playersplace.mesh"));
+            (Vector3[] vertices, int[] triangles) = await Task.Run(() => ParseMesh("CustomFloorPlugin.Assets.PlayersPlace.mesh"));
             Mesh mesh = new()
             {
                 vertices = vertices,

@@ -92,7 +92,6 @@ namespace CustomFloorPlugin
                 _instancedMaterialLightWithId.SetField("_intensity", 1.4f);
                 ((LightWithIdMonoBehaviour)_instancedMaterialLightWithId).SetField("_ID", (int)lightsID);
                 _instancedMaterialLightWithId.ColorWasSet(color);
-                gameObject.layer = 13;
             }
 
             ((LightWithIdMonoBehaviour)_instancedMaterialLightWithId).SetField("_lightManager", _lightWithIdManager);

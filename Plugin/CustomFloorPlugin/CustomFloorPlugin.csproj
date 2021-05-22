@@ -36,7 +36,7 @@
     <EmbeddedResource Include="Assets\Heart.png" />
     <EmbeddedResource Include="Assets\LvlInsaneCover.png" />
     <EmbeddedResource Include="Assets\Heart.mesh" />
-    <EmbeddedResource Include="Assets\Playersplace.mesh" />
+    <EmbeddedResource Include="Assets\PlayersPlace.mesh" />
     <EmbeddedResource Include="Views\PlatformLists.bsml" />
     <EmbeddedResource Include="Views\Settings.bsml" />
     <EmbeddedResource Include="Views\Changelog.bsml" />

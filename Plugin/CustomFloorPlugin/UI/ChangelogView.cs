@@ -26,7 +26,7 @@ namespace CustomFloorPlugin.UI
         @"  <size=150%><color=#888888>Version 6.1.3</color></size>
         - Updated for 1.15.0
         - Reduced startup times
-        - Mirrors
+        - Added Mirrors
 
   <size=150%><color=#888888>Version 6.1.2</color></size>
         - Updated for 1.14.0

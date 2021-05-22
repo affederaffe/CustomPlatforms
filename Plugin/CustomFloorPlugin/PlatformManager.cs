@@ -38,10 +38,11 @@ namespace CustomFloorPlugin
         /// </summary>
         internal Task<List<CustomPlatform>> PlatformsLoadingTask { get; }
 
-        internal CustomPlatform? ActivePlatform { get; set; }
-        internal CustomPlatform? CurrentSingleplayerPlatform { get; set; }
-        internal CustomPlatform? CurrentMultiplayerPlatform { get; set; }
-        internal CustomPlatform? CurrentA360Platform { get; set; }
+        internal CustomPlatform DefaultPlatform { get; }
+        internal CustomPlatform ActivePlatform { get; set; }
+        internal CustomPlatform CurrentSingleplayerPlatform { get; set; }
+        internal CustomPlatform CurrentMultiplayerPlatform { get; set; }
+        internal CustomPlatform CurrentA360Platform { get; set; }
         internal CustomPlatform? APIRequestedPlatform { get; set; }
 
         /// <summary>
@@ -66,6 +67,11 @@ namespace CustomFloorPlugin
             _anchor = new GameObject("CustomPlatforms").transform;
             _cacheFilePath = Path.Combine(_config.CustomPlatformsDirectory, "cache.dat");
             PlatformFilePaths = new Dictionary<string, CustomPlatform>();
+            DefaultPlatform = CreateDefaultPlatform();
+            CurrentSingleplayerPlatform = DefaultPlatform;
+            CurrentMultiplayerPlatform = DefaultPlatform;
+            CurrentA360Platform = DefaultPlatform;
+            ActivePlatform = DefaultPlatform;
             PlatformsLoadingTask = LoadPlatformsAsync();
         }
 
@@ -88,10 +94,10 @@ namespace CustomFloorPlugin
                 Directory.CreateDirectory(_config.CustomPlatformsDirectory);
 
             List<string> bundlePaths = Directory.EnumerateFiles(_config.CustomPlatformsDirectory, "*.plat").ToList();
-            List<CustomPlatform> platforms = new(bundlePaths.Count + 1);
-
-            CustomPlatform defaultPlatform = CreateDefaultPlatform();
-            platforms.Add(defaultPlatform);
+            List<CustomPlatform> platforms = new(bundlePaths.Count + 1)
+            {
+                DefaultPlatform
+            };
 
             if (File.Exists(_cacheFilePath))
                 foreach (CustomPlatform platform in EnumeratePlatformDescriptorsFromFile())
@@ -125,10 +131,6 @@ namespace CustomFloorPlugin
             defaultPlatform.platAuthor = "Beat Saber";
             defaultPlatform.icon = _assetLoader!.DefaultPlatformCover;
             defaultPlatform.isDescriptor = false;
-            CurrentSingleplayerPlatform = defaultPlatform;
-            CurrentMultiplayerPlatform = defaultPlatform;
-            CurrentA360Platform = defaultPlatform;
-            ActivePlatform = defaultPlatform;
             return defaultPlatform;
         }
 

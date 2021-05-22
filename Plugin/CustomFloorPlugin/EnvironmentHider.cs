@@ -102,11 +102,11 @@ namespace CustomFloorPlugin
         /// </summary>
         private async void CleanupEnvironment()
         {
-            _assetLoader.TogglePlayersPlace(await _platformManager.GetIndexForTypeAsync(PlatformType.Active) != 0 &&
-                                            !_platformManager.ActivePlatform!.hideDefaultPlatform &&
-                                            _sceneName == "MenuEnvironment");
             _trackLaneRings = null;
             _root = null;
+            _assetLoader.TogglePlayersPlace(!_platformManager.ActivePlatform!.hideDefaultPlatform &&
+                                            _sceneName == "MenuEnvironment" &&
+                                            await _platformManager.GetIndexForTypeAsync(PlatformType.Active) != 0);
         }
 
         /// <summary>
@@ -147,7 +147,8 @@ namespace CustomFloorPlugin
         {
             GameObject? go = _root!.transform.Find(name)?.gameObject;
             if (go == null) return false;
-            if (rename) go.name += "renamed";
+            if (rename)
+                go.name += "renamed";
             list.Add(go);
             return true;
         }
@@ -216,6 +217,7 @@ namespace CustomFloorPlugin
         {
             switch (_sceneName)
             {
+                case "TutorialEnvironment":
                 case "DefaultEnvironment":
                 case "NiceEnvironment":
                 case "MonstercatEnvironment":

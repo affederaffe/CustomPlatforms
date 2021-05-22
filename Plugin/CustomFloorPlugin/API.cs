@@ -150,13 +150,10 @@ namespace CustomFloorPlugin
         /// <summary>
         /// Disable platform spawning as required by Cinema
         /// </summary>
-        private async void OnCinemaEvent(bool allowPlatform)
+        private void OnCinemaEvent(bool allowPlatform)
         {
             if (!allowPlatform)
-            {
-                List<CustomPlatform> allPlatforms = await _platformManager.PlatformsLoadingTask;
-                _platformManager.APIRequestedPlatform = allPlatforms[0];
-            }
+                _platformManager.APIRequestedPlatform = _platformManager.DefaultPlatform;
         }
 
         /// <summary>
