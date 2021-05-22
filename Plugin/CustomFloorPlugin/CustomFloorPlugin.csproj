@@ -30,15 +30,16 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="Assets\FeetIcon.png" />
-    <EmbeddedResource Include="Assets\heart.mesh" />
-    <EmbeddedResource Include="Assets\heart.png" />
-    <EmbeddedResource Include="Assets\LvlInsaneCover.png" />
     <EmbeddedResource Include="manifest.json" />
+    <EmbeddedResource Include="Assets\FeetIcon.png" />
+    <EmbeddedResource Include="Assets\Floor.png" />
+    <EmbeddedResource Include="Assets\Heart.png" />
+    <EmbeddedResource Include="Assets\LvlInsaneCover.png" />
+    <EmbeddedResource Include="Assets\Heart.mesh" />
+    <EmbeddedResource Include="Assets\PlayersPlace.mesh" />
     <EmbeddedResource Include="Views\PlatformLists.bsml" />
     <EmbeddedResource Include="Views\Settings.bsml" />
     <EmbeddedResource Include="Views\Changelog.bsml" />
-    <EmbeddedResource Include="Assets\playersplace.mesh" />
   </ItemGroup>
 
   <ItemGroup>

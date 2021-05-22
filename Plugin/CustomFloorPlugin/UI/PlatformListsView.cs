@@ -23,10 +23,9 @@ namespace CustomFloorPlugin.UI
     internal class PlatformListsView : BSMLAutomaticViewController
     {
         private PluginConfig? _config;
+        private AssetLoader? _assetLoader;
         private PlatformManager? _platformManager;
         private PlatformSpawner? _platformSpawner;
-
-        private Dictionary<CustomPlatform, CustomListTableData.CustomCellInfo>? _platformCellPairs;
 
         /// <summary>
         /// The table of currently loaded Platforms for singleplayer
@@ -46,10 +45,8 @@ namespace CustomFloorPlugin.UI
         [UIComponent("a360-platforms-list")]
         private readonly CustomListTableData? _a360PlatformListTable = null;
 
-        /// <summary>
-        /// An <see cref="System.Array"/> of all <see cref="CustomListTableData"/>s
-        /// </summary>
         private CustomListTableData[]? _allListTables;
+        private PlatformType _selectedPlatformType;
 
         /// <summary>
         /// Indicates whether the loading symbol should be shown or not
@@ -67,12 +64,12 @@ namespace CustomFloorPlugin.UI
         private bool _loadingIndicatorActive = true;
 
         [Inject]
-        public void Construct(PluginConfig config, PlatformSpawner platformSpawner, PlatformManager platformManager)
+        public void Construct(PluginConfig config, AssetLoader assetLoader, PlatformSpawner platformSpawner, PlatformManager platformManager)
         {
             _config = config;
+            _assetLoader = assetLoader;
             _platformManager = platformManager;
             _platformSpawner = platformSpawner;
-            _platformCellPairs = new Dictionary<CustomPlatform, CustomListTableData.CustomCellInfo>();
         }
 
         [UIAction("select-cell")]
@@ -80,52 +77,24 @@ namespace CustomFloorPlugin.UI
         // ReSharper disable once UnusedParameter.Local
         private async void TabSelect(SegmentedControl segmentedControl, int _1)
         {
-            await _platformManager!.PlatformsLoadingTask!;
-            PlatformType type = (PlatformType)segmentedControl.selectedCellNumber;
-            int index = _platformManager.GetIndexForType(type);
+            _selectedPlatformType = (PlatformType)segmentedControl.selectedCellNumber;
+            int index = await _platformManager!.GetIndexForTypeAsync(_selectedPlatformType);
             await _platformSpawner!.ChangeToPlatformAsync(index);
             _allListTables![segmentedControl.selectedCellNumber].tableView.ScrollToCellWithIdx(index, TableView.ScrollPositionType.Center, true);
             _allListTables![segmentedControl.selectedCellNumber].tableView.SelectCellWithIdx(index);
-            _platformManager.CurrentPlatformType = type;
         }
 
         /// <summary>
-        /// Called when a <see cref="CustomPlatform"/> is selected by the user<br/>
+        /// Called when a <see cref="CustomPlatform"/> is selected by the user
         /// </summary>
         /// <param name="_">I love how optimised BSML is</param>
         /// <param name="idx">Cell index of the users selection</param>
-        [UIAction("singleplayer-select")]
+        [UIAction("platform-select")]
         // ReSharper disable once UnusedMember.Local
         // ReSharper disable once UnusedParameter.Local
-        private async void SingleplayerSelect(TableView _, int idx)
+        private async void PlatformSelect(TableView _, int idx)
         {
-            await _platformSpawner!.SetPlatformAndShowAsync(idx, PlatformType.Singleplayer);
-        }
-
-        /// <summary>
-        /// Called when a <see cref="CustomPlatform"/> is selected by the user<br/>
-        /// </summary>
-        /// <param name="_">I love how optimised BSML is</param>
-        /// <param name="idx">Cell index of the users selection</param>
-        [UIAction("multiplayer-select")]
-        // ReSharper disable once UnusedMember.Local
-        // ReSharper disable once UnusedParameter.Local
-        private async void MultiplayerSelect(TableView _, int idx)
-        {
-            await _platformSpawner!.SetPlatformAndShowAsync(idx, PlatformType.Multiplayer);
-        }
-
-        /// <summary>
-        /// Called when a <see cref="CustomPlatform"/> is selected by the user<br/>
-        /// </summary>
-        /// <param name="_">I love how optimised BSML is</param>
-        /// <param name="idx">Cell index of the users selection</param>
-        [UIAction("a360-select")]
-        // ReSharper disable once UnusedMember.Local
-        // ReSharper disable once UnusedParameter.Local
-        private async void A360Select(TableView _, int idx)
-        {
-            await _platformSpawner!.SetPlatformAndShowAsync(idx, PlatformType.A360);
+            await _platformSpawner!.SetPlatformAndShowAsync(idx, _selectedPlatformType);
         }
 
         /// <summary>
@@ -135,8 +104,7 @@ namespace CustomFloorPlugin.UI
         protected override async void DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
         {
             base.DidActivate(firstActivation, addedToHierarchy, screenSystemEnabling);
-            await _platformManager!.PlatformsLoadingTask!;
-            int platformIndex = _platformManager.GetIndexForType(_platformManager.CurrentPlatformType);
+            int platformIndex = await _platformManager!.GetIndexForTypeAsync(_selectedPlatformType);
             await _platformSpawner!.ChangeToPlatformAsync(platformIndex);
         }
 
@@ -148,12 +116,12 @@ namespace CustomFloorPlugin.UI
         protected override async void DidDeactivate(bool removedFromHierarchy, bool screenSystemDisabling)
         {
             base.DidDeactivate(removedFromHierarchy, screenSystemDisabling);
-            await _platformManager!.PlatformsLoadingTask!;
             int platformIndex = 0;
             if (_config!.ShowInMenu)
                 platformIndex = _config.ShufflePlatforms
-                    ? _platformSpawner!.RandomPlatformIndex
-                    : _platformManager!.GetIndexForType(PlatformType.Singleplayer);
+                    ? await _platformSpawner!.GetRandomPlatformIndexAsync()
+                    : await _platformManager!.GetIndexForTypeAsync(PlatformType.Singleplayer);
+
             await _platformSpawner!.ChangeToPlatformAsync(platformIndex);
         }
 
@@ -165,16 +133,16 @@ namespace CustomFloorPlugin.UI
         // ReSharper disable once UnusedMember.Local
         private async void PostParse()
         {
-            await _platformManager!.PlatformsLoadingTask!;
-            _platformManager.PlatformsLoadingTask.Result.Sort(1, _platformManager.PlatformsLoadingTask.Result.Count - 1, null);
+            List<CustomPlatform> allPlatforms = await _platformManager!.PlatformsLoadingTask;
+            allPlatforms.Sort(1, allPlatforms.Count - 1, null);
             _allListTables = new[] { _singleplayerPlatformListTable!, _multiplayerPlatformListTable!, _a360PlatformListTable! };
             LoadingIndicatorActive = false;
-            foreach (CustomPlatform platform in _platformManager.PlatformsLoadingTask.Result)
+            foreach (CustomPlatform platform in allPlatforms)
                 AddCellForPlatform(platform, false);
             for (int i = 0; i < _allListTables.Length; i++)
             {
                 _allListTables[i].tableView.ReloadData();
-                int idx = _platformManager.GetIndexForType((PlatformType)i);
+                int idx = await _platformManager.GetIndexForTypeAsync((PlatformType)i);
                 _allListTables[i].tableView.ScrollToCellWithIdx(idx, TableView.ScrollPositionType.Center, true);
                 _allListTables[i].tableView.SelectCellWithIdx(idx);
             }
@@ -183,8 +151,7 @@ namespace CustomFloorPlugin.UI
         internal void AddCellForPlatform(CustomPlatform platform, bool forceReload)
         {
             if (_allListTables == null) return;
-            CustomListTableData.CustomCellInfo cell = new(platform.platName, platform.platAuthor, platform.icon);
-            _platformCellPairs!.Add(platform, cell);
+            CustomListTableData.CustomCellInfo cell = new(platform.platName, platform.platAuthor, platform.icon ? platform.icon : _assetLoader!.FallbackCover);
             foreach (CustomListTableData listTable in _allListTables)
             {
                 listTable.data.Add(cell);
@@ -193,15 +160,16 @@ namespace CustomFloorPlugin.UI
             }
         }
 
-        internal void RemoveCellForPlatform(CustomPlatform platform)
+        internal async void RemoveCellForPlatform(CustomPlatform platform)
         {
             if (_allListTables == null) return;
-            CustomListTableData.CustomCellInfo cell = _platformCellPairs![platform];
+            List<CustomPlatform> allPlatforms = await _platformManager!.PlatformsLoadingTask;
+            int platformIndex = allPlatforms.IndexOf(platform);
             for (int i = 0; i < _allListTables.Length; i++)
             {
-                _allListTables[i].data.Remove(cell);
+                _allListTables[i].data.RemoveAt(platformIndex);
                 _allListTables[i].tableView.ReloadData();
-                if (_platformManager!.GetIndexForType((PlatformType)i) == _platformManager!.PlatformsLoadingTask!.Result.IndexOf(platform))
+                if (await _platformManager!.GetIndexForTypeAsync((PlatformType)i) == platformIndex)
                 {
                     _allListTables[i].tableView.SelectCellWithIdx(0);
                     _allListTables[i].tableView.ScrollToCellWithIdx(0, TableView.ScrollPositionType.Center, true);

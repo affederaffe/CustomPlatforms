@@ -2,7 +2,6 @@
 
 using UnityEngine;
 using UnityEngine.Events;
-using UnityEngine.Serialization;
 
 
 namespace CustomFloorPlugin
@@ -17,24 +16,26 @@ namespace CustomFloorPlugin
         [Serializable] public class OnMissCountChangedEvent : UnityEvent<int> { }
         [Serializable] public class OnAllNotesCountChangedEvent : UnityEvent<int, int> { }
 
-        [FormerlySerializedAs("OnSlice")] public UnityEvent? onSlice;
-        [FormerlySerializedAs("OnMiss")] public UnityEvent? onMiss;
-        [FormerlySerializedAs("OnComboBreak")] public UnityEvent? onComboBreak;
-        [FormerlySerializedAs("MultiplierUp")] public UnityEvent? multiplierUp;
-        [FormerlySerializedAs("SaberStartColliding")] public UnityEvent? saberStartColliding;
-        [FormerlySerializedAs("SaberStopColliding")] public UnityEvent? saberStopColliding;
-        [FormerlySerializedAs("OnLevelStart")] public UnityEvent? onLevelStart;
-        [FormerlySerializedAs("OnLevelFail")] public UnityEvent? onLevelFail;
-        [FormerlySerializedAs("OnLevelFinish")] public UnityEvent? onLevelFinish;
-        [FormerlySerializedAs("OnBlueLightOn")] public UnityEvent? onBlueLightOn;
-        [FormerlySerializedAs("OnRedLightOn")] public UnityEvent? onRedLightOn;
-        [FormerlySerializedAs("OnNewHighscore")] public UnityEvent? onNewHighscore;
-        [FormerlySerializedAs("OnComboChanged")] public ComboChangedEvent onComboChanged = new();
-        [FormerlySerializedAs("OnSpecificSlice")] public OnSpecificSliceEvent onSpecificSlice = new();
-        [FormerlySerializedAs("OnScoreChanged")] public OnScoreChangedEvent onScoreChanged = new();
-        [FormerlySerializedAs("OnGoodCutCountChanged")] public OnGoodCutCountChangedEvent onGoodCutCountChanged = new();
-        [FormerlySerializedAs("OnBadCutCountChanged")] public OnBadCutCountChangedEvent onBadCutCountChangedEvent = new();
-        [FormerlySerializedAs("OnMissCountChanged")] public OnMissCountChangedEvent onMissCountChanged = new();
-        [FormerlySerializedAs("OnAllNotesCountChanged")] public OnAllNotesCountChangedEvent onAllNotesCountChanged = new();
+        // ReSharper disable InconsistentNaming
+        public UnityEvent? OnSlice;
+        public UnityEvent? OnMiss;
+        public UnityEvent? OnComboBreak;
+        public UnityEvent? MultiplierUp;
+        public UnityEvent? SaberStartColliding;
+        public UnityEvent? SaberStopColliding;
+        public UnityEvent? OnLevelStart;
+        public UnityEvent? OnLevelFail;
+        public UnityEvent? OnLevelFinish;
+        public UnityEvent? OnBlueLightOn;
+        public UnityEvent? OnRedLightOn;
+        public UnityEvent? OnNewHighscore;
+        public ComboChangedEvent OnComboChanged = new();
+        public OnSpecificSliceEvent OnSpecificSlice = new();
+        public OnScoreChangedEvent OnScoreChanged = new();
+        public OnGoodCutCountChangedEvent OnGoodCutCountChanged = new();
+        public OnBadCutCountChangedEvent OnBadCutCountChanged = new();
+        public OnMissCountChangedEvent OnMissCountChanged = new();
+        public OnAllNotesCountChangedEvent OnAllNotesCountChanged = new();
+        // ReSharper restore InconsistentNaming
     }
 }

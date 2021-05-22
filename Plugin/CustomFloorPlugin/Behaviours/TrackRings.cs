@@ -59,7 +59,6 @@ namespace CustomFloorPlugin
             if (_trackLaneRingsManager == null)
             {
                 await _materialSwapper!.ReplaceMaterials(trackLaneRingPrefab);
-                trackLaneRingPrefab.layer = 14;
                 gameObject.SetActive(false);
                 TrackLaneRing trackLaneRing = trackLaneRingPrefab.AddComponent<TrackLaneRing>();
                 _trackLaneRingsManager = gameObject.AddComponent<TrackLaneRingsManager>();
@@ -128,8 +127,10 @@ namespace CustomFloorPlugin
 
         public void PlatformDisabled()
         {
-            if (_trackLaneRingsRotationEffectSpawner != null) _trackLaneRingsRotationEffectSpawner.OnDestroy();
-            if (_trackLaneRingsPositionStepEffectSpawner != null) _trackLaneRingsPositionStepEffectSpawner.OnDestroy();
+            if (_trackLaneRingsRotationEffectSpawner != null)
+                _trackLaneRingsRotationEffectSpawner.OnDestroy();
+            if (_trackLaneRingsPositionStepEffectSpawner != null)
+                _trackLaneRingsPositionStepEffectSpawner.OnDestroy();
 
             foreach (INotifyPlatformDisabled notifyDisable in GetComponentsInChildren<INotifyPlatformDisabled>(true))
             {

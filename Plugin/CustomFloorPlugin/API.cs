@@ -89,7 +89,8 @@ namespace CustomFloorPlugin
                 if (newPlatform == null) return;
                 if (wasActivePlatform)
                 {
-                    int index = _platformManager.PlatformsLoadingTask!.Result.IndexOf(newPlatform);
+                    List<CustomPlatform> allPlatforms = await _platformManager.PlatformsLoadingTask;
+                    int index = allPlatforms.IndexOf(newPlatform);
                     await _platformSpawner.ChangeToPlatformAsync(index);
                 }
             }
@@ -108,7 +109,8 @@ namespace CustomFloorPlugin
 
             CustomPlatform? newPlatform = await _platformManager.CreatePlatformAsync(e.FullPath);
             if (newPlatform == null) return;
-            _platformManager.PlatformsLoadingTask!.Result.Add(newPlatform);
+            List<CustomPlatform> allPlatforms = await _platformManager.PlatformsLoadingTask;
+            allPlatforms.Add(newPlatform);
             _platformListsView.AddCellForPlatform(newPlatform, true);
             if (_apiRequest)
             {
@@ -130,11 +132,12 @@ namespace CustomFloorPlugin
 
             if (_platformManager.PlatformFilePaths.TryGetValue(e.FullPath, out CustomPlatform platform))
             {
-                await _platformManager.PlatformsLoadingTask!;
+                List<CustomPlatform> allPlatforms = await _platformManager.PlatformsLoadingTask;
                 _platformListsView.RemoveCellForPlatform(platform);
-                if (_platformManager.ActivePlatform == platform) await _platformSpawner.ChangeToPlatformAsync(0);
+                if (_platformManager.ActivePlatform == platform)
+                    await _platformSpawner.ChangeToPlatformAsync(0);
                 _platformManager.PlatformFilePaths.Remove(platform.fullPath);
-                _platformManager.PlatformsLoadingTask.Result.Remove(platform);
+                allPlatforms.Remove(platform);
                 UnityEngine.Object.Destroy(platform.gameObject);
             }
         }
@@ -147,13 +150,10 @@ namespace CustomFloorPlugin
         /// <summary>
         /// Disable platform spawning as required by Cinema
         /// </summary>
-        private async void OnCinemaEvent(bool allowPlatform)
+        private void OnCinemaEvent(bool allowPlatform)
         {
             if (!allowPlatform)
-            {
-                await _platformManager.PlatformsLoadingTask!;
-                _platformManager.APIRequestedPlatform = _platformManager.PlatformsLoadingTask.Result[0];
-            }
+                _platformManager.APIRequestedPlatform = _platformManager.DefaultPlatform;
         }
 
         /// <summary>
@@ -186,13 +186,12 @@ namespace CustomFloorPlugin
             _platformManager.APIRequestedLevelId = level.levelID;
 
             // Check if the requested platform is already downloaded
-            foreach (CustomPlatform platform in await _platformManager.PlatformsLoadingTask!)
+            List<CustomPlatform> allPlatforms = await _platformManager.PlatformsLoadingTask;
+            CustomPlatform? platform = allPlatforms.FirstOrDefault(x => x.platHash == hash || x.name.StartsWith(name ?? string.Empty, StringComparison.Ordinal));
+            if (platform != null)
             {
-                if (platform.platHash == hash || platform.platName.StartsWith(name ?? string.Empty, StringComparison.Ordinal))
-                {
-                    _platformManager.APIRequestedPlatform = platform;
-                    return;
-                }
+                _platformManager.APIRequestedPlatform = platform;
+                return;
             }
 
             string url = hash != null ? $"https://modelsaber.com/api/v2/get.php?type=platform&filter=hash:{hash}"

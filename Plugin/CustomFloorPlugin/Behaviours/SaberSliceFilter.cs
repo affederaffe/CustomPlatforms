@@ -1,6 +1,5 @@
 ﻿using UnityEngine;
 using UnityEngine.Events;
-using UnityEngine.Serialization;
 
 using Zenject;
 
@@ -16,7 +15,8 @@ namespace CustomFloorPlugin
         }
 
         public SaberType saberType;
-        [FormerlySerializedAs("SaberSlice")] public UnityEvent? saberSlice;
+        // ReSharper disable once InconsistentNaming
+        public UnityEvent? SaberSlice;
 
         private BSEvents? _events;
 
@@ -29,20 +29,20 @@ namespace CustomFloorPlugin
         public void PlatformEnabled(DiContainer container)
         {
             container.Inject(this);
-            if (_events == null) return;
-            _events.NoteWasCutEvent += OnSlice;
+            if (_events != null)
+                _events.NoteWasCutEvent += OnSlice;
         }
 
         public void PlatformDisabled()
         {
-            if (_events == null) return;
-            _events.NoteWasCutEvent -= OnSlice;
+            if (_events != null)
+                _events.NoteWasCutEvent -= OnSlice;
         }
 
         private void OnSlice(int saber)
         {
             if ((SaberType)saber == saberType)
-                saberSlice!.Invoke();
+                SaberSlice!.Invoke();
         }
     }
 }

@@ -1,57 +1,45 @@
 ﻿using System;
 
 using UnityEngine;
-using UnityEngine.Serialization;
+
+using Zenject;
 
 
 namespace CustomFloorPlugin
 {
-    public class PrefabLightmapData : MonoBehaviour
+    public class PrefabLightmapData : MonoBehaviour, INotifyPlatformEnabled
     {
-        [FormerlySerializedAs("m_Renderers")] public Renderer[]? renderers;
-        [FormerlySerializedAs("m_LightmapOffsetScales")] public Vector4[]? lightmapOffsetScales;
-        [FormerlySerializedAs("m_Lightmaps")] public Texture2D[]? lightmaps;
+        // ReSharper disable InconsistentNaming
+        public Renderer[]? m_Renderers;
+        public Vector4[]? m_LightmapOffsetScales;
+        public Texture2D[]? m_Lightmaps;
+        // ReSharper restore InconsistentNaming
 
-        private void Start()
+        public void PlatformEnabled(DiContainer container)
         {
-            ApplyLightmaps();
+            enabled = m_Renderers != null && m_LightmapOffsetScales != null && m_Lightmaps != null && m_Renderers.Length > 0 &&
+                      m_Renderers.Length != m_LightmapOffsetScales.Length && m_Renderers.Length != m_Lightmaps.Length &&
+                      m_LightmapOffsetScales.Length != m_Lightmaps.Length &&
+                      m_Renderers[m_Renderers.Length - 1].lightmapIndex >= LightmapSettings.lightmaps.Length;
         }
 
         private void Update()
         {
-            if (renderers != null && renderers.Length > 0 && renderers[renderers.Length - 1].lightmapIndex >= LightmapSettings.lightmaps.Length)
-            {
-                ApplyLightmaps();
-            }
-        }
+            LightmapData[] lightmapData = LightmapSettings.lightmaps;
+            LightmapData[] combinedLightmaps = new LightmapData[m_Lightmaps!.Length + lightmapData.Length];
 
-        private void ApplyLightmaps()
-        {
-            if (renderers == null || lightmapOffsetScales == null || lightmaps == null ||
-                renderers.Length <= 0 ||
-                renderers.Length != lightmapOffsetScales.Length ||
-                renderers.Length != lightmaps.Length ||
-                lightmapOffsetScales.Length != lightmaps.Length)
+            Array.Copy(lightmapData, combinedLightmaps, lightmapData.Length);
+            for (int i = 0; i < m_Lightmaps.Length; i++)
             {
-                return;
-            }
-
-            LightmapData[] lightmapDatas = LightmapSettings.lightmaps;
-            LightmapData[] combinedLightmaps = new LightmapData[lightmaps.Length + lightmapDatas.Length];
-
-            Array.Copy(lightmapDatas, combinedLightmaps, lightmapDatas.Length);
-            for (int i = 0; i < lightmaps.Length; i++)
-            {
-                combinedLightmaps[lightmapDatas.Length + i] = new LightmapData
+                combinedLightmaps[lightmapData.Length + i] = new LightmapData
                 {
-                    lightmapColor = lightmaps[i]
+                    lightmapColor = m_Lightmaps[i]
                 };
             }
 
-            ApplyRendererInfo(renderers, lightmapOffsetScales, lightmapDatas.Length);
+            ApplyRendererInfo(m_Renderers!, m_LightmapOffsetScales!, lightmapData.Length);
             LightmapSettings.lightmaps = combinedLightmaps;
         }
-
 
         private static void ApplyRendererInfo(Renderer[] renderers, Vector4[] lightmapOffsetScales, int lightmapIndexOffset)
         {

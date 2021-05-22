@@ -9,42 +9,42 @@ using UnityEngine;
 public class PrefabLightmapDataEditor : MonoBehaviour
 {
     [MenuItem("Assets/Bake Prefab Lightmaps")]
-    static void GenerateLightmapInfo()
+    public static void GenerateLightmapInfo()
     {
         if (Lightmapping.giWorkflowMode != Lightmapping.GIWorkflowMode.OnDemand)
         {
             Debug.LogError("ExtractLightmapData requires that you have baked you lightmaps and Auto mode is disabled.");
             return;
         }
+
         Lightmapping.Bake();
 
         PrefabLightmapData[] prefabs = FindObjectsOfType<PrefabLightmapData>();
 
-        foreach (var instance in prefabs)
+        foreach (PrefabLightmapData instance in prefabs)
         {
-            var gameObject = instance.gameObject;
-            var renderers = new List<Renderer>();
-            var lightmapOffsetScales = new List<Vector4>();
-            var lightmaps = new List<Texture2D>();
+            GameObject gameObject = instance.gameObject;
+            List<Renderer> renderers = new List<Renderer>();
+            List<Vector4> lightmapOffsetScales = new List<Vector4>();
+            List<Texture2D> lightmaps = new List<Texture2D>();
 
             GenerateLightmapInfo(gameObject, renderers, lightmapOffsetScales, lightmaps);
 
-            instance.renderers = renderers.ToArray();
-            instance.lightmapOffsetScales = lightmapOffsetScales.ToArray();
-            instance.lightmaps = lightmaps.ToArray();
+            // ReSharper disable InconsistentNaming
+            instance.m_Renderers = renderers.ToArray();
+            instance.m_LightmapOffsetScales = lightmapOffsetScales.ToArray();
+            instance.m_Lightmaps = lightmaps.ToArray();
+            // ReSharper restore InconsistentNaming
 
             var targetPrefab = PrefabUtility.GetCorrespondingObjectFromSource(gameObject);
             if (targetPrefab != null)
-            {
                 PrefabUtility.ReplacePrefab(gameObject, targetPrefab);
-            }
         }
     }
 
     static void GenerateLightmapInfo(GameObject root, List<Renderer> rendererList, List<Vector4> lightmapOffsetScaleList, List<Texture2D> lightmaps)
     {
-        var renderers = root.GetComponentsInChildren<MeshRenderer>();
-        foreach (MeshRenderer renderer in renderers)
+        foreach (MeshRenderer renderer in root.GetComponentsInChildren<MeshRenderer>())
         {
             if (renderer.lightmapIndex != -1)
             {

@@ -25,8 +25,8 @@ namespace CustomFloorPlugin
         public bool hideRotatingLasers;
         public bool hideTrackLights;
 
-        [SerializeField] internal string platHash = "";
-        [SerializeField] internal string fullPath = "";
+        [SerializeField] internal string platHash = string.Empty;
+        [SerializeField] internal string fullPath = string.Empty;
         [SerializeField] internal bool isDescriptor = true;
 
         private void Awake()
@@ -34,9 +34,6 @@ namespace CustomFloorPlugin
             gameObject.SetActive(false);
         }
 
-        public int CompareTo(CustomPlatform other)
-        {
-            return string.Compare(platName, other.platName, StringComparison.Ordinal);
-        }
+        public int CompareTo(CustomPlatform other) => string.Compare(platName, other.platName, StringComparison.Ordinal);
     }
 }

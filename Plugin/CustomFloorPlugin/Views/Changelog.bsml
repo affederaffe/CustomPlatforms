@@ -9,7 +9,7 @@
   </horizontal>
 
   <horizontal>
-    <button-with-icon icon="CustomFloorPlugin.Assets.heart.png" click-event="open-credits" hover-hint="Credits" pref-height="12" pref-width="12"/>
+    <button-with-icon icon="CustomFloorPlugin.Assets.Heart.png" click-event="open-credits" hover-hint="Credits" pref-height="12" pref-width="12"/>
   </horizontal>
 
   <modal id="credits-modal" show-event="open-credits" clickerino-offerino-closerino="true" move-to-center="true">

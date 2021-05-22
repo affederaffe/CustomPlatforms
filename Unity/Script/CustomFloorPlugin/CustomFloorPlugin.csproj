@@ -5,11 +5,14 @@
     <OutputType>Library</OutputType>
     <LangVersion>9</LangVersion>
     <Nullable>enable</Nullable>
-    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
     <RootNamespace>CustomFloorPlugin</RootNamespace>
     <LocalRefsDir Condition="Exists('..\Refs')">..\Refs</LocalRefsDir>
     <BeatSaberDir>$(LocalRefsDir)</BeatSaberDir>
     <AppOutputBase>$(MSBuildProjectDirectory)\</AppOutputBase>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+    <EnableNETAnalyzers>true</EnableNETAnalyzers>
+    <AnalysisLevel>latest</AnalysisLevel>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
@@ -30,8 +33,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="CustomFloorPlugin.csproj.user" />
-    <None Include="Directory.Build.props" Condition="Exists('Directory.Build.props')" />
     <None Include="Directory.Build.targets" Condition="Exists('Directory.Build.targets')" />
     <None Include="CustomFloorPlugin.csproj.user" Condition="Exists('CustomFloorPlugin.csproj.user')" />
   </ItemGroup>
@@ -60,4 +61,5 @@
      <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\Unity.TextMeshPro.dll</HintPath>
    </Reference>
   </ItemGroup>
+  
 </Project>

@@ -940,9 +940,9 @@ MonoBehaviour:
   m_Script: {fileID: -11171668, guid: ef0b7a4a35889bb49a4d2b880d5c9138, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  eventL: 2
-  eventR: 3
-  switchOverrideRandomValuesEvent: 0
+  eventL: 12
+  eventR: 13
+  switchOverrideRandomValuesEvent: 4
   transformL: {fileID: 298025384}
   transformR: {fileID: 1447169101}
   rotationVector: {x: 1, y: 0, z: 1}
@@ -1746,9 +1746,9 @@ MonoBehaviour:
   m_Script: {fileID: -11171668, guid: ef0b7a4a35889bb49a4d2b880d5c9138, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  eventL: 2
-  eventR: 3
-  switchOverrideRandomValuesEvent: 0
+  eventL: 12
+  eventR: 13
+  switchOverrideRandomValuesEvent: 4
   transformL: {fileID: 1154436099}
   transformR: {fileID: 875723803}
   rotationVector: {x: 1, y: 0, z: 1}
@@ -5055,13 +5055,13 @@ MonoBehaviour:
   m_Script: {fileID: -1513598488, guid: ef0b7a4a35889bb49a4d2b880d5c9138, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  onSlice:
+  OnSlice:
     m_PersistentCalls:
       m_Calls: []
-  onMiss:
+  OnMiss:
     m_PersistentCalls:
       m_Calls: []
-  onComboBreak:
+  OnComboBreak:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 185189137}
@@ -5108,52 +5108,96 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
-  multiplierUp:
+  MultiplierUp:
     m_PersistentCalls:
       m_Calls: []
-  saberStartColliding:
+  SaberStartColliding:
     m_PersistentCalls:
       m_Calls: []
-  saberStopColliding:
+  SaberStopColliding:
     m_PersistentCalls:
       m_Calls: []
-  onLevelStart:
+  OnLevelStart:
     m_PersistentCalls:
       m_Calls: []
-  onLevelFail:
+  OnLevelFail:
     m_PersistentCalls:
       m_Calls: []
-  onLevelFinish:
+  OnLevelFinish:
     m_PersistentCalls:
       m_Calls: []
-  onBlueLightOn:
+  OnBlueLightOn:
     m_PersistentCalls:
       m_Calls: []
-  onRedLightOn:
+  OnRedLightOn:
     m_PersistentCalls:
       m_Calls: []
-  onNewHighscore:
+  OnNewHighscore:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 185189137}
+        m_MethodName: SetActive
+        m_Mode: 6
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 1
+        m_CallState: 2
+      - m_Target: {fileID: 432148262}
+        m_MethodName: SetActive
+        m_Mode: 6
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 1
+        m_CallState: 2
+      - m_Target: {fileID: 1790141397}
+        m_MethodName: SetActive
+        m_Mode: 6
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 1
+        m_CallState: 2
+      - m_Target: {fileID: 1570082861}
+        m_MethodName: SetActive
+        m_Mode: 6
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 1
+        m_CallState: 2
+  OnComboChanged:
     m_PersistentCalls:
       m_Calls: []
-  onComboChanged:
+  OnSpecificSlice:
     m_PersistentCalls:
       m_Calls: []
-  onSpecificSlice:
+  OnScoreChanged:
     m_PersistentCalls:
       m_Calls: []
-  onScoreChanged:
+  OnGoodCutCountChanged:
     m_PersistentCalls:
       m_Calls: []
-  onGoodCutCountChanged:
+  OnBadCutCountChanged:
     m_PersistentCalls:
       m_Calls: []
-  onBadCutCountChangedEvent:
+  OnMissCountChanged:
     m_PersistentCalls:
       m_Calls: []
-  onMissCountChanged:
-    m_PersistentCalls:
-      m_Calls: []
-  onAllNotesCountChanged:
+  OnAllNotesCountChanged:
     m_PersistentCalls:
       m_Calls: []
 --- !u!114 &1331660974
@@ -5182,8 +5226,8 @@ MonoBehaviour:
   m_Script: {fileID: 143752110, guid: ef0b7a4a35889bb49a4d2b880d5c9138, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  comboTarget: 60
-  nthComboReached:
+  ComboTarget: 40
+  NthComboReached:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 1570082861}
@@ -5209,8 +5253,8 @@ MonoBehaviour:
   m_Script: {fileID: 143752110, guid: ef0b7a4a35889bb49a4d2b880d5c9138, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  comboTarget: 45
-  nthComboReached:
+  ComboTarget: 30
+  NthComboReached:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 1790141397}
@@ -5236,8 +5280,8 @@ MonoBehaviour:
   m_Script: {fileID: 143752110, guid: ef0b7a4a35889bb49a4d2b880d5c9138, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  comboTarget: 30
-  nthComboReached:
+  ComboTarget: 20
+  NthComboReached:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 432148262}
@@ -5263,8 +5307,8 @@ MonoBehaviour:
   m_Script: {fileID: 143752110, guid: ef0b7a4a35889bb49a4d2b880d5c9138, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  comboTarget: 15
-  nthComboReached:
+  ComboTarget: 10
+  NthComboReached:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 185189137}
@@ -5867,7 +5911,7 @@ GameObject:
   - component: {fileID: 1539300439}
   - component: {fileID: 1539300438}
   m_Layer: 0
-  m_Name: No-Mesh TubeLight
+  m_Name: Cube TubeLight (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -5964,7 +6008,7 @@ GameObject:
   - component: {fileID: 1562256342}
   - component: {fileID: 1562256341}
   m_Layer: 0
-  m_Name: No-Mesh TubeLight
+  m_Name: Cube TubeLight
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -6303,9 +6347,9 @@ MonoBehaviour:
   m_Script: {fileID: -11171668, guid: ef0b7a4a35889bb49a4d2b880d5c9138, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  eventL: 2
-  eventR: 3
-  switchOverrideRandomValuesEvent: 0
+  eventL: 12
+  eventR: 13
+  switchOverrideRandomValuesEvent: 4
   transformL: {fileID: 1852345831}
   transformR: {fileID: 543203270}
   rotationVector: {x: 1, y: 0, z: 1}
@@ -6861,9 +6905,9 @@ MonoBehaviour:
   m_Script: {fileID: -11171668, guid: ef0b7a4a35889bb49a4d2b880d5c9138, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  eventL: 2
-  eventR: 3
-  switchOverrideRandomValuesEvent: 0
+  eventL: 12
+  eventR: 13
+  switchOverrideRandomValuesEvent: 4
   transformL: {fileID: 771304787}
   transformR: {fileID: 1476705049}
   rotationVector: {x: 1, y: 0, z: 1}

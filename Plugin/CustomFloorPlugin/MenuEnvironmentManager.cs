@@ -64,8 +64,8 @@ namespace CustomFloorPlugin
             if (_config.ShowInMenu)
             {
                 int platformIndex = _config.ShufflePlatforms
-                    ? _platformSpawner.RandomPlatformIndex
-                    : _platformManager.GetIndexForType(PlatformType.Singleplayer);
+                    ? await _platformSpawner.GetRandomPlatformIndexAsync()
+                    : await _platformManager.GetIndexForTypeAsync(PlatformType.Singleplayer);
                 await _platformSpawner.ChangeToPlatformAsync(platformIndex);
             }
         }

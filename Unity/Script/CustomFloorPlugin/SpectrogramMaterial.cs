@@ -1,5 +1,4 @@
 using UnityEngine;
-using UnityEngine.Serialization;
 
 
 namespace CustomFloorPlugin
@@ -7,9 +6,11 @@ namespace CustomFloorPlugin
     [RequireComponent(typeof(Renderer))]
     public class SpectrogramMaterial : MonoBehaviour
     {
+        // ReSharper disable InconsistentNaming
         [Header("The Array property (uniform float arrayName[64])")]
-        [FormerlySerializedAs("PropertyName")] public string? propertyName;
+        public string? PropertyName;
         [Header("The global intensity (float valueName)")]
-        [FormerlySerializedAs("AveragePropertyName")] public string? averagePropertyName;
+        public string? AveragePropertyName;
+        // ReSharper restore InconsistentNaming
     }
 }

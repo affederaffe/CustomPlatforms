@@ -43,7 +43,6 @@ namespace CustomFloorPlugin
         private BasicSpectrogramData? _basicSpectrogramData;
 
         private Transform[]? _columnTransforms;
-        private bool _hasSpectrogramData;
 
         [Inject]
         public void Construct(MaterialSwapper materialSwapper, [InjectOptional] BasicSpectrogramData basicSpectrogramData)
@@ -57,9 +56,10 @@ namespace CustomFloorPlugin
             if (columnPrefab == null) return;
             container.Inject(this);
             await _materialSwapper!.ReplaceMaterials(columnPrefab);
-            columnPrefab.layer = 14;
-            _hasSpectrogramData = _basicSpectrogramData != null;
             _columnTransforms ??= CreateColumns();
+            UpdateColumnHeights(FallbackSamples);
+            enabled = _basicSpectrogramData != null;
+
             foreach (INotifyPlatformEnabled notifyEnable in GetComponentsInChildren<INotifyPlatformEnabled>(true))
             {
                 if ((Object)notifyEnable != this)
@@ -77,16 +77,23 @@ namespace CustomFloorPlugin
         }
 
         /// <summary>
-        /// Updates all columns heights.<br/>
+        /// Updates all columns heights with the processed samples
         /// [Unity calls this once per frame!]
         /// </summary>
         private void Update()
         {
-            IList<float> processedSamples = _hasSpectrogramData ? _basicSpectrogramData!.ProcessedSamples : FallbackSamples;
-            for (int i = 0; i < processedSamples.Count; i++)
+            UpdateColumnHeights(_basicSpectrogramData!.ProcessedSamples);
+        }
+
+        /// <summary>
+        /// Updates all columns heights
+        /// </summary>
+        private void UpdateColumnHeights(IList<float> samples)
+        {
+            for (int i = 0; i < samples.Count; i++)
             {
-                _columnTransforms![i].localScale = new Vector3(columnWidth, Mathf.Lerp(minHeight, maxHeight, processedSamples[i]), columnDepth);
-                _columnTransforms![i + 64].localScale = new Vector3(columnWidth, Mathf.Lerp(minHeight, maxHeight, processedSamples[i]), columnDepth);
+                _columnTransforms![i].localScale = new Vector3(columnWidth, Mathf.Lerp(minHeight, maxHeight, samples[i]), columnDepth);
+                _columnTransforms![i + 64].localScale = new Vector3(columnWidth, Mathf.Lerp(minHeight, maxHeight, samples[i]), columnDepth);
             }
         }
 
@@ -101,6 +108,7 @@ namespace CustomFloorPlugin
                 columnTransforms[i] = CreateColumn(separator * i);
                 columnTransforms[i + 64] = CreateColumn(-separator * (i + 1));
             }
+
             return columnTransforms;
         }
 
@@ -113,22 +121,26 @@ namespace CustomFloorPlugin
         {
             GameObject column = Instantiate(columnPrefab!, transform);
             column.transform.localPosition = pos;
-            column.transform.localScale = new Vector3(columnWidth, minHeight, columnDepth);
             return column.transform;
         }
 
         /// <summary>
         /// Spectrogram fallback data
         /// </summary>
-        private static IList<float> FallbackSamples => _fallbackSamples ??= CreateFallbackSamples();
-        private static float[]? _fallbackSamples;
-
-        private static float[] CreateFallbackSamples()
+        private static IList<float> FallbackSamples
         {
-            float[] samples = new float[64];
-            for (int i = 0; i < samples.Length; i++)
-                samples[i] = (Mathf.Sin(0.4f * i - 0.5f * Mathf.PI) + 1) / 2;
-            return samples;
+            get
+            {
+                if (_fallbackSamples == null)
+                {
+                    _fallbackSamples = new float[64];
+                    for (int i = 0; i < _fallbackSamples.Length; i++)
+                        _fallbackSamples[i] = (Mathf.Sin((0.4f * i) - (0.5f * Mathf.PI)) + 1) / 2;
+                }
+
+                return _fallbackSamples;
+            }
         }
+        private static float[]? _fallbackSamples;
     }
 }
