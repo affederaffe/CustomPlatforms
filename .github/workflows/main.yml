@@ -21,7 +21,7 @@ jobs:
       uses: actions/setup-dotnet@v1.7.2
       with:
         dotnet-version: 3.1.x
-    - name: GetStrippedRefs
+    - name: Get Stripped Refs
       env:
         FILES_URL: ${{ secrets.BSFILES_URL }}
       run: wget --no-check-certificate "$FILES_URL" -q -O bsfiles.zip
@@ -32,13 +32,6 @@ jobs:
       env: 
         FrameworkPathOverride: /usr/lib/mono/4.8-api
       run: dotnet build ./Plugin/CustomFloorPlugin.sln --configuration Release
-    - name: Echo Filename
-      run: echo "$BUILDTEXT ($ASSEMBLYNAME)"
-      env:
-        BUILDTEXT: Filename=${{ steps.Build.outputs.filename }}
-        ASSEMBLYNAME: AssemblyName=${{ steps.Build.outputs.assemblyname }}
-    - name: Unity Project
-      run: zip -r UnityProject.zip ./Unity/CustomPlatforms
     - name: Upload Plugin Artifact
       uses: actions/upload-artifact@v2
       with:
@@ -48,4 +41,6 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: Unity Project
-        path: UnityProject.zip
+        path: |
+          ./Unity/
+          !./Unity/Script
