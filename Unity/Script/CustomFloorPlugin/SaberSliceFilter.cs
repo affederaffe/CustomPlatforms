@@ -1,6 +1,5 @@
 ﻿using UnityEngine;
 using UnityEngine.Events;
-using UnityEngine.Serialization;
 
 
 namespace CustomFloorPlugin
@@ -14,6 +13,7 @@ namespace CustomFloorPlugin
         }
 
         public SaberType saberType;
-        [FormerlySerializedAs("SaberSlice")] public UnityEvent? saberSlice;
+        // ReSharper disable once InconsistentNaming
+        public UnityEvent? SaberSlice;
     }
 }

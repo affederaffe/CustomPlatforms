@@ -15,9 +15,7 @@ namespace CustomFloorPlugin
     /// </summary>
     public class MaterialSwapper : IInitializable
     {
-        internal readonly Task<(Material DarkEnvSimpleMaterial,
-                                Material TransparentGlowMaterial,
-                                Material OpaqueGlowMaterial)> MaterialsLoadingTask;
+        internal Task<(Material DarkEnvSimpleMaterial, Material TransparentGlowMaterial, Material OpaqueGlowMaterial)> MaterialsLoadingTask { get; }
 
         private readonly TaskCompletionSource<(Material, Material, Material)> _taskSource;
 

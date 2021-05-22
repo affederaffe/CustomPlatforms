@@ -34,7 +34,8 @@ namespace CustomFloorPlugin
                         GameEnergyCounter gameEnergyCounter,
                         GameplayCoreSceneSetupData gameplayCoreSceneSetupData,
                         ObstacleSaberSparkleEffectManager obstacleSaberSparkleEffectManager,
-                        ScoreController scoreController, PlayerDataModel playerDataModel,
+                        ScoreController scoreController,
+                        PlayerDataModel playerDataModel,
                         PrepareLevelCompletionResults prepareLevelCompletionResults,
                         IBeatmapObjectCallbackController beatmapObjectCallbackController,
                         IDifficultyBeatmap difficultyBeatmap)
@@ -135,6 +136,7 @@ namespace CustomFloorPlugin
             {
                 BadCutCountDidChangeEvent?.Invoke(_badCutCount++);
             }
+
             if (Mathf.Approximately(noteController.noteData.time, _lastNoteTime))
             {
                 _lastNoteTime = 0f;

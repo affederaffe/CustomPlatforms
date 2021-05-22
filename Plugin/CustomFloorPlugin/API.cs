@@ -134,7 +134,8 @@ namespace CustomFloorPlugin
             {
                 List<CustomPlatform> allPlatforms = await _platformManager.PlatformsLoadingTask;
                 _platformListsView.RemoveCellForPlatform(platform);
-                if (_platformManager.ActivePlatform == platform) await _platformSpawner.ChangeToPlatformAsync(0);
+                if (_platformManager.ActivePlatform == platform)
+                    await _platformSpawner.ChangeToPlatformAsync(0);
                 _platformManager.PlatformFilePaths.Remove(platform.fullPath);
                 allPlatforms.Remove(platform);
                 UnityEngine.Object.Destroy(platform.gameObject);

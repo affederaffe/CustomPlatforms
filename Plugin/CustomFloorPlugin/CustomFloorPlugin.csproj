@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>net48</TargetFramework>
     <OutputType>Library</OutputType>
-    <LangVersion>9</LangVersion>
+    <LangVersion>latest</LangVersion>
     <Nullable>enable</Nullable>
     <RootNamespace>CustomFloorPlugin</RootNamespace>
     <OutputName>CustomPlatforms</OutputName>

@@ -89,11 +89,9 @@ namespace CustomFloorPlugin
                     if (IsMultiplayer) return;
                     _assetLoader.ToggleHeart(_config.ShowHeart);
                     if (_config.ShowInMenu)
-                    {
                         platformIndex = _config.ShufflePlatforms
                             ? await GetRandomPlatformIndexAsync()
                             : await _platformManager.GetIndexForTypeAsync(PlatformType.Singleplayer);
-                    }
                     break;
                 case StandardLevelScenesTransitionSetupDataSO:
                 case MissionLevelScenesTransitionSetupDataSO:
@@ -171,6 +169,7 @@ namespace CustomFloorPlugin
             if (_platformManager.ActivePlatform.isDescriptor)
             {
                 CustomPlatform? platform = await _platformManager.CreatePlatformAsync(_platformManager.ActivePlatform.fullPath);
+                if (platform != null && _platformManager.ActivePlatform.fullPath != platform.fullPath) return;
                 if (platform == null)
                 {
                     await ChangeToPlatformAsync(0);

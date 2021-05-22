@@ -1,6 +1,5 @@
 ﻿using UnityEngine;
 using UnityEngine.Events;
-using UnityEngine.Serialization;
 
 using Zenject;
 
@@ -9,8 +8,10 @@ namespace CustomFloorPlugin
 {
     public class ComboReachedEvent : MonoBehaviour, INotifyPlatformEnabled, INotifyPlatformDisabled
     {
-        [FormerlySerializedAs("ComboTarget")] public int comboTarget = 50;
-        [FormerlySerializedAs("NthComboReached")] public UnityEvent? nthComboReached;
+        // ReSharper disable InconsistentNaming
+        public int ComboTarget = 50;
+        public UnityEvent? NthComboReached;
+        // ReSharper restore InconsistentNaming
 
         private BSEvents? _events;
 
@@ -35,8 +36,8 @@ namespace CustomFloorPlugin
 
         private void OnComboReached(int combo)
         {
-            if (combo == comboTarget)
-                nthComboReached!.Invoke();
+            if (combo == ComboTarget)
+                NthComboReached!.Invoke();
         }
     }
 }

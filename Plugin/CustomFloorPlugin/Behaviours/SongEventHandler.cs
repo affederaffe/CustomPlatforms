@@ -1,6 +1,5 @@
 ﻿using UnityEngine;
 using UnityEngine.Events;
-using UnityEngine.Serialization;
 
 using Zenject;
 
@@ -12,7 +11,8 @@ namespace CustomFloorPlugin
         public SongEventType eventType;
         public int value;
         public bool anyValue;
-        [FormerlySerializedAs("OnTrigger")] public UnityEvent? onTrigger;
+        // ReSharper disable once InconsistentNaming
+        public UnityEvent? OnTrigger;
 
         private BSEvents? _events;
 
@@ -25,18 +25,18 @@ namespace CustomFloorPlugin
         public void PlatformEnabled(DiContainer container)
         {
             container.Inject(this);
-            if (_events == null) return;
-            _events.BeatmapEventDidTriggerEvent += OnSongEvent;
+            if (_events != null)
+                _events.BeatmapEventDidTriggerEvent += OnSongEvent;
         }
 
         public void PlatformDisabled()
         {
-            if (_events == null) return;
-            _events.BeatmapEventDidTriggerEvent -= OnSongEvent;
+            if (_events != null)
+                _events.BeatmapEventDidTriggerEvent -= OnSongEvent;
         }
 
         /// <summary>
-        /// Gatekeeper function for <see cref="onTrigger"/><br/>
+        /// Gatekeeper function for <see cref="OnTrigger"/><br/>
         /// (I refuse calling that a good implementation)<br/>
         /// (Who the fuck did this???)<br/>
         /// (Use a <see cref="System.Collections.Generic.Dictionary{TKey, TValue}"/> instead)
@@ -45,10 +45,8 @@ namespace CustomFloorPlugin
         private void OnSongEvent(BeatmapEventData songEventData)
         {
             if (songEventData.type == (BeatmapEventType)eventType)
-            {
                 if (songEventData.value == value || anyValue)
-                    onTrigger!.Invoke();
-            }
+                    OnTrigger!.Invoke();
         }
     }
 }

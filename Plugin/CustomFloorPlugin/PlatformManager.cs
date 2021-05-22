@@ -94,13 +94,11 @@ namespace CustomFloorPlugin
             platforms.Add(defaultPlatform);
 
             if (File.Exists(_cacheFilePath))
-            {
                 foreach (CustomPlatform platform in EnumeratePlatformDescriptorsFromFile())
                 {
                     platforms.Add(platform);
                     bundlePaths.Remove(platform.fullPath);
                 }
-            }
 
             // Load all remaining platforms, or all if no cache file is found
             foreach (string path in bundlePaths)

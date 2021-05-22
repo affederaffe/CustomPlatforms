@@ -56,13 +56,12 @@ namespace CustomFloorPlugin
                 SetChildrenToLayer(child.gameObject, layer);
         }
 
-        private static readonly Camera mainCamera = Camera.main!;
-
         /// <summary>
         /// Sets Main-<see cref="Camera"/>s <see cref="Camera.cullingMask"/>
         /// </summary>
         private static void SetCameraMasks()
         {
+            Camera mainCamera = Camera.main!;
             int cullingMask = mainCamera.cullingMask;
             cullingMask &= ~(1 << kOnlyInThirdPerson);
             cullingMask |= 1 << kOnlyInHeadset;

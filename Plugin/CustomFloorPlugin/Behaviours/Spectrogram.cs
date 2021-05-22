@@ -135,7 +135,7 @@ namespace CustomFloorPlugin
                 {
                     _fallbackSamples = new float[64];
                     for (int i = 0; i < _fallbackSamples.Length; i++)
-                        _fallbackSamples[i] = (Mathf.Sin(0.4f * i - 0.5f * Mathf.PI) + 1) / 2;
+                        _fallbackSamples[i] = (Mathf.Sin((0.4f * i) - (0.5f * Mathf.PI)) + 1) / 2;
                 }
 
                 return _fallbackSamples;

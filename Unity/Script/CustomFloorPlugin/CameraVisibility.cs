@@ -10,7 +10,7 @@ namespace CustomFloorPlugin
             Default,
             HeadsetOnly,
             ThirdPersonOnly
-        };
+        }
 
         public VisibilityMode visibilityMode;
         public bool affectChildren;

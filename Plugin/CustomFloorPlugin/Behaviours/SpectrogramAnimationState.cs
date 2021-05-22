@@ -22,7 +22,6 @@ namespace CustomFloorPlugin
         public void Construct([InjectOptional] BasicSpectrogramData basicSpectrogramData)
         {
             _basicSpectrogramData = basicSpectrogramData;
-            _animation = GetComponent<Animation>() ?? gameObject.AddComponent<Animation>();
         }
 
         public void PlatformEnabled(DiContainer container)

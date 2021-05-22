@@ -1,6 +1,5 @@
 ﻿using UnityEngine;
 using UnityEngine.Events;
-using UnityEngine.Serialization;
 
 using Zenject;
 
@@ -9,8 +8,10 @@ namespace CustomFloorPlugin
 {
     public class EveryNthComboFilter : MonoBehaviour, INotifyPlatformEnabled, INotifyPlatformDisabled
     {
-        [FormerlySerializedAs("ComboStep")] public int comboStep = 50;
-        [FormerlySerializedAs("NthComboReached")] public UnityEvent? nthComboReached;
+        // ReSharper disable InconsistentNaming
+        public int ComboStep = 50;
+        public UnityEvent? NthComboReached;
+        // ReSharper restore InconsistentNaming
 
         private BSEvents? _events;
 
@@ -35,8 +36,8 @@ namespace CustomFloorPlugin
 
         private void OnComboStep(int combo)
         {
-            if (combo % comboStep == 0 && combo != 0)
-                nthComboReached!.Invoke();
+            if (combo % ComboStep == 0 && combo != 0)
+                NthComboReached!.Invoke();
         }
     }
 }

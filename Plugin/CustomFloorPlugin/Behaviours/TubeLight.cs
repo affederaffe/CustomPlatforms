@@ -77,7 +77,7 @@ namespace CustomFloorPlugin
                         new(-width, (y-length)/2, width),
                     };
 
-                    mesh.triangles = triangles;
+                    mesh.triangles = Triangles;
                 }
 
                 (_, _, Material opaqueGlowMaterial) = await _materialSwapper!.MaterialsLoadingTask;
@@ -96,6 +96,7 @@ namespace CustomFloorPlugin
             }
 
             ((LightWithIdMonoBehaviour)_instancedMaterialLightWithId).SetField("_lightManager", _lightWithIdManager);
+
             if (activeSelf)
                 gameObject.SetActive(true);
         }
@@ -105,7 +106,7 @@ namespace CustomFloorPlugin
             _instancedMaterialLightWithId!.ColorWasSet(color);
         }
 
-        private static readonly int[] triangles = {
+        private static readonly int[] Triangles = {
             0, 2, 1, //face front
 			0, 3, 2,
             2, 3, 4, //face top

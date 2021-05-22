@@ -118,11 +118,9 @@ namespace CustomFloorPlugin.UI
             base.DidDeactivate(removedFromHierarchy, screenSystemDisabling);
             int platformIndex = 0;
             if (_config!.ShowInMenu)
-            {
                 platformIndex = _config.ShufflePlatforms
                     ? await _platformSpawner!.GetRandomPlatformIndexAsync()
                     : await _platformManager!.GetIndexForTypeAsync(PlatformType.Singleplayer);
-            }
 
             await _platformSpawner!.ChangeToPlatformAsync(platformIndex);
         }

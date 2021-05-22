@@ -45,8 +45,8 @@ namespace CustomFloorPlugin
         {
             _container = container;
             _materialSwapper = materialSwapper;
-            _heartLoadingTask = CreateHeart();
-            _playersPlaceLoadingTask = CreatePlayersPlace();
+            _heartLoadingTask = CreateHeartAsync();
+            _playersPlaceLoadingTask = CreatePlayersPlaceAsync();
             using Stream defaultCoverStream = GetEmbeddedResource("CustomFloorPlugin.Assets.LvlInsaneCover.png");
             DefaultPlatformCover = defaultCoverStream.ReadTexture2D().ToSprite();
             using Stream fallbackCoverStream = GetEmbeddedResource("CustomFloorPlugin.Assets.FeetIcon.png");
@@ -89,7 +89,7 @@ namespace CustomFloorPlugin
             }
         }
 
-        private async Task<GameObject> CreateHeart()
+        private async Task<GameObject> CreateHeartAsync()
         {
             (Vector3[] vertices, int[] triangles) = await Task.Run(() => ParseMesh("CustomFloorPlugin.Assets.Heart.mesh"));
             Mesh mesh = new()
@@ -112,7 +112,7 @@ namespace CustomFloorPlugin
             return heart;
         }
 
-        private async Task<GameObject> CreatePlayersPlace()
+        private async Task<GameObject> CreatePlayersPlaceAsync()
         {
             (Vector3[] vertices, int[] triangles) = await Task.Run(() => ParseMesh("CustomFloorPlugin.Assets.Playersplace.mesh"));
             Mesh mesh = new()
@@ -153,12 +153,12 @@ namespace CustomFloorPlugin
             return playersPlaceCube;
         }
 
+        private static Assembly Assembly => _assembly ??= Assembly.GetExecutingAssembly();
+        private static Assembly? _assembly;
+
         private static Stream GetEmbeddedResource(string name) =>
             Assembly.GetManifestResourceStream(name) ??
             throw new InvalidOperationException($"No embedded resource found: {name}");
-
-        private static Assembly Assembly => _assembly ??= Assembly.GetExecutingAssembly();
-        private static Assembly? _assembly;
 
         private static (Vector3[] vertices, int[] triangles) ParseMesh(string resourcePath)
         {
@@ -179,8 +179,8 @@ namespace CustomFloorPlugin
             foreach (string[] strVector3 in strVector3S)
             {
                 vertices[i++] = new Vector3(float.Parse(strVector3[0], NumberFormatInfo.InvariantInfo),
-                    float.Parse(strVector3[1], NumberFormatInfo.InvariantInfo),
-                    float.Parse(strVector3[2], NumberFormatInfo.InvariantInfo));
+                                            float.Parse(strVector3[1], NumberFormatInfo.InvariantInfo),
+                                            float.Parse(strVector3[2], NumberFormatInfo.InvariantInfo));
             }
 
             i = 0;

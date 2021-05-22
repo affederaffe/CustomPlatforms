@@ -116,7 +116,8 @@ namespace CustomFloorPlugin
         {
             root = null;
             _sceneName = _gameScenesManager.GetCurrentlyLoadedSceneNames().Last(x => x.EndsWith("Environment", System.StringComparison.Ordinal));
-            if (_sceneName == "MultiplayerEnvironment") _sceneName = "GameCore";
+            if (_sceneName == "MultiplayerEnvironment")
+                _sceneName = "GameCore";
             Scene scene = SceneManager.GetSceneByName(_sceneName);
             if (!scene.IsValid()) return false;
             root = scene.GetRootGameObjects().First(x => x.name.EndsWith("Environment", System.StringComparison.Ordinal) || x.name.EndsWith("LocalActivePlayerController(Clone)", System.StringComparison.Ordinal));
@@ -406,7 +407,9 @@ namespace CustomFloorPlugin
 
                     // Only hide the other player's construction when in duel layout
                     if (FindAddGameObject("IsActiveObjects/CenterRings", _highway))
+                    {
                         FindAddGameObject("IsActiveObjects/PlatformEnd", _highway);
+                    }
                     else
                     {
                         FindAddGameObject("Construction", _highway);
