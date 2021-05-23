@@ -53,8 +53,8 @@ namespace CustomFloorPlugin
 
         public void PlatformDisabled()
         {
-            if (_lightPairRotationEventEffect != null)
-                _lightPairRotationEventEffect.enabled = false;
+            if (_lightPairRotationEventEffect == null) return;
+            _lightPairRotationEventEffect.enabled = false;
         }
     }
 }

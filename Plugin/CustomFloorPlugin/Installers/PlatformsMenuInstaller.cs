@@ -11,7 +11,7 @@ namespace CustomFloorPlugin.Installers
     {
         public override void InstallBindings()
         {
-            Container.Bind<PlatformListsView>().FromNewComponentAsViewController().AsSingle();
+            Container.BindInterfacesAndSelfTo<PlatformListsView>().FromNewComponentAsViewController().AsSingle();
             Container.Bind<ChangelogView>().FromNewComponentAsViewController().AsSingle();
             Container.Bind<SettingsView>().FromNewComponentAsViewController().AsSingle();
             Container.Bind<PlatformsFlowCoordinator>().FromNewComponentOnNewGameObject().AsSingle();

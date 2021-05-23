@@ -23,7 +23,10 @@ namespace CustomFloorPlugin.UI
         /// </summary>
         [UIValue("changelog-text")]
         public static string Changelog =>
-        @"  <size=150%><color=#888888>Version 6.1.3</color></size>
+        @"  <size=150%><color=#888888>Version 6.1.4</color></size>
+        - UI enhancements
+
+  <size=150%><color=#888888>Version 6.1.3</color></size>
         - Updated for 1.15.0
         - Reduced startup times
         - Added Mirrors

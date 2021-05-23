@@ -55,8 +55,7 @@ namespace CustomFloorPlugin
         {
             container.Inject(this);
             bool activeSelf = gameObject.activeSelf;
-            if (activeSelf)
-                gameObject.SetActive(false);
+            if (activeSelf) gameObject.SetActive(false);
 
             if (_instancedMaterialLightWithId == null)
             {
@@ -95,9 +94,7 @@ namespace CustomFloorPlugin
             }
 
             ((LightWithIdMonoBehaviour)_instancedMaterialLightWithId).SetField("_lightManager", _lightWithIdManager);
-
-            if (activeSelf)
-                gameObject.SetActive(true);
+            if (activeSelf) gameObject.SetActive(true);
         }
 
         public void PlatformDisabled()

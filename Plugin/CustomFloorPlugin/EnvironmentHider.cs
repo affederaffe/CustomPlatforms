@@ -55,13 +55,13 @@ namespace CustomFloorPlugin
         /// <summary>
         /// Hide world objects as required by the active platform
         /// </summary>
-        internal async void HideObjectsForPlatform()
+        internal void HideObjectsForPlatform()
         {
             if (TryGetEnvironmentRoot(out _root))
             {
                 FindEnvironment();
-                SetCollectionHidden(_menuEnvironment, await _platformManager.GetIndexForTypeAsync(PlatformType.Active) != 0);
-                SetCollectionHidden(_playersPlace, _platformManager.ActivePlatform!.hideDefaultPlatform);
+                SetCollectionHidden(_menuEnvironment, _platformManager.GetIndexForType(PlatformType.Active) != 0);
+                SetCollectionHidden(_playersPlace, _platformManager.ActivePlatform.hideDefaultPlatform);
                 SetCollectionHidden(_feet, _platformManager.ActivePlatform.hideDefaultPlatform && !_config.AlwaysShowFeet);
                 SetCollectionHidden(_smallRings, _platformManager.ActivePlatform.hideSmallRings);
                 SetCollectionHidden(_bigRings, _platformManager.ActivePlatform.hideBigRings);
@@ -100,13 +100,13 @@ namespace CustomFloorPlugin
         /// <summary>
         /// (De-)Activates the PlayersPlace replacement as well as preparing for the next platform
         /// </summary>
-        private async void CleanupEnvironment()
+        private void CleanupEnvironment()
         {
             _trackLaneRings = null;
             _root = null;
-            _assetLoader.TogglePlayersPlace(!_platformManager.ActivePlatform!.hideDefaultPlatform &&
+            _assetLoader.TogglePlayersPlace(!_platformManager.ActivePlatform.hideDefaultPlatform &&
                                             _sceneName == "MenuEnvironment" &&
-                                            await _platformManager.GetIndexForTypeAsync(PlatformType.Active) != 0);
+                                            _platformManager.GetIndexForType(PlatformType.Active) != 0);
         }
 
         /// <summary>
@@ -116,8 +116,7 @@ namespace CustomFloorPlugin
         {
             root = null;
             _sceneName = _gameScenesManager.GetCurrentlyLoadedSceneNames().Last(x => x.EndsWith("Environment", System.StringComparison.Ordinal));
-            if (_sceneName == "MultiplayerEnvironment")
-                _sceneName = "GameCore";
+            if (_sceneName == "MultiplayerEnvironment") _sceneName = "GameCore";
             Scene scene = SceneManager.GetSceneByName(_sceneName);
             if (!scene.IsValid()) return false;
             root = scene.GetRootGameObjects().First(x => x.name.EndsWith("Environment", System.StringComparison.Ordinal) || x.name.EndsWith("LocalActivePlayerController(Clone)", System.StringComparison.Ordinal));

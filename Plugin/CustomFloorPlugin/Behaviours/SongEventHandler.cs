@@ -25,14 +25,14 @@ namespace CustomFloorPlugin
         public void PlatformEnabled(DiContainer container)
         {
             container.Inject(this);
-            if (_events != null)
-                _events.BeatmapEventDidTriggerEvent += OnSongEvent;
+            if (_events == null) return;
+            _events.BeatmapEventDidTriggerEvent += OnSongEvent;
         }
 
         public void PlatformDisabled()
         {
-            if (_events != null)
-                _events.BeatmapEventDidTriggerEvent -= OnSongEvent;
+            if (_events == null) return;
+            _events.BeatmapEventDidTriggerEvent -= OnSongEvent;
         }
 
         /// <summary>
@@ -44,9 +44,8 @@ namespace CustomFloorPlugin
         /// <param name="songEventData">Event to evaluate</param>
         private void OnSongEvent(BeatmapEventData songEventData)
         {
-            if (songEventData.type == (BeatmapEventType)eventType)
-                if (songEventData.value == value || anyValue)
-                    OnTrigger!.Invoke();
+            if (songEventData.type == (BeatmapEventType)eventType && (songEventData.value == value || anyValue))
+                OnTrigger!.Invoke();
         }
     }
 }

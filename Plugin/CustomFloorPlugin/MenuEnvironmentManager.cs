@@ -47,26 +47,26 @@ namespace CustomFloorPlugin
         /// Deactivates the heart and changes to the default platform when connecting to a lobby
         /// because using a platform there looks terrible
         /// </summary>
-        private async void OnConnected()
+        private void OnConnected()
         {
             _platformSpawner.IsMultiplayer = true;
             _assetLoader.ToggleHeart(false);
-            await _platformSpawner.ChangeToPlatformAsync(0);
+            _ = _platformSpawner.ChangeToPlatformAsync(0);
         }
 
         /// <summary>
         /// Reactivates platform and heart if needed
         /// </summary>
-        private async void OnDisconnected(DisconnectedReason reason)
+        private void OnDisconnected(DisconnectedReason reason)
         {
             _platformSpawner.IsMultiplayer = false;
             _assetLoader.ToggleHeart(_config.ShowHeart);
             if (_config.ShowInMenu)
             {
-                int platformIndex = _config.ShufflePlatforms
-                    ? await _platformSpawner.GetRandomPlatformIndexAsync()
-                    : await _platformManager.GetIndexForTypeAsync(PlatformType.Singleplayer);
-                await _platformSpawner.ChangeToPlatformAsync(platformIndex);
+                int index = _config.ShufflePlatforms
+                    ? _platformSpawner.RandomPlatformIndex
+                    : _platformManager.GetIndexForType(PlatformType.Singleplayer);
+                _ = _platformSpawner.ChangeToPlatformAsync(index);
             }
         }
     }

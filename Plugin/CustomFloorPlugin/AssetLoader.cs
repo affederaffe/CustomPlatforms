@@ -5,7 +5,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 
 using CustomFloorPlugin.Helpers;
-
+using IPA.Utilities;
 using UnityEngine;
 
 using Zenject;
@@ -32,6 +32,11 @@ namespace CustomFloorPlugin
         internal Sprite FallbackCover { get; }
 
         /// <summary>
+        /// Multiplayer light effects
+        /// </summary>
+        internal LightEffects MultiplayerLightEffects { get; }
+
+        /// <summary>
         /// The old heart, to remind everyone that this plugin is some legacy garbage
         /// </summary>
         private readonly Task<GameObject> _heartLoadingTask;
@@ -51,6 +56,8 @@ namespace CustomFloorPlugin
             DefaultPlatformCover = defaultCoverStream.ReadTexture2D().ToSprite();
             using Stream fallbackCoverStream = GetEmbeddedResource("CustomFloorPlugin.Assets.FeetIcon.png");
             FallbackCover = fallbackCoverStream.ReadTexture2D().ToSprite();
+            MultiplayerLightEffects = new GameObject("LightEffects").AddComponent<LightEffects>();
+            MultiplayerLightEffects.gameObject.SetActive(false);
         }
 
         /// <summary>
@@ -59,7 +66,7 @@ namespace CustomFloorPlugin
         /// <param name="value">The desired state</param>
         internal async void ToggleHeart(bool value)
         {
-            GameObject heart = await _heartLoadingTask!;
+            GameObject heart = await _heartLoadingTask;
             if (value)
             {
                 heart.SetActive(true);
@@ -77,7 +84,7 @@ namespace CustomFloorPlugin
         /// <param name="value">The desired state</param>
         internal async void TogglePlayersPlace(bool value)
         {
-            GameObject playersPlace = await _playersPlaceLoadingTask!;
+            GameObject playersPlace = await _playersPlaceLoadingTask;
             if (value)
             {
                 playersPlace.SetActive(true);
@@ -177,11 +184,7 @@ namespace CustomFloorPlugin
             i = 0;
             Vector3[] vertices = new Vector3[strVector3S.Length];
             foreach (string[] strVector3 in strVector3S)
-            {
-                vertices[i++] = new Vector3(float.Parse(strVector3[0], NumberFormatInfo.InvariantInfo),
-                                            float.Parse(strVector3[1], NumberFormatInfo.InvariantInfo),
-                                            float.Parse(strVector3[2], NumberFormatInfo.InvariantInfo));
-            }
+                vertices[i++] = new Vector3(float.Parse(strVector3[0], NumberFormatInfo.InvariantInfo), float.Parse(strVector3[1], NumberFormatInfo.InvariantInfo), float.Parse(strVector3[2], NumberFormatInfo.InvariantInfo));
 
             i = 0;
             int[] triangles = new int[dimension2[1].Length];
@@ -189,6 +192,97 @@ namespace CustomFloorPlugin
                 triangles[i++] = int.Parse(strInt, NumberFormatInfo.InvariantInfo);
 
             return (vertices, triangles);
+        }
+
+        /// <summary>
+        /// Replacement for the missing light effects in multiplayer games
+        /// </summary>
+        internal class LightEffects : MonoBehaviour, INotifyPlatformEnabled, INotifyPlatformDisabled
+        {
+            private ColorScheme? _colorScheme;
+
+            private LightSwitchEventEffect[]? _lightSwitchEventEffects;
+
+            private readonly SimpleColorSO _simpleLightColor0 = ScriptableObject.CreateInstance<SimpleColorSO>();
+            private readonly SimpleColorSO _simpleLightColor1 = ScriptableObject.CreateInstance<SimpleColorSO>();
+            private readonly SimpleColorSO _simpleHighlightColor0 = ScriptableObject.CreateInstance<SimpleColorSO>();
+            private readonly SimpleColorSO _simpleHighlightColor1 = ScriptableObject.CreateInstance<SimpleColorSO>();
+            private readonly SimpleColorSO _simpleLightColor0Boost = ScriptableObject.CreateInstance<SimpleColorSO>();
+            private readonly SimpleColorSO _simpleLightColor1Boost = ScriptableObject.CreateInstance<SimpleColorSO>();
+            private readonly SimpleColorSO _simpleHighlightColor0Boost = ScriptableObject.CreateInstance<SimpleColorSO>();
+            private readonly SimpleColorSO _simpleHighlightColor1Boost = ScriptableObject.CreateInstance<SimpleColorSO>();
+
+            [Inject]
+            public void Construct([InjectOptional] ColorScheme colorScheme)
+            {
+                _colorScheme = colorScheme;
+            }
+
+            public void PlatformEnabled(DiContainer container)
+            {
+                container.Inject(this);
+                if (_colorScheme == null) return;
+
+                if (_lightSwitchEventEffects == null)
+                {
+                    Color normalColor = new(1f, 1f, 1f, 0.7490196f);
+                    Color highlightColor = Color.white;
+                    Color boostColor = new(1f, 1f, 1f, 0.8f);
+
+                    _lightSwitchEventEffects = new LightSwitchEventEffect[5];
+                    for (int i = 0; i < _lightSwitchEventEffects.Length; i++)
+                    {
+                        _lightSwitchEventEffects[i] = container.InstantiateComponent<LightSwitchEventEffect>(gameObject);
+                        _lightSwitchEventEffects[i].SetField("_lightsID", i + 1);
+                        _lightSwitchEventEffects[i].SetField("_event", (BeatmapEventType)i);
+                        _lightSwitchEventEffects[i].SetField("_colorBoostEvent", BeatmapEventType.Event5);
+                        _lightSwitchEventEffects[i].SetField("_lightColor0", (ColorSO)CreateMultipliedColorSO(_simpleLightColor0, normalColor));
+                        _lightSwitchEventEffects[i].SetField("_lightColor1", (ColorSO)CreateMultipliedColorSO(_simpleLightColor1, normalColor));
+                        _lightSwitchEventEffects[i].SetField("_highlightColor0", (ColorSO)CreateMultipliedColorSO(_simpleHighlightColor0, highlightColor));
+                        _lightSwitchEventEffects[i].SetField("_highlightColor1", (ColorSO)CreateMultipliedColorSO(_simpleHighlightColor1, highlightColor));
+                        _lightSwitchEventEffects[i].SetField("_lightColor0Boost", (ColorSO)CreateMultipliedColorSO(_simpleLightColor0Boost, boostColor));
+                        _lightSwitchEventEffects[i].SetField("_lightColor1Boost", (ColorSO)CreateMultipliedColorSO(_simpleLightColor1Boost, boostColor));
+                        _lightSwitchEventEffects[i].SetField("_highlightColor0Boost", (ColorSO)CreateMultipliedColorSO(_simpleHighlightColor0Boost, highlightColor));
+                        _lightSwitchEventEffects[i].SetField("_highlightColor1Boost", (ColorSO)CreateMultipliedColorSO(_simpleHighlightColor1Boost, highlightColor));
+                    }
+
+                    gameObject.SetActive(true);
+                }
+                else
+                {
+                    foreach (LightSwitchEventEffect lse in _lightSwitchEventEffects)
+                    {
+                        container.Inject(lse);
+                        lse.SetField("_initialized", false);
+                        gameObject.SetActive(true);
+                        lse.Start();
+                    }
+                }
+
+                _simpleLightColor0.SetColor(_colorScheme.environmentColor0);
+                _simpleLightColor1.SetColor(_colorScheme.environmentColor1);
+                _simpleHighlightColor0.SetColor(_colorScheme.environmentColor0);
+                _simpleHighlightColor1.SetColor(_colorScheme.environmentColor1);
+                _simpleLightColor0Boost.SetColor(_colorScheme.environmentColor0Boost);
+                _simpleLightColor1Boost.SetColor(_colorScheme.environmentColor1Boost);
+                _simpleHighlightColor0Boost.SetColor(_colorScheme.environmentColor0Boost);
+                _simpleHighlightColor1Boost.SetColor(_colorScheme.environmentColor1Boost);
+            }
+
+            public void PlatformDisabled()
+            {
+                gameObject.SetActive(false);
+                foreach (LightSwitchEventEffect lse in _lightSwitchEventEffects!)
+                    lse.OnDestroy();
+            }
+
+            private static MultipliedColorSO CreateMultipliedColorSO(SimpleColorSO simpleColorSO, Color color)
+            {
+                MultipliedColorSO multipliedColorSO = ScriptableObject.CreateInstance<MultipliedColorSO>();
+                multipliedColorSO.SetField("_baseColor", simpleColorSO);
+                multipliedColorSO.SetField("_multiplierColor", color);
+                return multipliedColorSO;
+            }
         }
     }
 }

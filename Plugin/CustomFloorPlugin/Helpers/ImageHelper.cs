@@ -20,12 +20,6 @@ namespace CustomFloorPlugin.Helpers
             return BytesToTexture2D(bytes);
         }
 
-        internal static Sprite ToSprite(this Texture2D texture2D)
-        {
-            Sprite sprite = Sprite.Create(texture2D, new Rect(0, 0, texture2D.width, texture2D.height), Vector2.zero);
-            return sprite;
-        }
-
         internal static void WriteSprite(this BinaryWriter binaryWriter, Sprite? sprite)
         {
             if (sprite == null)
@@ -38,6 +32,12 @@ namespace CustomFloorPlugin.Helpers
             binaryWriter.Write(true);
             binaryWriter.Write(textureBytes.Length);
             binaryWriter.Write(textureBytes);
+        }
+
+        internal static Sprite ToSprite(this Texture2D texture2D)
+        {
+            Sprite sprite = Sprite.Create(texture2D, new Rect(0, 0, texture2D.width, texture2D.height), Vector2.zero);
+            return sprite;
         }
 
         /// <summary>

@@ -16,7 +16,7 @@ namespace CustomFloorPlugin.Helpers
         /// <summary>
         /// Waits one frame via a Coroutine
         /// </summary>
-        public static async Task WaitForEndOfFrameAsync()
+        internal static async Task WaitForEndOfFrameAsync()
         {
             await Coroutines.AsTask(WaitForEndOfFrameCoroutine());
             static IEnumerator<WaitForEndOfFrame> WaitForEndOfFrameCoroutine() { yield return WaitForEndOfFrame; }

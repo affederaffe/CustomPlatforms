@@ -5,8 +5,7 @@ using System.Linq;
 using System.Threading;
 
 using CustomFloorPlugin.Configuration;
-using CustomFloorPlugin.UI;
-
+using CustomFloorPlugin.Helpers;
 using IPA.Loader;
 using IPA.Utilities;
 using IPA.Utilities.Async;
@@ -28,23 +27,22 @@ namespace CustomFloorPlugin
         private readonly PluginConfig _config;
         private readonly PlatformManager _platformManager;
         private readonly PlatformSpawner _platformSpawner;
-        private readonly PlatformListsView _platformListsView;
         private readonly FileSystemWatcher _fileSystemWatcher;
-
-        private bool _apiRequest;
+        private readonly bool _isSongCoreInstalled;
+        private readonly bool _isCinemaInstalled;
 
         public API(WebClient webClient,
                    PluginConfig config,
                    PlatformManager platformManager,
-                   PlatformSpawner platformSpawner,
-                   PlatformListsView platformListsView)
+                   PlatformSpawner platformSpawner)
         {
             _webClient = webClient;
             _config = config;
             _platformManager = platformManager;
             _platformSpawner = platformSpawner;
-            _platformListsView = platformListsView;
             _fileSystemWatcher = new FileSystemWatcher(_config.CustomPlatformsDirectory, "*.plat");
+            _isSongCoreInstalled = PluginManager.GetPlugin("SongCore") != null;
+            _isCinemaInstalled = PluginManager.GetPlugin("BeatSaberCinema") != null;
         }
 
         public void Initialize()
@@ -53,9 +51,9 @@ namespace CustomFloorPlugin
             _fileSystemWatcher.Created += OnFileCreated;
             _fileSystemWatcher.Deleted += OnFileDeleted;
             _fileSystemWatcher.EnableRaisingEvents = true;
-            if (PluginManager.GetPlugin("SongCore") != null)
+            if (_isSongCoreInstalled)
                 SubscribeToSongCoreEvent();
-            if (PluginManager.GetPlugin("Cinema") != null)
+            if (_isCinemaInstalled)
                 SubscribeToCinemaEvent();
         }
 
@@ -65,9 +63,9 @@ namespace CustomFloorPlugin
             _fileSystemWatcher.Created -= OnFileCreated;
             _fileSystemWatcher.Deleted -= OnFileDeleted;
             _fileSystemWatcher.Dispose();
-            if (PluginManager.GetPlugin("SongCore") != null)
+            if (_isSongCoreInstalled)
                 UnsubscribeFromSongCoreEvent();
-            if (PluginManager.GetPlugin("Cinema") != null)
+            if (_isCinemaInstalled)
                 UnsubscribeFromCinemaEvent();
         }
 
@@ -89,9 +87,8 @@ namespace CustomFloorPlugin
                 if (newPlatform == null) return;
                 if (wasActivePlatform)
                 {
-                    List<CustomPlatform> allPlatforms = await _platformManager.PlatformsLoadingTask;
-                    int index = allPlatforms.IndexOf(newPlatform);
-                    await _platformSpawner.ChangeToPlatformAsync(index);
+                    int index = _platformManager.AllPlatforms.IndexOf(newPlatform);
+                    _ = _platformSpawner.ChangeToPlatformAsync(index);
                 }
             }
         }
@@ -109,14 +106,7 @@ namespace CustomFloorPlugin
 
             CustomPlatform? newPlatform = await _platformManager.CreatePlatformAsync(e.FullPath);
             if (newPlatform == null) return;
-            List<CustomPlatform> allPlatforms = await _platformManager.PlatformsLoadingTask;
-            allPlatforms.Add(newPlatform);
-            _platformListsView.AddCellForPlatform(newPlatform, true);
-            if (_apiRequest)
-            {
-                _platformManager.APIRequestedPlatform = newPlatform;
-                _apiRequest = false;
-            }
+            _platformManager.AllPlatforms.AddSorted(1, _platformManager.AllPlatforms.Count - 1, newPlatform);
         }
 
         /// <summary>
@@ -132,12 +122,10 @@ namespace CustomFloorPlugin
 
             if (_platformManager.PlatformFilePaths.TryGetValue(e.FullPath, out CustomPlatform platform))
             {
-                List<CustomPlatform> allPlatforms = await _platformManager.PlatformsLoadingTask;
-                _platformListsView.RemoveCellForPlatform(platform);
                 if (_platformManager.ActivePlatform == platform)
-                    await _platformSpawner.ChangeToPlatformAsync(0);
+                    _ = _platformSpawner.ChangeToPlatformAsync(0);
                 _platformManager.PlatformFilePaths.Remove(platform.fullPath);
-                allPlatforms.Remove(platform);
+                _platformManager.AllPlatforms.Remove(platform);
                 UnityEngine.Object.Destroy(platform.gameObject);
             }
         }
@@ -186,12 +174,13 @@ namespace CustomFloorPlugin
             _platformManager.APIRequestedLevelId = level.levelID;
 
             // Check if the requested platform is already downloaded
-            List<CustomPlatform> allPlatforms = await _platformManager.PlatformsLoadingTask;
-            CustomPlatform? platform = allPlatforms.FirstOrDefault(x => x.platHash == hash || x.name.StartsWith(name ?? string.Empty, StringComparison.Ordinal));
-            if (platform != null)
+            foreach (CustomPlatform platform in _platformManager.AllPlatforms)
             {
-                _platformManager.APIRequestedPlatform = platform;
-                return;
+                if (platform.platHash == hash || platform.platName == name)
+                {
+                    _platformManager.APIRequestedPlatform = platform;
+                    return;
+                }
             }
 
             string url = hash != null ? $"https://modelsaber.com/api/v2/get.php?type=platform&filter=hash:{hash}"
@@ -204,9 +193,11 @@ namespace CustomFloorPlugin
             WebResponse platDownloadWebResponse = await _webClient.GetAsync(platformDownloadData.download, CancellationToken.None);
             if (!platDownloadWebResponse.IsSuccessStatusCode) return;
             byte[] platData = platDownloadWebResponse.ContentToBytes();
-            _apiRequest = true;
-            string destination = Path.Combine(_config.CustomPlatformsDirectory, $"{platformDownloadData.name}.plat");
-            File.WriteAllBytes(destination, platData);
+            string path = Path.Combine(_config.CustomPlatformsDirectory, $"{platformDownloadData.name}.plat");
+            _fileSystemWatcher.EnableRaisingEvents = false;
+            File.WriteAllBytes(path, platData);
+            _fileSystemWatcher.EnableRaisingEvents = true;
+            _platformManager.APIRequestedPlatform = await _platformManager.CreatePlatformAsync(path);
         }
     }
 }
