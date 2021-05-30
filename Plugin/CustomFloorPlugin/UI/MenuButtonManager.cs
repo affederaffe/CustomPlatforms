@@ -9,7 +9,7 @@ using Zenject;
 namespace CustomFloorPlugin.UI
 {
     /// <summary>
-    /// UI Class, sets up the menu button and everything about it
+    /// UI Class, sets up the menu button
     /// </summary>
     internal class MenuButtonManager : IInitializable, IDisposable
     {
@@ -35,6 +35,9 @@ namespace CustomFloorPlugin.UI
                 MenuButtons.instance.UnregisterButton(_menuButton);
         }
 
+        /// <summary>
+        /// Shows the UI when the button is pressed
+        /// </summary>
         private void SummonFlowCoordinator()
         {
             _mainFlowCoordinator.PresentFlowCoordinator(_platformListFlowCoordinator);

@@ -16,6 +16,7 @@ namespace CustomFloorPlugin
     /// Different callbacks will be notified throughout the games lifespan, and can be used as hooks.
     /// </summary>
     [Plugin(RuntimeOptions.DynamicInit)]
+    // ReSharper disable once UnusedType.Global
     public class Plugin
     {
         /// <summary>

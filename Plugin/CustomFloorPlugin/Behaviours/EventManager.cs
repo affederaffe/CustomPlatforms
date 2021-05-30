@@ -51,7 +51,7 @@ namespace CustomFloorPlugin
         public void PlatformEnabled(DiContainer container)
         {
             container.Inject(this);
-            if (_events == null) return;
+            if (_events is null) return;
             _events.BeatmapEventDidTriggerEvent += LightEventCallBack;
             _events.GameSceneLoadedEvent += OnLevelStart!.Invoke;
             _events.NoteWasCutEvent += OnSimpleSlice;
@@ -74,7 +74,7 @@ namespace CustomFloorPlugin
 
         public void PlatformDisabled()
         {
-            if (_events == null) return;
+            if (_events is null) return;
             _events.BeatmapEventDidTriggerEvent -= LightEventCallBack;
             _events.GameSceneLoadedEvent -= OnLevelStart!.Invoke;
             _events.NoteWasCutEvent -= OnSimpleSlice;

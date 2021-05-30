@@ -29,7 +29,7 @@ namespace CustomFloorPlugin
         public void PlatformEnabled(DiContainer container)
         {
             container.Inject(this);
-            enabled = _basicSpectrogramData != null;
+            enabled = _basicSpectrogramData is not null;
         }
 
         private void Update()

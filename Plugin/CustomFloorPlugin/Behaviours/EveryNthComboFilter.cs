@@ -24,19 +24,19 @@ namespace CustomFloorPlugin
         public void PlatformEnabled(DiContainer container)
         {
             container.Inject(this);
-            if (_events == null) return;
+            if (_events is null) return;
             _events.ComboDidChangeEvent += OnComboStep;
         }
 
         public void PlatformDisabled()
         {
-            if (_events == null) return;
+            if (_events is null) return;
             _events.ComboDidChangeEvent -= OnComboStep;
         }
 
         private void OnComboStep(int combo)
         {
-            if (combo % ComboStep == 0 && combo != 0)
+            if (combo % ComboStep is 0 && combo is 0)
                 NthComboReached!.Invoke();
         }
     }

@@ -5,22 +5,27 @@
     <OutputType>Library</OutputType>
     <LangVersion>9</LangVersion>
     <Nullable>enable</Nullable>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+    <EnableNETAnalyzers>true</EnableNETAnalyzers>
+    <AnalysisLevel>latest</AnalysisLevel>
     <RootNamespace>CustomFloorPlugin</RootNamespace>
     <OutputName>CustomPlatforms</OutputName>
     <LocalRefsDir Condition="Exists('..\Refs')">..\Refs</LocalRefsDir>
     <BeatSaberDir>$(LocalRefsDir)</BeatSaberDir>
     <AppOutputBase>$(MSBuildProjectDirectory)\</AppOutputBase>
-    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
-    <EnableNETAnalyzers>true</EnableNETAnalyzers>
-    <AnalysisLevel>latest</AnalysisLevel>
-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
     <DebugType>full</DebugType>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
     <DebugType>pdbonly</DebugType>
   </PropertyGroup>
 
@@ -43,9 +48,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="Directory.Build.props" Condition="Exists('Directory.Build.props')" />
-    <None Include="Directory.Build.targets" Condition="Exists('Directory.Build.targets')" />
-    <None Include="CustomFloorPlugin.csproj.user" Condition="Exists('CustomFloorPlugin.csproj.user')" />
+    <None Include="Directory.Build.props" Condition="Exists('Directory.Build.props')" Visible="false" />
+    <None Include="Directory.Build.targets" Condition="Exists('Directory.Build.targets')" Visible="false" />
+    <None Include="CustomFloorPlugin.csproj.user" Condition="Exists('CustomFloorPlugin.csproj.user')" Visible="false" />
   </ItemGroup>
 
   <ItemGroup>

@@ -1,14 +1,14 @@
 ﻿<vertical child-control-height="false" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="https://monkeymanboy.github.io/BSML-Docs/ https://raw.githubusercontent.com/monkeymanboy/BSML-Docs/gh-pages/BSMLSchema.xsd">
 
   <horizontal pref-width="100" pref-height="10">
-    <tab-selector page-count="3" tab-tag="platform-lists" select-cell="select-cell" hover-hint="Select different platforms for each gamemode" child-expand-width="true" child-control-width="true"/>
+    <tab-selector page-count="3" tab-tag="platform-lists" select-cell="select-tab" hover-hint="Select different platforms for each gamemode" child-expand-width="true" child-control-width="true"/>
   </horizontal>
 
   <horizontal pref-width="100" pref-height="72">
     <tab tab-name="Singleplayer" tags="platform-lists" hover-hint="Select which platform is used in singleplayer and the menu" size-delta-x="25">
       <vertical pref-width="65" pref-height="72">
         <page-button click-event="singleplayer-platforms-list#PageUp" direction="Up"/>
-        <list id="singleplayer-platforms-list" expand-cell="true" select-cell="platform-select"/>
+        <list id="singleplayer-platforms-list" expand-cell="true" select-cell="select-platform"/>
        <page-button click-event="singleplayer-platforms-list#PageDown" direction="Down"/>
      </vertical>
    </tab>
@@ -16,7 +16,7 @@
    <tab tab-name="Multiplayer" tags="platform-lists" hover-hint="Select which platform is used in multiplayer" size-delta-x="25">
      <vertical pref-width="65" pref-height="72">
        <page-button click-event="multiplayer-platforms-list#PageUp" direction="Up"/>
-        <list id="multiplayer-platforms-list" expand-cell="true" select-cell="platform-select"/>
+        <list id="multiplayer-platforms-list" expand-cell="true" select-cell="select-platform"/>
         <page-button click-event="multiplayer-platforms-list#PageDown" direction="Down"/>
       </vertical>
     </tab>
@@ -24,7 +24,7 @@
     <tab tab-name="360°" tags="platform-lists" hover-hint="Select which platform is used in 360°-levels" size-delta-x="25">
       <vertical pref-width="65" pref-height="72">
         <page-button click-event="a360-platforms-list#PageUp" direction="Up"/>
-        <list id="a360-platforms-list" expand-cell="true" select-cell="platform-select"/>
+        <list id="a360-platforms-list" expand-cell="true" select-cell="select-platform"/>
        <page-button click-event="a360-platforms-list#PageDown" direction="Down"/>
      </vertical>
    </tab>

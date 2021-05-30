@@ -27,8 +27,8 @@ namespace CustomFloorPlugin
         public void PlatformEnabled(DiContainer container)
         {
             container.Inject(this);
-            enabled = animationClip != null && _basicSpectrogramData != null;
-            if (_animation == null)
+            enabled = animationClip is not null && _basicSpectrogramData is not null;
+            if (_animation is null)
             {
                 _animation = gameObject.AddComponent<Animation>();
                 _animation.AddClip(animationClip, "clip");

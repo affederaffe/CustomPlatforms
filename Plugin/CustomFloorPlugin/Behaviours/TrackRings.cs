@@ -53,10 +53,10 @@ namespace CustomFloorPlugin
         // ReSharper disable once CognitiveComplexity
         public async void PlatformEnabled(DiContainer container)
         {
-            if (trackLaneRingPrefab == null) return;
+            if (trackLaneRingPrefab is null) return;
             container.Inject(this);
 
-            if (_trackLaneRingsManager == null)
+            if (_trackLaneRingsManager is null)
             {
                 await _materialSwapper!.ReplaceMaterials(trackLaneRingPrefab);
                 gameObject.SetActive(false);
@@ -71,7 +71,7 @@ namespace CustomFloorPlugin
 
             if (useRotationEffect)
             {
-                if (_trackLaneRingsRotationEffectSpawner == null)
+                if (_trackLaneRingsRotationEffectSpawner is null)
                 {
                     TrackLaneRingsRotationEffect trackLaneRingsRotationEffect = gameObject.AddComponent<TrackLaneRingsRotationEffect>();
                     trackLaneRingsRotationEffect.SetField("_trackLaneRingsManager", _trackLaneRingsManager);
@@ -92,7 +92,7 @@ namespace CustomFloorPlugin
                     _trackLaneRingsRotationEffectSpawner.SetField("_rotationFlexySpeed", rotationFlexySpeed);
                     _trackLaneRingsRotationEffectSpawner.SetField("_trackLaneRingsRotationEffect", trackLaneRingsRotationEffect);
                 }
-                else if (_beatmapObjectCallbackController != null)
+                else if (_beatmapObjectCallbackController is not null)
                 {
                     _trackLaneRingsRotationEffectSpawner.SetField("_beatmapObjectCallbackController", _beatmapObjectCallbackController);
                     _trackLaneRingsRotationEffectSpawner.Start();
@@ -101,7 +101,7 @@ namespace CustomFloorPlugin
 
             if (useStepEffect)
             {
-                if (_trackLaneRingsPositionStepEffectSpawner == null)
+                if (_trackLaneRingsPositionStepEffectSpawner is null)
                 {
                     _trackLaneRingsPositionStepEffectSpawner = gameObject.AddComponent<TrackLaneRingsPositionStepEffectSpawner>();
                     _trackLaneRingsPositionStepEffectSpawner.SetField("_beatmapObjectCallbackController", _beatmapObjectCallbackController);
@@ -111,7 +111,7 @@ namespace CustomFloorPlugin
                     _trackLaneRingsPositionStepEffectSpawner.SetField("_maxPositionStep", maxPositionStep);
                     _trackLaneRingsPositionStepEffectSpawner.SetField("_moveSpeed", moveSpeed);
                 }
-                else if (_beatmapObjectCallbackController != null)
+                else if (_beatmapObjectCallbackController is not null)
                 {
                     _trackLaneRingsPositionStepEffectSpawner.SetField("_beatmapObjectCallbackController", _beatmapObjectCallbackController);
                     _trackLaneRingsPositionStepEffectSpawner.Start();
@@ -120,21 +120,21 @@ namespace CustomFloorPlugin
 
             foreach (INotifyPlatformEnabled notifyEnable in GetComponentsInChildren<INotifyPlatformEnabled>(true))
             {
-                if ((Object)notifyEnable != this)
+                if (!ReferenceEquals(this, notifyEnable))
                     notifyEnable.PlatformEnabled(container);
             }
         }
 
         public void PlatformDisabled()
         {
-            if (_trackLaneRingsRotationEffectSpawner != null)
+            if (_trackLaneRingsRotationEffectSpawner is not null)
                 _trackLaneRingsRotationEffectSpawner.OnDestroy();
-            if (_trackLaneRingsPositionStepEffectSpawner != null)
+            if (_trackLaneRingsPositionStepEffectSpawner is not null)
                 _trackLaneRingsPositionStepEffectSpawner.OnDestroy();
 
             foreach (INotifyPlatformDisabled notifyDisable in GetComponentsInChildren<INotifyPlatformDisabled>(true))
             {
-                if ((Object)notifyDisable != this)
+                if (!ReferenceEquals(this, notifyDisable))
                     notifyDisable.PlatformDisabled();
             }
         }

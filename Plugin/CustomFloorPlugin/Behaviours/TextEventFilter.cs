@@ -36,7 +36,7 @@ namespace CustomFloorPlugin
         public void PlatformEnabled(DiContainer container)
         {
             container.Inject(this);
-            if (_events == null || textMeshPro == null) return;
+            if (_events is null || textMeshPro is null) return;
             _startText = textMeshPro!.text;
             switch (counterType)
             {
@@ -63,7 +63,7 @@ namespace CustomFloorPlugin
 
         public void PlatformDisabled()
         {
-            if (_events == null || textMeshPro == null) return;
+            if (_events is null || textMeshPro is null) return;
             textMeshPro!.text = _startText!;
             switch (counterType)
             {

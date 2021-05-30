@@ -28,8 +28,8 @@ namespace CustomFloorPlugin
         public void PlatformEnabled(DiContainer container)
         {
             container.Inject(this);
-            if (_beatmapObjectCallbackController == null) return;
-            if (_lightRotationEventEffect == null)
+            if (_beatmapObjectCallbackController is null) return;
+            if (_lightRotationEventEffect is null)
             {
                 _lightRotationEventEffect = gameObject.AddComponent<LightRotationEventEffect>();
                 _lightRotationEventEffect.SetField("_event", (BeatmapEventType)eventType);
@@ -43,7 +43,7 @@ namespace CustomFloorPlugin
 
         public void PlatformDisabled()
         {
-            if (_lightRotationEventEffect == null) return;
+            if (_lightRotationEventEffect is null) return;
             _lightRotationEventEffect.enabled = false;
         }
     }

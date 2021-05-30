@@ -16,8 +16,6 @@ namespace CustomFloorPlugin.Installers
             Container.Bind<SettingsView>().FromNewComponentAsViewController().AsSingle();
             Container.Bind<PlatformsFlowCoordinator>().FromNewComponentOnNewGameObject().AsSingle();
             Container.BindInterfacesTo<MenuButtonManager>().AsSingle();
-            Container.BindInterfacesTo<API>().AsSingle();
-            Container.BindInterfacesTo<MenuEnvironmentManager>().AsSingle();
         }
     }
 }

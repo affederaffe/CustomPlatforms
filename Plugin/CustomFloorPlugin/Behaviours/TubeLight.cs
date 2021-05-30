@@ -57,7 +57,7 @@ namespace CustomFloorPlugin
             bool activeSelf = gameObject.activeSelf;
             if (activeSelf) gameObject.SetActive(false);
 
-            if (_instancedMaterialLightWithId == null)
+            if (_instancedMaterialLightWithId is null)
             {
                 // Using 2 different light types was a mistake
                 Mesh mesh = GetComponent<MeshFilter>().mesh;
@@ -88,7 +88,7 @@ namespace CustomFloorPlugin
                 materialPropertyBlockColorSetter.SetField("_property", "_Color");
                 _instancedMaterialLightWithId = gameObject.AddComponent<InstancedMaterialLightWithId>();
                 _instancedMaterialLightWithId.SetField("_materialPropertyBlockColorSetter", materialPropertyBlockColorSetter);
-                _instancedMaterialLightWithId.SetField("_intensity", 1.4f);
+                _instancedMaterialLightWithId.SetField("_intensity", 1.325f);
                 ((LightWithIdMonoBehaviour)_instancedMaterialLightWithId).SetField("_ID", (int)lightsID);
                 _instancedMaterialLightWithId.ColorWasSet(color);
             }

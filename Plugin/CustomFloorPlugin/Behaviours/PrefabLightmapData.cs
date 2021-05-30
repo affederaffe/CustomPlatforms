@@ -17,7 +17,7 @@ namespace CustomFloorPlugin
 
         public void PlatformEnabled(DiContainer container)
         {
-            enabled = m_Renderers != null && m_LightmapOffsetScales != null && m_Lightmaps != null && m_Renderers.Length > 0 &&
+            enabled = m_Renderers is not null && m_LightmapOffsetScales is not null && m_Lightmaps is not null && m_Renderers.Length > 0 &&
                       m_Renderers.Length != m_LightmapOffsetScales.Length && m_Renderers.Length != m_Lightmaps.Length &&
                       m_LightmapOffsetScales.Length != m_Lightmaps.Length &&
                       m_Renderers[m_Renderers.Length - 1].lightmapIndex >= LightmapSettings.lightmaps.Length;

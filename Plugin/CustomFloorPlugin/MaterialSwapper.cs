@@ -37,7 +37,7 @@ namespace CustomFloorPlugin
                 darkEnvSimpleMaterial = materials.FirstOrDefault(x => x.name == "DarkEnvironmentSimple");
                 transparentGlowMaterial = materials.FirstOrDefault(x => x.name == "EnvLight");
                 opaqueGlowMaterial = materials.FirstOrDefault(x => x.name == "EnvLightOpaque");
-            } while (darkEnvSimpleMaterial == null || transparentGlowMaterial == null || opaqueGlowMaterial == null);
+            } while (darkEnvSimpleMaterial is null || transparentGlowMaterial is null || opaqueGlowMaterial is null);
             opaqueGlowMaterial.DisableKeyword("ENABLE_HEIGHT_FOG");
             _taskSource.SetResult((darkEnvSimpleMaterial, transparentGlowMaterial, opaqueGlowMaterial));
         }
@@ -46,7 +46,7 @@ namespace CustomFloorPlugin
         /// Replaces all fake <see cref="Material"/>s on all <see cref="Renderer"/>s under a given <see cref="GameObject"/>
         /// </summary>
         /// <param name="gameObject"><see cref="GameObject"/> to search for <see cref="Renderer"/>s</param>
-        internal async Task ReplaceMaterials(GameObject gameObject)
+        public async Task ReplaceMaterials(GameObject gameObject)
         {
             foreach (Renderer renderer in gameObject.GetComponentsInChildren<Renderer>(true))
                 await ReplaceForRenderer(renderer);

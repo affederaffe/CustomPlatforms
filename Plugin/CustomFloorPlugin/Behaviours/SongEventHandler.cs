@@ -25,13 +25,13 @@ namespace CustomFloorPlugin
         public void PlatformEnabled(DiContainer container)
         {
             container.Inject(this);
-            if (_events == null) return;
+            if (_events is null) return;
             _events.BeatmapEventDidTriggerEvent += OnSongEvent;
         }
 
         public void PlatformDisabled()
         {
-            if (_events == null) return;
+            if (_events is null) return;
             _events.BeatmapEventDidTriggerEvent -= OnSongEvent;
         }
 

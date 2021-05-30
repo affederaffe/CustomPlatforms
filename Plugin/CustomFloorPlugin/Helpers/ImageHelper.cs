@@ -22,7 +22,7 @@ namespace CustomFloorPlugin.Helpers
 
         internal static void WriteSprite(this BinaryWriter binaryWriter, Sprite? sprite)
         {
-            if (sprite == null)
+            if (sprite is null)
             {
                 binaryWriter.Write(false);
                 return;
@@ -58,11 +58,8 @@ namespace CustomFloorPlugin.Helpers
             // Create readable texture by rendering onto a RenderTexture
             if (!texture.isReadable)
             {
-                float maxSize = 256;
-                float scale = Mathf.Min(1, maxSize / texture.width, maxSize / texture.height);
-                int width = Mathf.RoundToInt(texture.width * scale);
-                int height = Mathf.RoundToInt(texture.height * scale);
-
+                int width = Mathf.Min(texture.width, 192);
+                int height = Mathf.Min(texture.height, 192);
                 RenderTexture renderTexture = RenderTexture.GetTemporary(width, height, 0, RenderTextureFormat.ARGB32);
                 RenderTexture.active = renderTexture;
                 Graphics.Blit(texture, renderTexture);

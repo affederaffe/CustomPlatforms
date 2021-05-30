@@ -33,8 +33,8 @@ namespace CustomFloorPlugin
         public void PlatformEnabled(DiContainer container)
         {
             container.Inject(this);
-            if (_beatmapObjectCallbackController == null || transformL == null || transformR == null) return;
-            if (_lightPairRotationEventEffect == null)
+            if (_beatmapObjectCallbackController is null || transformL is null || transformR is null) return;
+            if (_lightPairRotationEventEffect is null)
             {
                 _lightPairRotationEventEffect = gameObject.AddComponent<LightPairRotationEventEffect>();
                 _lightPairRotationEventEffect.SetField("_eventL", (BeatmapEventType)eventL);
@@ -53,7 +53,7 @@ namespace CustomFloorPlugin
 
         public void PlatformDisabled()
         {
-            if (_lightPairRotationEventEffect == null) return;
+            if (_lightPairRotationEventEffect is null) return;
             _lightPairRotationEventEffect.enabled = false;
         }
     }

@@ -53,16 +53,16 @@ namespace CustomFloorPlugin
 
         public async void PlatformEnabled(DiContainer container)
         {
-            if (columnPrefab == null) return;
+            if (columnPrefab is null) return;
             container.Inject(this);
             await _materialSwapper!.ReplaceMaterials(columnPrefab);
             _columnTransforms ??= CreateColumns();
             UpdateColumnHeights(FallbackSamples);
-            enabled = _basicSpectrogramData != null;
+            enabled = _basicSpectrogramData is not null;
 
             foreach (INotifyPlatformEnabled notifyEnable in GetComponentsInChildren<INotifyPlatformEnabled>(true))
             {
-                if ((Object)notifyEnable != this)
+                if (!ReferenceEquals(this, notifyEnable))
                     notifyEnable.PlatformEnabled(container);
             }
         }
@@ -71,7 +71,7 @@ namespace CustomFloorPlugin
         {
             foreach (INotifyPlatformDisabled notifyDisable in GetComponentsInChildren<INotifyPlatformDisabled>(true))
             {
-                if ((Object)notifyDisable != this)
+                if (!ReferenceEquals(this, notifyDisable))
                     notifyDisable.PlatformDisabled();
             }
         }
@@ -131,7 +131,7 @@ namespace CustomFloorPlugin
         {
             get
             {
-                if (_fallbackSamples == null)
+                if (_fallbackSamples is null)
                 {
                     _fallbackSamples = new float[64];
                     for (int i = 0; i < _fallbackSamples.Length; i++)

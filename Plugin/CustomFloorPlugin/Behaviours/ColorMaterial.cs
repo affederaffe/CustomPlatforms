@@ -20,22 +20,23 @@ namespace CustomFloorPlugin
         public string propertyName = "_Color";
         public MaterialColorType materialColorType;
 
-        private ColorManager? _colorManager;
         private LightWithIdManager? _lightWithIdManager;
+        private ColorManager? _colorManager;
 
         private Renderer Renderer => _renderer ??= GetComponent<Renderer>();
         private Renderer? _renderer;
 
         [Inject]
-        public void Construct(ColorManager colorManager, LightWithIdManager lightWithIdManager)
+        public void Construct(LightWithIdManager lightWithIdManager, [InjectOptional] ColorManager colorManager)
         {
-            _colorManager = colorManager;
             _lightWithIdManager = lightWithIdManager;
+            _colorManager = colorManager;
         }
 
         public void PlatformEnabled(DiContainer container)
         {
             container.Inject(this);
+            if (_colorManager is null) return;
             _lightWithIdManager!.didChangeSomeColorsThisFrameEvent += OnColorsDidChange;
         }
 

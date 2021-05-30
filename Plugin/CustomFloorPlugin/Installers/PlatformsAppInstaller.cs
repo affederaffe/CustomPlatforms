@@ -1,4 +1,6 @@
-﻿using CustomFloorPlugin.Configuration;
+﻿using System;
+
+using CustomFloorPlugin.Configuration;
 
 using IPA.Logging;
 
@@ -29,7 +31,9 @@ namespace CustomFloorPlugin.Installers
             Container.Bind<PlatformLoader>().AsSingle();
             Container.BindInterfacesAndSelfTo<PlatformManager>().AsSingle();
             Container.Bind<EnvironmentHider>().AsSingle();
+            Container.Bind<Random>().AsSingle().IfNotBound();
             Container.BindInterfacesAndSelfTo<PlatformSpawner>().AsSingle();
+            Container.BindInterfacesTo<API>().AsSingle();
         }
     }
 }

@@ -5,7 +5,9 @@ using System.Reflection;
 using System.Threading.Tasks;
 
 using CustomFloorPlugin.Helpers;
+
 using IPA.Utilities;
+
 using UnityEngine;
 
 using Zenject;
@@ -199,10 +201,6 @@ namespace CustomFloorPlugin
         /// </summary>
         internal class LightEffects : MonoBehaviour, INotifyPlatformEnabled, INotifyPlatformDisabled
         {
-            private ColorScheme? _colorScheme;
-
-            private LightSwitchEventEffect[]? _lightSwitchEventEffects;
-
             private readonly SimpleColorSO _simpleLightColor0 = ScriptableObject.CreateInstance<SimpleColorSO>();
             private readonly SimpleColorSO _simpleLightColor1 = ScriptableObject.CreateInstance<SimpleColorSO>();
             private readonly SimpleColorSO _simpleHighlightColor0 = ScriptableObject.CreateInstance<SimpleColorSO>();
@@ -212,22 +210,25 @@ namespace CustomFloorPlugin
             private readonly SimpleColorSO _simpleHighlightColor0Boost = ScriptableObject.CreateInstance<SimpleColorSO>();
             private readonly SimpleColorSO _simpleHighlightColor1Boost = ScriptableObject.CreateInstance<SimpleColorSO>();
 
+            private ColorScheme? _colorScheme;
+
+            private LightSwitchEventEffect[]? _lightSwitchEventEffects;
+
             [Inject]
-            public void Construct([InjectOptional] ColorScheme colorScheme)
+            public void Construct(ColorScheme colorScheme)
             {
                 _colorScheme = colorScheme;
             }
 
             public void PlatformEnabled(DiContainer container)
             {
-                container.Inject(this);
-                if (_colorScheme == null) return;
+                container.InjectGameObject(gameObject);
 
-                if (_lightSwitchEventEffects == null)
+                if (_lightSwitchEventEffects is null)
                 {
                     Color normalColor = new(1f, 1f, 1f, 0.7490196f);
-                    Color highlightColor = Color.white;
                     Color boostColor = new(1f, 1f, 1f, 0.8f);
+                    Color highlightColor = new(1f, 1f, 1f, 1f);
 
                     _lightSwitchEventEffects = new LightSwitchEventEffect[5];
                     for (int i = 0; i < _lightSwitchEventEffects.Length; i++)
@@ -245,21 +246,17 @@ namespace CustomFloorPlugin
                         _lightSwitchEventEffects[i].SetField("_highlightColor0Boost", (ColorSO)CreateMultipliedColorSO(_simpleHighlightColor0Boost, highlightColor));
                         _lightSwitchEventEffects[i].SetField("_highlightColor1Boost", (ColorSO)CreateMultipliedColorSO(_simpleHighlightColor1Boost, highlightColor));
                     }
-
-                    gameObject.SetActive(true);
                 }
                 else
                 {
                     foreach (LightSwitchEventEffect lse in _lightSwitchEventEffects)
                     {
-                        container.Inject(lse);
                         lse.SetField("_initialized", false);
-                        gameObject.SetActive(true);
                         lse.Start();
                     }
                 }
 
-                _simpleLightColor0.SetColor(_colorScheme.environmentColor0);
+                _simpleLightColor0.SetColor(_colorScheme!.environmentColor0);
                 _simpleLightColor1.SetColor(_colorScheme.environmentColor1);
                 _simpleHighlightColor0.SetColor(_colorScheme.environmentColor0);
                 _simpleHighlightColor1.SetColor(_colorScheme.environmentColor1);
@@ -267,12 +264,15 @@ namespace CustomFloorPlugin
                 _simpleLightColor1Boost.SetColor(_colorScheme.environmentColor1Boost);
                 _simpleHighlightColor0Boost.SetColor(_colorScheme.environmentColor0Boost);
                 _simpleHighlightColor1Boost.SetColor(_colorScheme.environmentColor1Boost);
+
+                gameObject.SetActive(true);
             }
 
             public void PlatformDisabled()
             {
                 gameObject.SetActive(false);
-                foreach (LightSwitchEventEffect lse in _lightSwitchEventEffects!)
+                if (_lightSwitchEventEffects is null) return;
+                foreach (LightSwitchEventEffect lse in _lightSwitchEventEffects)
                     lse.OnDestroy();
             }
 
