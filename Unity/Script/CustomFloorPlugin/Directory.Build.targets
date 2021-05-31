@@ -1,0 +1,9 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project>
+  <PropertyGroup>
+    <OutputAssemblyName>$(OutputPath)$(AssemblyName)</OutputAssemblyName>
+  </PropertyGroup>
+  <Target Name="CopyToUnityProject" AfterTargets="Build">
+    <Copy SourceFiles="$(OutputAssemblyName).dll" DestinationFiles="$..\..\..\..\CustomPlatforms\Assets\Scripts\$(AssemblyName).dll" />
+  </Target>
+</Project>

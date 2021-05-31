@@ -1,3 +1,0 @@
-﻿[*.cs]
-
-dotnet_diagnostic.CS0649.severity = none
