@@ -176,20 +176,18 @@ namespace CustomFloorPlugin
                 return;
             }
 
-            Task.Run(() => DownloadPlatform(name, hash));
+            string url = hash is not null ? $"https://modelsaber.com/api/v2/get.php?type=platform&filter=hash:{hash}"
+                : name is not null ? $"https://modelsaber.com/api/v2/get.php?type=platform&filter=name:{name}"
+                : throw new ArgumentNullException($"{nameof(hash)}, {nameof(name)}", "Invalid platform request");
+
+            Task.Run(() => DownloadPlatform(url));
         }
 
         /// <summary>
         /// Asynchronously downloads a <see cref="CustomPlatform"/> from modelsaber if the selected level requires it
         /// </summary>
-        /// <param name="name">The name of the requested platform</param>
-        /// <param name="hash">The hash of the requested platform</param>
-        private async void DownloadPlatform(string? name, string? hash)
+        private async void DownloadPlatform(string url)
         {
-            string url = hash is not null ? $"https://modelsaber.com/api/v2/get.php?type=platform&filter=hash:{hash}"
-                       : name is not null ? $"https://modelsaber.com/api/v2/get.php?type=platform&filter=name:{name}"
-                       : throw new ArgumentNullException($"{nameof(hash)}, {nameof(name)}", "Invalid platform request");
-
             try
             {
                 CancellationToken cancellationToken = _cancellationTokenSource.Token;
@@ -204,11 +202,13 @@ namespace CustomFloorPlugin
                 File.WriteAllBytes(path, platData);
                 _fileSystemWatcher.EnableRaisingEvents = true;
                 CustomPlatform? requestedPlatform = await _platformManager.CreatePlatformAsync(path);
-                if (cancellationToken.IsCancellationRequested || requestedPlatform is null) return;
+                cancellationToken.ThrowIfCancellationRequested();
+                if (requestedPlatform is null) return;
                 _platformManager.AllPlatforms.AddSorted(1, _platformManager.AllPlatforms.Count - 1, requestedPlatform, null);
                 _platformManager.APIRequestedPlatform = requestedPlatform;
             }
             catch (TaskCanceledException) { }
+            catch (OperationCanceledException) { }
         }
     }
 }

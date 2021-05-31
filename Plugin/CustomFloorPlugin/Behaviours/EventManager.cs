@@ -1,5 +1,7 @@
 ﻿using System;
 
+using CustomFloorPlugin.Interfaces;
+
 using UnityEngine;
 using UnityEngine.Events;
 

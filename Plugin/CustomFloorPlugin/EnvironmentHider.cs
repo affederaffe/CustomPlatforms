@@ -121,7 +121,7 @@ namespace CustomFloorPlugin
             if (_sceneName.StartsWith("Multiplayer", System.StringComparison.Ordinal)) _sceneName = "GameCore";
             Scene scene = SceneManager.GetSceneByName(_sceneName);
             if (!scene.IsValid()) return false;
-            root = scene.GetRootGameObjects().FirstOrDefault(x => x.name is "Environment" or "MenuEnvironmentManager" or "LocalActivePlayerController(Clone)");
+            root = scene.GetRootGameObjects().FirstOrDefault(x => x.name is "Environment" or "MenuEnvironmentManager" or "MultiplayerLocalActivePlayerController(Clone)");
             return root is not null;
         }
 

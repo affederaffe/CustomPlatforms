@@ -1,4 +1,4 @@
-﻿namespace CustomFloorPlugin
+﻿namespace CustomFloorPlugin.Interfaces
 {
     /// <summary>
     /// <see cref="PlatformDisabled"/> will be called on every <see cref="UnityEngine.Component"/>

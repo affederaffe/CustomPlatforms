@@ -106,7 +106,7 @@ namespace CustomFloorPlugin
         }
 
         /// <summary>
-        /// Sets the platforms that were last selected as the current ones
+        /// Restores the last platform selection
         /// </summary>
         private void LastSelectedPlatform(CustomPlatform platform)
         {
@@ -187,7 +187,7 @@ namespace CustomFloorPlugin
                 platform.platAuthor = reader.ReadString();
                 platform.platHash = reader.ReadString();
                 platform.fullPath = reader.ReadString();
-                if (reader.ReadBoolean()) platform.icon = reader.ReadTexture2D().ToSprite();
+                platform.icon = reader.ReadNullableSprite();
                 if (!File.Exists(platform.fullPath))
                 {
                     _siraLog.Debug($"File {platform.fullPath} no longer exists; skipped");
@@ -218,7 +218,7 @@ namespace CustomFloorPlugin
                 writer.Write(AllPlatforms[i].platAuthor);
                 writer.Write(AllPlatforms[i].platHash);
                 writer.Write(AllPlatforms[i].fullPath);
-                writer.WriteSprite(AllPlatforms[i].icon);
+                writer.WriteNullableSprite(AllPlatforms[i].icon);
             }
 
             stream.SetLength(stream.Position);

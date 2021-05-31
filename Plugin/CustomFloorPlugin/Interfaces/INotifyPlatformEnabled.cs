@@ -1,7 +1,7 @@
 ﻿using Zenject;
 
 
-namespace CustomFloorPlugin
+namespace CustomFloorPlugin.Interfaces
 {
     /// <summary>
     /// <see cref="PlatformEnabled"/> will be called on every <see cref="UnityEngine.Component"/>

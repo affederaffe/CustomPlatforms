@@ -1,4 +1,4 @@
-﻿<vertical child-control-height="false" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="https://monkeymanboy.github.io/BSML-Docs/ https://raw.githubusercontent.com/monkeymanboy/BSML-Docs/gh-pages/BSMLSchema.xsd">
+﻿<vertical child-control-height="false" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/monkeymanboy/BSML-Docs/gh-pages/BSMLSchema.xsd">
 
   <horizontal pref-width="100" pref-height="10">
     <tab-selector page-count="3" tab-tag="platform-lists" select-cell="select-tab" hover-hint="Select different platforms for each gamemode" child-expand-width="true" child-control-width="true"/>

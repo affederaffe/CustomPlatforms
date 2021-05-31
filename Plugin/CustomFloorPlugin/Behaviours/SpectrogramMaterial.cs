@@ -1,3 +1,5 @@
+using CustomFloorPlugin.Interfaces;
+
 using UnityEngine;
 
 using Zenject;

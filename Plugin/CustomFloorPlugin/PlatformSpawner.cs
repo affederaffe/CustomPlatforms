@@ -3,7 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 
 using CustomFloorPlugin.Configuration;
-
+using CustomFloorPlugin.Interfaces;
 using SiraUtil.Tools;
 
 using Zenject;
@@ -157,28 +157,38 @@ namespace CustomFloorPlugin
         /// <param name="platform">The <see cref="CustomPlatform"/> to change to</param>
         public async Task ChangeToPlatformAsync(CustomPlatform platform)
         {
-            if (_platformManager.ActivePlatform == platform) return;
-
-            _cancellationTokenSource?.Cancel();
-            _cancellationTokenSource?.Dispose();
-            _cancellationTokenSource = new CancellationTokenSource();
-            CancellationToken cancellationToken = _cancellationTokenSource.Token;
-
-            DestroyCustomObjects();
-            _platformManager.ActivePlatform.gameObject.SetActive(false);
-            _platformManager.ActivePlatform = platform;
-
-            if (platform.isDescriptor)
+            try
             {
-                CustomPlatform? newPlatform = await _platformManager.CreatePlatformAsync(platform.fullPath);
-                if (cancellationToken.IsCancellationRequested || newPlatform is null) return;
-                _platformManager.ActivePlatform = newPlatform;
-            }
+                if (_platformManager.ActivePlatform == platform) return;
 
-            _siraLog.Info($"Switching to {_platformManager.ActivePlatform.name}");
-            _environmentHider.HideObjectsForPlatform(_platformManager.ActivePlatform);
-            _platformManager.ActivePlatform.gameObject.SetActive(true);
-            SpawnCustomObjects();
+                _cancellationTokenSource?.Cancel();
+                _cancellationTokenSource?.Dispose();
+                _cancellationTokenSource = new CancellationTokenSource();
+                CancellationToken cancellationToken = _cancellationTokenSource.Token;
+
+                DestroyCustomObjects();
+                _platformManager.ActivePlatform.gameObject.SetActive(false);
+                _platformManager.ActivePlatform = platform;
+
+                if (platform.isDescriptor)
+                {
+                    CustomPlatform? newPlatform = await _platformManager.CreatePlatformAsync(platform.fullPath);
+                    cancellationToken.ThrowIfCancellationRequested();
+                    if (newPlatform is null)
+                    {
+                        _ = ChangeToPlatformAsync(_platformManager.DefaultPlatform);
+                        return;
+                    }
+
+                    _platformManager.ActivePlatform = newPlatform;
+                }
+
+                _siraLog.Info($"Switching to {_platformManager.ActivePlatform.name}");
+                _environmentHider.HideObjectsForPlatform(_platformManager.ActivePlatform);
+                _platformManager.ActivePlatform.gameObject.SetActive(true);
+                SpawnCustomObjects();
+            }
+            catch (OperationCanceledException) { }
         }
 
         /// <summary>

@@ -14,13 +14,14 @@ namespace CustomFloorPlugin.Helpers
             return BytesToTexture2D(array);
         }
 
-        internal static Texture2D ReadTexture2D(this BinaryReader binaryReader)
+        internal static Sprite? ReadNullableSprite(this BinaryReader binaryReader)
         {
+            if (!binaryReader.ReadBoolean()) return null;
             byte[] bytes = binaryReader.ReadBytes(binaryReader.ReadInt32());
-            return BytesToTexture2D(bytes);
+            return BytesToTexture2D(bytes).ToSprite();
         }
 
-        internal static void WriteSprite(this BinaryWriter binaryWriter, Sprite? sprite)
+        internal static void WriteNullableSprite(this BinaryWriter binaryWriter, Sprite? sprite)
         {
             if (sprite is null)
             {
