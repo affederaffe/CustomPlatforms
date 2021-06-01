@@ -39,8 +39,7 @@ namespace CustomFloorPlugin
             if (_pathTaskPairs.TryGetValue(fullPath, out Task<CustomPlatform?> task))
                 return await task;
 
-            FileInfo fileInfo = new(fullPath);
-            task = LoadPlatformFromFileAsync(fileInfo);
+            task = LoadPlatformFromFileAsyncInternal(fullPath);
             _pathTaskPairs.Add(fullPath, task);
             CustomPlatform? platform = await task;
             _pathTaskPairs.Remove(fullPath);
@@ -50,21 +49,23 @@ namespace CustomFloorPlugin
         /// <summary>
         /// Asynchronously loads a <see cref="CustomPlatform"/> from a specified file path
         /// </summary>
-        private async Task<CustomPlatform?> LoadPlatformFromFileAsync(FileInfo fileInfo)
+        private async Task<CustomPlatform?> LoadPlatformFromFileAsyncInternal(string fullPath)
         {
-            if (!fileInfo.Exists)
+            if (!File.Exists(fullPath))
             {
-                _siraLog.Error($"File could not be found:\n{fileInfo.FullName}");
+                _siraLog.Error($"File could not be found:\n{fullPath}");
                 return null;
             }
 
-            using FileStream fileStream = fileInfo.OpenRead();
+            using FileStream fileStream = File.OpenRead(fullPath);
+            byte[] bundleData = new byte[fileStream.Length];
+            await Task.Run(() => fileStream.Read(bundleData, 0, bundleData.Length));
 
-            AssetBundle assetBundle = await LoadAssetBundleFromStreamAsync(fileStream);
+            AssetBundle assetBundle = await LoadAssetBundleFromBytesAsync(bundleData);
 
             if (assetBundle == null)
             {
-                _siraLog.Error($"File could not be loaded:\n{fileInfo.FullName}");
+                _siraLog.Error($"File could not be loaded:\n{fullPath}");
                 return null;
             }
 
@@ -73,7 +74,7 @@ namespace CustomFloorPlugin
             if (platformPrefab == null)
             {
                 assetBundle.Unload(true);
-                _siraLog.Error($"Platform GameObject could not be loaded:\n{fileInfo.FullName}");
+                _siraLog.Error($"Platform GameObject could not be loaded:\n{fullPath}");
                 return null;
             }
 
@@ -99,15 +100,15 @@ namespace CustomFloorPlugin
                 {
                     // No CustomPlatform component, abort
                     UnityEngine.Object.Destroy(platformPrefab);
-                    _siraLog.Error($"AssetBundle does not contain a CustomPlatform:\n{fileInfo.FullName}");
+                    _siraLog.Error($"AssetBundle does not contain a CustomPlatform:\n{fullPath}");
                     return null;
                 }
             }
 
             using MD5 md5 = MD5.Create();
-            byte[] hash = md5.ComputeHash(fileStream);
+            byte[] hash = md5.ComputeHash(bundleData);
             customPlatform.platHash = BitConverter.ToString(hash).Replace("-", string.Empty).ToLowerInvariant();
-            customPlatform.fullPath = fileInfo.FullName;
+            customPlatform.fullPath = fullPath;
             customPlatform.name = $"{customPlatform.platName} by {customPlatform.platAuthor}";
 
             await _materialSwapper.ReplaceMaterials(customPlatform.gameObject);
@@ -118,10 +119,10 @@ namespace CustomFloorPlugin
         /// <summary>
         /// Asynchronously loads and <see cref="AssetBundle"/> from a <see cref="FileStream"/>
         /// </summary>
-        private static async Task<AssetBundle> LoadAssetBundleFromStreamAsync(FileStream fileStream)
+        private static async Task<AssetBundle> LoadAssetBundleFromBytesAsync(byte[] data)
         {
             TaskCompletionSource<AssetBundle> taskCompletionSource = new();
-            AssetBundleCreateRequest assetBundleCreateRequest = AssetBundle.LoadFromStreamAsync(fileStream);
+            AssetBundleCreateRequest assetBundleCreateRequest = AssetBundle.LoadFromMemoryAsync(data);
             assetBundleCreateRequest.completed += delegate
             {
                 AssetBundle assetBundle = assetBundleCreateRequest.assetBundle;

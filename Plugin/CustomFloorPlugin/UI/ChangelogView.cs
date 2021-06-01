@@ -22,7 +22,10 @@ namespace CustomFloorPlugin.UI
         /// </summary>
         [UIValue("changelog-text")]
         public static string Changelog =>
-        @"  <size=150%><color=#888888>Version 6.1.4</color></size>
+        @"  <size=150%<color=#888888>Version 6.1.5</color></size>
+        - Hotfix: Fixed black screen on startup
+
+  <size=150%><color=#888888>Version 6.1.4</color></size>
         - Updated for 1.16.1
         - UI enhancements
         - Fixed a bug when switching between loading platforms very fast
@@ -36,8 +39,6 @@ namespace CustomFloorPlugin.UI
         - Updated for 1.14.0
         - Internal code 'cleanup'
         - Added 'Shuffle Platforms' option
-        - Added manual config option to change your
-           CustomPlatforms directory
         - New feature: nested components
         - Fixed issue with Chroma's environment removal
 

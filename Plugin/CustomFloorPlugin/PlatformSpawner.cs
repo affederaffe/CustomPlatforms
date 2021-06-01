@@ -16,7 +16,6 @@ namespace CustomFloorPlugin
     /// </summary>
     public sealed class PlatformSpawner : IInitializable, IDisposable
     {
-        private readonly Random _random;
         private readonly SiraLog _siraLog;
         private readonly PluginConfig _config;
         private readonly AssetLoader _assetLoader;
@@ -25,6 +24,8 @@ namespace CustomFloorPlugin
         private readonly GameScenesManager _gameScenesManager;
         private readonly LobbyGameState _lobbyGameState;
 
+        private readonly Random _random;
+
         private CancellationTokenSource? _cancellationTokenSource;
 
         internal DiContainer Container { private get; set; }
@@ -32,7 +33,6 @@ namespace CustomFloorPlugin
         internal CustomPlatform RandomPlatform => _platformManager.AllPlatforms[_random.Next(0, _platformManager.AllPlatforms.Count)];
 
         public PlatformSpawner(DiContainer container,
-                               Random random,
                                SiraLog siraLog,
                                PluginConfig config,
                                AssetLoader assetLoader,
@@ -42,7 +42,6 @@ namespace CustomFloorPlugin
                                LobbyGameState lobbyGameState)
         {
             Container = container;
-            _random = random;
             _siraLog = siraLog;
             _config = config;
             _assetLoader = assetLoader;
@@ -50,6 +49,7 @@ namespace CustomFloorPlugin
             _platformManager = platformManager;
             _gameScenesManager = gameScenesManager;
             _lobbyGameState = lobbyGameState;
+            _random = new Random();
         }
 
         public void Initialize()

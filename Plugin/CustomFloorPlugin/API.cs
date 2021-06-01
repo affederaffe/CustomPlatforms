@@ -4,7 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using CustomFloorPlugin.Configuration;
+
 using CustomFloorPlugin.Helpers;
 
 using IPA.Loader;
@@ -25,7 +25,6 @@ namespace CustomFloorPlugin
     internal class API : IInitializable, IDisposable
     {
         private readonly WebClient _webClient;
-        private readonly PluginConfig _config;
         private readonly PlatformManager _platformManager;
         private readonly PlatformSpawner _platformSpawner;
 
@@ -35,15 +34,13 @@ namespace CustomFloorPlugin
         private readonly bool _isCinemaInstalled;
 
         public API(WebClient webClient,
-                   PluginConfig config,
                    PlatformManager platformManager,
                    PlatformSpawner platformSpawner)
         {
             _webClient = webClient;
-            _config = config;
             _platformManager = platformManager;
             _platformSpawner = platformSpawner;
-            _fileSystemWatcher = new FileSystemWatcher(_config.CustomPlatformsDirectory, "*.plat");
+            _fileSystemWatcher = new FileSystemWatcher(_platformManager.DirectoryPath, "*.plat");
             _cancellationTokenSource = new CancellationTokenSource();
             _isSongCoreInstalled = PluginManager.GetPlugin("SongCore") is not null;
             _isCinemaInstalled = PluginManager.GetPlugin("Cinema") is not null;
@@ -197,7 +194,7 @@ namespace CustomFloorPlugin
                 WebResponse platDownloadWebResponse = await _webClient.GetAsync(platformDownloadData.download, cancellationToken);
                 if (!platDownloadWebResponse.IsSuccessStatusCode) return;
                 byte[] platData = platDownloadWebResponse.ContentToBytes();
-                string path = Path.Combine(_config.CustomPlatformsDirectory, $"{platformDownloadData.name}.plat");
+                string path = Path.Combine(_platformManager.DirectoryPath, $"{platformDownloadData.name}.plat");
                 _fileSystemWatcher.EnableRaisingEvents = false;
                 File.WriteAllBytes(path, platData);
                 _fileSystemWatcher.EnableRaisingEvents = true;

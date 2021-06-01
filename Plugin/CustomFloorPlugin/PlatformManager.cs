@@ -3,13 +3,14 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
-using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
 using CustomFloorPlugin.Configuration;
 using CustomFloorPlugin.Helpers;
+
+using IPA.Utilities;
 
 using SiraUtil.Tools;
 
@@ -33,6 +34,11 @@ namespace CustomFloorPlugin
         private readonly Transform _anchor;
         private readonly CancellationTokenSource _cancellationTokenSource;
         private readonly string _cacheFilePath;
+
+        /// <summary>
+        /// The path to the CustomPlatforms folder
+        /// </summary>
+        internal string DirectoryPath { get; }
 
         /// <summary>
         /// An <see cref="ObservableCollection{T}"/> of all currently loaded <see cref="CustomPlatform"/>s<br/>
@@ -63,7 +69,9 @@ namespace CustomFloorPlugin
             _platformLoader = platformLoader;
             _anchor = new GameObject("CustomPlatforms").transform;
             _cancellationTokenSource = new CancellationTokenSource();
-            _cacheFilePath = Path.Combine(_config.CustomPlatformsDirectory, "cache.dat");
+            DirectoryPath = Path.Combine(UnityGame.InstallPath, "CustomPlatforms");
+            _cacheFilePath = Path.Combine(DirectoryPath, "cache.dat");
+            Directory.CreateDirectory(DirectoryPath);
             DefaultPlatform = CreateDefaultPlatform();
             AllPlatforms = new ObservableCollection<CustomPlatform> { DefaultPlatform };
             SingleplayerPlatform = DefaultPlatform;
@@ -100,7 +108,7 @@ namespace CustomFloorPlugin
             defaultPlatform.transform.SetParent(_anchor);
             defaultPlatform.platName = "Default Environment";
             defaultPlatform.platAuthor = "Beat Saber";
-            defaultPlatform.icon = _assetLoader!.DefaultPlatformCover;
+            defaultPlatform.icon = _assetLoader.DefaultPlatformCover;
             defaultPlatform.isDescriptor = false;
             return defaultPlatform;
         }
@@ -124,18 +132,22 @@ namespace CustomFloorPlugin
         private async Task LoadPlatformsAsync(CancellationToken cancellationToken)
         {
             Stopwatch sw = Stopwatch.StartNew();
-            Directory.CreateDirectory(_config.CustomPlatformsDirectory);
+            List<string> loadedPlatformPaths = new();
 
             if (File.Exists(_cacheFilePath))
             {
                 foreach (CustomPlatform platform in EnumeratePlatformDescriptorsFromFile())
+                {
                     AllPlatforms.AddSorted(1, AllPlatforms.Count - 1, platform, null);
+                    loadedPlatformPaths.Add(platform.fullPath);
+                }
             }
 
             // Load all remaining platforms, or all if no cache file is found
-            foreach (string path in Directory.EnumerateFiles(_config.CustomPlatformsDirectory, "*.plat").Except(AllPlatforms.Select(x => x.fullPath)))
+            foreach (string path in Directory.EnumerateFiles(DirectoryPath, "*.plat"))
             {
                 cancellationToken.ThrowIfCancellationRequested();
+                if (loadedPlatformPaths.Contains(path)) continue;
                 CustomPlatform? platform = await CreatePlatformAsync(path);
                 if (platform is null) continue;
                 AllPlatforms.AddSorted(1, AllPlatforms.Count - 1, platform, null);
