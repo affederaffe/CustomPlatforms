@@ -7,7 +7,7 @@ using UnityEngine;
 using Zenject;
 
 
-
+// ReSharper disable once CheckNamespace
 namespace CustomFloorPlugin
 {
     [RequireComponent(typeof(MeshFilter))]
@@ -79,7 +79,7 @@ namespace CustomFloorPlugin
                         new(-width, (y-length)/2, width),
                     };
 
-                    mesh.triangles = Triangles;
+                    mesh.triangles = _triangles;
                 }
 
                 (_, _, Material opaqueGlowMaterial) = await _materialSwapper!.MaterialsLoadingTask;
@@ -105,7 +105,7 @@ namespace CustomFloorPlugin
             _instancedMaterialLightWithId!.ColorWasSet(color);
         }
 
-        private static readonly int[] Triangles = {
+        private static readonly int[] _triangles = {
             0, 2, 1, //face front
 			0, 3, 2,
             2, 3, 4, //face top

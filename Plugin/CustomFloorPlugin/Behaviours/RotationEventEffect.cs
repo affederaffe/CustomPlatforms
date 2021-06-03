@@ -6,6 +6,7 @@ using UnityEngine;
 using Zenject;
 
 
+// ReSharper disable once CheckNamespace
 namespace CustomFloorPlugin
 {
     /// <summary>

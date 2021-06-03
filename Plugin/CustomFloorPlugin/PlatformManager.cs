@@ -3,6 +3,7 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -38,7 +39,7 @@ namespace CustomFloorPlugin
         /// <summary>
         /// The path to the CustomPlatforms folder
         /// </summary>
-        internal string DirectoryPath { get; }
+        internal string DirectoryPath { get; } = Path.Combine(UnityGame.InstallPath, "CustomPlatforms");
 
         /// <summary>
         /// An <see cref="ObservableCollection{T}"/> of all currently loaded <see cref="CustomPlatform"/>s<br/>
@@ -69,7 +70,6 @@ namespace CustomFloorPlugin
             _platformLoader = platformLoader;
             _anchor = new GameObject("CustomPlatforms").transform;
             _cancellationTokenSource = new CancellationTokenSource();
-            DirectoryPath = Path.Combine(UnityGame.InstallPath, "CustomPlatforms");
             _cacheFilePath = Path.Combine(DirectoryPath, "cache.dat");
             Directory.CreateDirectory(DirectoryPath);
             DefaultPlatform = CreateDefaultPlatform();
@@ -118,11 +118,11 @@ namespace CustomFloorPlugin
         /// </summary>
         private void LastSelectedPlatform(CustomPlatform platform)
         {
-            if (_config.SingleplayerPlatformPath == platform.fullPath)
+            if (platform.fullPath == _config.SingleplayerPlatformPath)
                 SingleplayerPlatform = platform;
-            if (_config.MultiplayerPlatformPath == platform.fullPath)
+            if (platform.fullPath == _config.MultiplayerPlatformPath)
                 MultiplayerPlatform = platform;
-            if (_config.A360PlatformPath == platform.fullPath)
+            if (platform.fullPath == _config.A360PlatformPath)
                 A360Platform = platform;
         }
 
@@ -132,25 +132,21 @@ namespace CustomFloorPlugin
         private async Task LoadPlatformsAsync(CancellationToken cancellationToken)
         {
             Stopwatch sw = Stopwatch.StartNew();
-            List<string> loadedPlatformPaths = new();
 
             if (File.Exists(_cacheFilePath))
             {
                 foreach (CustomPlatform platform in EnumeratePlatformDescriptorsFromFile())
-                {
-                    AllPlatforms.AddSorted(1, AllPlatforms.Count - 1, platform, null);
-                    loadedPlatformPaths.Add(platform.fullPath);
-                }
+                    AllPlatforms.AddSorted(1, AllPlatforms.Count - 1, platform);
             }
 
             // Load all remaining platforms, or all if no cache file is found
             foreach (string path in Directory.EnumerateFiles(DirectoryPath, "*.plat"))
             {
                 cancellationToken.ThrowIfCancellationRequested();
-                if (loadedPlatformPaths.Contains(path)) continue;
+                if (AllPlatforms.Any(x => x.fullPath == path)) continue;
                 CustomPlatform? platform = await CreatePlatformAsync(path);
                 if (platform is null) continue;
-                AllPlatforms.AddSorted(1, AllPlatforms.Count - 1, platform, null);
+                AllPlatforms.AddSorted(1, AllPlatforms.Count - 1, platform);
             }
 
             sw.Stop();
@@ -169,14 +165,6 @@ namespace CustomFloorPlugin
             newPlatform.name = platform.name;
             newPlatform.isDescriptor = false;
             LastSelectedPlatform(newPlatform);
-            for (int i = 0; i < AllPlatforms.Count; i++)
-            {
-                CustomPlatform oldPlatform = AllPlatforms[i];
-                if (oldPlatform.fullPath != fullPath) continue;
-                Object.Destroy(oldPlatform.gameObject);
-                AllPlatforms[i] = newPlatform;
-            }
-
             return newPlatform;
         }
 

@@ -7,7 +7,7 @@ namespace CustomFloorPlugin.Helpers
 {
     internal static class CollectionHelper
     {
-        internal static void AddSorted<T>(this IList<T> list, int index, int count, T value, IComparer<T>? comparer)
+        internal static void AddSorted<T>(this IList<T> list, int index, int count, T value, IComparer<T>? comparer = null)
         {
             comparer ??= Comparer<T>.Default;
 
@@ -25,6 +25,13 @@ namespace CustomFloorPlugin.Helpers
         {
             item = enumerable.FirstOrDefault(predicate);
             return item is not null;
+        }
+
+        internal static void Replace<T>(this IList<T> list, T oldItem, T newItem)
+        {
+            int index = list.IndexOf(oldItem);
+            if (index is -1) return;
+            list[index] = newItem;
         }
 
         private static int BinarySearch<T>(this IList<T> list, int index, int count, T value, IComparer<T> comparer)

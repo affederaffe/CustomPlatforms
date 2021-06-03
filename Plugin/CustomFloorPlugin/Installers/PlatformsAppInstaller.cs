@@ -30,7 +30,7 @@ namespace CustomFloorPlugin.Installers
             Container.BindInterfacesAndSelfTo<PlatformManager>().AsSingle();
             Container.Bind<EnvironmentHider>().AsSingle();
             Container.BindInterfacesAndSelfTo<PlatformSpawner>().AsSingle();
-            Container.BindInterfacesTo<API>().AsSingle();
+            Container.BindInterfacesTo<InteractionManager>().AsSingle();
         }
     }
 }

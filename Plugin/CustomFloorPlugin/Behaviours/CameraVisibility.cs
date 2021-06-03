@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 
 
+// ReSharper disable once CheckNamespace
 namespace CustomFloorPlugin
 {
     public class CameraVisibility : MonoBehaviour

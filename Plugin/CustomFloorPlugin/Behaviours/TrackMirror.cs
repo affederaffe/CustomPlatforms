@@ -7,6 +7,7 @@ using UnityEngine;
 using Zenject;
 
 
+// ReSharper disable once CheckNamespace
 namespace CustomFloorPlugin
 {
     [RequireComponent(typeof(MeshRenderer))]
@@ -43,18 +44,18 @@ namespace CustomFloorPlugin
             mirrorMaterial.EnableKeyword("ENABLE_MIRROR");
             mirrorMaterial.EnableKeyword("ETC1_EXTERNAL_ALPHA");
             mirrorMaterial.EnableKeyword("_EMISSION");
-            mirrorMaterial.SetTexture(NormalTexId, normalTexture);
-            mirrorMaterial.SetTextureScale(NormalTexId, normalUVScale);
-            mirrorMaterial.SetTextureOffset(NormalTexId, normalUVOffset);
-            mirrorMaterial.SetFloat(BumpIntensityId, bumpIntensity);
-            mirrorMaterial.SetColor(TintColorId, tintColor);
+            mirrorMaterial.SetTexture(_normalTexId, normalTexture);
+            mirrorMaterial.SetTextureScale(_normalTexId, normalUVScale);
+            mirrorMaterial.SetTextureOffset(_normalTexId, normalUVOffset);
+            mirrorMaterial.SetFloat(_bumpIntensityId, bumpIntensity);
+            mirrorMaterial.SetColor(_tintColorId, tintColor);
             if (enableDirt)
             {
                 mirrorMaterial.EnableKeyword("ENABLE_DIRT");
-                mirrorMaterial.SetTexture(DirtTexId, dirtTexture);
-                mirrorMaterial.SetTextureScale(DirtTexId, dirtUVScale);
-                mirrorMaterial.SetTextureOffset(DirtTexId, dirtUVOffset);
-                mirrorMaterial.SetFloat(DirtIntensityId, dirtIntensity);
+                mirrorMaterial.SetTexture(_dirtTexId, dirtTexture);
+                mirrorMaterial.SetTextureScale(_dirtTexId, dirtUVScale);
+                mirrorMaterial.SetTextureOffset(_dirtTexId, dirtUVOffset);
+                mirrorMaterial.SetFloat(_dirtIntensityId, dirtIntensity);
             }
 
             return mirrorMaterial;
@@ -76,10 +77,10 @@ namespace CustomFloorPlugin
             {
                 noMirrorMaterial.EnableKeyword("DIRT");
                 noMirrorMaterial.EnableKeyword("ENABLE_DIRT");
-                noMirrorMaterial.SetTexture(DirtTexId, dirtTexture);
-                noMirrorMaterial.SetTextureScale(DirtTexId, dirtUVScale);
-                noMirrorMaterial.SetTextureOffset(DirtTexId, dirtUVOffset);
-                noMirrorMaterial.SetFloat(DirtIntensityId, dirtIntensity);
+                noMirrorMaterial.SetTexture(_dirtTexId, dirtTexture);
+                noMirrorMaterial.SetTextureScale(_dirtTexId, dirtUVScale);
+                noMirrorMaterial.SetTextureOffset(_dirtTexId, dirtUVOffset);
+                noMirrorMaterial.SetFloat(_dirtIntensityId, dirtIntensity);
             }
 
             return noMirrorMaterial;
@@ -92,10 +93,10 @@ namespace CustomFloorPlugin
         private static Shader NoMirrorShader => _noMirrorShader ??= Shader.Find("Custom/SimpleLit");
         private static Shader? _noMirrorShader;
 
-        private static readonly int NormalTexId = Shader.PropertyToID("_NormalTex");
-        private static readonly int BumpIntensityId = Shader.PropertyToID("_BumpIntensity");
-        private static readonly int DirtTexId = Shader.PropertyToID("_DirtTex");
-        private static readonly int DirtIntensityId = Shader.PropertyToID("_DirtIntensity");
-        private static readonly int TintColorId = Shader.PropertyToID("_TintColor");
+        private static readonly int _normalTexId = Shader.PropertyToID("_NormalTex");
+        private static readonly int _bumpIntensityId = Shader.PropertyToID("_BumpIntensity");
+        private static readonly int _dirtTexId = Shader.PropertyToID("_DirtTex");
+        private static readonly int _dirtIntensityId = Shader.PropertyToID("_DirtIntensity");
+        private static readonly int _tintColorId = Shader.PropertyToID("_TintColor");
     }
 }

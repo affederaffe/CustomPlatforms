@@ -159,7 +159,7 @@ namespace CustomFloorPlugin
                 case "MainMenu":
                 case "Credits":
                     FindAddGameObject("DefaultMenuEnvironment/MenuFogRing", _menuEnvironment);
-                    FindAddGameObject("DefaultMenuEnvironment/Ground", _menuEnvironment);
+                    FindAddGameObject("DefaultMenuEnvironment/BasicMenuGround", _menuEnvironment);
                     FindAddGameObject("DefaultMenuEnvironment/Notes", _menuEnvironment);
                     FindAddGameObject("DefaultMenuEnvironment/PileOfNotes", _menuEnvironment);
                     break;

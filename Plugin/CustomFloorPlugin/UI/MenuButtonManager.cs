@@ -13,9 +13,10 @@ namespace CustomFloorPlugin.UI
     /// </summary>
     internal class MenuButtonManager : IInitializable, IDisposable
     {
-        private readonly MenuButton _menuButton;
         private readonly PlatformsFlowCoordinator _platformListFlowCoordinator;
         private readonly MainFlowCoordinator _mainFlowCoordinator;
+
+        private readonly MenuButton _menuButton;
 
         public MenuButtonManager(PlatformsFlowCoordinator platformListFlowCoordinator, MainFlowCoordinator mainFlowCoordinator)
         {
@@ -31,7 +32,7 @@ namespace CustomFloorPlugin.UI
 
         public void Dispose()
         {
-            if (MenuButtons.IsSingletonAvailable)
+            if (MenuButtons.IsSingletonAvailable && BSMLParser.IsSingletonAvailable)
                 MenuButtons.instance.UnregisterButton(_menuButton);
         }
 

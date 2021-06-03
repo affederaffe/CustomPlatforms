@@ -5,6 +5,7 @@ using UnityEngine.Events;
 using Zenject;
 
 
+// ReSharper disable once CheckNamespace
 namespace CustomFloorPlugin
 {
     public class EveryNthComboFilter : MonoBehaviour, INotifyPlatformEnabled, INotifyPlatformDisabled

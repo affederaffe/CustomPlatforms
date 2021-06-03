@@ -1,5 +1,3 @@
-using System;
-using System.Collections.Generic;
 using System.Collections.Specialized;
 
 using BeatSaberMarkupLanguage.Attributes;
@@ -7,7 +5,6 @@ using BeatSaberMarkupLanguage.Components;
 using BeatSaberMarkupLanguage.ViewControllers;
 
 using CustomFloorPlugin.Configuration;
-using CustomFloorPlugin.Helpers;
 
 using HMUI;
 
@@ -24,7 +21,7 @@ namespace CustomFloorPlugin.UI
     /// Tagged functions and variables from this class may be used/called by BSML if the .bsml file mentions them.<br/>
     /// </summary>
     [ViewDefinition("CustomFloorPlugin.Views.PlatformLists.bsml")]
-    internal class PlatformListsView : BSMLAutomaticViewController, IInitializable, IDisposable
+    internal class PlatformListsView : BSMLAutomaticViewController
     {
         private PluginConfig? _config;
         private AssetLoader? _assetLoader;
@@ -40,8 +37,6 @@ namespace CustomFloorPlugin.UI
         [UIComponent("a360-platforms-list")]
         private readonly CustomListTableData? _a360PlatformListTable = null;
 
-        private readonly CustomCellComparer _customCellComparer = new();
-
         private CustomListTableData[]? _listTables;
         private ScrollView[]? _scrollViews;
         private int _currentTabIndex;
@@ -53,16 +48,6 @@ namespace CustomFloorPlugin.UI
             _assetLoader = assetLoader;
             _platformManager = platformManager;
             _platformSpawner = platformSpawner;
-        }
-
-        public void Initialize()
-        {
-            _platformManager!.AllPlatforms.CollectionChanged += OnCollectionDidChange;
-        }
-
-        public void Dispose()
-        {
-            _platformManager!.AllPlatforms.CollectionChanged -= OnCollectionDidChange;
         }
 
         /// <summary>
@@ -117,6 +102,7 @@ namespace CustomFloorPlugin.UI
         protected override void DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
         {
             base.DidActivate(firstActivation, addedToHierarchy, screenSystemEnabling);
+            if (firstActivation) _platformManager!.AllPlatforms.CollectionChanged += OnCollectionDidChange;
             CustomPlatform platform = GetPlatformForTabIndex(_currentTabIndex);
             _ = _platformSpawner!.ChangeToPlatformAsync(platform);
         }
@@ -128,6 +114,7 @@ namespace CustomFloorPlugin.UI
         protected override void DidDeactivate(bool removedFromHierarchy, bool screenSystemDisabling)
         {
             base.DidDeactivate(removedFromHierarchy, screenSystemDisabling);
+            if (removedFromHierarchy) _platformManager!.AllPlatforms.CollectionChanged -= OnCollectionDidChange;
             _ = _platformSpawner!.ChangeToPlatformAsync(_config!.ShowInMenu
                 ? _config.ShufflePlatforms
                     ? _platformSpawner!.RandomPlatform
@@ -146,7 +133,7 @@ namespace CustomFloorPlugin.UI
             _listTables = new[] { _singleplayerPlatformListTable!, _multiplayerPlatformListTable!, _a360PlatformListTable! };
             _scrollViews = new ScrollView[_listTables.Length];
             foreach (CustomPlatform platform in _platformManager!.AllPlatforms)
-                AddCellForPlatform(platform);
+                AddCellForPlatform(platform, -1);
             for (int i = 0; i < _listTables.Length; i++)
             {
                 int idx = GetPlatformIndexForTabIndex(i);
@@ -163,17 +150,16 @@ namespace CustomFloorPlugin.UI
         /// </summary>
         private void OnCollectionDidChange(object sender, NotifyCollectionChangedEventArgs e)
         {
-            if (_listTables is null) return;
             switch (e.Action)
             {
                 case NotifyCollectionChangedAction.Add:
                     foreach (CustomPlatform platform in e.NewItems)
-                        AddCellForPlatform(platform);
+                        AddCellForPlatform(platform, e.NewStartingIndex);
                     RefreshListViews();
                     break;
                 case NotifyCollectionChangedAction.Remove:
                     foreach (CustomPlatform platform in e.OldItems)
-                        RemoveCellForPlatform(platform);
+                        RemoveCellForPlatform(platform, e.OldStartingIndex);
                     RefreshListViews();
                     break;
             }
@@ -195,26 +181,26 @@ namespace CustomFloorPlugin.UI
         /// <summary>
         /// Adds a cell to the UI for the given <see cref="CustomPlatform"/>
         /// </summary>
-        /// <param name="platform">The cell's platform to be added</param>
-        private void AddCellForPlatform(CustomPlatform platform)
+        /// <param name="platform">The platform to be added as a cell</param>
+        /// <param name="index">The index the cell should be inserted at</param>
+        private void AddCellForPlatform(CustomPlatform platform, int index)
         {
-            if (_listTables is null) return;
+            if (index is -1) index = _platformManager!.AllPlatforms.IndexOf(platform);
             CustomListTableData.CustomCellInfo cell = new(platform.platName, platform.platAuthor, platform.icon ? platform.icon : _assetLoader!.FallbackCover);
-            foreach (CustomListTableData listTable in _listTables)
-                listTable.data.AddSorted(1, listTable.data.Count - 1, cell, _customCellComparer);
+            foreach (CustomListTableData listTable in _listTables!)
+                listTable.data.Insert(index, cell);
         }
 
         /// <summary>
         /// Removes the cell from the UI for the given <see cref="CustomPlatform"/>
         /// </summary>
-        /// <param name="platform">The cell's platform to be removed</param>
-        private void RemoveCellForPlatform(CustomPlatform platform)
+        /// <param name="platform">The platform the cell was created for</param>
+        /// <param name="index">The index the cell is located at</param>
+        private void RemoveCellForPlatform(CustomPlatform platform, int index)
         {
-            if (_listTables is null) return;
-            int platformIndex = _platformManager!.AllPlatforms.IndexOf(platform);
-            foreach (CustomListTableData listTable in _listTables)
+            foreach (CustomListTableData listTable in _listTables!)
             {
-                listTable.data.RemoveAt(platformIndex);
+                listTable.data.RemoveAt(index);
                 if (platform == GetPlatformForTabIndex(_currentTabIndex))
                 {
                     listTable.tableView.SelectCellWithIdx(0);
@@ -238,18 +224,6 @@ namespace CustomFloorPlugin.UI
                 2 => _platformManager!.A360Platform,
                 _ => _platformManager!.DefaultPlatform
             };
-        }
-
-        private class CustomCellComparer : IComparer<CustomListTableData.CustomCellInfo>
-        {
-            public int Compare(CustomListTableData.CustomCellInfo x, CustomListTableData.CustomCellInfo y)
-            {
-                if (x == y) return 0;
-                int textComparison = string.CompareOrdinal(x.text, y.text);
-                if (textComparison != 0) return textComparison;
-                int subtextComparison = string.CompareOrdinal(x.subtext, y.subtext);
-                return subtextComparison;
-            }
         }
     }
 }

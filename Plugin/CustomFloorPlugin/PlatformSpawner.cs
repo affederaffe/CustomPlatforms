@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 
 using CustomFloorPlugin.Configuration;
+using CustomFloorPlugin.Helpers;
 using CustomFloorPlugin.Interfaces;
 using SiraUtil.Tools;
 
@@ -159,7 +160,7 @@ namespace CustomFloorPlugin
         {
             try
             {
-                if (_platformManager.ActivePlatform == platform) return;
+                if (platform == _platformManager.ActivePlatform) return;
 
                 _cancellationTokenSource?.Cancel();
                 _cancellationTokenSource?.Dispose();
@@ -173,6 +174,7 @@ namespace CustomFloorPlugin
                 if (platform.isDescriptor)
                 {
                     CustomPlatform? newPlatform = await _platformManager.CreatePlatformAsync(platform.fullPath);
+                    if (newPlatform is not null) _platformManager.AllPlatforms.Replace(platform, newPlatform);
                     cancellationToken.ThrowIfCancellationRequested();
                     if (newPlatform is null)
                     {

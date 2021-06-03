@@ -8,8 +8,6 @@ using System.Threading.Tasks;
 using CustomFloorPlugin.Helpers;
 
 using IPA.Loader;
-using IPA.Utilities;
-using IPA.Utilities.Async;
 
 using SiraUtil;
 
@@ -22,24 +20,26 @@ namespace CustomFloorPlugin
     /// A class that handles all interaction with outside plugins, at the moment just SongCore and Cinema<br/>
     /// Also detects changes in the directory and reflects them in-game, e.g. loading, updating or removing platforms
     /// </summary>
-    internal class API : IInitializable, IDisposable
+    internal class InteractionManager : IInitializable, IDisposable
     {
         private readonly WebClient _webClient;
         private readonly PlatformManager _platformManager;
         private readonly PlatformSpawner _platformSpawner;
 
+        private readonly SynchronizationContext _mainThreadSynchronizationContext;
         private readonly FileSystemWatcher _fileSystemWatcher;
         private readonly CancellationTokenSource _cancellationTokenSource;
         private readonly bool _isSongCoreInstalled;
         private readonly bool _isCinemaInstalled;
 
-        public API(WebClient webClient,
-                   PlatformManager platformManager,
-                   PlatformSpawner platformSpawner)
+        public InteractionManager(WebClient webClient,
+                                  PlatformManager platformManager,
+                                  PlatformSpawner platformSpawner)
         {
             _webClient = webClient;
             _platformManager = platformManager;
             _platformSpawner = platformSpawner;
+            _mainThreadSynchronizationContext = SynchronizationContext.Current;
             _fileSystemWatcher = new FileSystemWatcher(_platformManager.DirectoryPath, "*.plat");
             _cancellationTokenSource = new CancellationTokenSource();
             _isSongCoreInstalled = PluginManager.GetPlugin("SongCore") is not null;
@@ -73,15 +73,10 @@ namespace CustomFloorPlugin
         /// </summary>
         private async void OnFileChanged(object sender, FileSystemEventArgs e)
         {
-            if (!UnityGame.OnMainThread)
-            {
-                _ = UnityMainThreadTaskScheduler.Factory.StartNew(() => OnFileChanged(sender, e));
-                return;
-            }
-
             if (_platformManager.AllPlatforms.TryGetFirst(x => x.fullPath == e.FullPath, out CustomPlatform platform))
             {
-                bool wasActivePlatform = _platformManager.ActivePlatform == platform;
+                await _mainThreadSynchronizationContext;
+                bool wasActivePlatform = platform == _platformManager.ActivePlatform;
                 CustomPlatform? newPlatform = await _platformManager.CreatePlatformAsync(e.FullPath);
                 if (!wasActivePlatform || newPlatform is null) return;
                 _ = _platformSpawner.ChangeToPlatformAsync(newPlatform);
@@ -93,15 +88,10 @@ namespace CustomFloorPlugin
         /// </summary>
         private async void OnFileCreated(object sender, FileSystemEventArgs e)
         {
-            if (!UnityGame.OnMainThread)
-            {
-                _ = UnityMainThreadTaskScheduler.Factory.StartNew(() => OnFileCreated(sender, e));
-                return;
-            }
-
+            await _mainThreadSynchronizationContext;
             CustomPlatform? newPlatform = await _platformManager.CreatePlatformAsync(e.FullPath);
             if (newPlatform is null) return;
-            _platformManager.AllPlatforms.AddSorted(1, _platformManager.AllPlatforms.Count - 1, newPlatform, null);
+            _platformManager.AllPlatforms.AddSorted(1, _platformManager.AllPlatforms.Count - 1, newPlatform);
         }
 
         /// <summary>
@@ -109,15 +99,10 @@ namespace CustomFloorPlugin
         /// </summary>
         private async void OnFileDeleted(object sender, FileSystemEventArgs e)
         {
-            if (!UnityGame.OnMainThread)
-            {
-                _ = UnityMainThreadTaskScheduler.Factory.StartNew(() => OnFileDeleted(sender, e));
-                return;
-            }
-
             if (_platformManager.AllPlatforms.TryGetFirst(x => x.fullPath == e.FullPath, out CustomPlatform platform))
             {
-                if (_platformManager.ActivePlatform == platform) await _platformSpawner.ChangeToPlatformAsync(_platformManager.DefaultPlatform);
+                await _mainThreadSynchronizationContext;
+                if (platform == _platformManager.ActivePlatform) await _platformSpawner.ChangeToPlatformAsync(_platformManager.DefaultPlatform);
                 _platformManager.AllPlatforms.Remove(platform);
                 UnityEngine.Object.Destroy(platform.gameObject);
             }
@@ -177,17 +162,16 @@ namespace CustomFloorPlugin
                 : name is not null ? $"https://modelsaber.com/api/v2/get.php?type=platform&filter=name:{name}"
                 : throw new ArgumentNullException($"{nameof(hash)}, {nameof(name)}", "Invalid platform request");
 
-            Task.Run(() => DownloadPlatform(url));
+            Task.Run(() => DownloadPlatform(url, _cancellationTokenSource.Token));
         }
 
         /// <summary>
         /// Asynchronously downloads a <see cref="CustomPlatform"/> from modelsaber if the selected level requires it
         /// </summary>
-        private async void DownloadPlatform(string url)
+        private async void DownloadPlatform(string url, CancellationToken cancellationToken)
         {
             try
             {
-                CancellationToken cancellationToken = _cancellationTokenSource.Token;
                 WebResponse downloadDataWebResponse = await _webClient.GetAsync(url, cancellationToken);
                 if (!downloadDataWebResponse.IsSuccessStatusCode) return;
                 PlatformDownloadData platformDownloadData = downloadDataWebResponse.ContentToJson<Dictionary<string, PlatformDownloadData>>().First().Value;
@@ -201,7 +185,7 @@ namespace CustomFloorPlugin
                 CustomPlatform? requestedPlatform = await _platformManager.CreatePlatformAsync(path);
                 cancellationToken.ThrowIfCancellationRequested();
                 if (requestedPlatform is null) return;
-                _platformManager.AllPlatforms.AddSorted(1, _platformManager.AllPlatforms.Count - 1, requestedPlatform, null);
+                _platformManager.AllPlatforms.AddSorted(1, _platformManager.AllPlatforms.Count - 1, requestedPlatform);
                 _platformManager.APIRequestedPlatform = requestedPlatform;
             }
             catch (TaskCanceledException) { }

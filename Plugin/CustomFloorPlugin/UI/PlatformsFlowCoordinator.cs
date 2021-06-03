@@ -37,8 +37,8 @@ namespace CustomFloorPlugin.UI
         {
             if (firstActivation)
             {
-                SetTitle("Custom Platforms");
                 showBackButton = true;
+                SetTitle("Custom Platforms");
                 ProvideInitialViewControllers(_platformsListView, _changelogView, _settingsView);
             }
         }

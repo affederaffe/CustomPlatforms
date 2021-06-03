@@ -22,8 +22,8 @@ namespace CustomFloorPlugin.UI
         /// </summary>
         [UIValue("changelog-text")]
         public static string Changelog =>
-        @"  <size=150%<color=#888888>Version 6.1.5</color></size>
-        - Hotfix: Fixed black screen on startup
+        @"  <size=150%><color=#888888>Version 6.1.5</color></size>
+        - Fixed black screen on startup
 
   <size=150%><color=#888888>Version 6.1.4</color></size>
         - Updated for 1.16.1

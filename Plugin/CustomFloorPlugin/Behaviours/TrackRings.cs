@@ -7,6 +7,7 @@ using UnityEngine;
 using Zenject;
 
 
+// ReSharper disable once CheckNamespace
 namespace CustomFloorPlugin
 {
     public class TrackRings : MonoBehaviour, INotifyPlatformEnabled, INotifyPlatformDisabled

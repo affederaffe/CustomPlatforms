@@ -24,6 +24,16 @@ namespace CustomFloorPlugin
         private readonly MaterialSwapper _materialSwapper;
 
         /// <summary>
+        /// The old heart, to remind everyone that this plugin is some legacy garbage
+        /// </summary>
+        private readonly Task<GameObject> _heartLoadingTask;
+
+        /// <summary>
+        /// Used as a players place replacement in platform preview
+        /// </summary>
+        private readonly Task<GameObject> _playersPlaceLoadingTask;
+
+        /// <summary>
         /// The cover for the default platform
         /// </summary>
         internal Sprite DefaultPlatformCover { get; }
@@ -37,16 +47,6 @@ namespace CustomFloorPlugin
         /// Multiplayer light effects
         /// </summary>
         internal LightEffects MultiplayerLightEffects { get; }
-
-        /// <summary>
-        /// The old heart, to remind everyone that this plugin is some legacy garbage
-        /// </summary>
-        private readonly Task<GameObject> _heartLoadingTask;
-
-        /// <summary>
-        /// Used as a players place replacement in platform preview
-        /// </summary>
-        private readonly Task<GameObject> _playersPlaceLoadingTask;
 
         public AssetLoader(DiContainer container, MaterialSwapper materialSwapper)
         {

@@ -19,13 +19,12 @@ namespace CustomFloorPlugin
         private readonly SiraLog _siraLog;
         private readonly MaterialSwapper _materialSwapper;
 
-        private readonly Dictionary<string, Task<CustomPlatform?>> _pathTaskPairs;
+        private readonly Dictionary<string, Task<CustomPlatform?>> _pathTaskPairs = new();
 
         public PlatformLoader(SiraLog siraLog, MaterialSwapper materialSwapper)
         {
             _siraLog = siraLog;
             _materialSwapper = materialSwapper;
-            _pathTaskPairs = new Dictionary<string, Task<CustomPlatform?>>();
         }
 
         /// <summary>
@@ -57,10 +56,7 @@ namespace CustomFloorPlugin
                 return null;
             }
 
-            using FileStream fileStream = File.OpenRead(fullPath);
-            byte[] bundleData = new byte[fileStream.Length];
-            await Task.Run(() => fileStream.Read(bundleData, 0, bundleData.Length));
-
+            byte[] bundleData = await Task.Run(() => File.ReadAllBytes(fullPath));
             AssetBundle assetBundle = await LoadAssetBundleFromBytesAsync(bundleData);
 
             if (assetBundle == null)

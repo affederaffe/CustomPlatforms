@@ -15,9 +15,9 @@ namespace CustomFloorPlugin
     /// </summary>
     public class MaterialSwapper : IInitializable
     {
-        internal Task<(Material DarkEnvSimpleMaterial, Material TransparentGlowMaterial, Material OpaqueGlowMaterial)> MaterialsLoadingTask { get; }
-
         private readonly TaskCompletionSource<(Material, Material, Material)> _taskSource;
+
+        internal Task<(Material DarkEnvSimpleMaterial, Material TransparentGlowMaterial, Material OpaqueGlowMaterial)> MaterialsLoadingTask { get; }
 
         public MaterialSwapper()
         {
@@ -27,16 +27,16 @@ namespace CustomFloorPlugin
 
         public async void Initialize()
         {
-            Material? darkEnvSimpleMaterial;
-            Material? transparentGlowMaterial;
-            Material? opaqueGlowMaterial;
+            Material? darkEnvSimpleMaterial = null;
+            Material? transparentGlowMaterial = null;
+            Material? opaqueGlowMaterial = null;
             do
             {
                 await Helpers.AsyncHelper.WaitForEndOfFrameAsync();
                 Material[] materials = Resources.FindObjectsOfTypeAll<Material>();
-                darkEnvSimpleMaterial = materials.FirstOrDefault(x => x.name == "DarkEnvironmentSimple");
-                transparentGlowMaterial = materials.FirstOrDefault(x => x.name == "EnvLight");
-                opaqueGlowMaterial = materials.FirstOrDefault(x => x.name == "EnvLightOpaque");
+                darkEnvSimpleMaterial ??= materials.FirstOrDefault(x => x.name == "DarkEnvironmentSimple");
+                transparentGlowMaterial ??= materials.FirstOrDefault(x => x.name == "EnvLight");
+                opaqueGlowMaterial ??= materials.FirstOrDefault(x => x.name == "EnvLightOpaque");
             } while (darkEnvSimpleMaterial is null || transparentGlowMaterial is null || opaqueGlowMaterial is null);
             opaqueGlowMaterial.DisableKeyword("ENABLE_HEIGHT_FOG");
             _taskSource.SetResult((darkEnvSimpleMaterial, transparentGlowMaterial, opaqueGlowMaterial));

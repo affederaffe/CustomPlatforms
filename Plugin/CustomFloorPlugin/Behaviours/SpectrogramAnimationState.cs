@@ -5,6 +5,7 @@ using UnityEngine;
 using Zenject;
 
 
+// ReSharper disable once CheckNamespace
 namespace CustomFloorPlugin
 {
     public class SpectrogramAnimationState : MonoBehaviour, INotifyPlatformEnabled
