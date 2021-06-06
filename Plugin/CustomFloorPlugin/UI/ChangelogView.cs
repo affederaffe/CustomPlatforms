@@ -23,7 +23,9 @@ namespace CustomFloorPlugin.UI
         [UIValue("changelog-text")]
         public static string Changelog =>
         @"  <size=150%><color=#888888>Version 6.1.5</color></size>
+        - Updated for 1.16.2
         - Fixed black screen on startup
+        - Added option to disable the gradient background
 
   <size=150%><color=#888888>Version 6.1.4</color></size>
         - Updated for 1.16.1

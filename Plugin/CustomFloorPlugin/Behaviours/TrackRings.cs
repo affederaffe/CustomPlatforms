@@ -61,7 +61,7 @@ namespace CustomFloorPlugin
 
             if (_trackLaneRingsManager is null)
             {
-                await _materialSwapper!.ReplaceMaterials(trackLaneRingPrefab);
+                await _materialSwapper!.ReplaceMaterialsAsync(trackLaneRingPrefab);
                 gameObject.SetActive(false);
                 TrackLaneRing trackLaneRing = trackLaneRingPrefab.AddComponent<TrackLaneRing>();
                 _trackLaneRingsManager = gameObject.AddComponent<TrackLaneRingsManager>();

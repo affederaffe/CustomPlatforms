@@ -39,7 +39,7 @@ namespace CustomFloorPlugin.UI
 
         private CustomListTableData[]? _listTables;
         private ScrollView[]? _scrollViews;
-        private int _currentTabIndex;
+        private int _tabIndex;
 
         [Inject]
         public void Construct(PluginConfig config, AssetLoader assetLoader, PlatformSpawner platformSpawner, PlatformManager platformManager)
@@ -61,8 +61,8 @@ namespace CustomFloorPlugin.UI
         // ReSharper disable once UnusedParameter.Local
         private void OnDidSelectTab(SegmentedControl segmentedControl, int _1)
         {
-            _currentTabIndex = segmentedControl.selectedCellNumber;
-            int index = GetPlatformIndexForTabIndex(_currentTabIndex);
+            _tabIndex = segmentedControl.selectedCellNumber;
+            int index = GetPlatformIndexForTabIndex(_tabIndex);
             _listTables![segmentedControl.selectedCellNumber].tableView.ScrollToCellWithIdx(index, TableView.ScrollPositionType.Beginning, false);
             _listTables![segmentedControl.selectedCellNumber].tableView.SelectCellWithIdx(index, true);
         }
@@ -78,7 +78,7 @@ namespace CustomFloorPlugin.UI
         private async void OnDidSelectPlatform(TableView _1, int index)
         {
             await _platformSpawner!.ChangeToPlatformAsync(_platformManager!.AllPlatforms[index]);
-            switch (_currentTabIndex)
+            switch (_tabIndex)
             {
                 case 0:
                     _platformManager!.SingleplayerPlatform = _platformManager.ActivePlatform;
@@ -103,7 +103,7 @@ namespace CustomFloorPlugin.UI
         {
             base.DidActivate(firstActivation, addedToHierarchy, screenSystemEnabling);
             if (firstActivation) _platformManager!.AllPlatforms.CollectionChanged += OnCollectionDidChange;
-            CustomPlatform platform = GetPlatformForTabIndex(_currentTabIndex);
+            CustomPlatform platform = GetPlatformForTabIndex(_tabIndex);
             _ = _platformSpawner!.ChangeToPlatformAsync(platform);
         }
 
@@ -132,14 +132,14 @@ namespace CustomFloorPlugin.UI
         {
             _listTables = new[] { _singleplayerPlatformListTable!, _multiplayerPlatformListTable!, _a360PlatformListTable! };
             _scrollViews = new ScrollView[_listTables.Length];
-            foreach (CustomPlatform platform in _platformManager!.AllPlatforms)
-                AddCellForPlatform(platform, -1);
+            for (int i = 0; i < _platformManager!.AllPlatforms.Count; i++)
+                AddCellForPlatform(_platformManager.AllPlatforms[i], i);
             for (int i = 0; i < _listTables.Length; i++)
             {
-                int idx = GetPlatformIndexForTabIndex(i);
+                int index = GetPlatformIndexForTabIndex(i);
                 _listTables[i].tableView.ReloadData();
-                _listTables[i].tableView.ScrollToCellWithIdx(idx, TableView.ScrollPositionType.Beginning, false);
-                _listTables[i].tableView.SelectCellWithIdx(idx);
+                _listTables[i].tableView.ScrollToCellWithIdx(index, TableView.ScrollPositionType.Beginning, false);
+                _listTables[i].tableView.SelectCellWithIdx(index);
                 _scrollViews[i] = _listTables[i].tableView.GetField<ScrollView, TableView>("_scrollView");
             }
         }
@@ -185,7 +185,6 @@ namespace CustomFloorPlugin.UI
         /// <param name="index">The index the cell should be inserted at</param>
         private void AddCellForPlatform(CustomPlatform platform, int index)
         {
-            if (index is -1) index = _platformManager!.AllPlatforms.IndexOf(platform);
             CustomListTableData.CustomCellInfo cell = new(platform.platName, platform.platAuthor, platform.icon ? platform.icon : _assetLoader!.FallbackCover);
             foreach (CustomListTableData listTable in _listTables!)
                 listTable.data.Insert(index, cell);
@@ -201,7 +200,7 @@ namespace CustomFloorPlugin.UI
             foreach (CustomListTableData listTable in _listTables!)
             {
                 listTable.data.RemoveAt(index);
-                if (platform == GetPlatformForTabIndex(_currentTabIndex))
+                if (platform == GetPlatformForTabIndex(_tabIndex))
                 {
                     listTable.tableView.SelectCellWithIdx(0);
                     listTable.tableView.ScrollToCellWithIdx(0, TableView.ScrollPositionType.Beginning, false);

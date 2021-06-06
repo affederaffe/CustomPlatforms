@@ -20,12 +20,14 @@ namespace CustomFloorPlugin.UI
     {
         private PluginConfig? _config;
         private AssetLoader? _assetLoader;
+        private EnvironmentHider? _environmentHider;
 
         [Inject]
-        public void Construct(PluginConfig config, AssetLoader assetLoader)
+        public void Construct(PluginConfig config, AssetLoader assetLoader, EnvironmentHider environmentHider)
         {
             _config = config;
             _assetLoader = assetLoader;
+            _environmentHider = environmentHider;
         }
 
         /// <summary>
@@ -36,7 +38,11 @@ namespace CustomFloorPlugin.UI
         public bool AlwaysShowFeet
         {
             get => _config!.AlwaysShowFeet;
-            set => _config!.AlwaysShowFeet = value;
+            set
+            {
+                _config!.AlwaysShowFeet = value;
+                _environmentHider!.ToggleFeet(value);
+            }
         }
 
         /// <summary>
@@ -50,7 +56,7 @@ namespace CustomFloorPlugin.UI
             set
             {
                 _config!.ShowHeart = value;
-                _assetLoader!.ToggleHeart(value);
+                _assetLoader!.Heart.Result.SetActive(value);
             }
         }
 
@@ -75,6 +81,24 @@ namespace CustomFloorPlugin.UI
             get => _config!.ShufflePlatforms;
             set => _config!.ShufflePlatforms = value;
         }
+
+        /// <summary>
+        /// Should the gradient background be disabled?<br/>
+        /// Forwards the current choice to the UI, and the new choice to the plugin
+        /// </summary>
+        [UIValue("disable-gradient-background")]
+        public bool DisableGradientBackground
+        {
+            get => _config!.DisableGradientBackground;
+            set
+            {
+                _config!.DisableGradientBackground = value;
+                _environmentHider!.ToggleGradientBackground(value);
+            }
+        }
+
+        [UIValue("show-heart-hover-hint")]
+        public static string ShowHeartHoverHint => "I <3 Beat Saber";
 
         [UIValue("shuffle-platforms-hover-hint")]
         public static string ShufflePlatformsHoverHint => "Use a random platform\n singleplayer | menu only";

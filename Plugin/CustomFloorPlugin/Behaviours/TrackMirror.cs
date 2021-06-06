@@ -25,14 +25,22 @@ namespace CustomFloorPlugin
         public Color tintColor = Color.white;
 
         private Mirror? _mirror;
+        private MirrorRendererSO? _mirrorRenderer;
+
+        [Inject]
+        public void Construct(MirrorRendererSO mirrorRenderer)
+        {
+            _mirrorRenderer = mirrorRenderer;
+        }
 
         public void PlatformEnabled(DiContainer container)
         {
             if (_mirror is null)
             {
+                container.Inject(this);
                 _mirror = gameObject.AddComponent<Mirror>();
                 _mirror.SetField("_renderer", GetComponent<MeshRenderer>());
-                _mirror.SetField("_mirrorRenderer", MirrorRenderer);
+                _mirror.SetField("_mirrorRenderer", _mirrorRenderer);
                 _mirror.SetField("_mirrorMaterial", CreateMirrorMaterial());
                 _mirror.SetField("_noMirrorMaterial", CreateNoMirrorMaterial());
             }
@@ -40,10 +48,7 @@ namespace CustomFloorPlugin
 
         private Material CreateMirrorMaterial()
         {
-            Material mirrorMaterial = new(MirrorShader);
-            mirrorMaterial.EnableKeyword("ENABLE_MIRROR");
-            mirrorMaterial.EnableKeyword("ETC1_EXTERNAL_ALPHA");
-            mirrorMaterial.EnableKeyword("_EMISSION");
+            Material mirrorMaterial = new(_mirrorMaterialBase);
             mirrorMaterial.SetTexture(_normalTexId, normalTexture);
             mirrorMaterial.SetTextureScale(_normalTexId, normalUVScale);
             mirrorMaterial.SetTextureOffset(_normalTexId, normalUVOffset);
@@ -63,16 +68,7 @@ namespace CustomFloorPlugin
 
         private Material CreateNoMirrorMaterial()
         {
-            Material noMirrorMaterial = new(NoMirrorShader);
-            noMirrorMaterial.EnableKeyword("DIFFUSE");
-            noMirrorMaterial.EnableKeyword("ENABLE_DIFFUSE");
-            noMirrorMaterial.EnableKeyword("ENABLE_FOG");
-            noMirrorMaterial.EnableKeyword("ENABLE_SPECULAR");
-            noMirrorMaterial.EnableKeyword("FOG");
-            noMirrorMaterial.EnableKeyword("SPECULAR");
-            noMirrorMaterial.EnableKeyword("_EMISSION");
-            noMirrorMaterial.EnableKeyword("_ENABLE_FOG_TINT");
-            noMirrorMaterial.EnableKeyword("_RIMLIGHT_NONE");
+            Material noMirrorMaterial = new(_noMirrorMaterialBase);
             if (enableDirt)
             {
                 noMirrorMaterial.EnableKeyword("DIRT");
@@ -86,12 +82,37 @@ namespace CustomFloorPlugin
             return noMirrorMaterial;
         }
 
-        private static MirrorRendererSO MirrorRenderer => _mirrorRenderer ??= Resources.FindObjectsOfTypeAll<MirrorRendererSO>()[0];
-        private static MirrorRendererSO? _mirrorRenderer;
-        private static Shader MirrorShader => _mirrorShader ??= Shader.Find("Custom/Mirror");
-        private static Shader? _mirrorShader;
-        private static Shader NoMirrorShader => _noMirrorShader ??= Shader.Find("Custom/SimpleLit");
-        private static Shader? _noMirrorShader;
+        private static Material CreateMirrorMaterialBase()
+        {
+            Shader mirrorShader = Shader.Find("Custom/Mirror");
+            Material mirrorMaterial = new(mirrorShader);
+            mirrorMaterial.EnableKeyword("ENABLE_MIRROR");
+            mirrorMaterial.EnableKeyword("ETC1_EXTERNAL_ALPHA");
+            mirrorMaterial.EnableKeyword("_EMISSION");
+            return mirrorMaterial;
+        }
+
+        private static Material CreateNoMirrorMaterialBase()
+        {
+            Shader noMirrorShader = Shader.Find("Custom/SimpleLit");
+            Material noMirrorMaterial = new(noMirrorShader);
+            noMirrorMaterial.EnableKeyword("DIFFUSE");
+            noMirrorMaterial.EnableKeyword("ENABLE_DIFFUSE");
+            noMirrorMaterial.EnableKeyword("ENABLE_FOG");
+            noMirrorMaterial.EnableKeyword("ENABLE_SPECULAR");
+            noMirrorMaterial.EnableKeyword("FOG");
+            noMirrorMaterial.EnableKeyword("NOISE_DITHERING");
+            noMirrorMaterial.EnableKeyword("REFLECTION_PROBE");
+            noMirrorMaterial.EnableKeyword("REFLECTION_PROBE_BOX_PROJECTION");
+            noMirrorMaterial.EnableKeyword("_EMISSION");
+            noMirrorMaterial.EnableKeyword("_ENABLE_FOG_TINT");
+            noMirrorMaterial.EnableKeyword("_RIMLIGHT_NONE");
+            noMirrorMaterial.color = new Color(0.15f, 0.15f, 0.15f, 0f);
+            return noMirrorMaterial;
+        }
+
+        private static readonly Material _mirrorMaterialBase = CreateMirrorMaterialBase();
+        private static readonly Material _noMirrorMaterialBase = CreateNoMirrorMaterialBase();
 
         private static readonly int _normalTexId = Shader.PropertyToID("_NormalTex");
         private static readonly int _bumpIntensityId = Shader.PropertyToID("_BumpIntensity");

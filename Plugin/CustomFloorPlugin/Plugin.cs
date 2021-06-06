@@ -26,9 +26,7 @@ namespace CustomFloorPlugin
         /// <param name="config">The config BSIPA provides</param>
         /// <param name="zenjector">The zenjector that SiraUtil passes to this plugin</param>
         [Init]
-        // ReSharper disable once UnusedMember.Global
-        // ReSharper disable once CA1822
-        public void Init(Logger logger, Config config, Zenjector zenjector)
+        public Plugin(Logger logger, Config config, Zenjector zenjector)
         {
             zenjector.OnApp<PlatformsAppInstaller>().WithParameters(logger, config.Generated<PluginConfig>());
             zenjector.OnMenu<PlatformsMenuInstaller>();

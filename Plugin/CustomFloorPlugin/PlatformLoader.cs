@@ -19,12 +19,13 @@ namespace CustomFloorPlugin
         private readonly SiraLog _siraLog;
         private readonly MaterialSwapper _materialSwapper;
 
-        private readonly Dictionary<string, Task<CustomPlatform?>> _pathTaskPairs = new();
+        private readonly Dictionary<string, Task<CustomPlatform?>> _pathTaskPairs;
 
         public PlatformLoader(SiraLog siraLog, MaterialSwapper materialSwapper)
         {
             _siraLog = siraLog;
             _materialSwapper = materialSwapper;
+            _pathTaskPairs = new Dictionary<string, Task<CustomPlatform?>>();
         }
 
         /// <summary>
@@ -107,7 +108,7 @@ namespace CustomFloorPlugin
             customPlatform.fullPath = fullPath;
             customPlatform.name = $"{customPlatform.platName} by {customPlatform.platAuthor}";
 
-            await _materialSwapper.ReplaceMaterials(customPlatform.gameObject);
+            await _materialSwapper.ReplaceMaterialsAsync(customPlatform.gameObject);
 
             return customPlatform;
         }

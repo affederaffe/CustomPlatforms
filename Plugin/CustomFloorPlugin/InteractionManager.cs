@@ -8,6 +8,8 @@ using System.Threading.Tasks;
 using CustomFloorPlugin.Helpers;
 
 using IPA.Loader;
+using IPA.Utilities;
+using IPA.Utilities.Async;
 
 using SiraUtil;
 
@@ -26,7 +28,6 @@ namespace CustomFloorPlugin
         private readonly PlatformManager _platformManager;
         private readonly PlatformSpawner _platformSpawner;
 
-        private readonly SynchronizationContext _mainThreadSynchronizationContext;
         private readonly FileSystemWatcher _fileSystemWatcher;
         private readonly CancellationTokenSource _cancellationTokenSource;
         private readonly bool _isSongCoreInstalled;
@@ -39,7 +40,6 @@ namespace CustomFloorPlugin
             _webClient = webClient;
             _platformManager = platformManager;
             _platformSpawner = platformSpawner;
-            _mainThreadSynchronizationContext = SynchronizationContext.Current;
             _fileSystemWatcher = new FileSystemWatcher(_platformManager.DirectoryPath, "*.plat");
             _cancellationTokenSource = new CancellationTokenSource();
             _isSongCoreInstalled = PluginManager.GetPlugin("SongCore") is not null;
@@ -73,9 +73,14 @@ namespace CustomFloorPlugin
         /// </summary>
         private async void OnFileChanged(object sender, FileSystemEventArgs e)
         {
+            if (!UnityGame.OnMainThread)
+            {
+                _ = UnityMainThreadTaskScheduler.Factory.StartNew(() => OnFileChanged(sender, e));
+                return;
+            }
+
             if (_platformManager.AllPlatforms.TryGetFirst(x => x.fullPath == e.FullPath, out CustomPlatform platform))
             {
-                await _mainThreadSynchronizationContext;
                 bool wasActivePlatform = platform == _platformManager.ActivePlatform;
                 CustomPlatform? newPlatform = await _platformManager.CreatePlatformAsync(e.FullPath);
                 if (!wasActivePlatform || newPlatform is null) return;
@@ -88,7 +93,12 @@ namespace CustomFloorPlugin
         /// </summary>
         private async void OnFileCreated(object sender, FileSystemEventArgs e)
         {
-            await _mainThreadSynchronizationContext;
+            if (!UnityGame.OnMainThread)
+            {
+                _ = UnityMainThreadTaskScheduler.Factory.StartNew(() => OnFileChanged(sender, e));
+                return;
+            }
+
             CustomPlatform? newPlatform = await _platformManager.CreatePlatformAsync(e.FullPath);
             if (newPlatform is null) return;
             _platformManager.AllPlatforms.AddSorted(1, _platformManager.AllPlatforms.Count - 1, newPlatform);
@@ -99,9 +109,14 @@ namespace CustomFloorPlugin
         /// </summary>
         private async void OnFileDeleted(object sender, FileSystemEventArgs e)
         {
+            if (!UnityGame.OnMainThread)
+            {
+                _ = UnityMainThreadTaskScheduler.Factory.StartNew(() => OnFileChanged(sender, e));
+                return;
+            }
+
             if (_platformManager.AllPlatforms.TryGetFirst(x => x.fullPath == e.FullPath, out CustomPlatform platform))
             {
-                await _mainThreadSynchronizationContext;
                 if (platform == _platformManager.ActivePlatform) await _platformSpawner.ChangeToPlatformAsync(_platformManager.DefaultPlatform);
                 _platformManager.AllPlatforms.Remove(platform);
                 UnityEngine.Object.Destroy(platform.gameObject);

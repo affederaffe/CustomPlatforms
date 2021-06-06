@@ -32,7 +32,7 @@ namespace CustomFloorPlugin
             Material? opaqueGlowMaterial = null;
             do
             {
-                await Helpers.AsyncHelper.WaitForEndOfFrameAsync();
+                await Task.Yield();
                 Material[] materials = Resources.FindObjectsOfTypeAll<Material>();
                 darkEnvSimpleMaterial ??= materials.FirstOrDefault(x => x.name == "DarkEnvironmentSimple");
                 transparentGlowMaterial ??= materials.FirstOrDefault(x => x.name == "EnvLight");
@@ -46,17 +46,17 @@ namespace CustomFloorPlugin
         /// Replaces all fake <see cref="Material"/>s on all <see cref="Renderer"/>s under a given <see cref="GameObject"/>
         /// </summary>
         /// <param name="gameObject"><see cref="GameObject"/> to search for <see cref="Renderer"/>s</param>
-        public async Task ReplaceMaterials(GameObject gameObject)
+        public async Task ReplaceMaterialsAsync(GameObject gameObject)
         {
             foreach (Renderer renderer in gameObject.GetComponentsInChildren<Renderer>(true))
-                await ReplaceForRenderer(renderer);
+                await ReplaceForRendererAsync(renderer);
         }
 
         /// <summary>
         /// Replaces all fake <see cref="Material"/>s on a given <see cref="Renderer"/>
         /// </summary>
         /// <param name="renderer">What <see cref="Renderer"/> to replace materials for</param>
-        private async Task ReplaceForRenderer(Renderer renderer)
+        private async Task ReplaceForRendererAsync(Renderer renderer)
         {
             Material[] materialsCopy = renderer.materials;
             (Material darkEnvSimpleMaterial, Material transparentGlowMaterial, Material opaqueGlowMaterial) = await MaterialsLoadingTask;

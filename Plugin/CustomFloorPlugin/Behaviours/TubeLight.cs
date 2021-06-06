@@ -69,21 +69,21 @@ namespace CustomFloorPlugin
                     float y = (0.5f - center) * length * 2;
                     mesh.vertices = new Vector3[]
                     {
-                        new(-width, (y-length)/2, -width),
-                        new(width, (y-length)/2, -width),
-                        new(width, (y+length)/2, -width),
-                        new(-width, (y+length)/2, -width),
-                        new(-width, (y+length)/2, width),
-                        new(width, (y+length)/2, width),
-                        new(width, (y-length)/2, width),
-                        new(-width, (y-length)/2, width),
+                        new(-width, (y - length) / 2, -width),
+                        new(width, (y - length) / 2, -width),
+                        new(width, (y + length) / 2, -width),
+                        new(-width, (y + length) / 2, -width),
+                        new(-width, (y + length) / 2, width),
+                        new(width, (y + length) / 2, width),
+                        new(width, (y - length) / 2, width),
+                        new(-width, (y - length) / 2, width)
                     };
 
                     mesh.triangles = _triangles;
                 }
 
                 (_, _, Material opaqueGlowMaterial) = await _materialSwapper!.MaterialsLoadingTask;
-                GetComponent<Renderer>().material = opaqueGlowMaterial;
+                GetComponent<Renderer>().sharedMaterial = opaqueGlowMaterial;
                 MaterialPropertyBlockController materialPropertyBlockController = gameObject.AddComponent<MaterialPropertyBlockController>();
                 materialPropertyBlockController.SetField("_renderers", new[] { GetComponent<Renderer>() });
                 MaterialPropertyBlockColorSetter materialPropertyBlockColorSetter = gameObject.AddComponent<MaterialPropertyBlockColorSetter>();
@@ -105,7 +105,8 @@ namespace CustomFloorPlugin
             _instancedMaterialLightWithId!.ColorWasSet(color);
         }
 
-        private static readonly int[] _triangles = {
+        private static readonly int[] _triangles = new[]
+        {
             0, 2, 1, //face front
 			0, 3, 2,
             2, 3, 4, //face top

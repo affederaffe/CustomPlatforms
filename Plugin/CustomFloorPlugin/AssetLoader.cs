@@ -26,12 +26,12 @@ namespace CustomFloorPlugin
         /// <summary>
         /// The old heart, to remind everyone that this plugin is some legacy garbage
         /// </summary>
-        private readonly Task<GameObject> _heartLoadingTask;
+        internal Task<GameObject> Heart { get; }
 
         /// <summary>
         /// Used as a players place replacement in platform preview
         /// </summary>
-        private readonly Task<GameObject> _playersPlaceLoadingTask;
+        internal Task<GameObject> PlayersPlace { get; }
 
         /// <summary>
         /// The cover for the default platform
@@ -52,50 +52,14 @@ namespace CustomFloorPlugin
         {
             _container = container;
             _materialSwapper = materialSwapper;
-            _heartLoadingTask = CreateHeartAsync();
-            _playersPlaceLoadingTask = CreatePlayersPlaceAsync();
+            Heart = CreateHeartAsync();
+            PlayersPlace = CreatePlayersPlaceAsync();
             using Stream defaultCoverStream = GetEmbeddedResource("CustomFloorPlugin.Assets.LvlInsaneCover.png");
             DefaultPlatformCover = defaultCoverStream.ReadTexture2D().ToSprite();
             using Stream fallbackCoverStream = GetEmbeddedResource("CustomFloorPlugin.Assets.FeetIcon.png");
             FallbackCover = fallbackCoverStream.ReadTexture2D().ToSprite();
             MultiplayerLightEffects = new GameObject("LightEffects").AddComponent<LightEffects>();
             MultiplayerLightEffects.gameObject.SetActive(false);
-        }
-
-        /// <summary>
-        /// (De-)Activates the heart
-        /// </summary>
-        /// <param name="value">The desired state</param>
-        internal async void ToggleHeart(bool value)
-        {
-            GameObject heart = await _heartLoadingTask;
-            if (value)
-            {
-                heart.SetActive(true);
-                heart.GetComponent<InstancedMaterialLightWithId>()?.ColorWasSet(Color.magenta);
-            }
-            else
-            {
-                heart.SetActive(false);
-            }
-        }
-
-        /// <summary>
-        /// (De-)Activates the players place replacement
-        /// </summary>
-        /// <param name="value">The desired state</param>
-        internal async void TogglePlayersPlace(bool value)
-        {
-            GameObject playersPlace = await _playersPlaceLoadingTask;
-            if (value)
-            {
-                playersPlace.SetActive(true);
-                playersPlace.GetComponentInChildren<InstancedMaterialLightWithId>()?.ColorWasSet(Color.blue);
-            }
-            else
-            {
-                playersPlace.SetActive(false);
-            }
         }
 
         private async Task<GameObject> CreateHeartAsync()
@@ -278,10 +242,10 @@ namespace CustomFloorPlugin
 
             private static MultipliedColorSO CreateMultipliedColorSO(SimpleColorSO simpleColorSO, Color color)
             {
-                MultipliedColorSO multipliedColorSO = ScriptableObject.CreateInstance<MultipliedColorSO>();
-                multipliedColorSO.SetField("_baseColor", simpleColorSO);
-                multipliedColorSO.SetField("_multiplierColor", color);
-                return multipliedColorSO;
+                MultipliedColorSO multipliedColor = ScriptableObject.CreateInstance<MultipliedColorSO>();
+                multipliedColor.SetField("_baseColor", simpleColorSO);
+                multipliedColor.SetField("_multiplierColor", color);
+                return multipliedColor;
             }
         }
     }

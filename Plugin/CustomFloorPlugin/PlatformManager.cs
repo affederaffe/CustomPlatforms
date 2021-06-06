@@ -47,12 +47,12 @@ namespace CustomFloorPlugin
         /// </summary>
         internal ObservableCollection<CustomPlatform> AllPlatforms { get; }
 
-        internal CustomPlatform DefaultPlatform { get; }
-        internal CustomPlatform ActivePlatform { get; set; }
-        internal CustomPlatform SingleplayerPlatform { get; set; }
-        internal CustomPlatform MultiplayerPlatform { get; set; }
-        internal CustomPlatform A360Platform { get; set; }
-        internal CustomPlatform? APIRequestedPlatform { get; set; }
+        public CustomPlatform DefaultPlatform { get; }
+        public CustomPlatform ActivePlatform { get; internal set; }
+        public CustomPlatform SingleplayerPlatform { get; internal set; }
+        public CustomPlatform MultiplayerPlatform { get; internal set; }
+        public CustomPlatform A360Platform { get; internal set; }
+        public CustomPlatform? APIRequestedPlatform { get; internal set; }
 
         /// <summary>
         /// The cache file version, change this to prevent loading older ones if something changes

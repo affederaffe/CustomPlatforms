@@ -7,6 +7,8 @@ using CustomFloorPlugin.Configuration;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
+using Zenject;
+
 
 namespace CustomFloorPlugin
 {
@@ -14,14 +16,14 @@ namespace CustomFloorPlugin
     /// Activates and deactivates world geometry in the active scene as required by the chosen custom platform<br />
     /// Most documentation on this file is omitted because it is a giant clusterfuck and I hate it... with a passion.
     /// </summary>
-    public class EnvironmentHider
+    public sealed class EnvironmentHider
     {
         private readonly PluginConfig _config;
         private readonly AssetLoader _assetLoader;
         private readonly PlatformManager _platformManager;
-        private readonly GameScenesManager _gameScenesManager;
 
         private readonly List<GameObject> _menuEnvironment = new();
+        private readonly List<GameObject> _gradientBackground = new();
         private readonly List<GameObject> _playersPlace = new();
         private readonly List<GameObject> _feet = new();
         private readonly List<GameObject> _smallRings = new();
@@ -36,45 +38,53 @@ namespace CustomFloorPlugin
         private readonly List<GameObject> _trackLights = new();
 
         private string? _sceneName;
-        private GameObject? _root;
-
-        private TrackLaneRing[] TrackLaneRings => _trackLaneRings ??= Object.FindObjectsOfType<TrackLaneRing>();
-        private TrackLaneRing[]? _trackLaneRings;
+        private Transform? _envRoot;
+        private Transform? _menuRoot;
 
         public EnvironmentHider(PluginConfig config,
                                 AssetLoader assetLoader,
-                                PlatformManager platformManager,
-                                GameScenesManager gameScenesManager)
+                                PlatformManager platformManager)
         {
             _config = config;
             _assetLoader = assetLoader;
             _platformManager = platformManager;
-            _gameScenesManager = gameScenesManager;
         }
 
         /// <summary>
         /// Hide world objects as required by the active platform
         /// </summary>
-        public void HideObjectsForPlatform(CustomPlatform platform)
+        public void HideObjectsForActivePlatform(DiContainer container)
         {
-            if (TryGetEnvironmentRoot(out _root))
+            if (TryGetEnvironmentObjectsForContainer(container))
             {
                 FindEnvironment();
-                SetCollectionHidden(_menuEnvironment, platform != _platformManager.DefaultPlatform);
-                SetCollectionHidden(_playersPlace, platform.hideDefaultPlatform);
-                SetCollectionHidden(_feet, platform.hideDefaultPlatform && !_config.AlwaysShowFeet);
-                SetCollectionHidden(_smallRings, platform.hideSmallRings);
-                SetCollectionHidden(_bigRings, platform.hideBigRings);
-                SetCollectionHidden(_visualizer, platform.hideEQVisualizer);
-                SetCollectionHidden(_towers, platform.hideTowers);
-                SetCollectionHidden(_highway, platform.hideHighway);
-                SetCollectionHidden(_backColumns, platform.hideBackColumns);
-                SetCollectionHidden(_backLasers, platform.hideBackLasers);
-                SetCollectionHidden(_doubleColorLasers, platform.hideDoubleColorLasers);
-                SetCollectionHidden(_rotatingLasers, platform.hideRotatingLasers);
-                SetCollectionHidden(_trackLights, platform.hideTrackLights);
-                CleanupEnvironment();
+                SetCollectionHidden(_menuEnvironment, _platformManager.ActivePlatform != _platformManager.DefaultPlatform);
+                SetCollectionHidden(_gradientBackground, _config.DisableGradientBackground);
+                SetCollectionHidden(_playersPlace, _platformManager.ActivePlatform.hideDefaultPlatform || (_platformManager.ActivePlatform == _platformManager.DefaultPlatform && _sceneName == "MainMenu"));
+                SetCollectionHidden(_feet, !_config.AlwaysShowFeet);
+                SetCollectionHidden(_smallRings, _platformManager.ActivePlatform.hideSmallRings);
+                SetCollectionHidden(_bigRings, _platformManager.ActivePlatform.hideBigRings);
+                SetCollectionHidden(_visualizer, _platformManager.ActivePlatform.hideEQVisualizer);
+                SetCollectionHidden(_towers, _platformManager.ActivePlatform.hideTowers);
+                SetCollectionHidden(_highway, _platformManager.ActivePlatform.hideHighway);
+                SetCollectionHidden(_backColumns, _platformManager.ActivePlatform.hideBackColumns);
+                SetCollectionHidden(_backLasers, _platformManager.ActivePlatform.hideBackLasers);
+                SetCollectionHidden(_doubleColorLasers, _platformManager.ActivePlatform.hideDoubleColorLasers);
+                SetCollectionHidden(_rotatingLasers, _platformManager.ActivePlatform.hideRotatingLasers);
+                SetCollectionHidden(_trackLights, _platformManager.ActivePlatform.hideTrackLights);
             }
+        }
+
+        internal void ToggleGradientBackground(bool value)
+        {
+            FindGradientBackground();
+            SetCollectionHidden(_gradientBackground, value);
+        }
+
+        internal void ToggleFeet(bool value)
+        {
+            FindFeetIcon();
+            SetCollectionHidden(_feet, !value);
         }
 
         /// <summary>
@@ -83,6 +93,7 @@ namespace CustomFloorPlugin
         private void FindEnvironment()
         {
             FindMenuEnvironment();
+            FindGradientBackground();
             FindPlayersPlace();
             FindFeetIcon();
             FindSmallRings();
@@ -98,31 +109,16 @@ namespace CustomFloorPlugin
         }
 
         /// <summary>
-        /// (De-)Activates the PlayersPlace replacement as well as preparing for the next platform
-        /// </summary>
-        private void CleanupEnvironment()
-        {
-            _trackLaneRings = null;
-            _root = null;
-            _assetLoader.TogglePlayersPlace(!_platformManager.ActivePlatform.hideDefaultPlatform &&
-                                            _sceneName == "MainMenu" &&
-                                            _platformManager.ActivePlatform != _platformManager.DefaultPlatform);
-        }
-
-        /// <summary>
         /// Gets the currently loaded <see cref="Scene" /> and returns the Environment root GameObject
         /// </summary>
-        private bool TryGetEnvironmentRoot(out GameObject? root)
+        private bool TryGetEnvironmentObjectsForContainer(DiContainer container)
         {
-            root = null;
-            _sceneName = _gameScenesManager.GetCurrentlyLoadedSceneNames().Last(x =>
-                x.EndsWith("Environment", System.StringComparison.Ordinal) ||
-                x.EndsWith("Menu", System.StringComparison.Ordinal));
-            if (_sceneName.StartsWith("Multiplayer", System.StringComparison.Ordinal)) _sceneName = "GameCore";
-            Scene scene = SceneManager.GetSceneByName(_sceneName);
-            if (!scene.IsValid()) return false;
-            root = scene.GetRootGameObjects().FirstOrDefault(x => x.name is "Environment" or "MenuEnvironmentManager" or "MultiplayerLocalActivePlayerController(Clone)");
-            return root is not null;
+            _envRoot = container.TryResolve<MultiplayerLocalActivePlayerFacade>()?.transform;
+            if (_envRoot is null) _envRoot = container.TryResolve<LightWithIdManager>()?.transform.parent;
+            _menuRoot ??= container.TryResolve<MenuEnvironmentManager>()?.transform;
+            if (_envRoot is null || _menuRoot is null) return false;
+            _sceneName = _envRoot.gameObject.scene.name;
+            return true;
         }
 
         /// <summary>
@@ -130,10 +126,9 @@ namespace CustomFloorPlugin
         /// </summary>
         /// <param name="list">A <see cref="List{T}" /> of GameObjects</param>
         /// <param name="hidden">A boolean describing the desired hidden state</param>
-        private void SetCollectionHidden(List<GameObject> list, bool hidden)
+        private void SetCollectionHidden(ICollection<GameObject> list, bool hidden)
         {
-            IEnumerable<GameObject> gameObjects = _sceneName == "MainMenu" ? list : list.Where(x => x.activeSelf);
-            foreach (GameObject gameObject in gameObjects)
+            foreach (GameObject gameObject in list)
                 gameObject.SetActive(!hidden);
             list.Clear();
         }
@@ -141,13 +136,14 @@ namespace CustomFloorPlugin
         /// <summary>
         /// Finds a GameObject by name and adds it to the provided list
         /// </summary>
+        /// <param name="root">The Transform the GameObject is a child of</param>
         /// <param name="name">The name of the desired GameObject</param>
         /// <param name="list">The list to be added to</param>
         /// <param name="rename">Whether the GameObject should be renamed or not</param>
-        private void FindAddGameObject(string name, List<GameObject> list, bool rename = false)
+        private void FindAddGameObject(Transform root, string name, ICollection<GameObject> list, bool rename = false)
         {
-            GameObject? go = _root!.transform.Find(name)?.gameObject;
-            if (go is null) return;
+            GameObject? go = root.Find(name)?.gameObject;
+            if (go is null || (!go.activeSelf && _sceneName != "MainMenu")) return;
             if (rename) go.name += "renamed";
             list.Add(go);
         }
@@ -158,10 +154,23 @@ namespace CustomFloorPlugin
             {
                 case "MainMenu":
                 case "Credits":
-                    FindAddGameObject("DefaultMenuEnvironment/MenuFogRing", _menuEnvironment);
-                    FindAddGameObject("DefaultMenuEnvironment/BasicMenuGround", _menuEnvironment);
-                    FindAddGameObject("DefaultMenuEnvironment/Notes", _menuEnvironment);
-                    FindAddGameObject("DefaultMenuEnvironment/PileOfNotes", _menuEnvironment);
+                    FindAddGameObject(_menuRoot!, "DefaultMenuEnvironment/MenuFogRing", _menuEnvironment);
+                    FindAddGameObject(_menuRoot!, "DefaultMenuEnvironment/BasicMenuGround", _menuEnvironment);
+                    FindAddGameObject(_menuRoot!, "DefaultMenuEnvironment/Notes", _menuEnvironment);
+                    FindAddGameObject(_menuRoot!, "DefaultMenuEnvironment/PileOfNotes", _menuEnvironment);
+                    break;
+            }
+        }
+
+        private void FindGradientBackground()
+        {
+            switch (_sceneName)
+            {
+                case "MainMenu":
+                    FindAddGameObject(_envRoot!, "BackgroundColor", _gradientBackground);
+                    break;
+                default:
+                    FindAddGameObject(_envRoot!, "GradientBackground", _gradientBackground);
                     break;
             }
         }
@@ -170,19 +179,26 @@ namespace CustomFloorPlugin
         {
             switch (_sceneName)
             {
+                case "MainMenu":
+                    _playersPlace.Add(_assetLoader.PlayersPlace.Result);
+                    break;
                 case "GameCore":
-                    FindAddGameObject("IsActiveObjects/Construction/PlayersPlace", _playersPlace);
-                    break;
-                case "GlassDesertEnvironment":
-                    FindAddGameObject("PlayersPlace", _playersPlace);
-                    FindAddGameObject("Collider", _playersPlace);
-                    break;
-                case "LinkinParkEnvironment":
-                    FindAddGameObject("PlayersPlace", _playersPlace);
-                    FindAddGameObject("PlayersPlaceShadow", _playersPlace);
+                    FindAddGameObject(_envRoot!, "IsActiveObjects/Construction/PlayersPlace/Mirror", _playersPlace);
+                    FindAddGameObject(_envRoot!, "IsActiveObjects/Construction/PlayersPlace/Construction", _playersPlace);
+                    FindAddGameObject(_envRoot!, "IsActiveObjects/Construction/PlayersPlace/RectangleFakeGlow", _playersPlace);
+                    FindAddGameObject(_envRoot!, "IsActiveObjects/Construction/PlayersPlace/Frame", _playersPlace);
+                    FindAddGameObject(_envRoot!, "IsActiveObjects/Construction/PlayersPlace/SaberBurnMarksParticles", _playersPlace);
+                    FindAddGameObject(_envRoot!, "IsActiveObjects/Construction/PlayersPlace/SaberBurnMarksArea", _playersPlace);
+                    FindAddGameObject(_envRoot!, "IsActiveObjects/Construction/PlayersPlace/Collider", _playersPlace);
                     break;
                 default:
-                    FindAddGameObject("PlayersPlace", _playersPlace);
+                    FindAddGameObject(_envRoot!, "PlayersPlace/Mirror", _playersPlace);
+                    FindAddGameObject(_envRoot!, "PlayersPlace/Construction", _playersPlace);
+                    FindAddGameObject(_envRoot!, "PlayersPlace/RectangleFakeGlow", _playersPlace);
+                    FindAddGameObject(_envRoot!, "PlayersPlace/Frame", _playersPlace);
+                    FindAddGameObject(_envRoot!, "PlayersPlace/SaberBurnMarksParticles", _playersPlace);
+                    FindAddGameObject(_envRoot!, "PlayersPlace/SaberBurnMarksArea", _playersPlace);
+                    FindAddGameObject(_envRoot!, "PlayersPlace/Collider", _playersPlace);
                     break;
             }
         }
@@ -191,22 +207,21 @@ namespace CustomFloorPlugin
         {
             switch (_sceneName)
             {
+                case "MainMenu":
+                    FindAddGameObject(_envRoot!, "PlayersPlace", _feet);
+                    break;
                 case "GameCore":
-                    FindAddGameObject("IsActiveObjects/Construction/PlayersPlace/Feet", _feet);
+                    FindAddGameObject(_envRoot!, "IsActiveObjects/Construction/PlayersPlace/Feet", _feet);
                     break;
                 default:
-                    FindAddGameObject("PlayersPlace/Feet", _feet);
+                    FindAddGameObject(_envRoot!, "PlayersPlace/Feet", _feet);
                     break;
             }
-
-            foreach (GameObject feet in _feet)
-                feet.transform.SetParent(null); // Remove from original platform 
         }
 
-        // ReSharper disable once CognitiveComplexity
-        // ReSharper disable once CyclomaticComplexity
         private void FindSmallRings()
         {
+            TrackLaneRingsManager? ringsManager = null;
             switch (_sceneName)
             {
                 case "TutorialEnvironment":
@@ -214,77 +229,62 @@ namespace CustomFloorPlugin
                 case "NiceEnvironment":
                 case "MonstercatEnvironment":
                 case "CrabRaveEnvironment":
-                    FindAddGameObject("SmallTrackLaneRings", _smallRings);
-                    foreach (TrackLaneRing ring in TrackLaneRings.Where(x => x.name == "SmallTrackLaneRing(Clone)"))
-                        _smallRings.Add(ring.gameObject);
+                    ringsManager = _envRoot!.Find("SmallTrackLaneRings").GetComponent<TrackLaneRingsManager>();
                     break;
                 case "TriangleEnvironment":
-                    FindAddGameObject("TriangleTrackLaneRings", _smallRings);
-                    foreach (TrackLaneRing ring in TrackLaneRings.Where(x => x.name == "TriangleTrackLaneRing(Clone)"))
-                        _smallRings.Add(ring.gameObject);
+                    ringsManager = _envRoot!.Find("TriangleTrackLaneRings").GetComponent<TrackLaneRingsManager>();
                     break;
                 case "DragonsEnvironment":
-                    FindAddGameObject("PanelsTrackLaneRings", _smallRings);
-                    foreach (TrackLaneRing ring in TrackLaneRings.Where(x => x.name == "PanelsTrackLaneRing(Clone)"))
-                        _smallRings.Add(ring.gameObject);
+                    ringsManager = _envRoot!.Find("PanelsTrackLaneRings").GetComponent<TrackLaneRingsManager>();
                     break;
                 case "PanicEnvironment":
-                    FindAddGameObject("Panels4TrackLaneRings", _smallRings);
-                    foreach (TrackLaneRing ring in TrackLaneRings.Where(x => x.name == "Panels4TrackLaneRing(Clone)"))
-                        _smallRings.Add(ring.gameObject);
+                    ringsManager = _envRoot!.Find("Panels4TrackLaneRings").GetComponent<TrackLaneRingsManager>();
                     break;
                 case "GreenDayEnvironment":
-                    FindAddGameObject("LightLinesTrackLaneRings", _smallRings);
-                    foreach (TrackLaneRing ring in TrackLaneRings.Where(x => x.name == "LightLinesTrackLaneRing(Clone)"))
-                        _smallRings.Add(ring.gameObject);
+                    ringsManager = _envRoot!.Find("LightLinesTrackLaneRings").GetComponent<TrackLaneRingsManager>();
                     break;
                 case "TimbalandEnvironment":
-                    FindAddGameObject("PairLaserTrackLaneRings", _smallRings);
-                    foreach (TrackLaneRing ring in TrackLaneRings.Where(x => x.name == "PairLaserTrackLaneRing(Clone)"))
-                        _smallRings.Add(ring.gameObject);
+                    ringsManager = _envRoot!.Find("PairLaserTrackLaneRings").GetComponent<TrackLaneRingsManager>();
                     break;
                 case "FitBeatEnvironment":
-                    FindAddGameObject("PanelsLightsTrackLaneRings", _smallRings);
-                    foreach (TrackLaneRing ring in TrackLaneRings.Where(x => x.name == "PanelLightTrackLaneRing(Clone)"))
-                        _smallRings.Add(ring.gameObject);
+                    ringsManager = _envRoot!.Find("PanelsLightsTrackLaneRings").GetComponent<TrackLaneRingsManager>();
                     break;
                 case "KaleidoscopeEnvironment":
-                    FindAddGameObject("SmallTrackLaneRings", _smallRings);
-                    foreach (TrackLaneRing ring in TrackLaneRings.Where(x => x.name == "ConeRing(Clone)"))
-                        _smallRings.Add(ring.gameObject);
+                    ringsManager = _envRoot!.Find("SmallTrackLaneRings").GetComponent<TrackLaneRingsManager>();
                     break;
             }
+
+            if (ringsManager is null) return;
+            _smallRings.Add(ringsManager.gameObject);
+            _smallRings.AddRange(ringsManager.Rings.Select(x => x.gameObject));
         }
 
-        // ReSharper disable once CognitiveComplexity
         private void FindBigRings()
         {
+            TrackLaneRingsManager? ringsManager = null;
             switch (_sceneName)
             {
                 case "DefaultEnvironment":
                 case "TriangleEnvironment":
                 case "NiceEnvironment":
                 case "BigMirrorEnvironment":
-                    FindAddGameObject("BigTrackLaneRings", _bigRings);
-                    foreach (TrackLaneRing ring in TrackLaneRings.Where(x => x.name == "BigTrackLaneRing(Clone)"))
-                        _bigRings.Add(ring.gameObject);
+                case "DragonsEnvironment":
+                    ringsManager = _envRoot!.Find("BigTrackLaneRings").GetComponent<TrackLaneRingsManager>();
                     break;
                 case "OriginsEnvironment":
-                    FindAddGameObject("BigLightsTrackLaneRings", _bigRings);
-                    foreach (TrackLaneRing ring in TrackLaneRings.Where(x => x.name == "LightsTrackLaneRing(Clone)"))
-                        _bigRings.Add(ring.gameObject);
+                    ringsManager = _envRoot!.Find("BigLightsTrackLaneRings").GetComponent<TrackLaneRingsManager>();
                     break;
                 case "FitBeatEnvironment":
-                    FindAddGameObject("BigCenterLightsTrackLaneRings", _bigRings);
-                    foreach (TrackLaneRing ring in TrackLaneRings.Where(x => x.name == "BigCenterLightTrackLaneRing(Clone)"))
-                        _bigRings.Add(ring.gameObject);
+                    ringsManager = _envRoot!.Find("BigCenterLightsTrackLaneRings").GetComponent<TrackLaneRingsManager>();
                     break;
                 case "KaleidoscopeEnvironment":
-                    FindAddGameObject("DistantRings", _bigRings);
-                    foreach (TrackLaneRing ring in TrackLaneRings.Where(x => x.name == "ConeRingBig(Clone)"))
-                        _bigRings.Add(ring.gameObject);
+                    ringsManager = _envRoot!.Find("DistantRings").GetComponent<TrackLaneRingsManager>();
                     break;
             }
+
+            if (ringsManager is null) return;
+            _bigRings.Add(ringsManager.gameObject);
+            _bigRings.AddRange(ringsManager.Rings.Select(x => x.gameObject));
         }
 
         private void FindVisualizers()
@@ -292,97 +292,93 @@ namespace CustomFloorPlugin
             switch (_sceneName)
             {
                 default:
-                    FindAddGameObject("Spectrograms", _visualizer);
+                    FindAddGameObject(_envRoot!, "Spectrograms", _visualizer);
                     break;
             }
         }
 
         // ReSharper disable once CognitiveComplexity
+        // ReSharper disable once CyclomaticComplexity
         private void FindTowers()
         {
             switch (_sceneName)
             {
                 case "GlassDesertEnvironment":
                     for (int i = 2; i < 25; i++)
-                        FindAddGameObject($"GameObject ({i.ToString(NumberFormatInfo.InvariantInfo)})", _towers);
+                        FindAddGameObject(_envRoot!, $"GameObject ({i.ToString(NumberFormatInfo.InvariantInfo)})", _towers);
                     break;
                 case "TutorialEnvironment":
-                    FindAddGameObject("Buildings", _towers);
+                    FindAddGameObject(_envRoot!, "Buildings", _towers);
                     break;
                 case "DefaultEnvironment":
-                    FindAddGameObject("NearBuildingLeft (1)", _towers);
-                    FindAddGameObject("NearBuildingRight (1)", _towers);
-                    FindAddGameObject("NearBuildingLeft (2)", _towers);
-                    FindAddGameObject("NearBuildingRight (2)", _towers);
+                    FindAddGameObject(_envRoot!, "NearBuildingLeft (1)", _towers);
+                    FindAddGameObject(_envRoot!, "NearBuildingRight (1)", _towers);
+                    FindAddGameObject(_envRoot!, "NearBuildingLeft (2)", _towers);
+                    FindAddGameObject(_envRoot!, "NearBuildingRight (2)", _towers);
                     break;
                 case "TriangleEnvironment":
-                    FindAddGameObject("NearBuildingLeft (3)", _towers);
-                    FindAddGameObject("NearBuildingRight (3)", _towers);
+                    FindAddGameObject(_envRoot!, "NearBuildingLeft", _towers);
+                    FindAddGameObject(_envRoot!, "NearBuildingRight", _towers);
                     break;
                 case "NiceEnvironment":
-                    FindAddGameObject("NearBuildingLeft (1)", _towers);
-                    FindAddGameObject("NearBuildingRight (1)", _towers);
-                    FindAddGameObject("NearBuildingLeft (2)", _towers);
-                    FindAddGameObject("NearBuildingRight (2)", _towers);
+                    FindAddGameObject(_envRoot!, "NearBuildingLeft (1)", _towers);
+                    FindAddGameObject(_envRoot!, "NearBuildingRight (1)", _towers);
+                    FindAddGameObject(_envRoot!, "NearBuildingLeft (2)", _towers);
+                    FindAddGameObject(_envRoot!, "NearBuildingRight (2)", _towers);
                     break;
                 case "BigMirrorEnvironment":
-                    FindAddGameObject("NearBuildingLeft (2)", _towers);
-                    FindAddGameObject("NearBuildingRight (2)", _towers);
+                    FindAddGameObject(_envRoot!, "NearBuildingLeft", _towers);
+                    FindAddGameObject(_envRoot!, "NearBuildingRight", _towers);
                     break;
                 case "DragonsEnvironment":
-                    FindAddGameObject("HallConstruction", _towers);
+                    FindAddGameObject(_envRoot!, "HallConstruction", _towers);
                     break;
                 case "KDAEnvironment":
-                    FindAddGameObject("TentacleLeft", _towers);
-                    FindAddGameObject("TentacleRight", _towers);
+                    FindAddGameObject(_envRoot!, "TentacleLeft", _towers);
+                    FindAddGameObject(_envRoot!, "TentacleRight", _towers);
                     break;
                 case "MonstercatEnvironment":
-                    FindAddGameObject("NearBuildingLeft", _towers);
-                    FindAddGameObject("NearBuildingRight", _towers);
-                    FindAddGameObject("FarBuildings", _towers);
+                    FindAddGameObject(_envRoot!, "NearBuildingLeft", _towers);
+                    FindAddGameObject(_envRoot!, "NearBuildingRight", _towers);
+                    FindAddGameObject(_envRoot!, "FarBuildings", _towers);
                     break;
                 case "CrabRaveEnvironment":
-                    FindAddGameObject("NearBuildingLeft", _towers);
-                    FindAddGameObject("NearBuildingRight", _towers);
-                    FindAddGameObject("FarBuildings", _towers);
+                    FindAddGameObject(_envRoot!, "NearBuildingLeft", _towers);
+                    FindAddGameObject(_envRoot!, "NearBuildingRight", _towers);
+                    FindAddGameObject(_envRoot!, "FarBuildings", _towers);
                     break;
                 case "PanicEnvironment":
-                    FindAddGameObject("TopCones", _towers);
-                    FindAddGameObject("BottomCones", _towers);
+                    FindAddGameObject(_envRoot!, "TopCones", _towers);
+                    FindAddGameObject(_envRoot!, "BottomCones", _towers);
                     break;
                 case "RocketEnvironment":
-                    FindAddGameObject("RocketCarL", _towers);
-                    FindAddGameObject("RocketCarR", _towers);
-                    FindAddGameObject("RocketArena", _towers);
-                    FindAddGameObject("RocketArenaLight", _towers);
-                    FindAddGameObject("EnvLight0", _towers);
+                    FindAddGameObject(_envRoot!, "RocketCarL", _towers);
+                    FindAddGameObject(_envRoot!, "RocketCarR", _towers);
+                    FindAddGameObject(_envRoot!, "RocketArena", _towers);
+                    FindAddGameObject(_envRoot!, "RocketArenaLight", _towers);
+                    FindAddGameObject(_envRoot!, "EnvLight0", _towers);
                     for (int i = 2; i < 10; i++)
-                        FindAddGameObject($"EnvLight0 ({i.ToString(NumberFormatInfo.InvariantInfo)})", _towers);
-                    break;
-                case "GreenDayGrenadeEnvironment":
-                    FindAddGameObject("GreenDayCity", _towers);
+                        FindAddGameObject(_envRoot!, $"EnvLight0 ({i.ToString(NumberFormatInfo.InvariantInfo)})", _towers);
                     break;
                 case "GreenDayEnvironment":
-                    FindAddGameObject("GreenDayCity", _towers);
+                case "GreenDayGrenadeEnvironment":
+                    FindAddGameObject(_envRoot!, "GreenDayCity", _towers);
                     break;
                 case "TimbalandEnvironment":
-                    FindAddGameObject("Buildings", _towers);
-                    FindAddGameObject("MainStructure", _towers);
-                    FindAddGameObject("TopStructure", _towers);
+                    FindAddGameObject(_envRoot!, "Buildings", _towers);
+                    FindAddGameObject(_envRoot!, "MainStructure", _towers);
+                    FindAddGameObject(_envRoot!, "TopStructure", _towers);
                     break;
                 case "BTSEnvironment":
-                    FindAddGameObject("PillarTrackLaneRingsR", _towers);
-                    FindAddGameObject("PillarTrackLaneRingsR (1)", _towers);
-                    FindAddGameObject("PillarsMovementEffect", _towers);
-                    FindAddGameObject("PillarPair", _towers);
-                    FindAddGameObject("SmallPillarPair", _towers);
+                    FindAddGameObject(_envRoot!, "PillarTrackLaneRingsR", _towers);
+                    FindAddGameObject(_envRoot!, "PillarTrackLaneRingsR (1)", _towers);
+                    FindAddGameObject(_envRoot!, "PillarsMovementEffect", _towers);
+                    FindAddGameObject(_envRoot!, "PillarPair", _towers);
                     for (int i = 1; i < 5; i++)
-                    {
-                        string strI = i.ToString(NumberFormatInfo.InvariantInfo);
-                        FindAddGameObject($"PillarPair ({strI})", _towers);
-                        FindAddGameObject($"SmallPillarPair ({strI})", _towers);
-                    }
-
+                        FindAddGameObject(_envRoot!, $"PillarPair ({i.ToString(NumberFormatInfo.InvariantInfo)})", _towers);
+                    FindAddGameObject(_envRoot!, "SmallPillarPair", _towers);
+                    for (int i = 1; i < 4; i++)
+                        FindAddGameObject(_envRoot!, $"SmallPillarPair ({i.ToString(NumberFormatInfo.InvariantInfo)})", _towers);
                     break;
             }
         }
@@ -394,153 +390,126 @@ namespace CustomFloorPlugin
             switch (_sceneName)
             {
                 case "GameCore":
-                    FindAddGameObject("IsActiveObjects/Construction/ConstructionL", _highway);
-                    FindAddGameObject("IsActiveObjects/Construction/ConstructionR", _highway);
-                    FindAddGameObject("IsActiveObjects/Lasers", _highway);
+                    FindAddGameObject(_envRoot!, "IsActiveObjects/Construction/ConstructionL", _highway);
+                    FindAddGameObject(_envRoot!, "IsActiveObjects/Construction/ConstructionR", _highway);
+                    FindAddGameObject(_envRoot!, "IsActiveObjects/Lasers", _highway);
 
-                    if (_root!.transform.Find("IsActiveObjects/CenterRings"))
+                    if (_envRoot!.transform.Find("IsActiveObjects/CenterRings"))
                     {
-                        FindAddGameObject("IsActiveObjects/CenterRings", _highway);
-                        FindAddGameObject("IsActiveObjects/PlatformEnd", _highway);
+                        FindAddGameObject(_envRoot!, "IsActiveObjects/CenterRings", _highway);
+                        FindAddGameObject(_envRoot!, "IsActiveObjects/PlatformEnd", _highway);
                     }
                     else
                     {
-                        FindAddGameObject("Construction", _highway);
-                        FindAddGameObject("Lasers", _highway);
+                        FindAddGameObject(_envRoot!, "Construction", _highway);
+                        FindAddGameObject(_envRoot!, "Lasers", _highway);
                     }
 
                     break;
                 case "GlassDesertEnvironment":
-                    FindAddGameObject("Cube", _highway);
-                    FindAddGameObject("Floor", _highway);
+                    FindAddGameObject(_envRoot!, "Cube", _highway);
+                    FindAddGameObject(_envRoot!, "Floor", _highway);
                     break;
                 case "TutorialEnvironment":
-                    FindAddGameObject("Floor", _highway);
+                    FindAddGameObject(_envRoot!, "Floor", _highway);
                     break;
                 case "DefaultEnvironment":
-                    FindAddGameObject("TrackMirror", _highway);
-                    FindAddGameObject("TrackConstruction", _highway);
+                case "PanicEnvironment":
+                case "GreenDayEnvironment":
+                case "GreenDayGrenadeEnvironment":
+                case "TimbalandEnvironment":
+                case "FitBeatEnvironment":
+                    FindAddGameObject(_envRoot!, "TrackMirror", _highway);
+                    FindAddGameObject(_envRoot!, "TrackConstruction", _highway);
                     break;
                 case "OriginsEnvironment":
-                    FindAddGameObject("Construction", _highway);
-                    FindAddGameObject("TrackMirror", _highway);
-                    FindAddGameObject("CombinedMesh", _highway);
+                    FindAddGameObject(_envRoot!, "Construction", _highway);
+                    FindAddGameObject(_envRoot!, "TrackMirror", _highway);
+                    FindAddGameObject(_envRoot!, "TrackConstruction", _highway);
                     break;
                 case "TriangleEnvironment":
-                    FindAddGameObject("FloorConstruction", _highway);
-                    FindAddGameObject("TrackMirror", _highway);
+                    FindAddGameObject(_envRoot!, "FloorConstruction", _highway);
+                    FindAddGameObject(_envRoot!, "TrackMirror", _highway);
                     break;
                 case "NiceEnvironment":
-                    FindAddGameObject("Floor", _highway);
+                    FindAddGameObject(_envRoot!, "Floor", _highway);
                     break;
                 case "BigMirrorEnvironment":
-                    FindAddGameObject("Floor", _highway);
-                    FindAddGameObject("Construction", _highway);
+                    FindAddGameObject(_envRoot!, "Floor", _highway);
+                    FindAddGameObject(_envRoot!, "Construction", _highway);
                     break;
                 case "DragonsEnvironment":
-                    FindAddGameObject("TrackMirror", _highway);
-                    FindAddGameObject("TrackConstruction", _highway);
-                    FindAddGameObject("TopConstruction", _highway);
-                    for (int i = 1; i < 4; i++)
-                        FindAddGameObject($"TopConstruction ({i.ToString(NumberFormatInfo.InvariantInfo)})", _highway);
-                    FindAddGameObject("FloorGround (4)", _highway);
-                    FindAddGameObject("FloorGround (5)", _highway);
-                    FindAddGameObject("Underground", _highway);
+                    FindAddGameObject(_envRoot!, "TrackMirror", _highway);
+                    FindAddGameObject(_envRoot!, "TrackConstruction", _highway);
+                    FindAddGameObject(_envRoot!, "Underground", _highway);
                     break;
                 case "KDAEnvironment":
-                    FindAddGameObject("Construction", _highway);
-                    FindAddGameObject("FloorMirror", _highway);
+                    FindAddGameObject(_envRoot!, "Construction", _highway);
+                    FindAddGameObject(_envRoot!, "FloorMirror", _highway);
                     break;
                 case "MonstercatEnvironment":
-                    FindAddGameObject("TrackMirror", _highway);
-                    FindAddGameObject("VConstruction", _highway);
-                    FindAddGameObject("MonstercatLogoL", _highway);
-                    FindAddGameObject("MonstercatLogoR", _highway);
-                    FindAddGameObject("Construction", _highway);
+                    FindAddGameObject(_envRoot!, "TrackMirror", _highway);
+                    FindAddGameObject(_envRoot!, "VConstruction", _highway);
+                    FindAddGameObject(_envRoot!, "MonstercatLogoL", _highway);
+                    FindAddGameObject(_envRoot!, "MonstercatLogoR", _highway);
+                    FindAddGameObject(_envRoot!, "Construction", _highway);
                     break;
                 case "CrabRaveEnvironment":
-                    FindAddGameObject("TrackMirror", _highway);
-                    FindAddGameObject("VConstruction", _highway);
-                    FindAddGameObject("Construction", _highway);
-                    break;
-                case "PanicEnvironment":
-                    FindAddGameObject("TrackMirror", _highway);
-                    FindAddGameObject("TrackConstruction", _highway);
+                    FindAddGameObject(_envRoot!, "TrackMirror", _highway);
+                    FindAddGameObject(_envRoot!, "VConstruction", _highway);
+                    FindAddGameObject(_envRoot!, "Construction", _highway);
                     break;
                 case "RocketEnvironment":
-                    FindAddGameObject("Mirror", _highway);
-                    FindAddGameObject("Construction", _highway);
-                    break;
-                case "GreenDayGrenadeEnvironment":
-                    FindAddGameObject("TrackMirror", _highway);
-                    FindAddGameObject("TrackConstruction", _highway);
-                    FindAddGameObject("Cube", _highway);
-                    FindAddGameObject("Cube (1)", _highway);
-                    break;
-                case "GreenDayEnvironment":
-                    FindAddGameObject("TrackMirror", _highway);
-                    FindAddGameObject("TrackConstruction", _highway);
-                    FindAddGameObject("Cube", _highway);
-                    FindAddGameObject("Cube (1)", _highway);
-                    break;
-                case "TimbalandEnvironment":
-                    FindAddGameObject("TrackMirror", _highway);
-                    FindAddGameObject("TrackConstruction", _highway);
-                    break;
-                case "FitBeatEnvironment":
-                    FindAddGameObject("TrackMirror", _highway);
-                    FindAddGameObject("TrackConstruction", _highway);
+                    FindAddGameObject(_envRoot!, "Mirror", _highway);
+                    FindAddGameObject(_envRoot!, "Construction", _highway);
                     break;
                 case "LinkinParkEnvironment":
-                    FindAddGameObject("TrackMirror", _highway);
-                    FindAddGameObject("TrackConstruction", _highway);
-                    FindAddGameObject("TrackShadow", _highway);
-                    FindAddGameObject("Tunnel", _highway);
-                    FindAddGameObject("TunnelRings", _highway);
-                    FindAddGameObject("LinkinParkSoldier", _highway);
-                    FindAddGameObject("LinkinParkTextLogoL", _highway);
-                    FindAddGameObject("LinkinParkTextLogoR", _highway);
-                    FindAddGameObject("FloorLightShadowL", _highway);
-                    FindAddGameObject("FloorLightShadowR", _highway);
+                    FindAddGameObject(_envRoot!, "TrackMirror", _highway);
+                    FindAddGameObject(_envRoot!, "TrackConstruction", _highway);
+                    FindAddGameObject(_envRoot!, "Tunnel", _highway);
+                    for (int i = 1; i < 11; i++)
+                        FindAddGameObject(_envRoot!, $"Tunnel ({i.ToString(NumberFormatInfo.InvariantInfo)})", _highway);
+                    FindAddGameObject(_envRoot!, "TunnelRings", _highway);
+                    FindAddGameObject(_envRoot!, "LinkinParkSoldier", _highway);
+                    FindAddGameObject(_envRoot!, "LinkinParkTextLogoL", _highway);
+                    FindAddGameObject(_envRoot!, "LinkinParkTextLogoR", _highway);
                     break;
                 case "BTSEnvironment":
-                    FindAddGameObject("TrackMirror", _highway);
-                    FindAddGameObject("Construction", _highway);
-                    FindAddGameObject("Clouds", _highway);
-                    FindAddGameObject("StarHemisphere", _highway);
-                    FindAddGameObject("StarEmitterPS", _highway);
-                    FindAddGameObject("BTSStarTextEffectEvent", _highway);
-                    FindAddGameObject("GradientBackground", _highway);
+                    FindAddGameObject(_envRoot!, "TrackMirror", _highway);
+                    FindAddGameObject(_envRoot!, "Construction", _highway);
+                    FindAddGameObject(_envRoot!, "Clouds", _highway);
+                    FindAddGameObject(_envRoot!, "StarHemisphere", _highway);
+                    FindAddGameObject(_envRoot!, "StarEmitterPS", _highway);
+                    FindAddGameObject(_envRoot!, "BTSStarTextEffectEvent", _highway);
                     break;
                 case "KaleidoscopeEnvironment":
-                    FindAddGameObject("TrackMirror", _highway);
-                    FindAddGameObject("Construction", _highway);
-                    FindAddGameObject("GradientBackground", _highway);
+                    FindAddGameObject(_envRoot!, "TrackMirror", _highway);
+                    FindAddGameObject(_envRoot!, "Construction", _highway);
                     break;
                 case "InterscopeEnvironment":
-                    FindAddGameObject("Logo", _highway);
-                    FindAddGameObject("Floor", _highway);
-                    FindAddGameObject("Spectrograms", _highway);
-                    FindAddGameObject("Pillar/PillarL", _highway);
-                    FindAddGameObject("Pillar/PillarR", _highway);
+                    FindAddGameObject(_envRoot!, "Logo", _highway);
+                    FindAddGameObject(_envRoot!, "Floor", _highway);
+                    FindAddGameObject(_envRoot!, "Spectrograms", _highway);
+                    FindAddGameObject(_envRoot!, "Pillar/PillarL", _highway);
+                    FindAddGameObject(_envRoot!, "Pillar/PillarR", _highway);
                     for (int i = 1; i < 5; i++)
                     {
-                        string baseName = $"Pillar ({i.ToString(NumberFormatInfo.InvariantInfo)}";
-                        FindAddGameObject($"{baseName}/PillarL", _highway);
-                        FindAddGameObject($"{baseName}/PillarR", _highway);
+                        string baseName = $"Pillar ({i.ToString(NumberFormatInfo.InvariantInfo)})";
+                        FindAddGameObject(_envRoot!, $"{baseName}/PillarL", _highway);
+                        FindAddGameObject(_envRoot!, $"{baseName}/PillarR", _highway);
                     }
 
-                    FindAddGameObject("RearPillar", _highway);
+                    FindAddGameObject(_envRoot!, "RearPillar", _highway);
                     for (int i = 1; i < 6; i++)
                     {
-                        FindAddGameObject($"RearPillar ({i.ToString(NumberFormatInfo.InvariantInfo)})", _highway);
-                        FindAddGameObject($"Plane ({i.ToString(NumberFormatInfo.InvariantInfo)})", _highway);
+                        FindAddGameObject(_envRoot!, $"RearPillar ({i.ToString(NumberFormatInfo.InvariantInfo)})", _highway);
+                        FindAddGameObject(_envRoot!, $"Plane ({i.ToString(NumberFormatInfo.InvariantInfo)})", _highway);
                     }
 
-                    for (int i = 0; i < 5; i++)
+                    for (int i = 1; i < 5; i++)
                     {
-                        FindAddGameObject($"Car{i.ToString(NumberFormatInfo.InvariantInfo)}", _highway);
-                        FindAddGameObject($"FarCar{i.ToString(NumberFormatInfo.InvariantInfo)}", _highway);
+                        FindAddGameObject(_envRoot!, $"Car{i.ToString(NumberFormatInfo.InvariantInfo)}", _highway);
+                        FindAddGameObject(_envRoot!, $"FarCar{i.ToString(NumberFormatInfo.InvariantInfo)}", _highway);
                     }
 
                     break;
@@ -552,23 +521,15 @@ namespace CustomFloorPlugin
             switch (_sceneName)
             {
                 case "GlassDesertEnvironment":
-                    FindAddGameObject("SeparatorWall", _backColumns);
+                    FindAddGameObject(_envRoot!, "SeparatorWall", _backColumns);
                     for (int i = 1; i < 16; i++)
-                        FindAddGameObject($"SeparatorWall ({i.ToString(NumberFormatInfo.InvariantInfo)})", _backColumns);
-                    break;
-                case "OriginsEnvironment":
-                    FindAddGameObject("SpectrogramEnd", _backColumns, true);
-                    FindAddGameObject("SpectrogramEnd", _backColumns);
-                    break;
-                case "DragonsEnvironment":
-                    FindAddGameObject("Underground (18)", _backColumns);
-                    FindAddGameObject("Underground (19)", _backColumns);
+                        FindAddGameObject(_envRoot!, $"SeparatorWall ({i.ToString(NumberFormatInfo.InvariantInfo)})", _backColumns);
                     break;
                 case "MonstercatEnvironment":
-                    FindAddGameObject("SpectrogramEnd", _backColumns);
+                    FindAddGameObject(_envRoot!, "SpectrogramEnd", _backColumns);
                     break;
                 default:
-                    FindAddGameObject("BackColumns", _backColumns);
+                    FindAddGameObject(_envRoot!, "BackColumns", _backColumns);
                     break;
             }
         }
@@ -581,89 +542,85 @@ namespace CustomFloorPlugin
             {
                 case "GlassDesertEnvironment":
                     for (int i = 9; i < 13; i++)
-                        FindAddGameObject($"LightPillar ({i.ToString(NumberFormatInfo.InvariantInfo)})", _rotatingLasers);
+                        FindAddGameObject(_envRoot!, $"LightPillar ({i.ToString(NumberFormatInfo.InvariantInfo)})", _rotatingLasers);
                     for (int i = 19; i < 26; i++)
-                        FindAddGameObject($"LightPillar ({i.ToString(NumberFormatInfo.InvariantInfo)})", _rotatingLasers);
+                        FindAddGameObject(_envRoot!, $"LightPillar ({i.ToString(NumberFormatInfo.InvariantInfo)})", _rotatingLasers);
                     break;
                 case "DefaultEnvironment":
-                    FindAddGameObject("RotatingLasersPair", _rotatingLasers);
+                    FindAddGameObject(_envRoot!, "RotatingLasersPair", _rotatingLasers);
                     for (int i = 1; i < 4; i++)
-                        FindAddGameObject($"RotatingLasersPair ({i.ToString(NumberFormatInfo.InvariantInfo)})", _rotatingLasers);
+                        FindAddGameObject(_envRoot!, $"RotatingLasersPair ({i.ToString(NumberFormatInfo.InvariantInfo)})", _rotatingLasers);
                     break;
                 case "OriginsEnvironment":
-                    FindAddGameObject("RotatingLasersPair", _rotatingLasers);
-                    for (int i = 1; i < 6; i++)
-                        FindAddGameObject($"RotatingLasersPair ({i.ToString(NumberFormatInfo.InvariantInfo)})", _rotatingLasers);
+                    FindAddGameObject(_envRoot!, "RotatingLasersPair", _rotatingLasers);
+                    for (int i = 1; i < 5; i++)
+                        FindAddGameObject(_envRoot!, $"RotatingLasersPair ({i.ToString(NumberFormatInfo.InvariantInfo)})", _rotatingLasers);
                     break;
                 case "TriangleEnvironment":
-                    FindAddGameObject("RotatingLasersPair", _rotatingLasers);
+                    FindAddGameObject(_envRoot!, "RotatingLasersPair", _rotatingLasers);
                     for (int i = 1; i < 7; i++)
-                        FindAddGameObject($"RotatingLasersPair ({i.ToString(NumberFormatInfo.InvariantInfo)})", _rotatingLasers);
+                        FindAddGameObject(_envRoot!, $"RotatingLasersPair ({i.ToString(NumberFormatInfo.InvariantInfo)})", _rotatingLasers);
                     break;
                 case "NiceEnvironment":
-                    FindAddGameObject("RotatingLaserLeft", _rotatingLasers);
-                    FindAddGameObject("RotatingLaserRight", _rotatingLasers);
-                    for (int i = 0; i < 4; i++)
+                    FindAddGameObject(_envRoot!, "RotatingLaserLeft", _rotatingLasers);
+                    FindAddGameObject(_envRoot!, "RotatingLaserRight", _rotatingLasers);
+                    for (int i = 1; i < 4; i++)
                     {
                         string strI = i.ToString(NumberFormatInfo.InvariantInfo);
-                        FindAddGameObject($"RotatingLaserLeft ({strI})", _rotatingLasers);
-                        FindAddGameObject($"RotatingLaserRight ({strI})", _rotatingLasers);
+                        FindAddGameObject(_envRoot!, $"RotatingLaserLeft ({strI})", _rotatingLasers);
+                        FindAddGameObject(_envRoot!, $"RotatingLaserRight ({strI})", _rotatingLasers);
                     }
 
                     break;
                 case "BigMirrorEnvironment":
-                    FindAddGameObject("RotatingLasersPair", _rotatingLasers);
+                    FindAddGameObject(_envRoot!, "RotatingLasersPair", _rotatingLasers);
                     for (int i = 1; i < 4; i++)
-                        FindAddGameObject($"RotatingLasersPair ({i.ToString(NumberFormatInfo.InvariantInfo)})", _rotatingLasers);
+                        FindAddGameObject(_envRoot!, $"RotatingLasersPair ({i.ToString(NumberFormatInfo.InvariantInfo)})", _rotatingLasers);
                     break;
                 case "DragonsEnvironment":
-                    FindAddGameObject("RotatingLasersPair", _rotatingLasers);
+                    FindAddGameObject(_envRoot!, "RotatingLasersPair", _rotatingLasers);
                     for (int i = 1; i < 5; i++)
-                        FindAddGameObject($"RotatingLasersPair ({i.ToString(NumberFormatInfo.InvariantInfo)})", _rotatingLasers);
+                        FindAddGameObject(_envRoot!, $"RotatingLasersPair ({i.ToString(NumberFormatInfo.InvariantInfo)})", _rotatingLasers);
                     break;
                 case "KDAEnvironment":
-                    FindAddGameObject("RotatingLasersPair", _rotatingLasers);
+                    FindAddGameObject(_envRoot!, "RotatingLasersPair", _rotatingLasers);
                     for (int i = 1; i < 7; i++)
-                        FindAddGameObject($"RotatingLasersPair ({i.ToString(NumberFormatInfo.InvariantInfo)})", _rotatingLasers);
+                        FindAddGameObject(_envRoot!, $"RotatingLasersPair ({i.ToString(NumberFormatInfo.InvariantInfo)})", _rotatingLasers);
                     break;
                 case "MonstercatEnvironment":
-                    FindAddGameObject("RotatingLasersPair", _rotatingLasers);
+                    FindAddGameObject(_envRoot!, "RotatingLasersPair", _rotatingLasers);
                     for (int i = 1; i < 5; i++)
-                        FindAddGameObject($"RotatingLasersPair ({i.ToString(NumberFormatInfo.InvariantInfo)})", _rotatingLasers);
+                        FindAddGameObject(_envRoot!, $"RotatingLasersPair ({i.ToString(NumberFormatInfo.InvariantInfo)})", _rotatingLasers);
                     break;
                 case "CrabRaveEnvironment":
-                    FindAddGameObject("RotatingLasersPair", _rotatingLasers);
+                    FindAddGameObject(_envRoot!, "RotatingLasersPair", _rotatingLasers);
                     for (int i = 1; i < 5; i++)
-                        FindAddGameObject($"RotatingLasersPair ({i.ToString(NumberFormatInfo.InvariantInfo)})", _rotatingLasers);
+                        FindAddGameObject(_envRoot!, $"RotatingLasersPair ({i.ToString(NumberFormatInfo.InvariantInfo)})", _rotatingLasers);
                     break;
                 case "PanicEnvironment":
-                    FindAddGameObject("RotatingLasersPair", _rotatingLasers);
+                    FindAddGameObject(_envRoot!, "RotatingLasersPair", _rotatingLasers);
                     for (int i = 1; i < 7; i++)
-                        FindAddGameObject($"RotatingLasersPair ({i.ToString(NumberFormatInfo.InvariantInfo)})", _rotatingLasers);
+                        FindAddGameObject(_envRoot!, $"RotatingLasersPair ({i.ToString(NumberFormatInfo.InvariantInfo)})", _rotatingLasers);
                     break;
                 case "RocketEnvironment":
                     for (int i = 7; i < 14; i++)
-                        FindAddGameObject($"RotatingLasersPair ({i.ToString(NumberFormatInfo.InvariantInfo)})", _rotatingLasers);
-                    break;
-                case "GreenDayGrenadeEnvironment":
-                    FindAddGameObject("RotatingLasersPair", _rotatingLasers);
-                    for (int i = 1; i < 6; i++)
-                        FindAddGameObject($"RotatingLasersPair ({i.ToString(NumberFormatInfo.InvariantInfo)})", _rotatingLasers);
+                        FindAddGameObject(_envRoot!, $"RotatingLasersPair ({i.ToString(NumberFormatInfo.InvariantInfo)})", _rotatingLasers);
                     break;
                 case "GreenDayEnvironment":
-                    FindAddGameObject("RotatingLasersPair", _rotatingLasers);
+                case "GreenDayGrenadeEnvironment":
+                    FindAddGameObject(_envRoot!, "RotatingLasersPair", _rotatingLasers);
                     for (int i = 1; i < 6; i++)
-                        FindAddGameObject($"RotatingLasersPair ({i.ToString(NumberFormatInfo.InvariantInfo)})", _rotatingLasers);
+                        FindAddGameObject(_envRoot!, $"RotatingLasersPair ({i.ToString(NumberFormatInfo.InvariantInfo)})", _rotatingLasers);
                     break;
                 case "FitBeatEnvironment":
-                    FindAddGameObject("RotatingLasersPair", _rotatingLasers);
+                    FindAddGameObject(_envRoot!, "RotatingLasersPair", _rotatingLasers);
                     for (int i = 1; i < 8; i++)
-                        FindAddGameObject($"RotatingLasersPair ({i.ToString(NumberFormatInfo.InvariantInfo)})", _rotatingLasers);
+                        FindAddGameObject(_envRoot!, $"RotatingLasersPair ({i.ToString(NumberFormatInfo.InvariantInfo)})", _rotatingLasers);
                     break;
                 case "LinkinParkEnvironment":
-                    FindAddGameObject("TunnelRotatingLasersPair", _rotatingLasers);
+                    FindAddGameObject(_envRoot!, "TunnelRotatingLasersPair", _rotatingLasers);
                     for (int i = 1; i < 18; i++)
-                        FindAddGameObject($"TunnelRotatingLasersPair ({i.ToString(NumberFormatInfo.InvariantInfo)})", _rotatingLasers);
+                        FindAddGameObject(_envRoot!, $"TunnelRotatingLasersPair ({i.ToString(NumberFormatInfo.InvariantInfo)})", _rotatingLasers);
                     break;
             }
         }
@@ -676,59 +633,51 @@ namespace CustomFloorPlugin
             {
                 case "TutorialEnvironment":
                     for (int i = 10; i < 20; i++)
-                        FindAddGameObject($"DoubleColorLaser ({i.ToString(NumberFormatInfo.InvariantInfo)})", _doubleColorLasers);
+                        FindAddGameObject(_envRoot!, $"DoubleColorLaser ({i.ToString(NumberFormatInfo.InvariantInfo)})", _doubleColorLasers);
                     break;
                 case "DefaultEnvironment":
-                    FindAddGameObject("DoubleColorLaserL", _doubleColorLasers);
-                    FindAddGameObject("DoubleColorLaserR", _doubleColorLasers);
+                    FindAddGameObject(_envRoot!, "DoubleColorLaserL", _doubleColorLasers);
+                    FindAddGameObject(_envRoot!, "DoubleColorLaserR", _doubleColorLasers);
                     for (int i = 1; i < 5; i++)
                     {
-                        FindAddGameObject($"DoubleColorLaserL ({i.ToString(NumberFormatInfo.InvariantInfo)})", _doubleColorLasers);
-                        FindAddGameObject($"DoubleColorLaserR ({i.ToString(NumberFormatInfo.InvariantInfo)})", _doubleColorLasers);
+                        FindAddGameObject(_envRoot!, $"DoubleColorLaserL ({i.ToString(NumberFormatInfo.InvariantInfo)})", _doubleColorLasers);
+                        FindAddGameObject(_envRoot!, $"DoubleColorLaserR ({i.ToString(NumberFormatInfo.InvariantInfo)})", _doubleColorLasers);
                     }
 
                     break;
                 case "OriginsEnvironment":
-                    FindAddGameObject("Laser", _doubleColorLasers);
+                    FindAddGameObject(_envRoot!, "Laser", _doubleColorLasers);
                     for (int i = 1; i < 4; i++)
-                        FindAddGameObject($"Laser ({i.ToString(NumberFormatInfo.InvariantInfo)})", _doubleColorLasers);
+                        FindAddGameObject(_envRoot!, $"Laser ({i.ToString(NumberFormatInfo.InvariantInfo)})", _doubleColorLasers);
                     break;
                 case "TriangleEnvironment":
-                    FindAddGameObject("DoubleColorLaser", _doubleColorLasers);
+                    FindAddGameObject(_envRoot!, "DoubleColorLaser", _doubleColorLasers);
                     for (int i = 1; i < 10; i++)
-                        FindAddGameObject($"DoubleColorLaser ({i.ToString(NumberFormatInfo.InvariantInfo)})", _doubleColorLasers);
+                        FindAddGameObject(_envRoot!, $"DoubleColorLaser ({i.ToString(NumberFormatInfo.InvariantInfo)})", _doubleColorLasers);
                     break;
                 case "NiceEnvironment":
-                    FindAddGameObject("DoubleColorLaser", _doubleColorLasers);
+                    FindAddGameObject(_envRoot!, "DoubleColorLaser", _doubleColorLasers);
                     for (int i = 1; i < 8; i++)
-                        FindAddGameObject($"DoubleColorLaser ({i.ToString(NumberFormatInfo.InvariantInfo)})", _doubleColorLasers);
+                        FindAddGameObject(_envRoot!, $"DoubleColorLaser ({i.ToString(NumberFormatInfo.InvariantInfo)})", _doubleColorLasers);
                     break;
                 case "BigMirrorEnvironment":
-                    FindAddGameObject("DoubleColorLaser", _doubleColorLasers);
+                    FindAddGameObject(_envRoot!, "DoubleColorLaser", _doubleColorLasers);
                     for (int i = 1; i < 10; i++)
-                        FindAddGameObject($"DoubleColorLaser ({i.ToString(NumberFormatInfo.InvariantInfo)})", _doubleColorLasers);
+                        FindAddGameObject(_envRoot!, $"DoubleColorLaser ({i.ToString(NumberFormatInfo.InvariantInfo)})", _doubleColorLasers);
                     break;
                 case "KDAEnvironment":
-                    for (int i = 2; i < 14; i++)
-                        FindAddGameObject($"Laser ({i.ToString(NumberFormatInfo.InvariantInfo)})", _doubleColorLasers);
+                    for (int i = 2; i < 5; i++)
+                        FindAddGameObject(_envRoot!, $"Laser ({i.ToString(NumberFormatInfo.InvariantInfo)})", _doubleColorLasers);
+                    for (int i = 7; i < 10; i++)
+                        FindAddGameObject(_envRoot!, $"Laser ({i.ToString(NumberFormatInfo.InvariantInfo)})", _doubleColorLasers);
                     break;
                 case "MonstercatEnvironment":
                     for (int i = 4; i < 13; i++)
-                        FindAddGameObject($"Laser ({i.ToString(NumberFormatInfo.InvariantInfo)})", _doubleColorLasers);
+                        FindAddGameObject(_envRoot!, $"Laser ({i.ToString(NumberFormatInfo.InvariantInfo)})", _doubleColorLasers);
                     break;
                 case "CrabRaveEnvironment":
                     for (int i = 4; i < 13; i++)
-                        FindAddGameObject($"Laser ({i.ToString(NumberFormatInfo.InvariantInfo)})", _doubleColorLasers);
-                    break;
-                case "GreenDayGrenadeEnvironment":
-                    FindAddGameObject("Laser", _doubleColorLasers);
-                    for (int i = 1; i < 20; i++)
-                        FindAddGameObject($"Laser ({i.ToString(NumberFormatInfo.InvariantInfo)})", _doubleColorLasers);
-                    break;
-                case "GreenDayEnvironment":
-                    FindAddGameObject("Laser", _doubleColorLasers);
-                    for (int i = 1; i < 20; i++)
-                        FindAddGameObject($"Laser ({i.ToString(NumberFormatInfo.InvariantInfo)})", _doubleColorLasers);
+                        FindAddGameObject(_envRoot!, $"Laser ({i.ToString(NumberFormatInfo.InvariantInfo)})", _doubleColorLasers);
                     break;
             }
         }
@@ -738,31 +687,34 @@ namespace CustomFloorPlugin
             switch (_sceneName)
             {
                 case "PanicEnvironment":
-                    FindAddGameObject("FrontLights", _backLasers);
-                    FindAddGameObject("Window", _backLasers, true);
-                    FindAddGameObject("Window", _backLasers);
+                    FindAddGameObject(_envRoot!, "Window", _backLasers, true);
+                    FindAddGameObject(_envRoot!, "Window", _backLasers);
                     break;
                 case "RocketEnvironment":
-                    FindAddGameObject("FrontLights", _backLasers);
-                    FindAddGameObject("RocketGateLight", _backLasers);
-                    FindAddGameObject("GateLight0", _backLasers);
-                    FindAddGameObject("GateLight1", _backLasers);
-                    FindAddGameObject("GateLight1 (4)", _backLasers);
+                    FindAddGameObject(_envRoot!, "FrontLights", _backLasers);
+                    FindAddGameObject(_envRoot!, "RocketGateLight", _backLasers);
+                    FindAddGameObject(_envRoot!, "GateLight0", _backLasers);
+                    FindAddGameObject(_envRoot!, "GateLight1", _backLasers);
+                    FindAddGameObject(_envRoot!, "GateLight1 (4)", _backLasers);
+                    break;
+                case "GreenDayEnvironment":
+                case "GreenDayGrenadeEnvironment":
+                    FindAddGameObject(_envRoot!, "FrontLight", _backLasers);
                     break;
                 case "TimbalandEnvironment":
-                    FindAddGameObject("FrontLights", _backLasers);
+                    FindAddGameObject(_envRoot!, "FrontLights", _backLasers);
                     for (int i = 4; i < 8; i++)
-                        FindAddGameObject($"Light ({i.ToString(NumberFormatInfo.InvariantInfo)})", _backLasers);
+                        FindAddGameObject(_envRoot!, $"Light ({i.ToString(NumberFormatInfo.InvariantInfo)})", _backLasers);
                     break;
                 case "LinkinParkEnvironment":
-                    FindAddGameObject("Logo", _backLasers);
-                    FindAddGameObject("LogoLight", _backLasers);
+                    FindAddGameObject(_envRoot!, "Logo", _backLasers);
+                    FindAddGameObject(_envRoot!, "LogoLight", _backLasers);
                     break;
                 case "BTSEnvironment":
-                    FindAddGameObject("MagicDoorSprite", _backLasers);
+                    FindAddGameObject(_envRoot!, "MagicDoorSprite", _backLasers);
                     break;
                 default:
-                    FindAddGameObject("FrontLights", _backLasers);
+                    FindAddGameObject(_envRoot!, "FrontLights", _backLasers);
                     break;
             }
         }
@@ -774,155 +726,144 @@ namespace CustomFloorPlugin
             switch (_sceneName)
             {
                 case "GlassDesertEnvironment":
-                    FindAddGameObject("TopLaser", _trackLights);
+                    FindAddGameObject(_envRoot!, "TopLaser", _trackLights);
                     for (int i = 1; i < 6; i++)
-                        FindAddGameObject($"TopLaser ({i.ToString(NumberFormatInfo.InvariantInfo)})", _trackLights);
+                        FindAddGameObject(_envRoot!, $"TopLaser ({i.ToString(NumberFormatInfo.InvariantInfo)})", _trackLights);
                     for (int i = 4; i < 13; i++)
-                        FindAddGameObject($"DownLaser ({i.ToString(NumberFormatInfo.InvariantInfo)})", _trackLights);
+                        FindAddGameObject(_envRoot!, $"DownLaser ({i.ToString(NumberFormatInfo.InvariantInfo)})", _trackLights);
                     for (int i = 0; i < 7; i++)
-                        FindAddGameObject("TopLightMesh", _trackLights, true);
+                        FindAddGameObject(_envRoot!, "TopLightMesh", _trackLights, true);
                     break;
                 case "TutorialEnvironment":
-                    FindAddGameObject("GlowLines", _trackLights);
+                    FindAddGameObject(_envRoot!, "GlowLines", _trackLights);
                     break;
                 case "DefaultEnvironment":
-                    FindAddGameObject("NeonTubeL", _trackLights);
-                    FindAddGameObject("NeonTubeR", _trackLights);
+                    FindAddGameObject(_envRoot!, "NeonTubeL", _trackLights);
+                    FindAddGameObject(_envRoot!, "NeonTubeR", _trackLights);
                     break;
                 case "OriginsEnvironment":
-                    FindAddGameObject("NeonTube", _trackLights);
-                    FindAddGameObject("NeonTube (1)", _trackLights);
-                    FindAddGameObject("LightAreaL", _trackLights);
-                    FindAddGameObject("LightAreaR", _trackLights);
-                    FindAddGameObject("SidePSL", _trackLights);
-                    FindAddGameObject("SidePSR", _trackLights);
+                    FindAddGameObject(_envRoot!, "NeonTube", _trackLights);
+                    FindAddGameObject(_envRoot!, "NeonTube (1)", _trackLights);
+                    FindAddGameObject(_envRoot!, "LightAreaL", _trackLights);
+                    FindAddGameObject(_envRoot!, "LightAreaR", _trackLights);
+                    FindAddGameObject(_envRoot!, "SidePSL", _trackLights);
+                    FindAddGameObject(_envRoot!, "SidePSR", _trackLights);
                     break;
                 case "TriangleEnvironment":
-                    FindAddGameObject("NeonTubeDirectionalL", _trackLights);
-                    FindAddGameObject("NeonTubeDirectionalR", _trackLights);
+                    FindAddGameObject(_envRoot!, "NeonTubeDirectionalL", _trackLights);
+                    FindAddGameObject(_envRoot!, "NeonTubeDirectionalR", _trackLights);
                     break;
                 case "NiceEnvironment":
-                    FindAddGameObject("GlowLineL", _trackLights);
-                    FindAddGameObject("GlowLineR", _trackLights);
-                    FindAddGameObject("GlowLineFarL", _trackLights);
-                    FindAddGameObject("GlowLineFarR", _trackLights);
+                    FindAddGameObject(_envRoot!, "GlowLineL", _trackLights);
+                    FindAddGameObject(_envRoot!, "GlowLineR", _trackLights);
+                    FindAddGameObject(_envRoot!, "GlowLineFarL", _trackLights);
+                    FindAddGameObject(_envRoot!, "GlowLineFarR", _trackLights);
                     break;
                 case "BigMirrorEnvironment":
-                    FindAddGameObject("NeonTubeDirectionalL", _trackLights);
-                    FindAddGameObject("NeonTubeDirectionalR", _trackLights);
-                    FindAddGameObject("NeonTubeDirectionalFL", _trackLights);
-                    FindAddGameObject("NeonTubeDirectionalFR", _trackLights);
+                    FindAddGameObject(_envRoot!, "NeonTubeDirectionalL", _trackLights);
+                    FindAddGameObject(_envRoot!, "NeonTubeDirectionalR", _trackLights);
+                    FindAddGameObject(_envRoot!, "NeonTubeDirectionalFL", _trackLights);
+                    FindAddGameObject(_envRoot!, "NeonTubeDirectionalFR", _trackLights);
                     break;
                 case "DragonsEnvironment":
-                    FindAddGameObject("GlowLineL", _trackLights);
-                    FindAddGameObject("GlowLineR", _trackLights);
-                    FindAddGameObject("ConstructionGlowLine (1)", _trackLights);
-                    FindAddGameObject("ConstructionGlowLine (4)", _trackLights);
-                    FindAddGameObject("ConstructionGlowLine (5)", _trackLights);
-                    FindAddGameObject("ConstructionGlowLine (6)", _trackLights);
-                    FindAddGameObject("DragonsSidePSL", _trackLights);
-                    FindAddGameObject("DragonsSidePSR", _trackLights);
+                    FindAddGameObject(_envRoot!, "GlowLineL", _trackLights);
+                    FindAddGameObject(_envRoot!, "GlowLineR", _trackLights);
+                    FindAddGameObject(_envRoot!, "ConstructionGlowLine (1)", _trackLights);
+                    FindAddGameObject(_envRoot!, "ConstructionGlowLine (4)", _trackLights);
+                    FindAddGameObject(_envRoot!, "ConstructionGlowLine (5)", _trackLights);
+                    FindAddGameObject(_envRoot!, "ConstructionGlowLine (6)", _trackLights);
+                    FindAddGameObject(_envRoot!, "DragonsSidePSL", _trackLights);
+                    FindAddGameObject(_envRoot!, "DragonsSidePSR", _trackLights);
                     break;
                 case "KDAEnvironment":
-                    FindAddGameObject("GlowLineLVisible", _trackLights);
-                    FindAddGameObject("GlowLineRVisible", _trackLights);
-                    FindAddGameObject("GlowTopLine", _trackLights);
-                    FindAddGameObject("GlowLineL", _trackLights);
-                    FindAddGameObject("GlowLineR", _trackLights);
-                    FindAddGameObject("GlowLineFarL", _trackLights);
-                    FindAddGameObject("GlowLineFarR", _trackLights);
-                    for (int i = 0; i < 5; i++)
-                        FindAddGameObject($"GlowTopLine ({i.ToString(NumberFormatInfo.InvariantInfo)})", _trackLights);
-                    FindAddGameObject("GlowLine", _trackLights);
-                    for (int i = 0; i < 100; i++)
-                        FindAddGameObject($"GlowLine ({i.ToString(NumberFormatInfo.InvariantInfo)})", _trackLights);
+                    FindAddGameObject(_envRoot!, "GlowLineLVisible", _trackLights);
+                    FindAddGameObject(_envRoot!, "GlowLineRVisible", _trackLights);
+                    FindAddGameObject(_envRoot!, "GlowTopLine", _trackLights);
+                    FindAddGameObject(_envRoot!, "GlowLineFarL", _trackLights);
+                    FindAddGameObject(_envRoot!, "GlowLineFarR", _trackLights);
+                    for (int i = 1; i < 5; i++)
+                        FindAddGameObject(_envRoot!, $"GlowTopLine ({i.ToString(NumberFormatInfo.InvariantInfo)})", _trackLights);
+                    FindAddGameObject(_envRoot!, "GlowLine", _trackLights);
+                    for (int i = 1; i < 77; i++)
+                        FindAddGameObject(_envRoot!, $"GlowLine ({i.ToString(NumberFormatInfo.InvariantInfo)})", _trackLights);
                     break;
                 case "MonstercatEnvironment":
-                    FindAddGameObject("GlowLineL", _trackLights);
-                    FindAddGameObject("GlowLineL (1)", _trackLights);
-                    FindAddGameObject("GlowLineR", _trackLights);
-                    FindAddGameObject("GlowLineR (1)", _trackLights);
+                    FindAddGameObject(_envRoot!, "GlowLineL", _trackLights);
+                    FindAddGameObject(_envRoot!, "GlowLineL (1)", _trackLights);
+                    FindAddGameObject(_envRoot!, "GlowLineR", _trackLights);
+                    FindAddGameObject(_envRoot!, "GlowLineR (1)", _trackLights);
                     for (int i = 5; i < 12; i++)
-                        FindAddGameObject($"GlowTopLine ({i.ToString(NumberFormatInfo.InvariantInfo)})", _trackLights);
+                        FindAddGameObject(_envRoot!, $"GlowTopLine ({i.ToString(NumberFormatInfo.InvariantInfo)})", _trackLights);
                     break;
                 case "CrabRaveEnvironment":
-                    FindAddGameObject("GlowLineL", _trackLights);
-                    FindAddGameObject("GlowLineL (1)", _trackLights);
-                    FindAddGameObject("GlowLineR", _trackLights);
-                    FindAddGameObject("GlowLineR (1)", _trackLights);
+                    FindAddGameObject(_envRoot!, "GlowLineL", _trackLights);
+                    FindAddGameObject(_envRoot!, "GlowLineL (1)", _trackLights);
+                    FindAddGameObject(_envRoot!, "GlowLineR", _trackLights);
+                    FindAddGameObject(_envRoot!, "GlowLineR (1)", _trackLights);
                     for (int i = 5; i < 12; i++)
-                        FindAddGameObject($"GlowTopLine ({i.ToString(NumberFormatInfo.InvariantInfo)})", _trackLights);
+                        FindAddGameObject(_envRoot!, $"GlowTopLine ({i.ToString(NumberFormatInfo.InvariantInfo)})", _trackLights);
                     break;
                 case "PanicEnvironment":
-                    FindAddGameObject("Light (5)", _trackLights);
-                    FindAddGameObject("ConstructionGlowLine (15)", _trackLights);
+                    FindAddGameObject(_envRoot!, "Light (5)", _trackLights);
+                    FindAddGameObject(_envRoot!, "ConstructionGlowLine (15)", _trackLights);
                     for (int i = 4; i < 9; i++)
-                        FindAddGameObject($"ConstructionGlowLine ({i.ToString(NumberFormatInfo.InvariantInfo)})", _trackLights);
+                        FindAddGameObject(_envRoot!, $"ConstructionGlowLine ({i.ToString(NumberFormatInfo.InvariantInfo)})", _trackLights);
                     break;
                 case "RocketEnvironment":
-                    FindAddGameObject("GlowLineR (1)", _trackLights);
+                    FindAddGameObject(_envRoot!, "GlowLineR (1)", _trackLights);
                     for (int i = 1; i < 10; i++)
-                        FindAddGameObject($"GlowLineL ({i.ToString(NumberFormatInfo.InvariantInfo)})", _trackLights);
-                    break;
-                case "GreenDayGrenadeEnvironment":
-                    FindAddGameObject("GlowLineL", _trackLights);
-                    FindAddGameObject("GlowLineR", _trackLights);
-                    FindAddGameObject("GlowLineL (1)", _trackLights);
-                    FindAddGameObject("GlowLineR (1)", _trackLights);
-                    FindAddGameObject("GlowLineL (2)", _trackLights);
-                    FindAddGameObject("GlowLineL (4)", _trackLights);
-                    for (int i = 7; i < 25; i++)
-                        FindAddGameObject($"GlowLineL ({i.ToString(NumberFormatInfo.InvariantInfo)})", _trackLights);
+                        FindAddGameObject(_envRoot!, $"GlowLineL ({i.ToString(NumberFormatInfo.InvariantInfo)})", _trackLights);
                     break;
                 case "GreenDayEnvironment":
-                    FindAddGameObject("GlowLineL", _trackLights);
-                    FindAddGameObject("GlowLineR", _trackLights);
-                    FindAddGameObject("GlowLineL (1)", _trackLights);
-                    FindAddGameObject("GlowLineR (1)", _trackLights);
-                    FindAddGameObject("GlowLineL (2)", _trackLights);
-                    FindAddGameObject("GlowLineL (4)", _trackLights);
-                    for (int i = 7; i < 25; i++)
-                        FindAddGameObject($"GlowLineL ({i.ToString(NumberFormatInfo.InvariantInfo)})", _trackLights);
+                case "GreenDayGrenadeEnvironment":
+                    FindAddGameObject(_envRoot!, "GlowLineL", _trackLights);
+                    FindAddGameObject(_envRoot!, "GlowLineR", _trackLights);
+                    FindAddGameObject(_envRoot!, "GlowLineL (2)", _trackLights);
+                    FindAddGameObject(_envRoot!, "GlowLineL (4)", _trackLights);
+                    FindAddGameObject(_envRoot!, "GlowLineL (7)", _trackLights);
+                    FindAddGameObject(_envRoot!, "GlowLineL (8)", _trackLights);
+                    for (int i = 13; i < 25; i++)
+                        FindAddGameObject(_envRoot!, $"GlowLineL ({i.ToString(NumberFormatInfo.InvariantInfo)})", _trackLights);
                     break;
                 case "TimbalandEnvironment":
-                    FindAddGameObject("GlowLineL", _trackLights);
-                    FindAddGameObject("GlowLineR", _trackLights);
+                    FindAddGameObject(_envRoot!, "GlowLineL", _trackLights);
+                    FindAddGameObject(_envRoot!, "GlowLineR", _trackLights);
                     break;
                 case "LinkinParkEnvironment":
-                    FindAddGameObject("LaserFloor", _trackLights);
-                    for (int i = 1; i < 4; i++)
-                        FindAddGameObject($"LaserFloor ({i.ToString(NumberFormatInfo.InvariantInfo)})", _trackLights);
-                    for (int i = 2; i < 22; i++)
-                        FindAddGameObject($"LaserTop ({i.ToString(NumberFormatInfo.InvariantInfo)})", _trackLights);
-                    FindAddGameObject("LaserL", _trackLights);
+                    for (int i = 2; i < 5; i++)
+                        FindAddGameObject(_envRoot!, $"LaserFloor ({i.ToString(NumberFormatInfo.InvariantInfo)})", _trackLights);
+                    FindAddGameObject(_envRoot!, "LaserTop", _trackLights);
+                    for (int i = 1; i < 8; i++)
+                        FindAddGameObject(_envRoot!, $"LaserTop ({i.ToString(NumberFormatInfo.InvariantInfo)})", _trackLights);
+                    FindAddGameObject(_envRoot!, "LaserL", _trackLights);
                     // ReSharper disable once StringLiteralTypo
-                    FindAddGameObject("LarerR", _trackLights);
-                    FindAddGameObject("LaserL (2)", _trackLights);
+                    FindAddGameObject(_envRoot!, "LarerR", _trackLights);
+                    FindAddGameObject(_envRoot!, "LaserL (2)", _trackLights);
                     // ReSharper disable once StringLiteralTypo
-                    FindAddGameObject("LarerR (2)", _trackLights);
+                    FindAddGameObject(_envRoot!, "LarerR (2)", _trackLights);
                     break;
                 case "BTSEnvironment":
-                    FindAddGameObject("GlowLineL", _trackLights);
-                    FindAddGameObject("GlowLineR", _trackLights);
-                    FindAddGameObject("GlowLineH", _trackLights);
-                    FindAddGameObject("GlowLineH (2)", _trackLights);
-                    FindAddGameObject("LaserL", _trackLights);
-                    FindAddGameObject("LaserR", _trackLights);
-                    FindAddGameObject("GlowLineC", _trackLights);
-                    FindAddGameObject("BottomGlow", _trackLights);
+                    FindAddGameObject(_envRoot!, "GlowLineL", _trackLights);
+                    FindAddGameObject(_envRoot!, "GlowLineR", _trackLights);
+                    FindAddGameObject(_envRoot!, "GlowLineH", _trackLights);
+                    FindAddGameObject(_envRoot!, "GlowLineH (2)", _trackLights);
+                    FindAddGameObject(_envRoot!, "LaserL", _trackLights);
+                    FindAddGameObject(_envRoot!, "LaserR", _trackLights);
+                    FindAddGameObject(_envRoot!, "GlowLineC", _trackLights);
+                    FindAddGameObject(_envRoot!, "BottomGlow", _trackLights);
                     for (int i = 0; i < 4; i++)
-                        FindAddGameObject("SideLaser", _trackLights, true);
+                        FindAddGameObject(_envRoot!, "SideLaser", _trackLights, true);
                     break;
                 case "InterscopeEnvironment":
-                    FindAddGameObject("NeonTop", _trackLights);
-                    FindAddGameObject("Pillar/Pillar/NeonLightL", _trackLights);
-                    FindAddGameObject("Pillar/Pillar/NeonLightR", _trackLights);
+                    FindAddGameObject(_envRoot!, "NeonTop", _trackLights);
+                    FindAddGameObject(_envRoot!, "Pillar/NeonLightL", _trackLights);
+                    FindAddGameObject(_envRoot!, "Pillar/NeonLightR", _trackLights);
                     for (int i = 1; i < 5; i++)
                     {
-                        FindAddGameObject($"NeonTop ({i.ToString(NumberFormatInfo.InvariantInfo)})", _trackLights);
-                        string baseName = $"Pillar ({i.ToString(NumberFormatInfo.InvariantInfo)}";
-                        FindAddGameObject($"{baseName}/NeonLightL", _trackLights);
-                        FindAddGameObject($"{baseName}/NeonLightR", _trackLights);
+                        FindAddGameObject(_envRoot!, $"NeonTop ({i.ToString(NumberFormatInfo.InvariantInfo)})", _trackLights);
+                        string baseName = $"Pillar ({i.ToString(NumberFormatInfo.InvariantInfo)})";
+                        FindAddGameObject(_envRoot!, $"{baseName}/NeonLightL", _trackLights);
+                        FindAddGameObject(_envRoot!, $"{baseName}/NeonLightR", _trackLights);
                     }
 
                     break;

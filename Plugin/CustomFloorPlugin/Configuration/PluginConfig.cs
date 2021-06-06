@@ -12,6 +12,7 @@ namespace CustomFloorPlugin.Configuration
         public virtual bool ShowHeart { get; set; } = true;
         public virtual bool ShowInMenu { get; set; }
         public virtual bool ShufflePlatforms { get; set; }
+        public virtual bool DisableGradientBackground { get; set; } = true;
         public virtual string? SingleplayerPlatformPath { get; set; }
         public virtual string? MultiplayerPlatformPath { get; set; }
         public virtual string? A360PlatformPath { get; set; }
