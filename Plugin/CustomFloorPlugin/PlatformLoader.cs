@@ -77,12 +77,12 @@ namespace CustomFloorPlugin
 
             assetBundle.Unload(false);
 
-            CustomPlatform customPlatform = platformPrefab.GetComponent<CustomPlatform>();
+            CustomPlatform? customPlatform = platformPrefab.GetComponent<CustomPlatform>();
 
             if (customPlatform is null)
             {
                 // Check for old platform 
-                global::CustomPlatform legacyPlatform = platformPrefab.GetComponent<global::CustomPlatform>();
+                global::CustomPlatform? legacyPlatform = platformPrefab.GetComponent<global::CustomPlatform>();
                 if (legacyPlatform is not null)
                 {
                     // Replace legacy platform component with up to date one

@@ -26,12 +26,12 @@ namespace CustomFloorPlugin
         /// <summary>
         /// The old heart, to remind everyone that this plugin is some legacy garbage
         /// </summary>
-        internal Task<GameObject> Heart { get; }
+        private readonly Task<GameObject> _heartTask;
 
         /// <summary>
         /// Used as a players place replacement in platform preview
         /// </summary>
-        internal Task<GameObject> PlayersPlace { get; }
+        private readonly Task<GameObject> _playersPlaceTask;
 
         /// <summary>
         /// The cover for the default platform
@@ -52,14 +52,26 @@ namespace CustomFloorPlugin
         {
             _container = container;
             _materialSwapper = materialSwapper;
-            Heart = CreateHeartAsync();
-            PlayersPlace = CreatePlayersPlaceAsync();
+            _heartTask = CreateHeartAsync();
+            _playersPlaceTask = CreatePlayersPlaceAsync();
             using Stream defaultCoverStream = GetEmbeddedResource("CustomFloorPlugin.Assets.LvlInsaneCover.png");
             DefaultPlatformCover = defaultCoverStream.ReadTexture2D().ToSprite();
             using Stream fallbackCoverStream = GetEmbeddedResource("CustomFloorPlugin.Assets.FeetIcon.png");
             FallbackCover = fallbackCoverStream.ReadTexture2D().ToSprite();
             MultiplayerLightEffects = new GameObject("LightEffects").AddComponent<LightEffects>();
             MultiplayerLightEffects.gameObject.SetActive(false);
+        }
+
+        internal async void ToggleHeart(bool active)
+        {
+            GameObject heart = await _heartTask;
+            heart.SetActive(active);
+        }
+
+        internal async void TogglePlayersPlace(bool active)
+        {
+            GameObject playersPlace = await _playersPlaceTask;
+            playersPlace.SetActive(active);
         }
 
         private async Task<GameObject> CreateHeartAsync()
@@ -99,9 +111,9 @@ namespace CustomFloorPlugin
             MeshRenderer cubeRenderer = playersPlaceCube.GetComponent<MeshRenderer>();
             (Material darkEnvSimpleMaterial, _, _) = await _materialSwapper.MaterialsLoadingTask;
             cubeRenderer.material = darkEnvSimpleMaterial;
-            playersPlaceCube.transform.localPosition = new Vector3(0f, -12.5f, 0f);
-            playersPlaceCube.transform.localScale = new Vector3(3f, 25f, 2f);
-            playersPlaceCube.name = "PlayersPlaceReplacement";
+            playersPlaceCube.transform.localPosition = new Vector3(0f, -50f, 0f);
+            playersPlaceCube.transform.localScale = new Vector3(3f, 100f, 2f);
+            playersPlaceCube.name = "PlayersPlace";
 
             GameObject playersPlaceMirror = GameObject.CreatePrimitive(PrimitiveType.Plane);
             playersPlaceMirror.name = "Mirror";

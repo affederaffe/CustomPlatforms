@@ -5,7 +5,7 @@ namespace CustomFloorPlugin
 {
     public class CameraVisibility : MonoBehaviour
     {
-        public enum VisibilityMode 
+        public enum VisibilityMode
         {
             Default,
             HeadsetOnly,

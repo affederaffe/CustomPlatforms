@@ -34,12 +34,15 @@ namespace CustomFloorPlugin
 
         private readonly Transform _anchor;
         private readonly CancellationTokenSource _cancellationTokenSource;
+        private readonly string _directoryPath;
         private readonly string _cacheFilePath;
 
         /// <summary>
-        /// The path to the CustomPlatforms folder
+        /// Getter for the CustomPlatforms directory path, this ensures that this directory actually exists
         /// </summary>
-        internal string DirectoryPath { get; } = Path.Combine(UnityGame.InstallPath, "CustomPlatforms");
+        internal string DirectoryPath => Directory.Exists(_directoryPath)
+            ? _directoryPath
+            : Directory.CreateDirectory(_directoryPath).FullName;
 
         /// <summary>
         /// An <see cref="ObservableCollection{T}"/> of all currently loaded <see cref="CustomPlatform"/>s<br/>
@@ -70,8 +73,8 @@ namespace CustomFloorPlugin
             _platformLoader = platformLoader;
             _anchor = new GameObject("CustomPlatforms").transform;
             _cancellationTokenSource = new CancellationTokenSource();
+            _directoryPath = Path.Combine(UnityGame.InstallPath, "CustomPlatforms");
             _cacheFilePath = Path.Combine(DirectoryPath, "cache.dat");
-            Directory.CreateDirectory(DirectoryPath);
             DefaultPlatform = CreateDefaultPlatform();
             AllPlatforms = new ObservableCollection<CustomPlatform> { DefaultPlatform };
             SingleplayerPlatform = DefaultPlatform;
@@ -84,7 +87,7 @@ namespace CustomFloorPlugin
         {
             try
             {
-                await LoadPlatformsAsync(_cancellationTokenSource.Token);
+                await LoadPlatformsAsync();
             }
             catch (System.OperationCanceledException) { }
         }
@@ -129,9 +132,10 @@ namespace CustomFloorPlugin
         /// <summary>
         /// Loads all platforms or their descriptors if a cache file exists
         /// </summary>
-        private async Task LoadPlatformsAsync(CancellationToken cancellationToken)
+        private async Task LoadPlatformsAsync()
         {
             Stopwatch sw = Stopwatch.StartNew();
+            CancellationToken cancellationToken = _cancellationTokenSource.Token;
 
             if (File.Exists(_cacheFilePath))
             {

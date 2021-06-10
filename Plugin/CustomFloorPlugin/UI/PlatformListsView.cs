@@ -23,22 +23,22 @@ namespace CustomFloorPlugin.UI
     [ViewDefinition("CustomFloorPlugin.Views.PlatformLists.bsml")]
     internal class PlatformListsView : BSMLAutomaticViewController
     {
-        private PluginConfig? _config;
-        private AssetLoader? _assetLoader;
-        private PlatformManager? _platformManager;
-        private PlatformSpawner? _platformSpawner;
+        private PluginConfig _config = null!;
+        private AssetLoader _assetLoader = null!;
+        private PlatformManager _platformManager = null!;
+        private PlatformSpawner _platformSpawner = null!;
 
         [UIComponent("singleplayer-platforms-list")]
-        private readonly CustomListTableData? _singleplayerPlatformListTable = null;
+        private readonly CustomListTableData _singleplayerPlatformListTable = null!;
 
         [UIComponent("multiplayer-platforms-list")]
-        private readonly CustomListTableData? _multiplayerPlatformListTable = null;
+        private readonly CustomListTableData _multiplayerPlatformListTable = null!;
 
         [UIComponent("a360-platforms-list")]
-        private readonly CustomListTableData? _a360PlatformListTable = null;
+        private readonly CustomListTableData _a360PlatformListTable = null!;
 
-        private CustomListTableData[]? _listTables;
-        private ScrollView[]? _scrollViews;
+        private CustomListTableData[] _listTables = null!;
+        private ScrollView[] _scrollViews = null!;
         private int _tabIndex;
 
         [Inject]
@@ -63,8 +63,8 @@ namespace CustomFloorPlugin.UI
         {
             _tabIndex = segmentedControl.selectedCellNumber;
             int index = GetPlatformIndexForTabIndex(_tabIndex);
-            _listTables![segmentedControl.selectedCellNumber].tableView.ScrollToCellWithIdx(index, TableView.ScrollPositionType.Beginning, false);
-            _listTables![segmentedControl.selectedCellNumber].tableView.SelectCellWithIdx(index, true);
+            _listTables[segmentedControl.selectedCellNumber].tableView.ScrollToCellWithIdx(index, TableView.ScrollPositionType.Beginning, false);
+            _listTables[segmentedControl.selectedCellNumber].tableView.SelectCellWithIdx(index, true);
         }
 
         /// <summary>
@@ -77,20 +77,20 @@ namespace CustomFloorPlugin.UI
         // ReSharper disable once UnusedParameter.Local
         private async void OnDidSelectPlatform(TableView _1, int index)
         {
-            await _platformSpawner!.ChangeToPlatformAsync(_platformManager!.AllPlatforms[index]);
+            await _platformSpawner.ChangeToPlatformAsync(_platformManager.AllPlatforms[index]);
             switch (_tabIndex)
             {
                 case 0:
-                    _platformManager!.SingleplayerPlatform = _platformManager.ActivePlatform;
-                    _config!.SingleplayerPlatformPath = _platformManager.ActivePlatform.fullPath;
+                    _platformManager.SingleplayerPlatform = _platformManager.ActivePlatform;
+                    _config.SingleplayerPlatformPath = _platformManager.ActivePlatform.fullPath;
                     break;
                 case 1:
-                    _platformManager!.MultiplayerPlatform = _platformManager.ActivePlatform;
-                    _config!.MultiplayerPlatformPath = _platformManager.ActivePlatform.fullPath;
+                    _platformManager.MultiplayerPlatform = _platformManager.ActivePlatform;
+                    _config.MultiplayerPlatformPath = _platformManager.ActivePlatform.fullPath;
                     break;
                 case 2:
-                    _platformManager!.A360Platform = _platformManager.ActivePlatform;
-                    _config!.A360PlatformPath = _platformManager.ActivePlatform.fullPath;
+                    _platformManager.A360Platform = _platformManager.ActivePlatform;
+                    _config.A360PlatformPath = _platformManager.ActivePlatform.fullPath;
                     break;
             }
         }
@@ -102,9 +102,9 @@ namespace CustomFloorPlugin.UI
         protected override void DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
         {
             base.DidActivate(firstActivation, addedToHierarchy, screenSystemEnabling);
-            if (firstActivation) _platformManager!.AllPlatforms.CollectionChanged += OnCollectionDidChange;
+            if (firstActivation) _platformManager.AllPlatforms.CollectionChanged += OnCollectionDidChange;
             CustomPlatform platform = GetPlatformForTabIndex(_tabIndex);
-            _ = _platformSpawner!.ChangeToPlatformAsync(platform);
+            _ = _platformSpawner.ChangeToPlatformAsync(platform);
         }
 
         /// <summary>
@@ -114,12 +114,12 @@ namespace CustomFloorPlugin.UI
         protected override void DidDeactivate(bool removedFromHierarchy, bool screenSystemDisabling)
         {
             base.DidDeactivate(removedFromHierarchy, screenSystemDisabling);
-            if (removedFromHierarchy) _platformManager!.AllPlatforms.CollectionChanged -= OnCollectionDidChange;
-            _ = _platformSpawner!.ChangeToPlatformAsync(_config!.ShowInMenu
+            if (removedFromHierarchy) _platformManager.AllPlatforms.CollectionChanged -= OnCollectionDidChange;
+            _ = _platformSpawner.ChangeToPlatformAsync(_config.ShowInMenu
                 ? _config.ShufflePlatforms
-                    ? _platformSpawner!.RandomPlatform
-                    : _platformManager!.SingleplayerPlatform
-                : _platformManager!.DefaultPlatform);
+                    ? _platformSpawner.RandomPlatform
+                    : _platformManager.SingleplayerPlatform
+                : _platformManager.DefaultPlatform);
         }
 
         /// <summary>
@@ -130,9 +130,9 @@ namespace CustomFloorPlugin.UI
         // ReSharper disable once UnusedMember.Local
         private void PostParse()
         {
-            _listTables = new[] { _singleplayerPlatformListTable!, _multiplayerPlatformListTable!, _a360PlatformListTable! };
+            _listTables = new[] { _singleplayerPlatformListTable, _multiplayerPlatformListTable, _a360PlatformListTable };
             _scrollViews = new ScrollView[_listTables.Length];
-            for (int i = 0; i < _platformManager!.AllPlatforms.Count; i++)
+            for (int i = 0; i < _platformManager.AllPlatforms.Count; i++)
                 AddCellForPlatform(_platformManager.AllPlatforms[i], i);
             for (int i = 0; i < _listTables.Length; i++)
             {
@@ -170,9 +170,9 @@ namespace CustomFloorPlugin.UI
         /// </summary>
         private void RefreshListViews()
         {
-            for (int i = 0; i < _listTables!.Length; i++)
+            for (int i = 0; i < _listTables.Length; i++)
             {
-                float pos = _scrollViews![i].GetField<float, ScrollView>("_destinationPos");
+                float pos = _scrollViews[i].GetField<float, ScrollView>("_destinationPos");
                 _listTables[i].tableView.ReloadData();
                 _scrollViews[i].ScrollTo(pos, false);
             }
@@ -185,8 +185,8 @@ namespace CustomFloorPlugin.UI
         /// <param name="index">The index the cell should be inserted at</param>
         private void AddCellForPlatform(CustomPlatform platform, int index)
         {
-            CustomListTableData.CustomCellInfo cell = new(platform.platName, platform.platAuthor, platform.icon ? platform.icon : _assetLoader!.FallbackCover);
-            foreach (CustomListTableData listTable in _listTables!)
+            CustomListTableData.CustomCellInfo cell = new(platform.platName, platform.platAuthor, platform.icon ? platform.icon : _assetLoader.FallbackCover);
+            foreach (CustomListTableData listTable in _listTables)
                 listTable.data.Insert(index, cell);
         }
 
@@ -197,7 +197,7 @@ namespace CustomFloorPlugin.UI
         /// <param name="index">The index the cell is located at</param>
         private void RemoveCellForPlatform(CustomPlatform platform, int index)
         {
-            foreach (CustomListTableData listTable in _listTables!)
+            foreach (CustomListTableData listTable in _listTables)
             {
                 listTable.data.RemoveAt(index);
                 if (platform == GetPlatformForTabIndex(_tabIndex))
@@ -211,17 +211,17 @@ namespace CustomFloorPlugin.UI
         private int GetPlatformIndexForTabIndex(int tabIndex)
         {
             CustomPlatform platform = GetPlatformForTabIndex(tabIndex);
-            return _platformManager!.AllPlatforms.IndexOf(platform);
+            return _platformManager.AllPlatforms.IndexOf(platform);
         }
 
         private CustomPlatform GetPlatformForTabIndex(int tabIndex)
         {
             return tabIndex switch
             {
-                0 => _platformManager!.SingleplayerPlatform,
-                1 => _platformManager!.MultiplayerPlatform,
-                2 => _platformManager!.A360Platform,
-                _ => _platformManager!.DefaultPlatform
+                0 => _platformManager.SingleplayerPlatform,
+                1 => _platformManager.MultiplayerPlatform,
+                2 => _platformManager.A360Platform,
+                _ => _platformManager.DefaultPlatform
             };
         }
     }

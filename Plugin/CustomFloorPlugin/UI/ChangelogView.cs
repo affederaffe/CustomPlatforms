@@ -15,7 +15,7 @@ namespace CustomFloorPlugin.UI
     internal class ChangelogView : BSMLAutomaticViewController
     {
         [UIComponent("credits-modal")]
-        private readonly ModalView? _creditsModal = null;
+        private readonly ModalView _creditsModal = null!;
 
         /// <summary>
         /// The string displayed in the changelog   
@@ -91,7 +91,7 @@ namespace CustomFloorPlugin.UI
         protected override void DidDeactivate(bool removedFromHierarchy, bool screenSystemDisabling)
         {
             base.DidDeactivate(removedFromHierarchy, screenSystemDisabling);
-            _creditsModal!.gameObject.SetActive(false);
+            _creditsModal.gameObject.SetActive(false);
         }
     }
 }

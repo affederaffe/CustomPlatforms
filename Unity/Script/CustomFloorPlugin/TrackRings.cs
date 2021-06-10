@@ -31,22 +31,23 @@ namespace CustomFloorPlugin
         public float minPositionStep = 1f;
         public float maxPositionStep = 2f;
         public float moveSpeed = 1f;
-        
-        private void OnDrawGizmos() 
+
+        private void OnDrawGizmos()
         {
             Gizmos.matrix = transform.localToWorldMatrix;
             Gizmos.color = Color.blue;
-            for (int i = 0; i < ringCount; i++) 
+            for (int i = 0; i < ringCount; i++)
             {
                 Vector3 vector = i * ringPositionStep * Vector3.forward;
-                if (trackLaneRingPrefab != null) 
+                if (trackLaneRingPrefab is not null)
                 {
-                    foreach (Renderer renderer in trackLaneRingPrefab.GetComponentsInChildren<Renderer>()) 
+                    foreach (Renderer renderer in trackLaneRingPrefab.GetComponentsInChildren<Renderer>())
                     {
-                        Gizmos.DrawCube(vector + renderer.bounds.center, renderer.bounds.size);
+                        Bounds bounds = renderer.bounds;
+                        Gizmos.DrawCube(vector + bounds.center, bounds.size);
                     }
                 }
-                else 
+                else
                 {
                     Gizmos.DrawCube(vector, Vector3.one * 0.5f);
                 }

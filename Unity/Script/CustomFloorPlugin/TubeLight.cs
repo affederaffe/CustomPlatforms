@@ -34,8 +34,8 @@ namespace CustomFloorPlugin
         public float center = 0.5f;
         public Color color = Color.cyan;
         public LightsID lightsID;
-        
-        private void OnDrawGizmos() 
+
+        private void OnDrawGizmos()
         {
             Gizmos.color = color;
             Gizmos.matrix = transform.localToWorldMatrix;

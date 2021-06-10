@@ -11,7 +11,7 @@ namespace CustomFloorPlugin
         public float maxHeight = 10f;
         public float columnWidth = 1f;
         public float columnDepth = 1f;
-        
+
         private void OnDrawGizmos()
         {
             Gizmos.matrix = transform.localToWorldMatrix;

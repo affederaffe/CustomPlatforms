@@ -12,10 +12,10 @@ namespace CustomFloorPlugin.UI
     /// </summary>
     internal class PlatformsFlowCoordinator : FlowCoordinator
     {
-        private PlatformListsView? _platformsListView;
-        private ChangelogView? _changelogView;
-        private SettingsView? _settingsView;
-        private MainFlowCoordinator? _mainFlowCoordinator;
+        private PlatformListsView _platformsListView = null!;
+        private ChangelogView _changelogView = null!;
+        private SettingsView _settingsView = null!;
+        private MainFlowCoordinator _mainFlowCoordinator = null!;
 
         [Inject]
         public void Construct(PlatformListsView platformsListView,

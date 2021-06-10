@@ -18,9 +18,9 @@ namespace CustomFloorPlugin.UI
     [ViewDefinition("CustomFloorPlugin.Views.Settings.bsml")]
     internal class SettingsView : BSMLAutomaticViewController
     {
-        private PluginConfig? _config;
-        private AssetLoader? _assetLoader;
-        private EnvironmentHider? _environmentHider;
+        private PluginConfig _config = null!;
+        private AssetLoader _assetLoader = null!;
+        private EnvironmentHider _environmentHider = null!;
 
         [Inject]
         public void Construct(PluginConfig config, AssetLoader assetLoader, EnvironmentHider environmentHider)
@@ -37,11 +37,11 @@ namespace CustomFloorPlugin.UI
         [UIValue("always-show-feet")]
         public bool AlwaysShowFeet
         {
-            get => _config!.AlwaysShowFeet;
+            get => _config.AlwaysShowFeet;
             set
             {
-                _config!.AlwaysShowFeet = value;
-                _environmentHider!.ToggleFeet(value);
+                _config.AlwaysShowFeet = value;
+                _environmentHider.ToggleFeet(!value);
             }
         }
 
@@ -52,11 +52,11 @@ namespace CustomFloorPlugin.UI
         [UIValue("show-heart")]
         public bool ShowHeart
         {
-            get => _config!.ShowHeart;
+            get => _config.ShowHeart;
             set
             {
-                _config!.ShowHeart = value;
-                _assetLoader!.Heart.Result.SetActive(value);
+                _config.ShowHeart = value;
+                _assetLoader.ToggleHeart(value);
             }
         }
 
@@ -67,8 +67,8 @@ namespace CustomFloorPlugin.UI
         [UIValue("show-in-menu")]
         public bool ShowInMenu
         {
-            get => _config!.ShowInMenu;
-            set => _config!.ShowInMenu = value;
+            get => _config.ShowInMenu;
+            set => _config.ShowInMenu = value;
         }
 
         /// <summary>
@@ -78,8 +78,8 @@ namespace CustomFloorPlugin.UI
         [UIValue("shuffle-platforms")]
         public bool ShufflePlatforms
         {
-            get => _config!.ShufflePlatforms;
-            set => _config!.ShufflePlatforms = value;
+            get => _config.ShufflePlatforms;
+            set => _config.ShufflePlatforms = value;
         }
 
         /// <summary>
@@ -89,11 +89,11 @@ namespace CustomFloorPlugin.UI
         [UIValue("disable-gradient-background")]
         public bool DisableGradientBackground
         {
-            get => _config!.DisableGradientBackground;
+            get => _config.DisableGradientBackground;
             set
             {
-                _config!.DisableGradientBackground = value;
-                _environmentHider!.ToggleGradientBackground(value);
+                _config.DisableGradientBackground = value;
+                _environmentHider.ToggleGradientBackground(value);
             }
         }
 

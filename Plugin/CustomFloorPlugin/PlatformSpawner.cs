@@ -78,7 +78,7 @@ namespace CustomFloorPlugin
                 case null when _lobbyGameState.gameState is not MultiplayerGameState.Lobby:
                 case MenuScenesTransitionSetupDataSO:
                     Container = container;
-                    _assetLoader.Heart.Result.SetActive(_config.ShowHeart);
+                    _assetLoader.ToggleHeart(_config.ShowHeart);
                     platform = _config.ShowInMenu
                         ? _config.ShufflePlatforms
                             ? RandomPlatform
@@ -87,19 +87,19 @@ namespace CustomFloorPlugin
                     break;
                 case StandardLevelScenesTransitionSetupDataSO standardLevelScenesTransitionSetupDataSO when standardLevelScenesTransitionSetupDataSO.difficultyBeatmap.parentDifficultyBeatmapSet.beatmapCharacteristic.requires360Movement:
                     Container = container;
-                    _assetLoader.Heart.Result.SetActive(false);
+                    _assetLoader.ToggleHeart(false);
                     platform = _platformManager.A360Platform;
                     break;
                 case StandardLevelScenesTransitionSetupDataSO when _platformManager.APIRequestedPlatform is not null:
                     Container = container;
-                    _assetLoader.Heart.Result.SetActive(false);
+                    _assetLoader.ToggleHeart(false);
                     platform = _platformManager.APIRequestedPlatform;
                     break;
                 case StandardLevelScenesTransitionSetupDataSO:
                 case MissionLevelScenesTransitionSetupDataSO:
                 case TutorialScenesTransitionSetupDataSO:
                     Container = container;
-                    _assetLoader.Heart.Result.SetActive(false);
+                    _assetLoader.ToggleHeart(false);
                     platform = _config.ShufflePlatforms
                         ? RandomPlatform
                         : _platformManager.SingleplayerPlatform;
@@ -108,7 +108,7 @@ namespace CustomFloorPlugin
                     platform = _platformManager.MultiplayerPlatform;
                     break;
                 case BeatmapEditorScenesTransitionSetupDataSO:
-                    _assetLoader.Heart.Result.SetActive(false);
+                    _assetLoader.ToggleHeart(false);
                     platform = _platformManager.DefaultPlatform;
                     break;
                 default:
@@ -127,7 +127,7 @@ namespace CustomFloorPlugin
             switch (multiplayerGameState)
             {
                 case MultiplayerGameState.None:
-                    _assetLoader.Heart.Result.SetActive(_config.ShowHeart);
+                    _assetLoader.ToggleHeart(_config.ShowHeart);
                     platform = _config.ShowInMenu
                         ? _config.ShufflePlatforms
                             ? RandomPlatform
@@ -135,7 +135,7 @@ namespace CustomFloorPlugin
                         : _platformManager.DefaultPlatform;
                     break;
                 case MultiplayerGameState.Lobby:
-                    _assetLoader.Heart.Result.SetActive(false);
+                    _assetLoader.ToggleHeart(false);
                     platform = _platformManager.DefaultPlatform;
                     break;
                 default:

@@ -5,7 +5,6 @@ using System.Linq;
 using CustomFloorPlugin.Configuration;
 
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 using Zenject;
 
@@ -60,7 +59,7 @@ namespace CustomFloorPlugin
                 FindEnvironment();
                 SetCollectionHidden(_menuEnvironment, _platformManager.ActivePlatform != _platformManager.DefaultPlatform);
                 SetCollectionHidden(_gradientBackground, _config.DisableGradientBackground);
-                SetCollectionHidden(_playersPlace, _platformManager.ActivePlatform.hideDefaultPlatform || (_platformManager.ActivePlatform == _platformManager.DefaultPlatform && _sceneName == "MainMenu"));
+                SetCollectionHidden(_playersPlace, _platformManager.ActivePlatform.hideDefaultPlatform);
                 SetCollectionHidden(_feet, !_config.AlwaysShowFeet);
                 SetCollectionHidden(_smallRings, _platformManager.ActivePlatform.hideSmallRings);
                 SetCollectionHidden(_bigRings, _platformManager.ActivePlatform.hideBigRings);
@@ -72,19 +71,22 @@ namespace CustomFloorPlugin
                 SetCollectionHidden(_doubleColorLasers, _platformManager.ActivePlatform.hideDoubleColorLasers);
                 SetCollectionHidden(_rotatingLasers, _platformManager.ActivePlatform.hideRotatingLasers);
                 SetCollectionHidden(_trackLights, _platformManager.ActivePlatform.hideTrackLights);
+                _assetLoader.TogglePlayersPlace(_sceneName == "MainMenu" &&
+                                                !_platformManager.ActivePlatform.hideDefaultPlatform &&
+                                                _platformManager.ActivePlatform != _platformManager.DefaultPlatform);
             }
         }
 
-        internal void ToggleGradientBackground(bool value)
+        internal void ToggleGradientBackground(bool active)
         {
             FindGradientBackground();
-            SetCollectionHidden(_gradientBackground, value);
+            SetCollectionHidden(_gradientBackground, active);
         }
 
-        internal void ToggleFeet(bool value)
+        internal void ToggleFeet(bool active)
         {
             FindFeetIcon();
-            SetCollectionHidden(_feet, !value);
+            SetCollectionHidden(_feet, active);
         }
 
         /// <summary>
@@ -109,13 +111,13 @@ namespace CustomFloorPlugin
         }
 
         /// <summary>
-        /// Gets the currently loaded <see cref="Scene" /> and returns the Environment root GameObject
+        /// Finds the <see cref="Transform"/> all environment related objects are parented to
         /// </summary>
         private bool TryGetEnvironmentObjectsForContainer(DiContainer container)
         {
+            _menuRoot ??= container.TryResolve<MenuEnvironmentManager>()?.transform;
             _envRoot = container.TryResolve<MultiplayerLocalActivePlayerFacade>()?.transform;
             if (_envRoot is null) _envRoot = container.TryResolve<LightWithIdManager>()?.transform.parent;
-            _menuRoot ??= container.TryResolve<MenuEnvironmentManager>()?.transform;
             if (_envRoot is null || _menuRoot is null) return false;
             _sceneName = _envRoot.gameObject.scene.name;
             return true;
@@ -124,9 +126,9 @@ namespace CustomFloorPlugin
         /// <summary>
         /// Set the active state of a Collection of GameObjects
         /// </summary>
-        /// <param name="list">A <see cref="List{T}" /> of GameObjects</param>
+        /// <param name="list">A <see cref="ICollection{T}" /> of GameObjects</param>
         /// <param name="hidden">A boolean describing the desired hidden state</param>
-        private void SetCollectionHidden(ICollection<GameObject> list, bool hidden)
+        private static void SetCollectionHidden(ICollection<GameObject> list, bool hidden)
         {
             foreach (GameObject gameObject in list)
                 gameObject.SetActive(!hidden);
@@ -179,9 +181,6 @@ namespace CustomFloorPlugin
         {
             switch (_sceneName)
             {
-                case "MainMenu":
-                    _playersPlace.Add(_assetLoader.PlayersPlace.Result);
-                    break;
                 case "GameCore":
                     FindAddGameObject(_envRoot!, "IsActiveObjects/Construction/PlayersPlace/Mirror", _playersPlace);
                     FindAddGameObject(_envRoot!, "IsActiveObjects/Construction/PlayersPlace/Construction", _playersPlace);
@@ -368,6 +367,9 @@ namespace CustomFloorPlugin
                     FindAddGameObject(_envRoot!, "Buildings", _towers);
                     FindAddGameObject(_envRoot!, "MainStructure", _towers);
                     FindAddGameObject(_envRoot!, "TopStructure", _towers);
+                    FindAddGameObject(_envRoot!, "TimbalandLogo", _towers);
+                    for (int i = 0; i < 4; i++)
+                        FindAddGameObject(_envRoot!, $"TimbalandLogo ({i.ToString(NumberFormatInfo.InvariantInfo)})", _towers);
                     break;
                 case "BTSEnvironment":
                     FindAddGameObject(_envRoot!, "PillarTrackLaneRingsR", _towers);
@@ -699,6 +701,7 @@ namespace CustomFloorPlugin
                     break;
                 case "GreenDayEnvironment":
                 case "GreenDayGrenadeEnvironment":
+                    FindAddGameObject(_envRoot!, "Logo", _backLasers);
                     FindAddGameObject(_envRoot!, "FrontLight", _backLasers);
                     break;
                 case "TimbalandEnvironment":
