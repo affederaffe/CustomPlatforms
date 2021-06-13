@@ -17,12 +17,12 @@ namespace CustomFloorPlugin
     {
         private readonly TaskCompletionSource<(Material, Material, Material)> _taskSource;
 
-        internal Task<(Material DarkEnvSimpleMaterial, Material TransparentGlowMaterial, Material OpaqueGlowMaterial)> MaterialsLoadingTask { get; }
+        internal Task<(Material DarkEnvSimpleMaterial, Material TransparentGlowMaterial, Material OpaqueGlowMaterial)> MaterialsTask { get; }
 
         public MaterialSwapper()
         {
             _taskSource = new TaskCompletionSource<(Material, Material, Material)>();
-            MaterialsLoadingTask = _taskSource.Task;
+            MaterialsTask = _taskSource.Task;
         }
 
         public async void Initialize()
@@ -59,7 +59,7 @@ namespace CustomFloorPlugin
         private async Task ReplaceForRendererAsync(Renderer renderer)
         {
             Material[] materialsCopy = renderer.materials;
-            (Material darkEnvSimpleMaterial, Material transparentGlowMaterial, Material opaqueGlowMaterial) = await MaterialsLoadingTask;
+            (Material darkEnvSimpleMaterial, Material transparentGlowMaterial, Material opaqueGlowMaterial) = await MaterialsTask;
             bool materialsDidChange = false;
             for (int i = 0; i < materialsCopy.Length; i++)
             {

@@ -33,7 +33,7 @@ namespace CustomFloorPlugin.Installers
         {
             Container.BindLoggerAsSiraLogger(_logger);
             Container.BindInstance(_config).AsSingle();
-            Container.BindInstance(_mainSystemInit.GetField<MirrorRendererSO, MainSystemInit>("_mirrorRenderer")).AsSingle();
+            Container.BindInstance(_mainSystemInit.GetField<MirrorRendererSO, MainSystemInit>("_mirrorRenderer")).AsSingle().IfNotBound();
             Container.BindInterfacesAndSelfTo<MaterialSwapper>().AsSingle();
             Container.Bind<AssetLoader>().AsSingle();
             Container.Bind<PlatformLoader>().AsSingle();

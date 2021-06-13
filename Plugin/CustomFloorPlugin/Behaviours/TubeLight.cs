@@ -82,7 +82,7 @@ namespace CustomFloorPlugin
                     mesh.triangles = _triangles;
                 }
 
-                (_, _, Material opaqueGlowMaterial) = await _materialSwapper!.MaterialsLoadingTask;
+                (_, _, Material opaqueGlowMaterial) = await _materialSwapper!.MaterialsTask;
                 GetComponent<Renderer>().sharedMaterial = opaqueGlowMaterial;
                 MaterialPropertyBlockController materialPropertyBlockController = gameObject.AddComponent<MaterialPropertyBlockController>();
                 materialPropertyBlockController.SetField("_renderers", new[] { GetComponent<Renderer>() });

@@ -49,32 +49,51 @@ namespace CustomFloorPlugin
             _platformManager = platformManager;
         }
 
+        internal void UpdateEnvironmentRoot(ScenesTransitionSetupDataSO? setupData, DiContainer container)
+        {
+            switch (setupData)
+            {
+                case MenuScenesTransitionSetupDataSO:
+                    _menuRoot = container.Resolve<MenuEnvironmentManager>().transform;
+                    _envRoot = container.Resolve<LightWithIdManager>().transform.parent;
+                    _sceneName = _envRoot.gameObject.scene.name;
+                    break;
+                case null:
+                case StandardLevelScenesTransitionSetupDataSO:
+                case TutorialScenesTransitionSetupDataSO:
+                case MissionLevelScenesTransitionSetupDataSO:
+                    _envRoot = container.Resolve<LightWithIdManager>().transform.parent;
+                    _sceneName = _envRoot.gameObject.scene.name;
+                    break;
+                case MultiplayerLevelScenesTransitionSetupDataSO:
+                    _envRoot = container.Resolve<MultiplayerLocalActivePlayerFacade>().transform;
+                    _sceneName = _envRoot.gameObject.scene.name;
+                    break;
+            }
+        }
+
         /// <summary>
         /// Hide world objects as required by the active platform
         /// </summary>
-        public void HideObjectsForActivePlatform(DiContainer container)
+        internal void HideObjectsForPlatform(CustomPlatform platform)
         {
-            if (TryGetEnvironmentObjectsForContainer(container))
-            {
-                FindEnvironment();
-                SetCollectionHidden(_menuEnvironment, _platformManager.ActivePlatform != _platformManager.DefaultPlatform);
-                SetCollectionHidden(_gradientBackground, _config.DisableGradientBackground);
-                SetCollectionHidden(_playersPlace, _platformManager.ActivePlatform.hideDefaultPlatform);
-                SetCollectionHidden(_feet, !_config.AlwaysShowFeet);
-                SetCollectionHidden(_smallRings, _platformManager.ActivePlatform.hideSmallRings);
-                SetCollectionHidden(_bigRings, _platformManager.ActivePlatform.hideBigRings);
-                SetCollectionHidden(_visualizer, _platformManager.ActivePlatform.hideEQVisualizer);
-                SetCollectionHidden(_towers, _platformManager.ActivePlatform.hideTowers);
-                SetCollectionHidden(_highway, _platformManager.ActivePlatform.hideHighway);
-                SetCollectionHidden(_backColumns, _platformManager.ActivePlatform.hideBackColumns);
-                SetCollectionHidden(_backLasers, _platformManager.ActivePlatform.hideBackLasers);
-                SetCollectionHidden(_doubleColorLasers, _platformManager.ActivePlatform.hideDoubleColorLasers);
-                SetCollectionHidden(_rotatingLasers, _platformManager.ActivePlatform.hideRotatingLasers);
-                SetCollectionHidden(_trackLights, _platformManager.ActivePlatform.hideTrackLights);
-                _assetLoader.TogglePlayersPlace(_sceneName == "MainMenu" &&
-                                                !_platformManager.ActivePlatform.hideDefaultPlatform &&
-                                                _platformManager.ActivePlatform != _platformManager.DefaultPlatform);
-            }
+            if (_menuRoot is null && _envRoot is null) return;
+            FindEnvironment();
+            SetCollectionHidden(_menuEnvironment, platform != _platformManager.DefaultPlatform);
+            SetCollectionHidden(_gradientBackground, _config.DisableGradientBackground);
+            SetCollectionHidden(_playersPlace, platform.hideDefaultPlatform);
+            SetCollectionHidden(_feet, !_config.AlwaysShowFeet);
+            SetCollectionHidden(_smallRings, platform.hideSmallRings);
+            SetCollectionHidden(_bigRings, platform.hideBigRings);
+            SetCollectionHidden(_visualizer, platform.hideEQVisualizer);
+            SetCollectionHidden(_towers, platform.hideTowers);
+            SetCollectionHidden(_highway, platform.hideHighway);
+            SetCollectionHidden(_backColumns, platform.hideBackColumns);
+            SetCollectionHidden(_backLasers, platform.hideBackLasers);
+            SetCollectionHidden(_doubleColorLasers, platform.hideDoubleColorLasers);
+            SetCollectionHidden(_rotatingLasers, platform.hideRotatingLasers);
+            SetCollectionHidden(_trackLights, platform.hideTrackLights);
+            _assetLoader.TogglePlayersPlace(_sceneName == "MainMenu" && !platform.hideDefaultPlatform && platform != _platformManager.DefaultPlatform);
         }
 
         internal void ToggleGradientBackground(bool active)
@@ -108,19 +127,6 @@ namespace CustomFloorPlugin
             FindRotatingLasers();
             FindDoubleColorLasers();
             FindTrackLights();
-        }
-
-        /// <summary>
-        /// Finds the <see cref="Transform"/> all environment related objects are parented to
-        /// </summary>
-        private bool TryGetEnvironmentObjectsForContainer(DiContainer container)
-        {
-            _menuRoot ??= container.TryResolve<MenuEnvironmentManager>()?.transform;
-            _envRoot = container.TryResolve<MultiplayerLocalActivePlayerFacade>()?.transform;
-            if (_envRoot is null) _envRoot = container.TryResolve<LightWithIdManager>()?.transform.parent;
-            if (_envRoot is null || _menuRoot is null) return false;
-            _sceneName = _envRoot.gameObject.scene.name;
-            return true;
         }
 
         /// <summary>

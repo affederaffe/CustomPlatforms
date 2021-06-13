@@ -59,7 +59,6 @@ namespace CustomFloorPlugin
             using Stream fallbackCoverStream = GetEmbeddedResource("CustomFloorPlugin.Assets.FeetIcon.png");
             FallbackCover = fallbackCoverStream.ReadTexture2D().ToSprite();
             MultiplayerLightEffects = new GameObject("LightEffects").AddComponent<LightEffects>();
-            MultiplayerLightEffects.gameObject.SetActive(false);
         }
 
         internal async void ToggleHeart(bool active)
@@ -109,9 +108,9 @@ namespace CustomFloorPlugin
             GameObject playersPlaceCube = GameObject.CreatePrimitive(PrimitiveType.Cube);
             playersPlaceCube.SetActive(false);
             MeshRenderer cubeRenderer = playersPlaceCube.GetComponent<MeshRenderer>();
-            (Material darkEnvSimpleMaterial, _, _) = await _materialSwapper.MaterialsLoadingTask;
+            (Material darkEnvSimpleMaterial, _, _) = await _materialSwapper.MaterialsTask;
             cubeRenderer.material = darkEnvSimpleMaterial;
-            playersPlaceCube.transform.localPosition = new Vector3(0f, -50f, 0f);
+            playersPlaceCube.transform.localPosition = new Vector3(0f, -50.0075f, 0f);
             playersPlaceCube.transform.localScale = new Vector3(3f, 100f, 2f);
             playersPlaceCube.name = "PlayersPlace";
 
@@ -228,6 +227,7 @@ namespace CustomFloorPlugin
                     foreach (LightSwitchEventEffect lse in _lightSwitchEventEffects)
                     {
                         lse.SetField("_initialized", false);
+                        lse.SetField("_lightIsOn", false);
                         lse.Start();
                     }
                 }
@@ -241,21 +241,24 @@ namespace CustomFloorPlugin
                 _simpleHighlightColor0Boost.SetColor(_colorScheme.environmentColor0Boost);
                 _simpleHighlightColor1Boost.SetColor(_colorScheme.environmentColor1Boost);
 
-                gameObject.SetActive(true);
+                foreach (LightSwitchEventEffect lse in _lightSwitchEventEffects)
+                    lse.enabled = true;
             }
 
             public void PlatformDisabled()
             {
-                gameObject.SetActive(false);
                 if (_lightSwitchEventEffects is null) return;
                 foreach (LightSwitchEventEffect lse in _lightSwitchEventEffects)
+                {
                     lse.OnDestroy();
+                    lse.enabled = false;
+                }
             }
 
-            private static MultipliedColorSO CreateMultipliedColorSO(SimpleColorSO simpleColorSO, Color color)
+            private static MultipliedColorSO CreateMultipliedColorSO(SimpleColorSO simpleColor, Color color)
             {
                 MultipliedColorSO multipliedColor = ScriptableObject.CreateInstance<MultipliedColorSO>();
-                multipliedColor.SetField("_baseColor", simpleColorSO);
+                multipliedColor.SetField("_baseColor", simpleColor);
                 multipliedColor.SetField("_multiplierColor", color);
                 return multipliedColor;
             }
