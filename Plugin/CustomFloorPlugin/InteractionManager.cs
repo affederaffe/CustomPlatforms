@@ -52,8 +52,8 @@ namespace CustomFloorPlugin
             _fileSystemWatcher.Created += OnFileCreated;
             _fileSystemWatcher.Deleted += OnFileDeleted;
             _fileSystemWatcher.EnableRaisingEvents = true;
-            if (_isSongCoreInstalled) SubscribeToSongCoreEvent();
             if (_isCinemaInstalled) SubscribeToCinemaEvent();
+            if (_isSongCoreInstalled) { SubscribeToSongCoreEvent(); RegisterSongCoreCapability(); }
         }
 
         public void Dispose()
@@ -64,8 +64,8 @@ namespace CustomFloorPlugin
             _fileSystemWatcher.Dispose();
             _cancellationTokenSource.Cancel();
             _cancellationTokenSource.Dispose();
-            if (_isSongCoreInstalled) UnsubscribeFromSongCoreEvent();
             if (_isCinemaInstalled) UnsubscribeFromCinemaEvent();
+            if (_isSongCoreInstalled) { UnsubscribeFromSongCoreEvent(); UnregisterSongCoreCapability(); }
         }
 
         /// <summary>
@@ -95,7 +95,7 @@ namespace CustomFloorPlugin
         {
             if (!UnityGame.OnMainThread)
             {
-                _ = UnityMainThreadTaskScheduler.Factory.StartNew(() => OnFileChanged(sender, e));
+                _ = UnityMainThreadTaskScheduler.Factory.StartNew(() => OnFileCreated(sender, e));
                 return;
             }
 
@@ -111,7 +111,7 @@ namespace CustomFloorPlugin
         {
             if (!UnityGame.OnMainThread)
             {
-                _ = UnityMainThreadTaskScheduler.Factory.StartNew(() => OnFileChanged(sender, e));
+                _ = UnityMainThreadTaskScheduler.Factory.StartNew(() => OnFileDeleted(sender, e));
                 return;
             }
 
@@ -126,6 +126,8 @@ namespace CustomFloorPlugin
         private void SubscribeToSongCoreEvent() => SongCore.Plugin.CustomSongPlatformSelectionDidChange += OnSongCoreEvent;
 
         private void UnsubscribeFromSongCoreEvent() => SongCore.Plugin.CustomSongPlatformSelectionDidChange -= OnSongCoreEvent;
+        private void RegisterSongCoreCapability() => SongCore.Collections.RegisterCapability("Custom Platforms");
+        private void UnregisterSongCoreCapability() => SongCore.Collections.DeregisterizeCapability("Custom Platforms");
 
         private void SubscribeToCinemaEvent() => BeatSaberCinema.Events.AllowCustomPlatform += OnCinemaEvent;
 

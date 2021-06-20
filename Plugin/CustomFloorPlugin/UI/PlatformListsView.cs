@@ -115,6 +115,8 @@ namespace CustomFloorPlugin.UI
         {
             base.DidDeactivate(removedFromHierarchy, screenSystemDisabling);
             if (removedFromHierarchy) _platformManager.AllPlatforms.CollectionChanged -= OnCollectionDidChange;
+            int index = GetPlatformIndexForTabIndex(_tabIndex);
+            _listTables[_tabIndex].tableView.SelectCellWithIdx(index);
             _ = _platformSpawner.ChangeToPlatformAsync(_config.ShowInMenu
                 ? _config.ShufflePlatforms
                     ? _platformSpawner.RandomPlatform

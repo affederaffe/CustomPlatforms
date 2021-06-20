@@ -22,6 +22,7 @@ namespace CustomFloorPlugin
         private readonly PrepareLevelCompletionResults _prepareLevelCompletionResults;
         private readonly IBeatmapObjectCallbackController _beatmapObjectCallbackController;
         private readonly IDifficultyBeatmap _difficultyBeatmap;
+
         private float _lastNoteTime;
         private int _anyCutCount;
         private int _goodCutCount;

@@ -67,11 +67,10 @@ namespace CustomFloorPlugin
         }
 
         /// <summary>
-        /// Clean up before switching scenes,
+        /// Clean up before switching scenes
         /// </summary>
-        private async void OnTransitionDidStart(float aheadTime)
+        private void OnTransitionDidStart(float aheadTime)
         {
-            await Task.Delay(TimeSpan.FromSeconds(aheadTime));
             _assetLoader.ToggleHeart(false);
             _ = ChangeToPlatformAsync(_platformManager.DefaultPlatform);
         }
@@ -129,13 +128,12 @@ namespace CustomFloorPlugin
         /// <summary>
         /// Despawns the current platform when entering a lobby and changing back when leaving
         /// </summary>
-        private async void OnMultiplayerGameStateDidChange(MultiplayerGameState multiplayerGameState)
+        private void OnMultiplayerGameStateDidChange(MultiplayerGameState multiplayerGameState)
         {
             CustomPlatform platform;
             switch (multiplayerGameState)
             {
                 case MultiplayerGameState.None:
-                    await Task.Delay(700);
                     _assetLoader.ToggleHeart(_config.ShowHeart);
                     platform = _config.ShowInMenu
                         ? _config.ShufflePlatforms
@@ -144,7 +142,6 @@ namespace CustomFloorPlugin
                         : _platformManager.DefaultPlatform;
                     break;
                 case MultiplayerGameState.Lobby when _prevGameState is not MultiplayerGameState.Game:
-                    await Task.Delay(700);
                     _assetLoader.ToggleHeart(false);
                     platform = _platformManager.DefaultPlatform;
                     break;

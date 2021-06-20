@@ -22,7 +22,13 @@ namespace CustomFloorPlugin.UI
         /// </summary>
         [UIValue("changelog-text")]
         public static string Changelog =>
-        @"  <size=150%><color=#888888>Version 6.1.5</color></size>
+        @"  <size=150%><color=#888888>Version 6.1.6</color></size>
+        - Fixed issue with GottaGoFast
+        - Fixed Hot-Reloading
+        - Added Custom Platforms as a SongCore capability,
+           Mappers can add it as a suggestion now
+
+  <size=150%><color=#888888>Version 6.1.5</color></size>
         - Updated for 1.16.2
         - Fixed black screen on startup
         - Added option to disable the gradient background

@@ -38,7 +38,7 @@ namespace CustomFloorPlugin
         private readonly string _cacheFilePath;
 
         /// <summary>
-        /// Getter for the CustomPlatforms directory path, this ensures that the directory exists
+        /// Getter for the CustomPlatforms directory path, 100% user proof
         /// </summary>
         internal string DirectoryPath => Directory.Exists(_directoryPath)
             ? _directoryPath
