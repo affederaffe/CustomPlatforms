@@ -37,16 +37,20 @@ namespace CustomFloorPlugin
                 _lightRotationEventEffect.SetField("_event", (BeatmapEventType)eventType);
                 _lightRotationEventEffect.SetField("_rotationVector", rotationVector);
                 _lightRotationEventEffect.SetField("_transform", transform);
+                _lightRotationEventEffect.SetField("_beatmapObjectCallbackController", _beatmapObjectCallbackController);
             }
-
-            _lightRotationEventEffect.SetField("_beatmapObjectCallbackController", _beatmapObjectCallbackController);
-            _lightRotationEventEffect.enabled = true;
+            else if (_beatmapObjectCallbackController is not null)
+            {
+                _lightRotationEventEffect.SetField("_beatmapObjectCallbackController", _beatmapObjectCallbackController);
+                _lightRotationEventEffect.Start();
+            }
         }
 
         public void PlatformDisabled()
         {
             if (_lightRotationEventEffect is null) return;
             _lightRotationEventEffect.enabled = false;
+            _lightRotationEventEffect.OnDestroy();
         }
     }
 }

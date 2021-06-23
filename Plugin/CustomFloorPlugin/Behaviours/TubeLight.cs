@@ -102,7 +102,8 @@ namespace CustomFloorPlugin
 
         public void PlatformDisabled()
         {
-            _instancedMaterialLightWithId!.ColorWasSet(color);
+            if (_instancedMaterialLightWithId is null) return;
+            _instancedMaterialLightWithId.ColorWasSet(color);
         }
 
         private static readonly int[] _triangles = new[]

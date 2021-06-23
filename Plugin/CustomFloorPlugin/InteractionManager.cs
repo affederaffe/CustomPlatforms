@@ -52,8 +52,8 @@ namespace CustomFloorPlugin
             _fileSystemWatcher.Created += OnFileCreated;
             _fileSystemWatcher.Deleted += OnFileDeleted;
             _fileSystemWatcher.EnableRaisingEvents = true;
-            if (_isCinemaInstalled) SubscribeToCinemaEvent();
-            if (_isSongCoreInstalled) { SubscribeToSongCoreEvent(); RegisterSongCoreCapability(); }
+            if (_isCinemaInstalled) InitializeCinemaConnection();
+            if (_isSongCoreInstalled) InitializeSongCoreConnection();
         }
 
         public void Dispose()
@@ -64,8 +64,8 @@ namespace CustomFloorPlugin
             _fileSystemWatcher.Dispose();
             _cancellationTokenSource.Cancel();
             _cancellationTokenSource.Dispose();
-            if (_isCinemaInstalled) UnsubscribeFromCinemaEvent();
-            if (_isSongCoreInstalled) { UnsubscribeFromSongCoreEvent(); UnregisterSongCoreCapability(); }
+            if (_isCinemaInstalled) DisposeCinemaConnection();
+            if (_isSongCoreInstalled) DisposeSongCoreConnection();
         }
 
         /// <summary>
@@ -123,15 +123,27 @@ namespace CustomFloorPlugin
             }
         }
 
-        private void SubscribeToSongCoreEvent() => SongCore.Plugin.CustomSongPlatformSelectionDidChange += OnSongCoreEvent;
+        private void InitializeSongCoreConnection()
+        {
+            SongCore.Plugin.CustomSongPlatformSelectionDidChange += OnSongCoreEvent;
+            SongCore.Collections.RegisterCapability("Custom Platforms");
+        }
 
-        private void UnsubscribeFromSongCoreEvent() => SongCore.Plugin.CustomSongPlatformSelectionDidChange -= OnSongCoreEvent;
-        private void RegisterSongCoreCapability() => SongCore.Collections.RegisterCapability("Custom Platforms");
-        private void UnregisterSongCoreCapability() => SongCore.Collections.DeregisterizeCapability("Custom Platforms");
+        private void DisposeSongCoreConnection()
+        {
+            SongCore.Plugin.CustomSongPlatformSelectionDidChange -= OnSongCoreEvent;
+            SongCore.Collections.DeregisterizeCapability("Custom Platforms");
+        }
 
-        private void SubscribeToCinemaEvent() => BeatSaberCinema.Events.AllowCustomPlatform += OnCinemaEvent;
+        private void InitializeCinemaConnection()
+        {
+            BeatSaberCinema.Events.AllowCustomPlatform += OnCinemaEvent;
+        }
 
-        private void UnsubscribeFromCinemaEvent() => BeatSaberCinema.Events.AllowCustomPlatform -= OnCinemaEvent;
+        private void DisposeCinemaConnection()
+        {
+            BeatSaberCinema.Events.AllowCustomPlatform -= OnCinemaEvent;
+        }
 
         /// <summary>
         /// Disable platform spawning as required by Cinema

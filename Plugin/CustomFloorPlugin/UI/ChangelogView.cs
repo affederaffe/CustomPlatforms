@@ -25,6 +25,7 @@ namespace CustomFloorPlugin.UI
         @"  <size=150%><color=#888888>Version 6.1.6</color></size>
         - Fixed issue with GottaGoFast
         - Fixed Hot-Reloading
+        - Fixed RotationEventEffect issues
         - Added Custom Platforms as a SongCore capability,
            Mappers can add it as a suggestion now
 

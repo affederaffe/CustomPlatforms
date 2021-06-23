@@ -47,16 +47,20 @@ namespace CustomFloorPlugin
                 _lightPairRotationEventEffect.SetField("_transformR", transformR);
                 _lightPairRotationEventEffect.SetField("_useZPositionForAngleOffset", useZPositionForAngleOffset);
                 _lightPairRotationEventEffect.SetField("_zPositionAngleOffsetScale", zPositionAngleOffsetScale);
+                _lightPairRotationEventEffect.SetField("_beatmapObjectCallbackController", _beatmapObjectCallbackController);
             }
-
-            _lightPairRotationEventEffect.SetField("_beatmapObjectCallbackController", _beatmapObjectCallbackController);
-            _lightPairRotationEventEffect.enabled = true;
+            else if (_beatmapObjectCallbackController is not null)
+            {
+                _lightPairRotationEventEffect.SetField("_beatmapObjectCallbackController", _beatmapObjectCallbackController);
+                _lightPairRotationEventEffect.Start();
+            }
         }
 
         public void PlatformDisabled()
         {
             if (_lightPairRotationEventEffect is null) return;
             _lightPairRotationEventEffect.enabled = false;
+            _lightPairRotationEventEffect.OnDestroy();
         }
     }
 }
