@@ -38,7 +38,7 @@ namespace CustomFloorPlugin
 
         private void OnComboStep(int combo)
         {
-            if (combo % ComboStep is 0 && combo is 0)
+            if (combo % ComboStep == 0 && combo == 0)
                 NthComboReached!.Invoke();
         }
     }

@@ -36,10 +36,14 @@ namespace CustomFloorPlugin
         /// <returns>The loaded <see cref="CustomPlatform"/>, or null if an error occurs</returns>
         internal async Task<CustomPlatform?> LoadPlatformFromFileAsync(string fullPath)
         {
-            if (_pathTaskPairs.TryGetValue(fullPath, out Task<CustomPlatform?> task))
-                return await task;
+            if (!File.Exists(fullPath))
+            {
+                _siraLog.Error($"File could not be found:\n{fullPath}");
+                return null;
+            }
 
-            task = LoadPlatformFromFileAsyncInternal(fullPath);
+            if (_pathTaskPairs.TryGetValue(fullPath, out Task<CustomPlatform?> task)) return await task;
+            task = LoadPlatformFromFileAsyncImpl(fullPath);
             _pathTaskPairs.Add(fullPath, task);
             CustomPlatform? platform = await task;
             _pathTaskPairs.Remove(fullPath);
@@ -49,14 +53,8 @@ namespace CustomFloorPlugin
         /// <summary>
         /// Asynchronously loads a <see cref="CustomPlatform"/> from a specified file path
         /// </summary>
-        private async Task<CustomPlatform?> LoadPlatformFromFileAsyncInternal(string fullPath)
+        private async Task<CustomPlatform?> LoadPlatformFromFileAsyncImpl(string fullPath)
         {
-            if (!File.Exists(fullPath))
-            {
-                _siraLog.Error($"File could not be found:\n{fullPath}");
-                return null;
-            }
-
             byte[] bundleData = await Task.Run(() => File.ReadAllBytes(fullPath));
             AssetBundle assetBundle = await LoadAssetBundleFromBytesAsync(bundleData);
 
@@ -102,9 +100,7 @@ namespace CustomFloorPlugin
                 }
             }
 
-            using MD5 md5 = MD5.Create();
-            byte[] hash = md5.ComputeHash(bundleData);
-            customPlatform.platHash = BitConverter.ToString(hash).Replace("-", string.Empty).ToLowerInvariant();
+            customPlatform.platHash = await Task.Run(() => ComputeHash(bundleData));
             customPlatform.fullPath = fullPath;
             customPlatform.name = $"{customPlatform.platName} by {customPlatform.platAuthor}";
 
@@ -114,7 +110,17 @@ namespace CustomFloorPlugin
         }
 
         /// <summary>
-        /// Asynchronously loads and <see cref="AssetBundle"/> from a <see cref="FileStream"/>
+        /// Computes the MD5 hash value for the given <see cref="data"/> and returns it's hexadecimal string representation
+        /// </summary>
+        private static string ComputeHash(byte[] data)
+        {
+            using MD5 md5 = MD5.Create();
+            byte[] hash = md5.ComputeHash(data);
+            return BitConverter.ToString(hash).Replace("-", string.Empty).ToLowerInvariant();
+        }
+
+        /// <summary>
+        /// Asynchronously loads and <see cref="AssetBundle"/> from a <see cref="byte"/>[]
         /// </summary>
         private static async Task<AssetBundle> LoadAssetBundleFromBytesAsync(byte[] data)
         {
@@ -130,7 +136,7 @@ namespace CustomFloorPlugin
         }
 
         /// <summary>
-        /// Asynchronously loads an Asset <typeparamref name="T"/> from an <see cref="AssetBundle"/>
+        /// Asynchronously loads an asset of type <typeparamref name="T"/> from an <see cref="AssetBundle"/>
         /// </summary>
         private static async Task<T> LoadAssetFromAssetBundleAsync<T>(AssetBundle assetBundle, string assetName) where T : UnityEngine.Object
         {

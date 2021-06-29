@@ -30,7 +30,7 @@ namespace CustomFloorPlugin.Helpers
         internal static void Replace<T>(this IList<T> list, T oldItem, T newItem)
         {
             int index = list.IndexOf(oldItem);
-            if (index is -1) return;
+            if (index == -1) return;
             list[index] = newItem;
         }
 

@@ -66,7 +66,7 @@ namespace CustomFloorPlugin
                     _sceneName = _envRoot.gameObject.scene.name;
                     break;
                 case MultiplayerLevelScenesTransitionSetupDataSO:
-                    _envRoot = container.Resolve<MultiplayerLocalActivePlayerFacade>().transform;
+                    _envRoot = container.Resolve<MultiplayerPlayersManager>().localPlayerTransform;
                     _sceneName = _envRoot.gameObject.scene.name;
                     break;
             }

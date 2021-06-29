@@ -22,7 +22,7 @@ namespace CustomFloorPlugin
     /// A class that handles all interaction with outside plugins, at the moment just SongCore and Cinema<br/>
     /// Also detects changes in the directory and reflects them in-game, e.g. loading, updating or removing platforms
     /// </summary>
-    internal class InteractionManager : IInitializable, IDisposable
+    internal class ConnectionManager : IInitializable, IDisposable
     {
         private readonly WebClient _webClient;
         private readonly PlatformManager _platformManager;
@@ -33,9 +33,9 @@ namespace CustomFloorPlugin
         private readonly bool _isSongCoreInstalled;
         private readonly bool _isCinemaInstalled;
 
-        public InteractionManager(WebClient webClient,
-                                  PlatformManager platformManager,
-                                  PlatformSpawner platformSpawner)
+        public ConnectionManager(WebClient webClient,
+                                 PlatformManager platformManager,
+                                 PlatformSpawner platformSpawner)
         {
             _webClient = webClient;
             _platformManager = platformManager;
@@ -197,7 +197,7 @@ namespace CustomFloorPlugin
         /// <summary>
         /// Asynchronously downloads a <see cref="CustomPlatform"/> from modelsaber if the selected level requires it
         /// </summary>
-        private async void DownloadPlatform(string url, CancellationToken cancellationToken)
+        private async Task DownloadPlatform(string url, CancellationToken cancellationToken)
         {
             try
             {

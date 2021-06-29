@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Globalization;
 using System.IO;
-using System.Reflection;
 using System.Threading.Tasks;
 
 using CustomFloorPlugin.Helpers;
 using CustomFloorPlugin.Interfaces;
+
+using IPA.Loader;
 using IPA.Utilities;
 
 using UnityEngine;
@@ -21,6 +22,7 @@ namespace CustomFloorPlugin
     public class AssetLoader
     {
         private readonly DiContainer _container;
+        private readonly PluginMetadata _pluginMetadata;
         private readonly MaterialSwapper _materialSwapper;
 
         /// <summary>
@@ -48,9 +50,10 @@ namespace CustomFloorPlugin
         /// </summary>
         internal LightEffects MultiplayerLightEffects { get; }
 
-        public AssetLoader(DiContainer container, MaterialSwapper materialSwapper)
+        public AssetLoader(DiContainer container, PluginMetadata pluginMetadata, MaterialSwapper materialSwapper)
         {
             _container = container;
+            _pluginMetadata = pluginMetadata;
             _materialSwapper = materialSwapper;
             _heartTask = CreateHeartAsync();
             _playersPlaceTask = CreatePlayersPlaceAsync();
@@ -137,14 +140,11 @@ namespace CustomFloorPlugin
             return playersPlaceCube;
         }
 
-        private static Assembly Assembly => _assembly ??= Assembly.GetExecutingAssembly();
-        private static Assembly? _assembly;
-
-        private static Stream GetEmbeddedResource(string name) =>
-            Assembly.GetManifestResourceStream(name) ??
+        private Stream GetEmbeddedResource(string name) =>
+            _pluginMetadata.Assembly.GetManifestResourceStream(name) ??
             throw new InvalidOperationException($"No embedded resource found: {name}");
 
-        private static (Vector3[] vertices, int[] triangles) ParseMesh(string resourcePath)
+        private (Vector3[] vertices, int[] triangles) ParseMesh(string resourcePath)
         {
             using Stream manifestResourceStream = GetEmbeddedResource(resourcePath);
             using StreamReader streamReader = new(manifestResourceStream);

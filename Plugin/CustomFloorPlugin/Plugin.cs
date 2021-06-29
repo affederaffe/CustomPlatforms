@@ -4,6 +4,7 @@ using CustomFloorPlugin.Installers;
 using IPA;
 using IPA.Config;
 using IPA.Config.Stores;
+using IPA.Loader;
 using IPA.Logging;
 
 using SiraUtil.Zenject;
@@ -22,13 +23,14 @@ namespace CustomFloorPlugin
         /// <summary>
         /// Initializes the Plugin 
         /// </summary>
+        /// <param name="pluginMetadata">This plugin's <see cref="PluginMetadata"/></param>
         /// <param name="logger">The instance of the IPA logger that BSIPA hands to plugins on initialization</param>
         /// <param name="config">The config BSIPA provides</param>
         /// <param name="zenjector">The zenjector that SiraUtil passes to this plugin</param>
         [Init]
-        public Plugin(Logger logger, Config config, Zenjector zenjector)
+        public Plugin(PluginMetadata pluginMetadata, Logger logger, Config config, Zenjector zenjector)
         {
-            zenjector.OnApp<PlatformsAppInstaller>().WithParameters(logger, config.Generated<PluginConfig>());
+            zenjector.OnApp<PlatformsAppInstaller>().WithParameters(pluginMetadata, logger, config.Generated<PluginConfig>());
             zenjector.OnMenu<PlatformsMenuInstaller>();
             zenjector.OnGame<PlatformsGameInstaller>(false);
         }
