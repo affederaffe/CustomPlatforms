@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Threading.Tasks;
@@ -150,12 +151,13 @@ namespace CustomFloorPlugin
             using StreamReader streamReader = new(manifestResourceStream);
 
             string meshFile = streamReader.ReadToEnd();
-            string[] dimension1 = meshFile.Split('|');
-            string[][] dimension2 = { dimension1[0].Split('/'), dimension1[1].Split('/') };
+            string[] meshSplit = meshFile.Split('|');
+            string[] verticesRaw = meshSplit[0].Split('/');
+            string[] trianglesRaw = meshSplit[1].Split('/');
 
             int i = 0;
-            string[][] strVector3S = new string[dimension2[0].Length][];
-            foreach (string vector3 in dimension2[0])
+            string[][] strVector3S = new string[verticesRaw.Length][];
+            foreach (string vector3 in verticesRaw)
                 strVector3S[i++] = vector3.Split(',');
 
             i = 0;
@@ -164,8 +166,8 @@ namespace CustomFloorPlugin
                 vertices[i++] = new Vector3(float.Parse(strVector3[0], NumberFormatInfo.InvariantInfo), float.Parse(strVector3[1], NumberFormatInfo.InvariantInfo), float.Parse(strVector3[2], NumberFormatInfo.InvariantInfo));
 
             i = 0;
-            int[] triangles = new int[dimension2[1].Length];
-            foreach (string strInt in dimension2[1])
+            int[] triangles = new int[trianglesRaw.Length];
+            foreach (string strInt in trianglesRaw)
                 triangles[i++] = int.Parse(strInt, NumberFormatInfo.InvariantInfo);
 
             return (vertices, triangles);
@@ -185,19 +187,27 @@ namespace CustomFloorPlugin
             private readonly SimpleColorSO _simpleHighlightColor0Boost = ScriptableObject.CreateInstance<SimpleColorSO>();
             private readonly SimpleColorSO _simpleHighlightColor1Boost = ScriptableObject.CreateInstance<SimpleColorSO>();
 
-            private ColorScheme? _colorScheme;
+            private IBeatmapObjectCallbackController _beatmapObjectCallbackController = null!;
+            private LightWithIdManager _lightWithIdManager = null!;
+            private ColorScheme _colorScheme = null!;
 
             private LightSwitchEventEffect[]? _lightSwitchEventEffects;
 
             [Inject]
-            public void Construct(ColorScheme colorScheme)
+            public void Construct(IBeatmapObjectCallbackController beatmapObjectCallbackController,
+                                  LightWithIdManager lightWithIdManager,
+                                  ColorScheme colorScheme)
             {
+                _beatmapObjectCallbackController = beatmapObjectCallbackController;
+                _lightWithIdManager = lightWithIdManager;
                 _colorScheme = colorScheme;
             }
 
             public void PlatformEnabled(DiContainer container)
             {
-                container.InjectGameObject(gameObject);
+                container.Inject(this);
+
+                List<ILightWithId>?[] lights = _lightWithIdManager.GetField<List<ILightWithId>?[], LightWithIdManager>("_lights");
 
                 if (_lightSwitchEventEffects is null)
                 {
@@ -208,6 +218,7 @@ namespace CustomFloorPlugin
                     _lightSwitchEventEffects = new LightSwitchEventEffect[5];
                     for (int i = 0; i < _lightSwitchEventEffects.Length; i++)
                     {
+                        lights[i] ??= new List<ILightWithId>();
                         _lightSwitchEventEffects[i] = container.InstantiateComponent<LightSwitchEventEffect>(gameObject);
                         _lightSwitchEventEffects[i].SetField("_lightsID", i + 1);
                         _lightSwitchEventEffects[i].SetField("_event", (BeatmapEventType)i);
@@ -226,13 +237,16 @@ namespace CustomFloorPlugin
                 {
                     foreach (LightSwitchEventEffect lse in _lightSwitchEventEffects)
                     {
+                        lights[lse.lightsId] ??= new List<ILightWithId>();
                         lse.SetField("_initialized", false);
                         lse.SetField("_lightIsOn", false);
+                        lse.SetField("_beatmapObjectCallbackController", _beatmapObjectCallbackController);
+                        lse.SetField("_lightManager", _lightWithIdManager);
                         lse.Start();
                     }
                 }
 
-                _simpleLightColor0.SetColor(_colorScheme!.environmentColor0);
+                _simpleLightColor0.SetColor(_colorScheme.environmentColor0);
                 _simpleLightColor1.SetColor(_colorScheme.environmentColor1);
                 _simpleHighlightColor0.SetColor(_colorScheme.environmentColor0);
                 _simpleHighlightColor1.SetColor(_colorScheme.environmentColor1);
@@ -241,18 +255,15 @@ namespace CustomFloorPlugin
                 _simpleHighlightColor0Boost.SetColor(_colorScheme.environmentColor0Boost);
                 _simpleHighlightColor1Boost.SetColor(_colorScheme.environmentColor1Boost);
 
-                foreach (LightSwitchEventEffect lse in _lightSwitchEventEffects)
-                    lse.enabled = true;
+                gameObject.SetActive(true);
             }
 
             public void PlatformDisabled()
             {
                 if (_lightSwitchEventEffects is null) return;
+                gameObject.SetActive(false);
                 foreach (LightSwitchEventEffect lse in _lightSwitchEventEffects)
-                {
                     lse.OnDestroy();
-                    lse.enabled = false;
-                }
             }
 
             private static MultipliedColorSO CreateMultipliedColorSO(SimpleColorSO simpleColor, Color color)

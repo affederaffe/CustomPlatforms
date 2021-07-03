@@ -26,6 +26,7 @@ namespace CustomFloorPlugin.UI
         - Fixed issue with GottaGoFast
         - Fixed Hot-Reloading
         - Fixed RotationEventEffect issues
+        - Fixed compatibility problems with Chroma in multiplayer
         - Added Custom Platforms as a SongCore capability,
            Mappers can add it as a suggestion now
 
