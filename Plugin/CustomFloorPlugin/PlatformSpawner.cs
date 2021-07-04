@@ -209,7 +209,7 @@ namespace CustomFloorPlugin
         /// </summary>
         private void DestroyCustomObjects()
         {
-            if (_lobbyGameState.gameState == MultiplayerGameState.Game) _assetLoader.MultiplayerLightEffects.PlatformDisabled();
+            if (_lobbyGameState.gameState != MultiplayerGameState.None) _assetLoader.MultiplayerLightEffects.PlatformDisabled();
             foreach (INotifyPlatformDisabled notifyDisable in _platformManager.ActivePlatform.GetComponentsInChildren<INotifyPlatformDisabled>(true))
                 notifyDisable.PlatformDisabled();
         }

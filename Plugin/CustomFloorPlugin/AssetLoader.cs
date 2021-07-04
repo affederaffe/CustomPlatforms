@@ -239,9 +239,10 @@ namespace CustomFloorPlugin
                     {
                         lights[lse.lightsId] ??= new List<ILightWithId>();
                         lse.SetField("_initialized", false);
-                        lse.SetField("_lightIsOn", false);
                         lse.SetField("_beatmapObjectCallbackController", _beatmapObjectCallbackController);
                         lse.SetField("_lightManager", _lightWithIdManager);
+                        lse.SetColor(Color.clear);
+                        gameObject.SetActive(true);
                         lse.Start();
                     }
                 }
@@ -254,16 +255,14 @@ namespace CustomFloorPlugin
                 _simpleLightColor1Boost.SetColor(_colorScheme.environmentColor1Boost);
                 _simpleHighlightColor0Boost.SetColor(_colorScheme.environmentColor0Boost);
                 _simpleHighlightColor1Boost.SetColor(_colorScheme.environmentColor1Boost);
-
-                gameObject.SetActive(true);
             }
 
             public void PlatformDisabled()
             {
                 if (_lightSwitchEventEffects is null) return;
-                gameObject.SetActive(false);
                 foreach (LightSwitchEventEffect lse in _lightSwitchEventEffects)
                     lse.OnDestroy();
+                gameObject.SetActive(false);
             }
 
             private static MultipliedColorSO CreateMultipliedColorSO(SimpleColorSO simpleColor, Color color)
