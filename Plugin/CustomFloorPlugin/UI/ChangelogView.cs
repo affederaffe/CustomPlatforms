@@ -23,6 +23,7 @@ namespace CustomFloorPlugin.UI
         [UIValue("changelog-text")]
         public static string Changelog =>
         @"  <size=150%><color=#888888>Version 6.1.6</color></size>
+        - Updated for 1.16.3
         - Fixed issue with GottaGoFast
         - Fixed Hot-Reloading
         - Fixed RotationEventEffect issues

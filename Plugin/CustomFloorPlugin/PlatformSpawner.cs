@@ -23,7 +23,7 @@ namespace CustomFloorPlugin
         private readonly EnvironmentHider _environmentHider;
         private readonly PlatformManager _platformManager;
         private readonly GameScenesManager _gameScenesManager;
-        private readonly LobbyGameState _lobbyGameState;
+        private readonly LobbyGameStateModel _lobbyGameStateModel;
 
         private readonly Random _random;
 
@@ -39,7 +39,7 @@ namespace CustomFloorPlugin
                                EnvironmentHider environmentHider,
                                PlatformManager platformManager,
                                GameScenesManager gameScenesManager,
-                               LobbyGameState lobbyGameState)
+                               LobbyGameStateModel lobbyGameStateModel)
         {
             _siraLog = siraLog;
             _config = config;
@@ -47,7 +47,7 @@ namespace CustomFloorPlugin
             _environmentHider = environmentHider;
             _platformManager = platformManager;
             _gameScenesManager = gameScenesManager;
-            _lobbyGameState = lobbyGameState;
+            _lobbyGameStateModel = lobbyGameStateModel;
             _random = new Random();
         }
 
@@ -55,14 +55,14 @@ namespace CustomFloorPlugin
         {
             _gameScenesManager.transitionDidStartEvent += OnTransitionDidStart;
             _gameScenesManager.transitionDidFinishEvent += OnTransitionDidFinish;
-            _lobbyGameState.gameStateDidChangeAlwaysSentEvent += OnMultiplayerGameStateDidChange;
+            _lobbyGameStateModel.gameStateDidChangeAlwaysSentEvent += OnMultiplayerGameStateModelDidChange;
         }
 
         public void Dispose()
         {
             _gameScenesManager.transitionDidStartEvent -= OnTransitionDidStart;
             _gameScenesManager.transitionDidFinishEvent -= OnTransitionDidFinish;
-            _lobbyGameState.gameStateDidChangeAlwaysSentEvent -= OnMultiplayerGameStateDidChange;
+            _lobbyGameStateModel.gameStateDidChangeAlwaysSentEvent -= OnMultiplayerGameStateModelDidChange;
         }
 
         /// <summary>
@@ -82,7 +82,7 @@ namespace CustomFloorPlugin
             CustomPlatform platform;
             switch (setupData)
             {
-                case null when _lobbyGameState.gameState != MultiplayerGameState.Lobby:
+                case null when _lobbyGameStateModel.gameState != MultiplayerGameState.Lobby:
                 case MenuScenesTransitionSetupDataSO:
                     _assetLoader.ToggleHeart(_config.ShowHeart);
                     platform = _config.ShowInMenu
@@ -123,7 +123,7 @@ namespace CustomFloorPlugin
         /// <summary>
         /// Despawns the current platform when entering a lobby and changing back when leaving
         /// </summary>
-        private void OnMultiplayerGameStateDidChange(MultiplayerGameState multiplayerGameState)
+        private void OnMultiplayerGameStateModelDidChange(MultiplayerGameState multiplayerGameState)
         {
             CustomPlatform platform;
             switch (multiplayerGameState)
@@ -199,7 +199,7 @@ namespace CustomFloorPlugin
         /// </summary>
         private void SpawnCustomObjects()
         {
-            if (_lobbyGameState.gameState == MultiplayerGameState.Game) _assetLoader.MultiplayerLightEffects.PlatformEnabled(_container);
+            if (_lobbyGameStateModel.gameState == MultiplayerGameState.Game) _assetLoader.MultiplayerLightEffects.PlatformEnabled(_container);
             foreach (INotifyPlatformEnabled notifyEnable in _platformManager.ActivePlatform.GetComponentsInChildren<INotifyPlatformEnabled>(true))
                 notifyEnable.PlatformEnabled(_container);
         }
@@ -209,7 +209,7 @@ namespace CustomFloorPlugin
         /// </summary>
         private void DestroyCustomObjects()
         {
-            if (_lobbyGameState.gameState != MultiplayerGameState.None) _assetLoader.MultiplayerLightEffects.PlatformDisabled();
+            if (_lobbyGameStateModel.gameState != MultiplayerGameState.None) _assetLoader.MultiplayerLightEffects.PlatformDisabled();
             foreach (INotifyPlatformDisabled notifyDisable in _platformManager.ActivePlatform.GetComponentsInChildren<INotifyPlatformDisabled>(true))
                 notifyDisable.PlatformDisabled();
         }
