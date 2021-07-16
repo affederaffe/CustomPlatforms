@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 
 using UnityEngine;
 
@@ -53,7 +52,6 @@ namespace CustomFloorPlugin
         }
 
         public event Action<BeatmapEventData>? BeatmapEventDidTriggerEvent;
-        public event Action? GameSceneLoadedEvent;
         public event Action? LevelFinishedEvent;
         public event Action? LevelFailedEvent;
         public event Action? NewHighscore;
@@ -85,7 +83,6 @@ namespace CustomFloorPlugin
             _scoreController.comboBreakingEventHappenedEvent += ComboDidBreak;
             _scoreController.multiplierDidChangeEvent += MultiplierDidChange;
             _scoreController.scoreDidChangeEvent += ScoreDidChange;
-            GameSceneLoadedEvent?.Invoke();
         }
 
         public void Dispose()
@@ -107,10 +104,9 @@ namespace CustomFloorPlugin
             float lastNoteTime = 0f;
             foreach (IReadonlyBeatmapLineData beatmapLineData in _gameplayCoreSceneSetupData.difficultyBeatmap.beatmapData.beatmapLinesData)
             {
-                IReadOnlyList<BeatmapObjectData> beatmapObjectsData = beatmapLineData.beatmapObjectsData;
-                for (int i = beatmapObjectsData.Count - 1; i >= 0; i--)
+                for (int i = beatmapLineData.beatmapObjectsData.Count - 1; i >= 0; i--)
                 {
-                    BeatmapObjectData beatmapObjectData = beatmapObjectsData[i];
+                    BeatmapObjectData beatmapObjectData = beatmapLineData.beatmapObjectsData[i];
                     if (beatmapObjectData.beatmapObjectType == BeatmapObjectType.Note && ((NoteData)beatmapObjectData).colorType != ColorType.None && beatmapObjectData.time > lastNoteTime)
                         lastNoteTime = beatmapObjectData.time;
                 }

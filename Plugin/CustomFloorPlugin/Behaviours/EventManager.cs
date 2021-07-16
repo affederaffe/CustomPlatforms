@@ -56,7 +56,6 @@ namespace CustomFloorPlugin
             container.Inject(this);
             if (_events is null) return;
             _events.BeatmapEventDidTriggerEvent += LightEventCallBack;
-            _events.GameSceneLoadedEvent += OnLevelStart!.Invoke;
             _events.NoteWasCutEvent += OnSimpleSlice;
             _events.NoteWasCutEvent += OnSpecificSlice.Invoke;
             _events.NoteWasMissedEvent += OnMiss!.Invoke;
@@ -73,13 +72,13 @@ namespace CustomFloorPlugin
             _events.BadCutCountDidChangeEvent += OnBadCutCountChanged.Invoke;
             _events.MissCountDidChangeEvent += OnMissCountChanged.Invoke;
             _events.AllNotesCountDidChangeEvent += OnAllNotesCountChanged.Invoke;
+            OnLevelStart!.Invoke();
         }
 
         public void PlatformDisabled()
         {
             if (_events is null) return;
             _events.BeatmapEventDidTriggerEvent -= LightEventCallBack;
-            _events.GameSceneLoadedEvent -= OnLevelStart!.Invoke;
             _events.NoteWasCutEvent -= OnSimpleSlice;
             _events.NoteWasCutEvent -= OnSpecificSlice.Invoke;
             _events.NoteWasMissedEvent -= OnMiss!.Invoke;
@@ -101,10 +100,7 @@ namespace CustomFloorPlugin
         /// <summary>
         /// Triggers subscribed functions when any block was cut
         /// </summary>
-        private void OnSimpleSlice(int _)
-        {
-            OnSlice!.Invoke();
-        }
+        private void OnSimpleSlice(int _) => OnSlice!.Invoke();
 
         /// <summary>
         /// Triggers subscribed functions if lights are turned on
