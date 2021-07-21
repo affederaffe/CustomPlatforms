@@ -7,9 +7,9 @@
   "description": "A plugin to support custom platforms and environments",
   "gameVersion": "1.16.3",
   "dependsOn": {
-    "BSIPA": "^4.1.6",
-    "BeatSaberMarkupLanguage": "^1.5.3",
-    "SiraUtil": "^2.5.5"
+    "BSIPA": "^4.2.0",
+    "BeatSaberMarkupLanguage": "^1.5.4",
+    "SiraUtil": "^2.5.6"
   },
   "loadAfter": [
     "SongCore",
