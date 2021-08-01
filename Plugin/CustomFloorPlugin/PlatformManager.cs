@@ -179,10 +179,7 @@ namespace CustomFloorPlugin
         {
             using FileStream stream = new(_cacheFilePath, FileMode.Open, FileAccess.Read);
             using BinaryReader reader = new(stream, Encoding.UTF8);
-
-            if (reader.ReadByte() != kCacheFileVersion)
-                yield break;
-
+            if (reader.ReadByte() != kCacheFileVersion) yield break;
             int count = reader.ReadInt32();
             for (int i = 0; i < count; i++)
             {

@@ -22,7 +22,11 @@ namespace CustomFloorPlugin.UI
         /// </summary>
         [UIValue("changelog-text")]
         public static string Changelog =>
-        @"  <size=150%><color=#888888>Version 6.1.6</color></size>
+        @"  <size=150%><color=#888888>Version 6.1.7</color></size>
+        - Fixed NullRef when selecting a platform with TrackRings in the menu
+        - Fixed RotationEffects not resetting their rotation
+
+  <size=150%><color=#888888>Version 6.1.6</color></size>
         - Updated for 1.16.3
         - Fixed issue with GottaGoFast
         - Fixed Hot-Reloading

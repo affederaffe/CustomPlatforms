@@ -43,8 +43,8 @@ namespace CustomFloorPlugin
         public LightsID lightsID;
 
         private MaterialSwapper? _materialSwapper;
-        private LightWithIdManager? _lightWithIdManager;
 
+        private LightWithIdManager? _lightWithIdManager;
         private InstancedMaterialLightWithId? _instancedMaterialLightWithId;
 
         [Inject]

@@ -20,6 +20,7 @@ namespace CustomFloorPlugin
         private IBeatmapObjectCallbackController? _beatmapObjectCallbackController;
 
         private LightRotationEventEffect? _lightRotationEventEffect;
+        private Quaternion _startRot;
 
         [Inject]
         public void Construct([InjectOptional] IBeatmapObjectCallbackController beatmapObjectCallbackController)
@@ -31,6 +32,7 @@ namespace CustomFloorPlugin
         {
             container.Inject(this);
             if (_beatmapObjectCallbackController is null) return;
+            _startRot = transform.rotation;
             if (_lightRotationEventEffect is null)
             {
                 _lightRotationEventEffect = gameObject.AddComponent<LightRotationEventEffect>();
@@ -49,6 +51,7 @@ namespace CustomFloorPlugin
         public void PlatformDisabled()
         {
             if (_lightRotationEventEffect is null) return;
+            transform.rotation = _startRot;
             _lightRotationEventEffect.enabled = false;
             _lightRotationEventEffect.OnDestroy();
         }
