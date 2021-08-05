@@ -43,8 +43,8 @@ namespace CustomFloorPlugin
         public LightsID lightsID;
 
         private MaterialSwapper? _materialSwapper;
-
         private LightWithIdManager? _lightWithIdManager;
+
         private InstancedMaterialLightWithId? _instancedMaterialLightWithId;
 
         [Inject]
@@ -62,7 +62,6 @@ namespace CustomFloorPlugin
 
             if (_instancedMaterialLightWithId is null)
             {
-                // Using 2 different light types was a mistake
                 Mesh mesh = GetComponent<MeshFilter>().mesh;
                 if (mesh.vertexCount == 0)
                 {
@@ -83,17 +82,22 @@ namespace CustomFloorPlugin
                 }
 
                 (_, _, Material opaqueGlowMaterial) = await _materialSwapper!.MaterialsTask;
-                GetComponent<Renderer>().sharedMaterial = opaqueGlowMaterial;
+                Renderer renderer = GetComponent<Renderer>();
+                renderer.sharedMaterial = opaqueGlowMaterial;
                 MaterialPropertyBlockController materialPropertyBlockController = gameObject.AddComponent<MaterialPropertyBlockController>();
-                materialPropertyBlockController.SetField("_renderers", new[] { GetComponent<Renderer>() });
+                materialPropertyBlockController.SetField("_renderers", new[] { renderer });
                 MaterialPropertyBlockColorSetter materialPropertyBlockColorSetter = gameObject.AddComponent<MaterialPropertyBlockColorSetter>();
                 materialPropertyBlockColorSetter.materialPropertyBlockController = materialPropertyBlockController;
                 materialPropertyBlockColorSetter.SetField("_property", "_Color");
                 _instancedMaterialLightWithId = gameObject.AddComponent<InstancedMaterialLightWithId>();
                 _instancedMaterialLightWithId.SetField("_materialPropertyBlockColorSetter", materialPropertyBlockColorSetter);
-                _instancedMaterialLightWithId.SetField("_intensity", 1.325f);
+                _instancedMaterialLightWithId.SetField("_intensity", 1.25f);
                 ((LightWithIdMonoBehaviour)_instancedMaterialLightWithId).SetField("_ID", (int)lightsID);
                 _instancedMaterialLightWithId.ColorWasSet(color);
+                BloomPrePassBackgroundNonLightRenderer bloomPrePassBackgroundNonLightRenderer = gameObject.AddComponent<BloomPrePassBackgroundNonLightRenderer>();
+                bloomPrePassBackgroundNonLightRenderer.SetField("_renderer", renderer);
+                ((BloomPrePassBackgroundNonLightRendererCore)bloomPrePassBackgroundNonLightRenderer).SetField("_keepDefaultRendering", true);
+                ((BloomPrePassNonLightPass)bloomPrePassBackgroundNonLightRenderer).SetField("_executionTimeType", BloomPrePassNonLightPass.ExecutionTimeType.BeforeBlur);
             }
 
             ((LightWithIdMonoBehaviour)_instancedMaterialLightWithId).SetField("_lightManager", _lightWithIdManager);

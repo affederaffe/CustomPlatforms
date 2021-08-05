@@ -39,7 +39,7 @@ namespace CustomFloorPlugin
             container.Inject(this);
             _mirror = gameObject.AddComponent<Mirror>();
             _mirror.SetField("_renderer", GetComponent<MeshRenderer>());
-            _mirror.SetField("_mirrorRenderer", _mirrorRenderer);
+            _mirror.SetField("_mirrorRenderer", Instantiate(_mirrorRenderer));
             _mirror.SetField("_mirrorMaterial", CreateMirrorMaterial());
             _mirror.SetField("_noMirrorMaterial", CreateNoMirrorMaterial());
         }
