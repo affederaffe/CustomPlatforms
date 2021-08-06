@@ -70,6 +70,11 @@ namespace CustomFloorPlugin
                 _trackLaneRingsManager.SetField("_ringPositionStep", ringPositionStep);
                 _trackLaneRingsManager.SetField("_spawnAsChildren", true);
                 gameObject.SetActive(true);
+                foreach (INotifyPlatformEnabled notifyEnable in GetComponentsInChildren<INotifyPlatformEnabled>(true))
+                {
+                    if (!ReferenceEquals(this, notifyEnable))
+                        notifyEnable?.PlatformEnabled(container);
+                }
             }
 
             if (useRotationEffect)
@@ -124,26 +129,12 @@ namespace CustomFloorPlugin
                     _trackLaneRingsPositionStepEffectSpawner.Start();
                 }
             }
-
-            foreach (INotifyPlatformEnabled notifyEnable in GetComponentsInChildren<INotifyPlatformEnabled>(true))
-            {
-                if (!ReferenceEquals(this, notifyEnable))
-                    notifyEnable.PlatformEnabled(container);
-            }
         }
 
         public void PlatformDisabled()
         {
-            if (_trackLaneRingsRotationEffectSpawner is not null)
-                _trackLaneRingsRotationEffectSpawner.OnDestroy();
-            if (_trackLaneRingsPositionStepEffectSpawner is not null)
-                _trackLaneRingsPositionStepEffectSpawner.OnDestroy();
-
-            foreach (INotifyPlatformDisabled notifyDisable in GetComponentsInChildren<INotifyPlatformDisabled>(true))
-            {
-                if (!ReferenceEquals(this, notifyDisable))
-                    notifyDisable.PlatformDisabled();
-            }
+            if (_trackLaneRingsRotationEffectSpawner is not null) _trackLaneRingsRotationEffectSpawner.OnDestroy();
+            if (_trackLaneRingsPositionStepEffectSpawner is not null) _trackLaneRingsPositionStepEffectSpawner.OnDestroy();
         }
     }
 }

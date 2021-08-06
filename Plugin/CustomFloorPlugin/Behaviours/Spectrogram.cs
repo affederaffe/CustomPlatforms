@@ -56,25 +56,24 @@ namespace CustomFloorPlugin
         {
             if (columnPrefab is null) return;
             container.Inject(this);
-            await _materialSwapper!.ReplaceMaterialsAsync(columnPrefab);
-            _columnTransforms ??= CreateColumns();
-            UpdateColumnHeights(FallbackSamples);
-            enabled = _basicSpectrogramData is not null;
-
-            foreach (INotifyPlatformEnabled notifyEnable in GetComponentsInChildren<INotifyPlatformEnabled>(true))
+            if (_columnTransforms is null)
             {
-                if (!ReferenceEquals(this, notifyEnable))
-                    notifyEnable.PlatformEnabled(container);
+                await _materialSwapper!.ReplaceMaterialsAsync(columnPrefab);
+                _columnTransforms = CreateColumns();
+                UpdateColumnHeights(FallbackSamples);
+                foreach (INotifyPlatformEnabled notifyEnable in GetComponentsInChildren<INotifyPlatformEnabled>(true))
+                {
+                    if (!ReferenceEquals(this, notifyEnable))
+                        notifyEnable?.PlatformEnabled(container);
+                }
             }
+
+            enabled = _basicSpectrogramData is not null;
         }
 
         public void PlatformDisabled()
         {
-            foreach (INotifyPlatformDisabled notifyDisable in GetComponentsInChildren<INotifyPlatformDisabled>(true))
-            {
-                if (!ReferenceEquals(this, notifyDisable))
-                    notifyDisable.PlatformDisabled();
-            }
+            UpdateColumnHeights(FallbackSamples);
         }
 
         /// <summary>
@@ -128,20 +127,17 @@ namespace CustomFloorPlugin
         /// <summary>
         /// Spectrogram fallback data
         /// </summary>
+        private static float[]? _fallbackSamples;
         private static IList<float> FallbackSamples
         {
             get
             {
-                if (_fallbackSamples is null)
-                {
-                    _fallbackSamples = new float[64];
-                    for (int i = 0; i < _fallbackSamples.Length; i++)
-                        _fallbackSamples[i] = (Mathf.Sin((0.4f * i) - (0.5f * Mathf.PI)) + 1) / 2;
-                }
-
+                if (_fallbackSamples is not null) return _fallbackSamples;
+                _fallbackSamples = new float[64];
+                for (int i = 0; i < _fallbackSamples.Length; i++)
+                    _fallbackSamples[i] = (Mathf.Sin((0.4f * i) - (0.5f * Mathf.PI)) + 1) / 2;
                 return _fallbackSamples;
             }
         }
-        private static float[]? _fallbackSamples;
     }
 }

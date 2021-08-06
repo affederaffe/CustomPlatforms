@@ -201,7 +201,7 @@ namespace CustomFloorPlugin
         {
             if (_lobbyGameStateModel.gameState == MultiplayerGameState.Game) _assetLoader.MultiplayerLightEffects.PlatformEnabled(_container);
             foreach (INotifyPlatformEnabled notifyEnable in _platformManager.ActivePlatform.GetComponentsInChildren<INotifyPlatformEnabled>(true))
-                notifyEnable.PlatformEnabled(_container);
+                notifyEnable?.PlatformEnabled(_container);
         }
 
         /// <summary>
@@ -211,7 +211,7 @@ namespace CustomFloorPlugin
         {
             if (_lobbyGameStateModel.gameState != MultiplayerGameState.None) _assetLoader.MultiplayerLightEffects.PlatformDisabled();
             foreach (INotifyPlatformDisabled notifyDisable in _platformManager.ActivePlatform.GetComponentsInChildren<INotifyPlatformDisabled>(true))
-                notifyDisable.PlatformDisabled();
+                notifyDisable?.PlatformDisabled();
         }
     }
 }

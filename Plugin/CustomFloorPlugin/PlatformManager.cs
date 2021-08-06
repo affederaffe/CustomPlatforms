@@ -38,11 +38,9 @@ namespace CustomFloorPlugin
         private readonly string _cacheFilePath;
 
         /// <summary>
-        /// Getter for the CustomPlatforms directory path, 100% user proof
+        /// Getter for the CustomPlatforms directory path
         /// </summary>
-        internal string DirectoryPath => Directory.Exists(_directoryPath)
-            ? _directoryPath
-            : Directory.CreateDirectory(_directoryPath).FullName;
+        internal string DirectoryPath => Directory.Exists(_directoryPath) ? _directoryPath : Directory.CreateDirectory(_directoryPath).FullName;
 
         /// <summary>
         /// An <see cref="ObservableCollection{T}"/> of all currently loaded <see cref="CustomPlatform"/>s<br/>
