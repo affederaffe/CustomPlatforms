@@ -70,7 +70,7 @@ namespace CustomFloorPlugin
 
         public void Initialize()
         {
-            _cuttableNotesCount = _difficultyBeatmap.beatmapData.cuttableNotesType - 1;
+            _cuttableNotesCount = _difficultyBeatmap.beatmapData.cuttableNotesCount - 1;
             _highScore = _playerDataModel.playerData.GetPlayerLevelStatsData(_difficultyBeatmap).highScore;
             _lastNoteTime = GetLastNoteTime();
             _beatmapObjectCallbackController.beatmapEventDidTriggerEvent += BeatmapEventDidTrigger;

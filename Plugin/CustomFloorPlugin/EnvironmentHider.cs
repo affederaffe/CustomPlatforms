@@ -257,6 +257,9 @@ namespace CustomFloorPlugin
                 case "KaleidoscopeEnvironment":
                     ringsManager = _envRoot!.Find("SmallTrackLaneRings").GetComponent<TrackLaneRingsManager>();
                     break;
+                case "SkrillexEnvironment":
+                    ringsManager = _envRoot!.Find("TrackLaneRings1").GetComponent<TrackLaneRingsManager>();
+                    break;
             }
 
             if (ringsManager is null) return;
@@ -284,6 +287,9 @@ namespace CustomFloorPlugin
                     break;
                 case "KaleidoscopeEnvironment":
                     ringsManager = _envRoot!.Find("DistantRings").GetComponent<TrackLaneRingsManager>();
+                    break;
+                case "SkrillexEnvironment":
+                    ringsManager = _envRoot!.Find("TrackLaneRings2").GetComponent<TrackLaneRingsManager>();
                     break;
             }
 
@@ -489,6 +495,12 @@ namespace CustomFloorPlugin
                     FindAddGameObject(_envRoot!, "StarHemisphere", _highway);
                     FindAddGameObject(_envRoot!, "StarEmitterPS", _highway);
                     FindAddGameObject(_envRoot!, "BTSStarTextEffectEvent", _highway);
+                    break;
+                case "SkrillexEnvironment":
+                    FindAddGameObject(_envRoot!, "TrackBL", _highway);
+                    FindAddGameObject(_envRoot!, "TrackBR", _highway);
+                    FindAddGameObject(_envRoot!, "TrackTR", _highway);
+                    FindAddGameObject(_envRoot!, "TrackTL", _highway);
                     break;
                 case "KaleidoscopeEnvironment":
                     FindAddGameObject(_envRoot!, "TrackMirror", _highway);
@@ -722,6 +734,10 @@ namespace CustomFloorPlugin
                 case "BTSEnvironment":
                     FindAddGameObject(_envRoot!, "MagicDoorSprite", _backLasers);
                     break;
+                case "SkrillexEnvironment":
+                    FindAddGameObject(_envRoot!, "SkrillexLogo", _backLasers);
+                    FindAddGameObject(_envRoot!, "SkrillexLogo (1)", _backLasers);
+                    break;
                 default:
                     FindAddGameObject(_envRoot!, "FrontLights", _backLasers);
                     break;
@@ -862,6 +878,13 @@ namespace CustomFloorPlugin
                     FindAddGameObject(_envRoot!, "BottomGlow", _trackLights);
                     for (int i = 0; i < 4; i++)
                         FindAddGameObject(_envRoot!, "SideLaser", _trackLights, true);
+                    break;
+                case "SkrillexEnvironment":
+                    FindAddGameObject(_envRoot!, "LeftLaser", _trackLights);
+                    FindAddGameObject(_envRoot!, "RightLaser", _trackLights);
+                    FindAddGameObject(_envRoot!, "NeonSide", _trackLights);
+                    for (int i = 1; i < 18; i++)
+                        FindAddGameObject(_envRoot!, $"NeonSide ({i.ToString(NumberFormatInfo.InvariantInfo)})", _trackLights);
                     break;
                 case "InterscopeEnvironment":
                     FindAddGameObject(_envRoot!, "NeonTop", _trackLights);
