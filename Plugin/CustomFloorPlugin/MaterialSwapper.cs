@@ -30,14 +30,15 @@ namespace CustomFloorPlugin
             Material? darkEnvSimpleMaterial = null;
             Material? transparentGlowMaterial = null;
             Material? opaqueGlowMaterial = null;
-            do
+            while (darkEnvSimpleMaterial is null || transparentGlowMaterial is null || opaqueGlowMaterial is null)
             {
                 await Task.Yield();
                 Material[] materials = Resources.FindObjectsOfTypeAll<Material>();
                 darkEnvSimpleMaterial ??= materials.FirstOrDefault(x => x.name == "DarkEnvironmentSimple");
                 transparentGlowMaterial ??= materials.FirstOrDefault(x => x.name == "EnvLight");
                 opaqueGlowMaterial ??= materials.FirstOrDefault(x => x.name == "EnvLightOpaque");
-            } while (darkEnvSimpleMaterial is null || transparentGlowMaterial is null || opaqueGlowMaterial is null);
+            }
+
             opaqueGlowMaterial.DisableKeyword("ENABLE_HEIGHT_FOG");
             _taskSource.SetResult((darkEnvSimpleMaterial, transparentGlowMaterial, opaqueGlowMaterial));
         }

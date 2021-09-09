@@ -20,6 +20,7 @@ namespace CustomFloorPlugin.Installers
         private readonly Logger _logger;
         private readonly PluginConfig _config;
         private readonly MirrorRendererSO _mirrorRenderer;
+        private readonly BoolSO _postProcessEnabled;
 
         public PlatformsAppInstaller(PluginMetadata pluginMetadata, Logger logger, PluginConfig config, SceneContext sceneContext)
         {
@@ -31,6 +32,8 @@ namespace CustomFloorPlugin.Installers
                 .First(x => x is PCAppInit))
                 .GetField<MainSystemInit, PCAppInit>("_mainSystemInit");
             _mirrorRenderer = mainSystemInit.GetField<MirrorRendererSO, MainSystemInit>("_mirrorRenderer");
+            MainEffectContainerSO mainEffectContainer = mainSystemInit.GetField<MainEffectContainerSO, MainSystemInit>("_mainEffectContainer");
+            _postProcessEnabled = mainEffectContainer.GetField<BoolSO, MainEffectContainerSO>("_postProcessEnabled");
         }
 
         public override void InstallBindings()
@@ -38,6 +41,7 @@ namespace CustomFloorPlugin.Installers
             Container.BindLoggerAsSiraLogger(_logger);
             Container.BindInstance(_config).AsSingle();
             Container.BindInstance(_mirrorRenderer).AsSingle().IfNotBound();
+            Container.BindInstance(_postProcessEnabled).WithId("PostProcessEnabled").AsSingle().IfNotBound();
             Container.BindInterfacesAndSelfTo<MaterialSwapper>().AsSingle();
             Container.Bind<AssetLoader>().AsSingle().WithArguments(_pluginMetadata);
             Container.Bind<PlatformLoader>().AsSingle();

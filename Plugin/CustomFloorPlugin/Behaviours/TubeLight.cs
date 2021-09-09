@@ -1,3 +1,5 @@
+using System.Linq;
+
 using CustomFloorPlugin.Interfaces;
 
 using IPA.Utilities;
@@ -37,20 +39,22 @@ namespace CustomFloorPlugin
 
         public float width = 0.5f;
         public float length = 1f;
-        [Range(0, 1)]
-        public float center = 0.5f;
+        [Range(0, 1)] public float center = 0.5f;
         public Color color = Color.cyan;
         public LightsID lightsID;
 
         private MaterialSwapper? _materialSwapper;
+        private BoolSO? _postProcessEnabled;
         private LightWithIdManager? _lightWithIdManager;
 
+        private TubeBloomPrePassLightWithId? _tubeBloomPrePassLightWithId;
         private InstancedMaterialLightWithId? _instancedMaterialLightWithId;
 
         [Inject]
-        public void Construct(MaterialSwapper materialSwapper, [InjectOptional] LightWithIdManager lightWithIdManager)
+        public void Construct(MaterialSwapper materialSwapper, [Inject(Id = "PostProcessEnabled")] BoolSO postProcessEnabled, [InjectOptional] LightWithIdManager lightWithIdManager)
         {
             _materialSwapper = materialSwapper;
+            _postProcessEnabled = postProcessEnabled;
             _lightWithIdManager = lightWithIdManager;
         }
 
@@ -58,50 +62,55 @@ namespace CustomFloorPlugin
         {
             container.Inject(this);
             bool activeSelf = gameObject.activeSelf;
-            if (activeSelf) gameObject.SetActive(false);
+            gameObject.SetActive(false);
 
-            if (_instancedMaterialLightWithId is null)
+            if (_instancedMaterialLightWithId is null && _tubeBloomPrePassLightWithId is null)
             {
+                (_, Material transparentGlowMaterial, Material opaqueGlowMaterial) =
+                    await _materialSwapper!.MaterialsTask;
                 Mesh mesh = GetComponent<MeshFilter>().mesh;
                 if (mesh.vertexCount == 0)
                 {
-                    float y = (0.5f - center) * length * 2;
-                    mesh.vertices = new Vector3[]
-                    {
-                        new(-width, (y - length) / 2, -width),
-                        new(width, (y - length) / 2, -width),
-                        new(width, (y + length) / 2, -width),
-                        new(-width, (y + length) / 2, -width),
-                        new(-width, (y + length) / 2, width),
-                        new(width, (y + length) / 2, width),
-                        new(width, (y - length) / 2, width),
-                        new(-width, (y - length) / 2, width)
-                    };
-
-                    mesh.triangles = _triangles;
+                    _tubeBloomPrePassLightWithId = gameObject.AddComponent<TubeBloomPrePassLightWithId>();
+                    TubeBloomPrePassLight tubeBloomPrePassLight = gameObject.AddComponent<TubeBloomPrePassLight>();
+                    GameObject boxLight = new("BoxLight");
+                    boxLight.SetActive(false);
+                    boxLight.transform.SetParent(transform);
+                    MeshRenderer renderer = boxLight.AddComponent<MeshRenderer>();
+                    renderer.sharedMaterial = transparentGlowMaterial;
+                    ParametricBoxController parametricBoxController = boxLight.AddComponent<ParametricBoxController>();
+                    parametricBoxController.SetField("_meshRenderer", renderer);
+                    tubeBloomPrePassLight.SetField("_center", center);
+                    tubeBloomPrePassLight.SetField("_parametricBoxController", parametricBoxController);
+                    tubeBloomPrePassLight.SetField("_mainEffectPostProcessEnabled", _postProcessEnabled);
+                    tubeBloomPrePassLight.width = width;
+                    tubeBloomPrePassLight.length = length;
+                    _tubeBloomPrePassLightWithId.SetField("_tubeBloomPrePassLight", tubeBloomPrePassLight);
+                    ((BloomPrePassLight)tubeBloomPrePassLight).SetField("_lightType", BloomPrePassLight.bloomLightsDict.Keys.First(x => x.name == "AddBloomPrePassLightType"));
+                    ((LightWithIdMonoBehaviour)_tubeBloomPrePassLightWithId).SetField("_ID", (int)lightsID);
+                    _tubeBloomPrePassLightWithId.ColorWasSet(color);
+                    boxLight.SetActive(true);
                 }
-
-                (_, _, Material opaqueGlowMaterial) = await _materialSwapper!.MaterialsTask;
-                Renderer renderer = GetComponent<Renderer>();
-                renderer.sharedMaterial = opaqueGlowMaterial;
-                MaterialPropertyBlockController materialPropertyBlockController = gameObject.AddComponent<MaterialPropertyBlockController>();
-                materialPropertyBlockController.SetField("_renderers", new[] { renderer });
-                MaterialPropertyBlockColorSetter materialPropertyBlockColorSetter = gameObject.AddComponent<MaterialPropertyBlockColorSetter>();
-                materialPropertyBlockColorSetter.materialPropertyBlockController = materialPropertyBlockController;
-                materialPropertyBlockColorSetter.SetField("_property", "_Color");
-                _instancedMaterialLightWithId = gameObject.AddComponent<InstancedMaterialLightWithId>();
-                _instancedMaterialLightWithId.SetField("_materialPropertyBlockColorSetter", materialPropertyBlockColorSetter);
-                _instancedMaterialLightWithId.SetField("_intensity", 1.25f);
-                ((LightWithIdMonoBehaviour)_instancedMaterialLightWithId).SetField("_ID", (int)lightsID);
-                _instancedMaterialLightWithId.ColorWasSet(color);
-                BloomPrePassBackgroundNonLightRenderer bloomPrePassBackgroundNonLightRenderer = gameObject.AddComponent<BloomPrePassBackgroundNonLightRenderer>();
-                bloomPrePassBackgroundNonLightRenderer.SetField("_renderer", renderer);
-                ((BloomPrePassBackgroundNonLightRendererCore)bloomPrePassBackgroundNonLightRenderer).SetField("_keepDefaultRendering", true);
-                ((BloomPrePassNonLightPass)bloomPrePassBackgroundNonLightRenderer).SetField("_executionTimeType", BloomPrePassNonLightPass.ExecutionTimeType.BeforeBlur);
+                else
+                {
+                    Renderer renderer = GetComponent<Renderer>();
+                    renderer.sharedMaterial = opaqueGlowMaterial;
+                    MaterialPropertyBlockController materialPropertyBlockController = gameObject.AddComponent<MaterialPropertyBlockController>();
+                    materialPropertyBlockController.SetField("_renderers", new[] { renderer });
+                    MaterialPropertyBlockColorSetter materialPropertyBlockColorSetter = gameObject.AddComponent<MaterialPropertyBlockColorSetter>();
+                    materialPropertyBlockColorSetter.materialPropertyBlockController = materialPropertyBlockController;
+                    materialPropertyBlockColorSetter.SetField("_property", "_Color");
+                    _instancedMaterialLightWithId = gameObject.AddComponent<InstancedMaterialLightWithId>();
+                    _instancedMaterialLightWithId.SetField("_materialPropertyBlockColorSetter", materialPropertyBlockColorSetter);
+                    _instancedMaterialLightWithId.SetField("_intensity", 1.25f);
+                    ((LightWithIdMonoBehaviour)_instancedMaterialLightWithId).SetField("_ID", (int)lightsID);
+                    _instancedMaterialLightWithId.ColorWasSet(color);
+                }
             }
 
-            ((LightWithIdMonoBehaviour)_instancedMaterialLightWithId).SetField("_lightManager", _lightWithIdManager);
-            if (activeSelf) gameObject.SetActive(true);
+            LightWithIdMonoBehaviour light = _instancedMaterialLightWithId is null ? _tubeBloomPrePassLightWithId! : _instancedMaterialLightWithId!;
+            light.SetField("_lightManager", _lightWithIdManager);
+            gameObject.SetActive(activeSelf);
         }
 
         public void PlatformDisabled()
@@ -109,21 +118,5 @@ namespace CustomFloorPlugin
             if (_instancedMaterialLightWithId is null) return;
             _instancedMaterialLightWithId.ColorWasSet(color);
         }
-
-        private static readonly int[] _triangles = new[]
-        {
-            0, 2, 1, //face front
-			0, 3, 2,
-            2, 3, 4, //face top
-			2, 4, 5,
-            1, 2, 5, //face right
-			1, 5, 6,
-            0, 7, 4, //face left
-			0, 4, 3,
-            5, 4, 7, //face back
-			5, 7, 6,
-            0, 6, 7, //face bottom
-			0, 1, 6
-        };
     }
 }
