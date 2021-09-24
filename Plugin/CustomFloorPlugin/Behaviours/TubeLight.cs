@@ -66,8 +66,7 @@ namespace CustomFloorPlugin
 
             if (_instancedMaterialLightWithId is null && _tubeBloomPrePassLightWithId is null)
             {
-                (_, Material transparentGlowMaterial, Material opaqueGlowMaterial) =
-                    await _materialSwapper!.MaterialsTask;
+                (_, Material transparentGlowMaterial, Material opaqueGlowMaterial) = await _materialSwapper!.MaterialsTask;
                 Mesh mesh = GetComponent<MeshFilter>().mesh;
                 if (mesh.vertexCount == 0)
                 {
@@ -76,6 +75,9 @@ namespace CustomFloorPlugin
                     GameObject boxLight = new("BoxLight");
                     boxLight.SetActive(false);
                     boxLight.transform.SetParent(transform);
+                    boxLight.transform.localRotation = Quaternion.Euler(Vector3.zero);
+                    MeshFilter meshFilter = boxLight.AddComponent<MeshFilter>();
+                    meshFilter.mesh = Mesh;
                     MeshRenderer renderer = boxLight.AddComponent<MeshRenderer>();
                     renderer.sharedMaterial = transparentGlowMaterial;
                     ParametricBoxController parametricBoxController = boxLight.AddComponent<ParametricBoxController>();
@@ -83,7 +85,7 @@ namespace CustomFloorPlugin
                     tubeBloomPrePassLight.SetField("_center", center);
                     tubeBloomPrePassLight.SetField("_parametricBoxController", parametricBoxController);
                     tubeBloomPrePassLight.SetField("_mainEffectPostProcessEnabled", _postProcessEnabled);
-                    tubeBloomPrePassLight.width = width;
+                    tubeBloomPrePassLight.width = width * 2;
                     tubeBloomPrePassLight.length = length;
                     _tubeBloomPrePassLightWithId.SetField("_tubeBloomPrePassLight", tubeBloomPrePassLight);
                     ((BloomPrePassLight)tubeBloomPrePassLight).SetField("_lightType", BloomPrePassLight.bloomLightsDict.Keys.First(x => x.name == "AddBloomPrePassLightType"));
@@ -108,7 +110,7 @@ namespace CustomFloorPlugin
                 }
             }
 
-            LightWithIdMonoBehaviour light = _instancedMaterialLightWithId is null ? _tubeBloomPrePassLightWithId! : _instancedMaterialLightWithId!;
+            LightWithIdMonoBehaviour light = (LightWithIdMonoBehaviour?)_instancedMaterialLightWithId ?? (LightWithIdMonoBehaviour)_tubeBloomPrePassLightWithId!;
             light.SetField("_lightManager", _lightWithIdManager);
             gameObject.SetActive(activeSelf);
         }
@@ -117,6 +119,58 @@ namespace CustomFloorPlugin
         {
             if (_instancedMaterialLightWithId is null) return;
             _instancedMaterialLightWithId.ColorWasSet(color);
+        }
+
+        private static Mesh? _mesh;
+        private static Mesh Mesh => _mesh ??= CreateMesh();
+
+        private static Mesh CreateMesh()
+        {
+            return new Mesh
+            {
+                vertices = new Vector3[]
+                {
+                    new(1, -1, -1),
+                    new(1, -1, 1),
+                    new(1, 1, -1),
+                    new(1, 1, 1),
+                    new(-1, -1, -1),
+                    new(-1, -1, 1),
+                    new(-1, 1, -1),
+                    new(-1, 1, 1),
+                    new(1, 1, -1),
+                    new(1, 1, 1),
+                    new(-1, 1, -1),
+                    new(-1, 1, 1),
+                    new(-1, -1, -1),
+                    new(1, -1, -1),
+                    new(1, -1, 1),
+                    new(-1, -1, 1),
+                    new(1, 1, -1),
+                    new(1, -1, -1),
+                    new(-1, -1, -1),
+                    new(-1, 1, -1),
+                    new(-1, 1, 1),
+                    new(-1, -1, 1),
+                    new(1, -1, 1),
+                    new(1, 1, 1)
+                },
+                triangles = new[]
+                {
+                    0, 2, 3,
+                    0, 3, 1,
+                    8, 6, 7,
+                    8, 7, 9,
+                    10, 4, 5,
+                    10, 5, 11,
+                    12, 13, 14,
+                    12, 14, 15,
+                    16, 17, 18,
+                    16, 18, 19,
+                    20, 21, 22,
+                    20, 22, 23
+                }
+            };
         }
     }
 }

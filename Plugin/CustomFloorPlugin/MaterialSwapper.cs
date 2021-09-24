@@ -40,6 +40,7 @@ namespace CustomFloorPlugin
             }
 
             opaqueGlowMaterial.DisableKeyword("ENABLE_HEIGHT_FOG");
+            transparentGlowMaterial.DisableKeyword("ENABLE_HEIGHT_FOG");
             _taskSource.SetResult((darkEnvSimpleMaterial, transparentGlowMaterial, opaqueGlowMaterial));
         }
 

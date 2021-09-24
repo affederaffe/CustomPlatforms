@@ -151,7 +151,7 @@ namespace CustomFloorPlugin
         private void FindAddGameObject(Transform root, string name, ICollection<GameObject> list, bool rename = false)
         {
             GameObject? go = root.Find(name)?.gameObject;
-            if (go is null || (!go.activeSelf && _sceneName != "MainMenu")) return;
+            if (go is null || !go.activeSelf && _sceneName != "MainMenu") return;
             if (rename) go.name += "renamed";
             list.Add(go);
         }
@@ -176,6 +176,9 @@ namespace CustomFloorPlugin
             {
                 case "MainMenu":
                     FindAddGameObject(_envRoot!, "BackgroundColor", _gradientBackground);
+                    break;
+                case "BillieEnvironment":
+                    FindAddGameObject(_envRoot!, "DayAndNight/BackgroundGradient", _gradientBackground);
                     break;
                 default:
                     FindAddGameObject(_envRoot!, "GradientBackground", _gradientBackground);
@@ -224,6 +227,8 @@ namespace CustomFloorPlugin
             }
         }
 
+        // ReSharper disable once CognitiveComplexity
+        // ReSharper disable once CyclomaticComplexity
         private void FindSmallRings()
         {
             TrackLaneRingsManager? ringsManager = null;
@@ -394,6 +399,10 @@ namespace CustomFloorPlugin
                     for (int i = 1; i < 4; i++)
                         FindAddGameObject(_envRoot!, $"SmallPillarPair ({i.ToString(NumberFormatInfo.InvariantInfo)})", _towers);
                     break;
+                case "BillieEnvironment":
+                    FindAddGameObject(_envRoot!, "Mountains", _towers);
+                    FindAddGameObject(_envRoot!, "Clouds", _towers);
+                    break;
             }
         }
 
@@ -533,6 +542,20 @@ namespace CustomFloorPlugin
                     }
 
                     break;
+                case "BillieEnvironment":
+                    FindAddGameObject(_envRoot!, "Rain", _highway);
+                    FindAddGameObject(_envRoot!, "Waterfall", _highway);
+                    FindAddGameObject(_envRoot!, "LeftRail", _highway);
+                    FindAddGameObject(_envRoot!, "RightRail", _highway);
+                    FindAddGameObject(_envRoot!, "LeftFarRail1", _highway);
+                    FindAddGameObject(_envRoot!, "LeftFarRail2", _highway);
+                    FindAddGameObject(_envRoot!, "RightFarRail1", _highway);
+                    FindAddGameObject(_envRoot!, "RightFarRail2", _highway);
+                    FindAddGameObject(_envRoot!, "RailingFullBack", _highway);
+                    FindAddGameObject(_envRoot!, "RailingFullFront", _highway);
+                    FindAddGameObject(_envRoot!, "LastRailingCurve", _highway);
+                    FindAddGameObject(_envRoot!, "WaterRainRipples", _highway);
+                    break;
             }
         }
 
@@ -642,6 +665,10 @@ namespace CustomFloorPlugin
                     for (int i = 1; i < 18; i++)
                         FindAddGameObject(_envRoot!, $"TunnelRotatingLasersPair ({i.ToString(NumberFormatInfo.InvariantInfo)})", _rotatingLasers);
                     break;
+                case "BillieEnvironment":
+                    for (int i = 4; i < 15; i++)
+                        FindAddGameObject(_envRoot!, $"TunnelRotatingLasersPair ({i.ToString(NumberFormatInfo.InvariantInfo)})", _rotatingLasers);
+                    break;
             }
         }
 
@@ -699,9 +726,16 @@ namespace CustomFloorPlugin
                     for (int i = 4; i < 13; i++)
                         FindAddGameObject(_envRoot!, $"Laser ({i.ToString(NumberFormatInfo.InvariantInfo)})", _doubleColorLasers);
                     break;
+                case "BillieEnvironment":
+                    FindAddGameObject(_envRoot!, "BottomPairLasers", _doubleColorLasers);
+                    for (int i = 1; i < 9; i++)
+                        FindAddGameObject(_envRoot!, $"BottomPairLasers ({i.ToString(NumberFormatInfo.InvariantInfo)})", _doubleColorLasers);
+                    break;
             }
         }
 
+        // ReSharper disable once CognitiveComplexity
+        // ReSharper disable once CyclomaticComplexity
         private void FindBackLasers()
         {
             switch (_sceneName)
@@ -737,6 +771,10 @@ namespace CustomFloorPlugin
                 case "SkrillexEnvironment":
                     FindAddGameObject(_envRoot!, "SkrillexLogo", _backLasers);
                     FindAddGameObject(_envRoot!, "SkrillexLogo (1)", _backLasers);
+                    break;
+                case "BillieEnvironment":
+                    FindAddGameObject(_envRoot!, "DayAndNight/Day", _backLasers);
+                    FindAddGameObject(_envRoot!, "DayAndNight/Night", _backLasers);
                     break;
                 default:
                     FindAddGameObject(_envRoot!, "FrontLights", _backLasers);
@@ -898,6 +936,11 @@ namespace CustomFloorPlugin
                         FindAddGameObject(_envRoot!, $"{baseName}/NeonLightR", _trackLights);
                     }
 
+                    break;
+                case "BillieEnvironment":
+                    FindAddGameObject(_envRoot!, "LightRailingSegment", _trackLights);
+                    for (int i = 1; i < 4; i++)
+                        FindAddGameObject(_envRoot!, $"LightRailingSegment ({i.ToString(NumberFormatInfo.InvariantInfo)})", _trackLights);
                     break;
             }
         }
