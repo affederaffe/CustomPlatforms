@@ -83,11 +83,7 @@ namespace CustomFloorPlugin
 
         public async void Initialize()
         {
-            try
-            {
-                await LoadPlatformsAsync();
-            }
-            catch (System.OperationCanceledException) { }
+            await LoadPlatformsAsync();
         }
 
         /// <summary>
@@ -142,10 +138,9 @@ namespace CustomFloorPlugin
             }
 
             // Load all remaining platforms, or all if no cache file is found
-            foreach (string path in Directory.EnumerateFiles(DirectoryPath, "*.plat"))
+            foreach (string path in Directory.EnumerateFiles(DirectoryPath, "*.plat").Where(x => AllPlatforms.All(y => y.fullPath != x)))
             {
-                cancellationToken.ThrowIfCancellationRequested();
-                if (AllPlatforms.Any(x => x.fullPath == path)) continue;
+                if (cancellationToken.IsCancellationRequested) return;
                 CustomPlatform? platform = await CreatePlatformAsync(path);
                 if (platform is null) continue;
                 AllPlatforms.AddSorted(1, AllPlatforms.Count - 1, platform);

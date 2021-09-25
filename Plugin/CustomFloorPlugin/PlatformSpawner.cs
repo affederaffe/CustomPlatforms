@@ -154,44 +154,35 @@ namespace CustomFloorPlugin
         /// <param name="platform">The <see cref="CustomPlatform"/> to change to</param>
         public async Task ChangeToPlatformAsync(CustomPlatform platform)
         {
-            try
+            if (platform == _platformManager.ActivePlatform) return;
+            _cancellationTokenSource?.Cancel();
+            _cancellationTokenSource?.Dispose();
+            _cancellationTokenSource = new CancellationTokenSource();
+            CancellationToken cancellationToken = _cancellationTokenSource.Token;
+
+            DestroyCustomObjects();
+            _platformManager.ActivePlatform.gameObject.SetActive(false);
+            _platformManager.ActivePlatform = platform;
+
+            if (platform.isDescriptor)
             {
-                if (platform == _platformManager.ActivePlatform) return;
-                _cancellationTokenSource?.Cancel();
-                _cancellationTokenSource?.Dispose();
-                _cancellationTokenSource = new CancellationTokenSource();
-                CancellationToken cancellationToken = _cancellationTokenSource.Token;
-
-                DestroyCustomObjects();
-                _platformManager.ActivePlatform.gameObject.SetActive(false);
-                _platformManager.ActivePlatform = platform;
-
-                if (platform.isDescriptor)
+                CustomPlatform? newPlatform = await _platformManager.CreatePlatformAsync(platform.fullPath);
+                if (newPlatform is null)
                 {
-                    CustomPlatform? newPlatform = await _platformManager.CreatePlatformAsync(platform.fullPath);
-                    if (newPlatform is not null)
-                    {
-                        _platformManager.AllPlatforms.Replace(platform, newPlatform);
-                        UnityEngine.Object.Destroy(platform.gameObject);
-                    }
-
-                    cancellationToken.ThrowIfCancellationRequested();
-
-                    if (newPlatform is null)
-                    {
-                        _ = ChangeToPlatformAsync(_platformManager.DefaultPlatform);
-                        return;
-                    }
-
-                    _platformManager.ActivePlatform = newPlatform;
+                    _ = ChangeToPlatformAsync(_platformManager.DefaultPlatform);
+                    return;
                 }
-
-                _siraLog.Info($"Switching to {_platformManager.ActivePlatform.name}");
-                _environmentHider.HideObjectsForPlatform(_platformManager.ActivePlatform);
-                _platformManager.ActivePlatform.gameObject.SetActive(true);
-                SpawnCustomObjects();
+                
+                _platformManager.AllPlatforms.Replace(platform, newPlatform);
+                UnityEngine.Object.Destroy(platform.gameObject);
+                if (cancellationToken.IsCancellationRequested) return;
+                _platformManager.ActivePlatform = newPlatform;
             }
-            catch (OperationCanceledException) { }
+
+            _siraLog.Info($"Switching to {_platformManager.ActivePlatform.name}");
+            _environmentHider.HideObjectsForPlatform(_platformManager.ActivePlatform);
+            _platformManager.ActivePlatform.gameObject.SetActive(true);
+            SpawnCustomObjects();
         }
 
         /// <summary>

@@ -206,15 +206,13 @@ namespace CustomFloorPlugin
             public void PlatformEnabled(DiContainer container)
             {
                 container.Inject(this);
-
+                gameObject.SetActive(false);
                 List<ILightWithId>?[] lights = _lightWithIdManager.GetField<List<ILightWithId>?[], LightWithIdManager>("_lights");
-
                 if (_lightSwitchEventEffects is null)
                 {
                     Color normalColor = new(1f, 1f, 1f, 0.7490196f);
                     Color boostColor = new(1f, 1f, 1f, 0.8f);
                     Color highlightColor = new(1f, 1f, 1f, 1f);
-
                     _lightSwitchEventEffects = new LightSwitchEventEffect[5];
                     for (int i = 0; i < _lightSwitchEventEffects.Length; i++)
                     {
@@ -238,11 +236,9 @@ namespace CustomFloorPlugin
                     foreach (LightSwitchEventEffect lse in _lightSwitchEventEffects)
                     {
                         lights[lse.lightsId] ??= new List<ILightWithId>();
-                        lse.SetField("_initialized", false);
                         lse.SetField("_beatmapObjectCallbackController", _beatmapObjectCallbackController);
                         lse.SetField("_lightManager", _lightWithIdManager);
                         lse.SetColor(Color.clear);
-                        gameObject.SetActive(true);
                         lse.Start();
                     }
                 }
@@ -255,13 +251,14 @@ namespace CustomFloorPlugin
                 _simpleLightColor1Boost.SetColor(_colorScheme.environmentColor1Boost);
                 _simpleHighlightColor0Boost.SetColor(_colorScheme.environmentColor0Boost);
                 _simpleHighlightColor1Boost.SetColor(_colorScheme.environmentColor1Boost);
+                gameObject.SetActive(true);
             }
 
             public void PlatformDisabled()
             {
                 if (_lightSwitchEventEffects is null) return;
                 foreach (LightSwitchEventEffect lse in _lightSwitchEventEffects)
-                    lse.OnDestroy();
+                    _beatmapObjectCallbackController.beatmapEventDidTriggerEvent -= lse.HandleBeatmapObjectCallbackControllerBeatmapEventDidTrigger;
                 gameObject.SetActive(false);
             }
 
