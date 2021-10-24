@@ -33,6 +33,7 @@ namespace CustomFloorPlugin
         [Range(0, 1)]
         public float center = 0.5f;
         public Color color = Color.cyan;
+        public float bloomFogIntensityMultiplier = 1f;
         public LightsID lightsID;
 
         private void OnDrawGizmos()
