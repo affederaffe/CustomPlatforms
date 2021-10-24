@@ -41,6 +41,7 @@ namespace CustomFloorPlugin
         public float length = 1f;
         [Range(0, 1)] public float center = 0.5f;
         public Color color = Color.cyan;
+        public float bloomFogIntensityMultiplier = 1f;
         public LightsID lightsID;
 
         private MaterialSwapper? _materialSwapper;
@@ -87,6 +88,7 @@ namespace CustomFloorPlugin
                     tubeBloomPrePassLight.SetField("_mainEffectPostProcessEnabled", _postProcessEnabled);
                     tubeBloomPrePassLight.width = width * 2;
                     tubeBloomPrePassLight.length = length;
+                    tubeBloomPrePassLight.bloomFogIntensityMultiplier = bloomFogIntensityMultiplier;
                     _tubeBloomPrePassLightWithId.SetField("_tubeBloomPrePassLight", tubeBloomPrePassLight);
                     ((BloomPrePassLight)tubeBloomPrePassLight).SetField("_lightType", BloomPrePassLight.bloomLightsDict.Keys.First(x => x.name == "AddBloomPrePassLightType"));
                     ((LightWithIdMonoBehaviour)_tubeBloomPrePassLightWithId).SetField("_ID", (int)lightsID);
