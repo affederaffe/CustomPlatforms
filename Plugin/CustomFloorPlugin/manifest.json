@@ -3,12 +3,12 @@
   "id": "Custom Platforms",
   "name": "Custom Platforms",
   "author": "Rolo",
-  "version": "6.1.9",
+  "version": "6.1.10",
   "description": "A plugin to support custom platforms and environments",
-  "gameVersion": "1.18.0",
+  "gameVersion": "1.18.3",
   "dependsOn": {
     "BSIPA": "^4.2.0",
-    "BeatSaberMarkupLanguage": "^1.5.8",
+    "BeatSaberMarkupLanguage": "^1.5.11",
     "SiraUtil": "^2.5.8"
   },
   "loadAfter": [
