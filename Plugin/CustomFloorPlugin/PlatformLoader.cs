@@ -4,6 +4,8 @@ using System.IO;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
 
+using IPA.Utilities;
+
 using SiraUtil.Tools;
 
 using UnityEngine;
@@ -17,13 +19,16 @@ namespace CustomFloorPlugin
     public class PlatformLoader
     {
         private readonly SiraLog _siraLog;
+        private readonly BloomPrePassRendererSO _bloomPrepassRenderer;
+        private readonly BloomPrePassEffectContainerSO _bloomPrePassEffectContainer;
         private readonly MaterialSwapper _materialSwapper;
-
         private readonly Dictionary<string, Task<CustomPlatform?>> _pathTaskPairs;
 
-        public PlatformLoader(SiraLog siraLog, MaterialSwapper materialSwapper)
+        public PlatformLoader(SiraLog siraLog, BloomPrePassRendererSO bloomPrepassRenderer, BloomPrePassEffectContainerSO bloomPrePassEffectContainer, MaterialSwapper materialSwapper)
         {
             _siraLog = siraLog;
+            _bloomPrepassRenderer = bloomPrepassRenderer;
+            _bloomPrePassEffectContainer = bloomPrePassEffectContainer;
             _materialSwapper = materialSwapper;
             _pathTaskPairs = new Dictionary<string, Task<CustomPlatform?>>();
         }
@@ -100,6 +105,14 @@ namespace CustomFloorPlugin
                 }
             }
 
+            Camera[] cameras = platformPrefab.GetComponentsInChildren<Camera>(true);
+            foreach (Camera camera in cameras)
+            {
+                BloomPrePass bloomPrePass = camera.gameObject.AddComponent<BloomPrePass>();
+                bloomPrePass.SetField("_bloomPrepassRenderer", _bloomPrepassRenderer);
+                bloomPrePass.SetField("_bloomPrePassEffectContainer", _bloomPrePassEffectContainer);
+            }
+
             customPlatform.platHash = await Task.Run(() => ComputeHash(bundleData));
             customPlatform.fullPath = fullPath;
             customPlatform.name = $"{customPlatform.platName} by {customPlatform.platAuthor}";
@@ -122,7 +135,7 @@ namespace CustomFloorPlugin
         /// <summary>
         /// Asynchronously loads and <see cref="AssetBundle"/> from a <see cref="byte"/>[]
         /// </summary>
-        private static async Task<AssetBundle> LoadAssetBundleFromBytesAsync(byte[] data)
+        private static Task<AssetBundle> LoadAssetBundleFromBytesAsync(byte[] data)
         {
             TaskCompletionSource<AssetBundle> taskCompletionSource = new();
             AssetBundleCreateRequest assetBundleCreateRequest = AssetBundle.LoadFromMemoryAsync(data);
@@ -132,13 +145,13 @@ namespace CustomFloorPlugin
                 taskCompletionSource.SetResult(assetBundle);
             };
 
-            return await taskCompletionSource.Task;
+            return taskCompletionSource.Task;
         }
 
         /// <summary>
         /// Asynchronously loads an asset of type <typeparamref name="T"/> from an <see cref="AssetBundle"/>
         /// </summary>
-        private static async Task<T> LoadAssetFromAssetBundleAsync<T>(AssetBundle assetBundle, string assetName) where T : UnityEngine.Object
+        private static Task<T> LoadAssetFromAssetBundleAsync<T>(AssetBundle assetBundle, string assetName) where T : UnityEngine.Object
         {
             TaskCompletionSource<T> taskCompletionSource = new();
             AssetBundleRequest assetBundleRequest = assetBundle.LoadAssetAsync<T>(assetName);
@@ -148,7 +161,7 @@ namespace CustomFloorPlugin
                 taskCompletionSource.SetResult(asset);
             };
 
-            return await taskCompletionSource.Task;
+            return taskCompletionSource.Task;
         }
     }
 }

@@ -93,7 +93,8 @@ namespace CustomFloorPlugin
             SetCollectionHidden(_doubleColorLasers, platform.hideDoubleColorLasers);
             SetCollectionHidden(_rotatingLasers, platform.hideRotatingLasers);
             SetCollectionHidden(_trackLights, platform.hideTrackLights);
-            _assetLoader.TogglePlayersPlace(_sceneName == "MainMenu" && !platform.hideDefaultPlatform && platform != _platformManager.DefaultPlatform);
+            bool showPlayersPlace = _sceneName is "MainMenu" or "HalloweenEnvironment" && !platform.hideDefaultPlatform && platform != _platformManager.DefaultPlatform;
+            _assetLoader.TogglePlayersPlace(showPlayersPlace);
         }
 
         internal void ToggleGradientBackground(bool active)
@@ -556,6 +557,46 @@ namespace CustomFloorPlugin
                     FindAddGameObject(_envRoot!, "LastRailingCurve", _highway);
                     FindAddGameObject(_envRoot!, "WaterRainRipples", _highway);
                     break;
+                case "HalloweenEnvironment":
+                    FindAddGameObject(_envRoot!, "Ground", _highway);
+                    for (int i = 1; i < 92; i++)
+                        FindAddGameObject(_envRoot!, $"GroundStone ({i.ToString(NumberFormatInfo.InvariantInfo)})", _highway);
+                    FindAddGameObject(_envRoot!, "Fence", _highway, true);
+                    FindAddGameObject(_envRoot!, "Fence", _highway);
+                    for (int i = 1; i < 25; i++)
+                        FindAddGameObject(_envRoot!, $"Fence ({i.ToString(NumberFormatInfo.InvariantInfo)})", _highway);
+                    FindAddGameObject(_envRoot!, "Grave", _highway, true);
+                    FindAddGameObject(_envRoot!, "Grave", _highway, true);
+                    FindAddGameObject(_envRoot!, "Grave0", _highway);
+                    FindAddGameObject(_envRoot!, "Grave0 (1)", _highway);
+                    FindAddGameObject(_envRoot!, "Grave0 (2)", _highway);
+                    FindAddGameObject(_envRoot!, "Grave1", _highway);
+                    FindAddGameObject(_envRoot!, "Grave1 (1)", _highway);
+                    FindAddGameObject(_envRoot!, "Castle", _highway);
+                    for (int i = 1; i < 4; i++)
+                        FindAddGameObject(_envRoot!, $"Castle ({i.ToString(NumberFormatInfo.InvariantInfo)})", _highway);
+                    FindAddGameObject(_envRoot!, "Tree1 (1)", _highway);
+                    FindAddGameObject(_envRoot!, "Tree2", _highway);
+                    FindAddGameObject(_envRoot!, "Tree3", _highway);
+                    FindAddGameObject(_envRoot!, "Tree5", _highway);
+                    for (int i = 1; i < 4; i++)
+                    {
+                        string strI = i.ToString(NumberFormatInfo.InvariantInfo);
+                        FindAddGameObject(_envRoot!, $"Tree3 ({strI})", _highway);
+                        FindAddGameObject(_envRoot!, $"Tree2 ({strI})", _highway);
+                    }
+
+                    for (int i = 2; i < 25; i++)
+                        FindAddGameObject(_envRoot!, $"TombStone ({i.ToString(NumberFormatInfo.InvariantInfo)})", _highway);
+                    FindAddGameObject(_envRoot!, "ZombieHand", _highway);
+                    for (int i = 1; i < 7; i++)
+                        FindAddGameObject(_envRoot!, $"ZombieHand ({i.ToString(NumberFormatInfo.InvariantInfo)})", _highway);
+                    FindAddGameObject(_envRoot!, "Crow", _highway);
+                    for (int i = 1; i < 4; i++)
+                        FindAddGameObject(_envRoot!, $"Crow ({i.ToString(NumberFormatInfo.InvariantInfo)})", _highway);
+                    FindAddGameObject(_envRoot!, "Bats", _highway);
+                    FindAddGameObject(_envRoot!, "GroundFog", _highway);
+                    break;
             }
         }
 
@@ -669,6 +710,10 @@ namespace CustomFloorPlugin
                     for (int i = 4; i < 15; i++)
                         FindAddGameObject(_envRoot!, $"TunnelRotatingLasersPair ({i.ToString(NumberFormatInfo.InvariantInfo)})", _rotatingLasers);
                     break;
+                case "HalloweenEnvironment":
+                    for (int i = 7; i < 24; i++)
+                        FindAddGameObject(_envRoot!, $"RotatingLasersPair ({i.ToString(NumberFormatInfo.InvariantInfo)})", _rotatingLasers);
+                    break;
             }
         }
 
@@ -775,6 +820,10 @@ namespace CustomFloorPlugin
                 case "BillieEnvironment":
                     FindAddGameObject(_envRoot!, "DayAndNight/Day", _backLasers);
                     FindAddGameObject(_envRoot!, "DayAndNight/Night", _backLasers);
+                    break;
+                case "HalloweenEnvironment":
+                    FindAddGameObject(_envRoot!, "Moon", _backLasers);
+                    FindAddGameObject(_envRoot!, "GateLight", _backLasers);
                     break;
                 default:
                     FindAddGameObject(_envRoot!, "FrontLights", _backLasers);
@@ -941,6 +990,15 @@ namespace CustomFloorPlugin
                     FindAddGameObject(_envRoot!, "LightRailingSegment", _trackLights);
                     for (int i = 1; i < 4; i++)
                         FindAddGameObject(_envRoot!, $"LightRailingSegment ({i.ToString(NumberFormatInfo.InvariantInfo)})", _trackLights);
+                    break;
+                case "HalloweenEnvironment":
+                    FindAddGameObject(_envRoot!, "NeonTubeL", _trackLights);
+                    FindAddGameObject(_envRoot!, "NeonTubeL (1)", _trackLights);
+                    FindAddGameObject(_envRoot!, "NeonTubeR", _trackLights);
+                    FindAddGameObject(_envRoot!, "NeonTubeR (1)", _trackLights);
+                    FindAddGameObject(_envRoot!, "NeonTubeC", _trackLights);
+                    for (int i = 6; i < 10; i++)
+                        FindAddGameObject(_envRoot!, $"GlowLineL ({i.ToString(NumberFormatInfo.InvariantInfo)})", _trackLights);
                     break;
             }
         }
