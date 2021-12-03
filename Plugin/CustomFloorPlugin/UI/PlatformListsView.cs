@@ -37,6 +37,9 @@ namespace CustomFloorPlugin.UI
         [UIComponent("a360-platforms-list")]
         private readonly CustomListTableData _a360PlatformListTable = null!;
 
+        [UIComponent("menu-platforms-list")]
+        private readonly CustomListTableData _menuPlatformListTable = null!;
+
         private CustomListTableData[] _listTables = null!;
         private ScrollView[] _scrollViews = null!;
         private int _tabIndex;
@@ -55,11 +58,11 @@ namespace CustomFloorPlugin.UI
         /// Changes to the <see cref="CustomPlatform"/> of the selected game mode
         /// </summary>
         /// <param name="segmentedControl">Used to gather the cell index</param>
-        /// <param name="_1">I love how optimised BSML is</param>
+        /// <param name="_">I love how optimised BSML is</param>
         [UIAction("select-tab")]
         // ReSharper disable once UnusedMember.Local
         // ReSharper disable once UnusedParameter.Local
-        private void OnDidSelectTab(SegmentedControl segmentedControl, int _1)
+        private void OnDidSelectTab(SegmentedControl segmentedControl, int _)
         {
             _tabIndex = segmentedControl.selectedCellNumber;
             int index = GetPlatformIndexForTabIndex(_tabIndex);
@@ -70,12 +73,12 @@ namespace CustomFloorPlugin.UI
         /// <summary>
         /// Called when a <see cref="CustomPlatform"/> is selected by the user
         /// </summary>
-        /// <param name="_1">I love how optimised BSML is</param>
+        /// <param name="_">I love how optimised BSML is</param>
         /// <param name="index">Cell index of the users selection</param>
         [UIAction("select-platform")]
         // ReSharper disable once UnusedMember.Local
         // ReSharper disable once UnusedParameter.Local
-        private async void OnDidSelectPlatform(TableView _1, int index)
+        private async void OnDidSelectPlatform(TableView _, int index)
         {
             await _platformSpawner.ChangeToPlatformAsync(_platformManager.AllPlatforms[index]);
             switch (_tabIndex)
@@ -91,6 +94,10 @@ namespace CustomFloorPlugin.UI
                 case 2:
                     _platformManager.A360Platform = _platformManager.ActivePlatform;
                     _config.A360PlatformPath = _platformManager.ActivePlatform.fullPath;
+                    break;
+                case 3:
+                    _platformManager.MenuPlatform = _platformManager.ActivePlatform;
+                    _config.MenuPlatformPath = _platformManager.ActivePlatform.fullPath;
                     break;
             }
         }
@@ -117,11 +124,9 @@ namespace CustomFloorPlugin.UI
             if (removedFromHierarchy) _platformManager.AllPlatforms.CollectionChanged -= OnCollectionDidChange;
             int index = GetPlatformIndexForTabIndex(_tabIndex);
             _listTables[_tabIndex].tableView.SelectCellWithIdx(index);
-            _ = _platformSpawner.ChangeToPlatformAsync(_config.ShowInMenu
-                ? _config.ShufflePlatforms
-                    ? _platformSpawner.RandomPlatform
-                    : _platformManager.SingleplayerPlatform
-                : _platformManager.DefaultPlatform);
+            _ = _platformSpawner.ChangeToPlatformAsync(_config.ShufflePlatforms
+                ? _platformSpawner.RandomPlatform
+                : _platformManager.MenuPlatform);
         }
 
         /// <summary>
@@ -132,7 +137,7 @@ namespace CustomFloorPlugin.UI
         // ReSharper disable once UnusedMember.Local
         private void PostParse()
         {
-            _listTables = new[] { _singleplayerPlatformListTable, _multiplayerPlatformListTable, _a360PlatformListTable };
+            _listTables = new[] { _singleplayerPlatformListTable, _multiplayerPlatformListTable, _a360PlatformListTable, _menuPlatformListTable };
             _scrollViews = new ScrollView[_listTables.Length];
             for (int i = 0; i < _platformManager.AllPlatforms.Count; i++)
                 AddCellForPlatform(_platformManager.AllPlatforms[i], i);
@@ -223,6 +228,7 @@ namespace CustomFloorPlugin.UI
                 0 => _platformManager.SingleplayerPlatform,
                 1 => _platformManager.MultiplayerPlatform,
                 2 => _platformManager.A360Platform,
+                3 => _platformManager.MenuPlatform,
                 _ => _platformManager.DefaultPlatform
             };
         }

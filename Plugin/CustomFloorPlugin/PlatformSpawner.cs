@@ -85,11 +85,9 @@ namespace CustomFloorPlugin
                 case null when _lobbyGameStateModel.gameState != MultiplayerGameState.Lobby:
                 case MenuScenesTransitionSetupDataSO:
                     _assetLoader.ToggleHeart(_config.ShowHeart);
-                    platform = _config.ShowInMenu
-                        ? _config.ShufflePlatforms
-                            ? RandomPlatform
-                            : _platformManager.SingleplayerPlatform
-                        : _platformManager.DefaultPlatform;
+                    platform = _config.ShufflePlatforms
+                        ? RandomPlatform
+                        : _platformManager.MenuPlatform;
                     break;
                 case StandardLevelScenesTransitionSetupDataSO standardLevelScenesTransitionSetupDataSO when standardLevelScenesTransitionSetupDataSO.difficultyBeatmap.parentDifficultyBeatmapSet.beatmapCharacteristic.requires360Movement:
                     platform = _platformManager.A360Platform;
@@ -130,11 +128,9 @@ namespace CustomFloorPlugin
             {
                 case MultiplayerGameState.None:
                     _assetLoader.ToggleHeart(_config.ShowHeart);
-                    platform = _config.ShowInMenu
-                        ? _config.ShufflePlatforms
-                            ? RandomPlatform
-                            : _platformManager.SingleplayerPlatform
-                        : _platformManager.DefaultPlatform;
+                    platform = _config.ShufflePlatforms
+                        ? RandomPlatform
+                        : _platformManager.MenuPlatform;
                     break;
                 case MultiplayerGameState.Lobby when _prevGameState != MultiplayerGameState.Game:
                     _assetLoader.ToggleHeart(false);

@@ -53,6 +53,7 @@ namespace CustomFloorPlugin
         public CustomPlatform SingleplayerPlatform { get; internal set; }
         public CustomPlatform MultiplayerPlatform { get; internal set; }
         public CustomPlatform A360Platform { get; internal set; }
+        public CustomPlatform MenuPlatform { get; internal set; }
         public CustomPlatform? APIRequestedPlatform { get; internal set; }
 
         /// <summary>
@@ -78,6 +79,7 @@ namespace CustomFloorPlugin
             SingleplayerPlatform = DefaultPlatform;
             MultiplayerPlatform = DefaultPlatform;
             A360Platform = DefaultPlatform;
+            MenuPlatform = DefaultPlatform;
             ActivePlatform = DefaultPlatform;
         }
 

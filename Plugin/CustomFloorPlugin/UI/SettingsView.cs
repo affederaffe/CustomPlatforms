@@ -61,17 +61,6 @@ namespace CustomFloorPlugin.UI
         }
 
         /// <summary>
-        /// Should the selected Platform also be shown in menu?<br/>
-        /// Forwards the current choice to the UI, and the new choice to the plugin
-        /// </summary>
-        [UIValue("show-in-menu")]
-        public bool ShowInMenu
-        {
-            get => _config.ShowInMenu;
-            set => _config.ShowInMenu = value;
-        }
-
-        /// <summary>
         /// Should a random platform be spawned instead of the selected one?<br/>
         /// Forwards the current choice to the UI, and the new choice to the plugin
         /// </summary>
