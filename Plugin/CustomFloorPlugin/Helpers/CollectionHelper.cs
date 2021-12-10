@@ -10,7 +10,6 @@ namespace CustomFloorPlugin.Helpers
         internal static void AddSorted<T>(this IList<T> list, int index, int count, T value, IComparer<T>? comparer = null)
         {
             comparer ??= Comparer<T>.Default;
-
             if (list.Count == 0 || comparer.Compare(list[list.Count - 1], value) <= 0)
             {
                 list.Add(value);

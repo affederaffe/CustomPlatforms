@@ -52,13 +52,13 @@ namespace CustomFloorPlugin
             _basicSpectrogramData = basicSpectrogramData;
         }
 
-        public async void PlatformEnabled(DiContainer container)
+        public void PlatformEnabled(DiContainer container)
         {
             if (columnPrefab is null) return;
             container.Inject(this);
             if (_columnTransforms is null)
             {
-                await _materialSwapper!.ReplaceMaterialsAsync(columnPrefab);
+                _materialSwapper!.ReplaceMaterials(columnPrefab);
                 _columnTransforms = CreateColumns();
                 UpdateColumnHeights(FallbackSamples);
                 foreach (INotifyPlatformEnabled notifyEnable in GetComponentsInChildren<INotifyPlatformEnabled>(true))

@@ -94,7 +94,7 @@ namespace CustomFloorPlugin
             SetCollectionHidden(_rotatingLasers, platform.hideRotatingLasers);
             SetCollectionHidden(_trackLights, platform.hideTrackLights);
             bool showPlayersPlace = _sceneName is "MainMenu" or "HalloweenEnvironment" && !platform.hideDefaultPlatform && platform != _platformManager.DefaultPlatform;
-            _assetLoader.TogglePlayersPlace(showPlayersPlace);
+            _assetLoader.PlayersPlace.SetActive(showPlayersPlace);
         }
 
         internal void ToggleGradientBackground(bool active)
@@ -152,7 +152,7 @@ namespace CustomFloorPlugin
         private void FindAddGameObject(Transform root, string name, ICollection<GameObject> list, bool rename = false)
         {
             GameObject? go = root.Find(name)?.gameObject;
-            if (go is null || !go.activeSelf && _sceneName != "MainMenu") return;
+            if (go is null || (!go.activeSelf && _sceneName != "MainMenu")) return;
             if (rename) go.name += "renamed";
             list.Add(go);
         }
@@ -404,6 +404,17 @@ namespace CustomFloorPlugin
                     FindAddGameObject(_envRoot!, "Mountains", _towers);
                     FindAddGameObject(_envRoot!, "Clouds", _towers);
                     break;
+                case "GagaEnvironment":
+                    FindAddGameObject(_envRoot!, "TeslaTower1L", _towers);
+                    FindAddGameObject(_envRoot!, "TeslaTower1R", _towers);
+                    FindAddGameObject(_envRoot!, "TeslaTower2L", _towers);
+                    FindAddGameObject(_envRoot!, "TeslaTower2R", _towers);
+                    FindAddGameObject(_envRoot!, "TeslaTower3L", _towers);
+                    FindAddGameObject(_envRoot!, "TeslaTower3R", _towers);
+                    FindAddGameObject(_envRoot!, "TubeR", _towers);
+                    FindAddGameObject(_envRoot!, "TubeL", _towers);
+                    FindAddGameObject(_envRoot!, "TubeL (1)", _towers);
+                    break;
             }
         }
 
@@ -417,7 +428,6 @@ namespace CustomFloorPlugin
                     FindAddGameObject(_envRoot!, "IsActiveObjects/Construction/ConstructionL", _highway);
                     FindAddGameObject(_envRoot!, "IsActiveObjects/Construction/ConstructionR", _highway);
                     FindAddGameObject(_envRoot!, "IsActiveObjects/Lasers", _highway);
-
                     if (_envRoot!.transform.Find("IsActiveObjects/CenterRings"))
                     {
                         FindAddGameObject(_envRoot!, "IsActiveObjects/CenterRings", _highway);
@@ -596,6 +606,15 @@ namespace CustomFloorPlugin
                         FindAddGameObject(_envRoot!, $"Crow ({i.ToString(NumberFormatInfo.InvariantInfo)})", _highway);
                     FindAddGameObject(_envRoot!, "Bats", _highway);
                     FindAddGameObject(_envRoot!, "GroundFog", _highway);
+                    break;
+                case "GagaEnvironment":
+                    FindAddGameObject(_envRoot!, "Construction", _highway);
+                    FindAddGameObject(_envRoot!, "Runway", _highway);
+                    FindAddGameObject(_envRoot!, "RunwayPillar", _highway);
+                    FindAddGameObject(_envRoot!, "RunwayPillarLow (1)", _highway);
+                    FindAddGameObject(_envRoot!, "RunwayPillarLow (2)", _highway);
+                    FindAddGameObject(_envRoot!, "BackCube", _highway);
+                    FindAddGameObject(_envRoot!, "Logo", _highway);
                     break;
             }
         }
@@ -825,6 +844,9 @@ namespace CustomFloorPlugin
                     FindAddGameObject(_envRoot!, "Moon", _backLasers);
                     FindAddGameObject(_envRoot!, "GateLight", _backLasers);
                     break;
+                case "GagaEnvironment":
+                    FindAddGameObject(_envRoot!, "FrontLasers", _backLasers);
+                    break;
                 default:
                     FindAddGameObject(_envRoot!, "FrontLights", _backLasers);
                     break;
@@ -999,6 +1021,9 @@ namespace CustomFloorPlugin
                     FindAddGameObject(_envRoot!, "NeonTubeC", _trackLights);
                     for (int i = 6; i < 10; i++)
                         FindAddGameObject(_envRoot!, $"GlowLineL ({i.ToString(NumberFormatInfo.InvariantInfo)})", _trackLights);
+                    break;
+                case "GagaEnvironment":
+                    FindAddGameObject(_envRoot!, "Aurora", _trackLights);
                     break;
             }
         }

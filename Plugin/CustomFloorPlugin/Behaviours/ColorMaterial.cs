@@ -56,7 +56,7 @@ namespace CustomFloorPlugin
                 MaterialColorType.ColorTypeA => _colorManager!.ColorForType(ColorType.ColorA),
                 MaterialColorType.ColorTypeB => _colorManager!.ColorForType(ColorType.ColorB),
                 MaterialColorType.ObstacleColor => _colorManager!.GetObstacleEffectColor(),
-                _ => Color.white,
+                _ => Color.white
             });
         }
     }

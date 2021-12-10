@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 using IPA.Utilities;
 
-using SiraUtil.Tools;
+using SiraUtil.Logging;
 
 using UnityEngine;
 
@@ -84,7 +84,7 @@ namespace CustomFloorPlugin
 
             if (customPlatform is null)
             {
-                // Check for old platform 
+                // Check for old platform
                 global::CustomPlatform? legacyPlatform = platformPrefab.GetComponent<global::CustomPlatform>();
                 if (legacyPlatform is not null)
                 {
@@ -117,7 +117,7 @@ namespace CustomFloorPlugin
             customPlatform.fullPath = fullPath;
             customPlatform.name = $"{customPlatform.platName} by {customPlatform.platAuthor}";
 
-            await _materialSwapper.ReplaceMaterialsAsync(customPlatform.gameObject);
+            _materialSwapper.ReplaceMaterials(customPlatform.gameObject);
 
             return customPlatform;
         }

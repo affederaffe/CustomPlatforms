@@ -124,9 +124,7 @@ namespace CustomFloorPlugin.UI
             if (removedFromHierarchy) _platformManager.AllPlatforms.CollectionChanged -= OnCollectionDidChange;
             int index = GetPlatformIndexForTabIndex(_tabIndex);
             _listTables[_tabIndex].tableView.SelectCellWithIdx(index);
-            _ = _platformSpawner.ChangeToPlatformAsync(_config.ShufflePlatforms
-                ? _platformSpawner.RandomPlatform
-                : _platformManager.MenuPlatform);
+            _ = _platformSpawner.ChangeToPlatformAsync(_config.ShufflePlatforms ? _platformSpawner.RandomPlatform : _platformManager.MenuPlatform);
         }
 
         /// <summary>
@@ -207,11 +205,9 @@ namespace CustomFloorPlugin.UI
             foreach (CustomListTableData listTable in _listTables)
             {
                 listTable.data.RemoveAt(index);
-                if (platform == GetPlatformForTabIndex(_tabIndex))
-                {
-                    listTable.tableView.SelectCellWithIdx(0);
-                    listTable.tableView.ScrollToCellWithIdx(0, TableView.ScrollPositionType.Beginning, false);
-                }
+                if (platform != GetPlatformForTabIndex(_tabIndex)) continue;
+                listTable.tableView.SelectCellWithIdx(0);
+                listTable.tableView.ScrollToCellWithIdx(0, TableView.ScrollPositionType.Beginning, false);
             }
         }
 

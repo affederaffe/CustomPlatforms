@@ -18,11 +18,17 @@ namespace CustomFloorPlugin.UI
         private readonly ModalView _creditsModal = null!;
 
         /// <summary>
-        /// The string displayed in the changelog   
+        /// The string displayed in the changelog
         /// </summary>
         [UIValue("changelog-text")]
         public static string Changelog =>
-        @"  <size=150%><color=#888888>Version 6.1.8</color></size>
+        @"  <size=150%><color=#888888>Version 6.1.10</color></size>
+        - Updated for 1.18.0
+
+  <size=150%><color=#888888>Version 6.1.9</color></size>
+        - Minor bugfix
+
+  <size=150%><color=#888888>Version 6.1.8</color></size>
         - Updated for 1.18.0
         - Better lighting
 

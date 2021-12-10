@@ -11,7 +11,9 @@ using IPA.Loader;
 using IPA.Utilities;
 using IPA.Utilities.Async;
 
-using SiraUtil;
+using Newtonsoft.Json;
+
+using SiraUtil.Web;
 
 using Zenject;
 
@@ -24,7 +26,7 @@ namespace CustomFloorPlugin
     /// </summary>
     internal class ConnectionManager : IInitializable, IDisposable
     {
-        private readonly WebClient _webClient;
+        private readonly IHttpService _httpService;
         private readonly PlatformManager _platformManager;
         private readonly PlatformSpawner _platformSpawner;
 
@@ -33,11 +35,11 @@ namespace CustomFloorPlugin
         private readonly bool _isSongCoreInstalled;
         private readonly bool _isCinemaInstalled;
 
-        public ConnectionManager(WebClient webClient,
+        public ConnectionManager(IHttpService httpService,
                                  PlatformManager platformManager,
                                  PlatformSpawner platformSpawner)
         {
-            _webClient = webClient;
+            _httpService = httpService;
             _platformManager = platformManager;
             _platformSpawner = platformSpawner;
             _fileSystemWatcher = new FileSystemWatcher(_platformManager.DirectoryPath, "*.plat");
@@ -201,12 +203,13 @@ namespace CustomFloorPlugin
         {
             try
             {
-                WebResponse downloadDataWebResponse = await _webClient.GetAsync(url, cancellationToken);
-                if (!downloadDataWebResponse.IsSuccessStatusCode) return;
-                PlatformDownloadData platformDownloadData = downloadDataWebResponse.ContentToJson<Dictionary<string, PlatformDownloadData>>().First().Value;
-                WebResponse platDownloadWebResponse = await _webClient.GetAsync(platformDownloadData.download, cancellationToken);
-                if (!platDownloadWebResponse.IsSuccessStatusCode) return;
-                byte[] platData = platDownloadWebResponse.ContentToBytes();
+                IHttpResponse downloadDataWebResponse = await _httpService.GetAsync(url, null, cancellationToken);
+                if (!downloadDataWebResponse.Successful) return;
+                string json = await downloadDataWebResponse.ReadAsStringAsync();
+                PlatformDownloadData platformDownloadData = JsonConvert.DeserializeObject<Dictionary<string, PlatformDownloadData>>(json).First().Value;
+                IHttpResponse platDownloadWebResponse = await _httpService.GetAsync(platformDownloadData.download!, null, cancellationToken);
+                if (!platDownloadWebResponse.Successful) return;
+                byte[] platData = await platDownloadWebResponse.ReadAsByteArrayAsync();
                 string path = Path.Combine(_platformManager.DirectoryPath, $"{platformDownloadData.name}.plat");
                 _fileSystemWatcher.EnableRaisingEvents = false;
                 File.WriteAllBytes(path, platData);

@@ -12,7 +12,6 @@ namespace CustomFloorPlugin
     /// </summary>
     public sealed class BSEvents : IInitializable, IDisposable
     {
-        private readonly BeatmapObjectManager _beatmapObjectManager;
         private readonly GameEnergyCounter _gameEnergyCounter;
         private readonly GameplayCoreSceneSetupData _gameplayCoreSceneSetupData;
         private readonly ObstacleSaberSparkleEffectManager _obstacleSaberSparkleEffectManager;
@@ -30,8 +29,7 @@ namespace CustomFloorPlugin
         private int _cuttableNotesCount;
         private int _highScore;
 
-        public BSEvents(BeatmapObjectManager beatmapObjectManager,
-                        GameEnergyCounter gameEnergyCounter,
+        public BSEvents(GameEnergyCounter gameEnergyCounter,
                         GameplayCoreSceneSetupData gameplayCoreSceneSetupData,
                         ObstacleSaberSparkleEffectManager obstacleSaberSparkleEffectManager,
                         ScoreController scoreController,
@@ -40,7 +38,6 @@ namespace CustomFloorPlugin
                         IBeatmapObjectCallbackController beatmapObjectCallbackController,
                         IDifficultyBeatmap difficultyBeatmap)
         {
-            _beatmapObjectManager = beatmapObjectManager;
             _gameEnergyCounter = gameEnergyCounter;
             _gameplayCoreSceneSetupData = gameplayCoreSceneSetupData;
             _obstacleSaberSparkleEffectManager = obstacleSaberSparkleEffectManager;
@@ -74,11 +71,11 @@ namespace CustomFloorPlugin
             _highScore = _playerDataModel.playerData.GetPlayerLevelStatsData(_difficultyBeatmap).highScore;
             _lastNoteTime = GetLastNoteTime();
             _beatmapObjectCallbackController.beatmapEventDidTriggerEvent += BeatmapEventDidTrigger;
-            _beatmapObjectManager.noteWasCutEvent += NoteWasCut;
-            _beatmapObjectManager.noteWasMissedEvent += NoteWasMissed;
             _gameEnergyCounter.gameEnergyDidReach0Event += LevelFailed;
             _obstacleSaberSparkleEffectManager.sparkleEffectDidStartEvent += SabersStartCollide;
             _obstacleSaberSparkleEffectManager.sparkleEffectDidEndEvent += SabersEndCollide;
+            _scoreController.noteWasCutEvent += NoteWasCut;
+            _scoreController.noteWasMissedEvent += NoteWasMissed;
             _scoreController.comboDidChangeEvent += ComboDidChange;
             _scoreController.comboBreakingEventHappenedEvent += ComboDidBreak;
             _scoreController.multiplierDidChangeEvent += MultiplierDidChange;
@@ -88,11 +85,11 @@ namespace CustomFloorPlugin
         public void Dispose()
         {
             _beatmapObjectCallbackController.beatmapEventDidTriggerEvent -= BeatmapEventDidTrigger;
-            _beatmapObjectManager.noteWasCutEvent -= NoteWasCut;
-            _beatmapObjectManager.noteWasMissedEvent -= NoteWasMissed;
             _gameEnergyCounter.gameEnergyDidReach0Event -= LevelFailed;
             _obstacleSaberSparkleEffectManager.sparkleEffectDidStartEvent -= SabersStartCollide;
             _obstacleSaberSparkleEffectManager.sparkleEffectDidEndEvent -= SabersEndCollide;
+            _scoreController.noteWasCutEvent -= NoteWasCut;
+            _scoreController.noteWasMissedEvent -= NoteWasMissed;
             _scoreController.comboDidChangeEvent -= ComboDidChange;
             _scoreController.comboBreakingEventHappenedEvent -= ComboDidBreak;
             _scoreController.multiplierDidChangeEvent -= MultiplierDidChange;
@@ -120,9 +117,9 @@ namespace CustomFloorPlugin
             BeatmapEventDidTriggerEvent?.Invoke(eventData);
         }
 
-        private void NoteWasCut(NoteController noteController, in NoteCutInfo noteCutInfo)
+        private void NoteWasCut(NoteData noteData, in NoteCutInfo noteCutInfo, int multiplier)
         {
-            if (noteController.noteData.colorType == ColorType.None || noteController.noteData.beatmapObjectType != BeatmapObjectType.Note) return;
+            if (noteData.colorType == ColorType.None || noteData.beatmapObjectType != BeatmapObjectType.Note) return;
             AllNotesCountDidChangeEvent?.Invoke(_anyCutCount++, _cuttableNotesCount);
             if (noteCutInfo.allIsOK)
             {
@@ -134,7 +131,7 @@ namespace CustomFloorPlugin
                 BadCutCountDidChangeEvent?.Invoke(_badCutCount++);
             }
 
-            if (Mathf.Approximately(noteController.noteData.time, _lastNoteTime))
+            if (Mathf.Approximately(noteData.time, _lastNoteTime))
             {
                 _lastNoteTime = 0f;
                 LevelFinishedEvent?.Invoke();
@@ -144,13 +141,13 @@ namespace CustomFloorPlugin
             }
         }
 
-        private void NoteWasMissed(NoteController noteController)
+        private void NoteWasMissed(NoteData noteData, int i)
         {
-            if (noteController.noteData.colorType == ColorType.None || noteController.noteData.beatmapObjectType != BeatmapObjectType.Note) return;
+            if (noteData.colorType == ColorType.None || noteData.beatmapObjectType != BeatmapObjectType.Note) return;
             NoteWasMissedEvent?.Invoke();
             AllNotesCountDidChangeEvent?.Invoke(_anyCutCount++, _cuttableNotesCount);
             MissCountDidChangeEvent?.Invoke(_missCount++);
-            if (Mathf.Approximately(noteController.noteData.time, _lastNoteTime))
+            if (Mathf.Approximately(noteData.time, _lastNoteTime))
             {
                 _lastNoteTime = 0f;
                 LevelFinishedEvent?.Invoke();

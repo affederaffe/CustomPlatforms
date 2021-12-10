@@ -1,13 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
-using System.Threading.Tasks;
+using System.Reflection;
 
 using CustomFloorPlugin.Helpers;
 using CustomFloorPlugin.Interfaces;
 
-using IPA.Loader;
 using IPA.Utilities;
 
 using UnityEngine;
@@ -23,18 +21,18 @@ namespace CustomFloorPlugin
     public class AssetLoader
     {
         private readonly DiContainer _container;
-        private readonly PluginMetadata _pluginMetadata;
+        private readonly Assembly _assembly;
         private readonly MaterialSwapper _materialSwapper;
 
         /// <summary>
         /// The old heart, to remind everyone that this plugin is some legacy garbage
         /// </summary>
-        private readonly Task<GameObject> _heartTask;
+        internal GameObject Heart { get; }
 
         /// <summary>
         /// Used as a players place replacement in platform preview
         /// </summary>
-        private readonly Task<GameObject> _playersPlaceTask;
+        internal GameObject PlayersPlace { get; }
 
         /// <summary>
         /// The cover for the default platform
@@ -51,13 +49,13 @@ namespace CustomFloorPlugin
         /// </summary>
         internal LightEffects MultiplayerLightEffects { get; }
 
-        public AssetLoader(DiContainer container, PluginMetadata pluginMetadata, MaterialSwapper materialSwapper)
+        public AssetLoader(DiContainer container, Assembly assembly, MaterialSwapper materialSwapper)
         {
             _container = container;
-            _pluginMetadata = pluginMetadata;
+            _assembly = assembly;
             _materialSwapper = materialSwapper;
-            _heartTask = CreateHeartAsync();
-            _playersPlaceTask = CreatePlayersPlaceAsync();
+            Heart = CreateHeart();
+            PlayersPlace = CreatePlayersPlace();
             using Stream defaultCoverStream = GetEmbeddedResource("CustomFloorPlugin.Assets.LvlInsaneCover.png");
             DefaultPlatformCover = defaultCoverStream.ReadTexture2D().ToSprite();
             using Stream fallbackCoverStream = GetEmbeddedResource("CustomFloorPlugin.Assets.FeetIcon.png");
@@ -65,21 +63,9 @@ namespace CustomFloorPlugin
             MultiplayerLightEffects = new GameObject("LightEffects").AddComponent<LightEffects>();
         }
 
-        internal async void ToggleHeart(bool active)
+        private GameObject CreateHeart()
         {
-            GameObject heart = await _heartTask;
-            heart.SetActive(active);
-        }
-
-        internal async void TogglePlayersPlace(bool active)
-        {
-            GameObject playersPlace = await _playersPlaceTask;
-            playersPlace.SetActive(active);
-        }
-
-        private async Task<GameObject> CreateHeartAsync()
-        {
-            (Vector3[] vertices, int[] triangles) = await Task.Run(() => ParseMesh("CustomFloorPlugin.Assets.Heart.mesh"));
+            (Vector3[] vertices, int[] triangles) = ParseMesh("CustomFloorPlugin.Assets.Heart.mesh");
             Mesh mesh = new()
             {
                 vertices = vertices,
@@ -100,9 +86,9 @@ namespace CustomFloorPlugin
             return heart;
         }
 
-        private async Task<GameObject> CreatePlayersPlaceAsync()
+        private GameObject CreatePlayersPlace()
         {
-            (Vector3[] vertices, int[] triangles) = await Task.Run(() => ParseMesh("CustomFloorPlugin.Assets.PlayersPlace.mesh"));
+            (Vector3[] vertices, int[] triangles) = ParseMesh("CustomFloorPlugin.Assets.PlayersPlace.mesh");
             Mesh mesh = new()
             {
                 vertices = vertices,
@@ -112,8 +98,7 @@ namespace CustomFloorPlugin
             GameObject playersPlaceCube = GameObject.CreatePrimitive(PrimitiveType.Cube);
             playersPlaceCube.SetActive(false);
             MeshRenderer cubeRenderer = playersPlaceCube.GetComponent<MeshRenderer>();
-            (Material darkEnvSimpleMaterial, _, _) = await _materialSwapper.MaterialsTask;
-            cubeRenderer.material = darkEnvSimpleMaterial;
+            cubeRenderer.material = _materialSwapper.Materials.DarkEnvSimpleMaterial;
             playersPlaceCube.transform.localPosition = new Vector3(0f, -50.0075f, 0f);
             playersPlaceCube.transform.localScale = new Vector3(3f, 100f, 2f);
             playersPlaceCube.name = "PlayersPlace";
@@ -141,9 +126,7 @@ namespace CustomFloorPlugin
             return playersPlaceCube;
         }
 
-        private Stream GetEmbeddedResource(string name) =>
-            _pluginMetadata.Assembly.GetManifestResourceStream(name) ??
-            throw new InvalidOperationException($"No embedded resource found: {name}");
+        private Stream GetEmbeddedResource(string name) => _assembly.GetManifestResourceStream(name)!;
 
         private (Vector3[] vertices, int[] triangles) ParseMesh(string resourcePath)
         {

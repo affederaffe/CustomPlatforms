@@ -56,19 +56,15 @@ namespace CustomFloorPlugin.Helpers
         /// </summary>
         private static byte[] BytesFromTexture2D(Texture2D texture)
         {
-            // Create readable texture by rendering onto a RenderTexture
-            if (!texture.isReadable)
-            {
-                int width = Mathf.Min(texture.width, 192);
-                int height = Mathf.Min(texture.height, 192);
-                RenderTexture renderTexture = RenderTexture.GetTemporary(width, height, 0, RenderTextureFormat.ARGB32);
-                RenderTexture.active = renderTexture;
-                Graphics.Blit(texture, renderTexture);
-                texture = renderTexture.GetTexture2D();
-                RenderTexture.active = null;
-                RenderTexture.ReleaseTemporary(renderTexture);
-            }
-
+            if (texture.isReadable) return texture.EncodeToPNG();
+            int width = Mathf.Min(texture.width, 192); // Create readable texture by rendering onto a RenderTexture
+            int height = Mathf.Min(texture.height, 192);
+            RenderTexture renderTexture = RenderTexture.GetTemporary(width, height, 0, RenderTextureFormat.ARGB32);
+            RenderTexture.active = renderTexture;
+            Graphics.Blit(texture, renderTexture);
+            texture = renderTexture.GetTexture2D();
+            RenderTexture.active = null;
+            RenderTexture.ReleaseTemporary(renderTexture);
             return texture.EncodeToPNG();
         }
     }

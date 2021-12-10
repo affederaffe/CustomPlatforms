@@ -38,11 +38,7 @@ namespace CustomFloorPlugin.UI
         public bool AlwaysShowFeet
         {
             get => _config.AlwaysShowFeet;
-            set
-            {
-                _config.AlwaysShowFeet = value;
-                _environmentHider.ToggleFeet(!value);
-            }
+            set => _environmentHider.ToggleFeet(!(_config.AlwaysShowFeet = value));
         }
 
         /// <summary>
@@ -53,11 +49,7 @@ namespace CustomFloorPlugin.UI
         public bool ShowHeart
         {
             get => _config.ShowHeart;
-            set
-            {
-                _config.ShowHeart = value;
-                _assetLoader.ToggleHeart(value);
-            }
+            set => _assetLoader.Heart.SetActive(_config.ShowHeart = value);
         }
 
         /// <summary>
@@ -79,11 +71,7 @@ namespace CustomFloorPlugin.UI
         public bool DisableGradientBackground
         {
             get => _config.DisableGradientBackground;
-            set
-            {
-                _config.DisableGradientBackground = value;
-                _environmentHider.ToggleGradientBackground(value);
-            }
+            set => _environmentHider.ToggleGradientBackground(_config.DisableGradientBackground = value);
         }
 
         [UIValue("show-heart-hover-hint")]

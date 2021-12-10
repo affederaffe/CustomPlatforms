@@ -59,7 +59,7 @@ namespace CustomFloorPlugin
             _lightWithIdManager = lightWithIdManager;
         }
 
-        public async void PlatformEnabled(DiContainer container)
+        public void PlatformEnabled(DiContainer container)
         {
             container.Inject(this);
             bool activeSelf = gameObject.activeSelf;
@@ -67,7 +67,6 @@ namespace CustomFloorPlugin
 
             if (_instancedMaterialLightWithId is null && _tubeBloomPrePassLightWithId is null)
             {
-                (_, Material transparentGlowMaterial, Material opaqueGlowMaterial) = await _materialSwapper!.MaterialsTask;
                 Mesh mesh = GetComponent<MeshFilter>().mesh;
                 if (mesh.vertexCount == 0)
                 {
@@ -80,7 +79,7 @@ namespace CustomFloorPlugin
                     MeshFilter meshFilter = boxLight.AddComponent<MeshFilter>();
                     meshFilter.mesh = Mesh;
                     MeshRenderer renderer = boxLight.AddComponent<MeshRenderer>();
-                    renderer.sharedMaterial = transparentGlowMaterial;
+                    renderer.sharedMaterial = _materialSwapper!.Materials.TransparentGlowMaterial;
                     ParametricBoxController parametricBoxController = boxLight.AddComponent<ParametricBoxController>();
                     parametricBoxController.SetField("_meshRenderer", renderer);
                     tubeBloomPrePassLight.SetField("_center", center);
@@ -98,7 +97,7 @@ namespace CustomFloorPlugin
                 else
                 {
                     Renderer renderer = GetComponent<Renderer>();
-                    renderer.sharedMaterial = opaqueGlowMaterial;
+                    renderer.sharedMaterial = _materialSwapper!.Materials.OpaqueGlowMaterial;
                     MaterialPropertyBlockController materialPropertyBlockController = gameObject.AddComponent<MaterialPropertyBlockController>();
                     materialPropertyBlockController.SetField("_renderers", new[] { renderer });
                     MaterialPropertyBlockColorSetter materialPropertyBlockColorSetter = gameObject.AddComponent<MaterialPropertyBlockColorSetter>();
@@ -112,7 +111,7 @@ namespace CustomFloorPlugin
                 }
             }
 
-            LightWithIdMonoBehaviour light = (LightWithIdMonoBehaviour?)_instancedMaterialLightWithId ?? (LightWithIdMonoBehaviour)_tubeBloomPrePassLightWithId!;
+            LightWithIdMonoBehaviour light = _instancedMaterialLightWithId as LightWithIdMonoBehaviour ?? _tubeBloomPrePassLightWithId!;
             light.SetField("_lightManager", _lightWithIdManager);
             gameObject.SetActive(activeSelf);
         }

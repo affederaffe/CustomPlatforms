@@ -21,7 +21,7 @@ namespace CustomFloorPlugin
     public class Plugin
     {
         /// <summary>
-        /// Initializes the Plugin 
+        /// Initializes the Plugin
         /// </summary>
         /// <param name="pluginMetadata">This plugin's <see cref="PluginMetadata"/></param>
         /// <param name="logger">The instance of the IPA logger that BSIPA hands to plugins on initialization</param>
@@ -30,9 +30,11 @@ namespace CustomFloorPlugin
         [Init]
         public Plugin(PluginMetadata pluginMetadata, Logger logger, Config config, Zenjector zenjector)
         {
-            zenjector.OnApp<PlatformsAppInstaller>().WithParameters(pluginMetadata, logger, config.Generated<PluginConfig>());
-            zenjector.OnMenu<PlatformsMenuInstaller>();
-            zenjector.OnGame<PlatformsGameInstaller>(false);
+            zenjector.UseLogger(logger);
+            zenjector.UseHttpService();
+            zenjector.Install<PlatformsAppInstaller>(Location.App, pluginMetadata.Assembly, config.Generated<PluginConfig>());
+            zenjector.Install<PlatformsMenuInstaller>(Location.Menu);
+            zenjector.Install<PlatformsGameInstaller>(Location.Player);
         }
     }
 }

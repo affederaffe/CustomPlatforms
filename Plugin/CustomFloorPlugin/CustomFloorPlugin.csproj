@@ -124,8 +124,8 @@
     <Reference Include="IPA.Loader">
       <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\IPA.Loader.dll</HintPath>
     </Reference>
-    <Reference Include="BeatSaberCinema">
-      <HintPath>$(BeatSaberDir)\Plugins\BeatSaberCinema.dll</HintPath>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>$(BeatSaberDir)\Libs\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="BeatSaberMarkupLanguage">
       <HintPath>$(BeatSaberDir)\Plugins\BSML.dll</HintPath>
@@ -135,6 +135,9 @@
     </Reference>
     <Reference Include="SongCore">
       <HintPath>$(BeatSaberDir)\Plugins\SongCore.dll</HintPath>
+    </Reference>
+    <Reference Include="BeatSaberCinema">
+      <HintPath>$(BeatSaberDir)\Plugins\BeatSaberCinema.dll</HintPath>
     </Reference>
   </ItemGroup>
 

@@ -1,13 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 
 using CustomFloorPlugin.Configuration;
 
-using IPA.Loader;
-using IPA.Logging;
 using IPA.Utilities;
-
-using SiraUtil;
 
 using Zenject;
 
@@ -16,19 +13,17 @@ namespace CustomFloorPlugin.Installers
 {
     internal class PlatformsAppInstaller : Installer
     {
-        private readonly PluginMetadata _pluginMetadata;
-        private readonly Logger _logger;
+        private readonly Assembly _assembly;
         private readonly PluginConfig _config;
         private readonly MirrorRendererSO _mirrorRenderer;
         private readonly BloomPrePassRendererSO _bloomPrePassRenderer;
         private readonly BloomPrePassEffectContainerSO _bloomPrePassEffectContainer;
         private readonly BoolSO _postProcessEnabled;
 
-        public PlatformsAppInstaller(PluginMetadata pluginMetadata, Logger logger, PluginConfig config, SceneContext sceneContext)
+        public PlatformsAppInstaller(Assembly assembly, PluginConfig config, SceneContext sceneContext)
         {
-            _pluginMetadata = pluginMetadata;
+            _assembly = assembly;
             _config = config;
-            _logger = logger;
             MainSystemInit mainSystemInit = ((PCAppInit)sceneContext
                 .GetField<List<MonoInstaller>, Context>("_monoInstallers")
                 .First(x => x is PCAppInit))
@@ -42,14 +37,13 @@ namespace CustomFloorPlugin.Installers
 
         public override void InstallBindings()
         {
-            Container.BindLoggerAsSiraLogger(_logger);
             Container.BindInstance(_config).AsSingle();
             Container.BindInstance(_mirrorRenderer).AsSingle().IfNotBound();
             Container.BindInstance(_bloomPrePassRenderer).AsSingle().IfNotBound();
             Container.BindInstance(_bloomPrePassEffectContainer).AsSingle().IfNotBound();
             Container.BindInstance(_postProcessEnabled).WithId("PostProcessEnabled").AsSingle().IfNotBound();
             Container.BindInterfacesAndSelfTo<MaterialSwapper>().AsSingle();
-            Container.Bind<AssetLoader>().AsSingle().WithArguments(_pluginMetadata);
+            Container.Bind<AssetLoader>().AsSingle().WithArguments(_assembly);
             Container.Bind<PlatformLoader>().AsSingle();
             Container.BindInterfacesAndSelfTo<PlatformManager>().AsSingle();
             Container.Bind<EnvironmentHider>().AsSingle();

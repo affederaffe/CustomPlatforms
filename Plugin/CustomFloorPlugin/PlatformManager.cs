@@ -13,7 +13,7 @@ using CustomFloorPlugin.Helpers;
 
 using IPA.Utilities;
 
-using SiraUtil.Tools;
+using SiraUtil.Logging;
 
 using UnityEngine;
 
@@ -40,7 +40,7 @@ namespace CustomFloorPlugin
         /// <summary>
         /// Getter for the CustomPlatforms directory path
         /// </summary>
-        internal string DirectoryPath => Directory.Exists(_directoryPath) ? _directoryPath : Directory.CreateDirectory(_directoryPath).FullName;
+        internal string DirectoryPath => Directory.CreateDirectory(_directoryPath).FullName;
 
         /// <summary>
         /// An <see cref="ObservableCollection{T}"/> of all currently loaded <see cref="CustomPlatform"/>s<br/>
@@ -123,6 +123,8 @@ namespace CustomFloorPlugin
                 MultiplayerPlatform = platform;
             if (platform.fullPath == _config.A360PlatformPath)
                 A360Platform = platform;
+            if (platform.fullPath == _config.MenuPlatformPath)
+                MenuPlatform = platform;
         }
 
         /// <summary>
