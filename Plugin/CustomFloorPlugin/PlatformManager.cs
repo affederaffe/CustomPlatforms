@@ -14,10 +14,9 @@ using CustomFloorPlugin.Helpers;
 using IPA.Utilities;
 
 using SiraUtil.Logging;
+using SiraUtil.Zenject;
 
 using UnityEngine;
-
-using Zenject;
 
 
 namespace CustomFloorPlugin
@@ -25,7 +24,7 @@ namespace CustomFloorPlugin
     /// <summary>
     /// Handles platform loading and saving
     /// </summary>
-    public sealed class PlatformManager : IInitializable, System.IDisposable
+    public sealed class PlatformManager : IAsyncInitializable, System.IDisposable
     {
         private readonly SiraLog _siraLog;
         private readonly PluginConfig _config;
@@ -33,7 +32,6 @@ namespace CustomFloorPlugin
         private readonly PlatformLoader _platformLoader;
 
         private readonly Transform _anchor;
-        private readonly CancellationTokenSource _cancellationTokenSource;
         private readonly string _directoryPath;
         private readonly string _cacheFilePath;
 
@@ -71,7 +69,6 @@ namespace CustomFloorPlugin
             _assetLoader = assetLoader;
             _platformLoader = platformLoader;
             _anchor = new GameObject("CustomPlatforms").transform;
-            _cancellationTokenSource = new CancellationTokenSource();
             _directoryPath = Path.Combine(UnityGame.InstallPath, "CustomPlatforms");
             _cacheFilePath = Path.Combine(DirectoryPath, "cache.dat");
             DefaultPlatform = CreateDefaultPlatform();
@@ -83,9 +80,9 @@ namespace CustomFloorPlugin
             ActivePlatform = DefaultPlatform;
         }
 
-        public async void Initialize()
+        public async Task InitializeAsync(CancellationToken token)
         {
-            await LoadPlatformsAsync();
+            await LoadPlatformsAsync(token);
         }
 
         /// <summary>
@@ -93,8 +90,6 @@ namespace CustomFloorPlugin
         /// </summary>
         public void Dispose()
         {
-            _cancellationTokenSource.Cancel();
-            _cancellationTokenSource.Dispose();
             SavePlatformInfosToFile();
         }
 
@@ -130,10 +125,9 @@ namespace CustomFloorPlugin
         /// <summary>
         /// Loads all platforms or their descriptors if a cache file exists
         /// </summary>
-        private async Task LoadPlatformsAsync()
+        private async Task LoadPlatformsAsync(CancellationToken cancellationToken)
         {
             Stopwatch sw = Stopwatch.StartNew();
-            CancellationToken cancellationToken = _cancellationTokenSource.Token;
 
             if (File.Exists(_cacheFilePath))
             {
