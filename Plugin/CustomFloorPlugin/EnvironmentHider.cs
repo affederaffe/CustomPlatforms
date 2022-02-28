@@ -93,8 +93,8 @@ namespace CustomFloorPlugin
             SetCollectionHidden(_doubleColorLasers, platform.hideDoubleColorLasers);
             SetCollectionHidden(_rotatingLasers, platform.hideRotatingLasers);
             SetCollectionHidden(_trackLights, platform.hideTrackLights);
-            bool showPlayersPlace = _sceneName is "MainMenu" or "HalloweenEnvironment" && !platform.hideDefaultPlatform && platform != _platformManager.DefaultPlatform;
-            _assetLoader.PlayersPlace.SetActive(showPlayersPlace);
+            bool showPlayersPlace = _sceneName == "MainMenu" && !platform.hideDefaultPlatform && platform != _platformManager.DefaultPlatform;
+            _assetLoader.PlayersPlace.Value.SetActive(showPlayersPlace);
         }
 
         internal void ToggleGradientBackground(bool active)
@@ -152,7 +152,7 @@ namespace CustomFloorPlugin
         private void FindAddGameObject(Transform root, string name, ICollection<GameObject> list, bool rename = false)
         {
             GameObject? go = root.Find(name)?.gameObject;
-            if (go is null || (!go.activeSelf && _sceneName != "MainMenu")) return;
+            if (go is null || !go.activeSelf && _sceneName != "MainMenu") return;
             if (rename) go.name += "renamed";
             list.Add(go);
         }
@@ -270,7 +270,7 @@ namespace CustomFloorPlugin
 
             if (ringsManager is null) return;
             _smallRings.Add(ringsManager.gameObject);
-            _smallRings.AddRange(ringsManager.Rings.Select(x => x.gameObject));
+            _smallRings.AddRange(ringsManager.Rings.Select(static x => x.gameObject));
         }
 
         private void FindBigRings()
@@ -301,7 +301,7 @@ namespace CustomFloorPlugin
 
             if (ringsManager is null) return;
             _bigRings.Add(ringsManager.gameObject);
-            _bigRings.AddRange(ringsManager.Rings.Select(x => x.gameObject));
+            _bigRings.AddRange(ringsManager.Rings.Select(static x => x.gameObject));
         }
 
         private void FindVisualizers()

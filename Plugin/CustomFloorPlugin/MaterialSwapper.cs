@@ -16,25 +16,23 @@ namespace CustomFloorPlugin
     /// </summary>
     public class MaterialSwapper : IAsyncInitializable
     {
-        internal (Material DarkEnvSimpleMaterial, Material TransparentGlowMaterial, Material OpaqueGlowMaterial) Materials { get; private set; }
+        internal Material? DarkEnvSimpleMaterial { get; private set; }
+        internal Material? TransparentGlowMaterial { get; private set; }
+        internal Material? OpaqueGlowMaterial { get; private set; }
 
         public async Task InitializeAsync(CancellationToken token)
         {
-            Material? darkEnvSimpleMaterial = null;
-            Material? transparentGlowMaterial = null;
-            Material? opaqueGlowMaterial = null;
-            while (darkEnvSimpleMaterial is null || transparentGlowMaterial is null || opaqueGlowMaterial is null)
+            while (DarkEnvSimpleMaterial is null || TransparentGlowMaterial is null || OpaqueGlowMaterial is null)
             {
                 await Task.Yield();
                 Material[] materials = Resources.FindObjectsOfTypeAll<Material>();
-                darkEnvSimpleMaterial ??= materials.FirstOrDefault(x => x.name == "DarkEnvironmentSimple");
-                transparentGlowMaterial ??= materials.FirstOrDefault(x => x.name == "EnvLight");
-                opaqueGlowMaterial ??= materials.FirstOrDefault(x => x.name == "EnvLightOpaque");
+                DarkEnvSimpleMaterial ??= materials.FirstOrDefault(static x => x.name == "DarkEnvironmentSimple");
+                TransparentGlowMaterial ??= materials.FirstOrDefault(static x => x.name == "EnvLight");
+                OpaqueGlowMaterial ??= materials.FirstOrDefault(static x => x.name == "EnvLightOpaque");
             }
 
-            opaqueGlowMaterial.DisableKeyword("ENABLE_HEIGHT_FOG");
-            transparentGlowMaterial.DisableKeyword("ENABLE_HEIGHT_FOG");
-            Materials = (darkEnvSimpleMaterial, transparentGlowMaterial, opaqueGlowMaterial);
+            OpaqueGlowMaterial.DisableKeyword("ENABLE_HEIGHT_FOG");
+            TransparentGlowMaterial.DisableKeyword("ENABLE_HEIGHT_FOG");
         }
 
         /// <summary>
@@ -60,15 +58,15 @@ namespace CustomFloorPlugin
                 switch (materialsCopy[i].name)
                 {
                     case "_dark_replace (Instance)":
-                        materialsCopy[i] = Materials.DarkEnvSimpleMaterial;
+                        materialsCopy[i] = DarkEnvSimpleMaterial!;
                         materialsDidChange = true;
                         break;
                     case "_transparent_glow_replace (Instance)":
-                        materialsCopy[i] = Materials.TransparentGlowMaterial;
+                        materialsCopy[i] = TransparentGlowMaterial!;
                         materialsDidChange = true;
                         break;
                     case "_glow_replace (Instance)":
-                        materialsCopy[i] = Materials.OpaqueGlowMaterial;
+                        materialsCopy[i] = OpaqueGlowMaterial!;
                         materialsDidChange = true;
                         break;
                 }

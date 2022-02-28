@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 
 using CustomFloorPlugin.Interfaces;
@@ -74,12 +75,13 @@ namespace CustomFloorPlugin
                     TubeBloomPrePassLight tubeBloomPrePassLight = gameObject.AddComponent<TubeBloomPrePassLight>();
                     GameObject boxLight = new("BoxLight");
                     boxLight.SetActive(false);
-                    boxLight.transform.SetParent(transform);
-                    boxLight.transform.localRotation = Quaternion.Euler(Vector3.zero);
+                    Transform boxLightTransform = boxLight.transform;
+                    boxLightTransform.transform.SetParent(transform);
+                    boxLightTransform.transform.localRotation = Quaternion.Euler(Vector3.zero);
                     MeshFilter meshFilter = boxLight.AddComponent<MeshFilter>();
-                    meshFilter.mesh = Mesh;
+                    meshFilter.mesh = _mesh.Value;
                     MeshRenderer renderer = boxLight.AddComponent<MeshRenderer>();
-                    renderer.sharedMaterial = _materialSwapper!.Materials.TransparentGlowMaterial;
+                    renderer.sharedMaterial = _materialSwapper!.TransparentGlowMaterial;
                     ParametricBoxController parametricBoxController = boxLight.AddComponent<ParametricBoxController>();
                     parametricBoxController.SetField("_meshRenderer", renderer);
                     tubeBloomPrePassLight.SetField("_center", center);
@@ -89,7 +91,7 @@ namespace CustomFloorPlugin
                     tubeBloomPrePassLight.length = length;
                     tubeBloomPrePassLight.bloomFogIntensityMultiplier = bloomFogIntensityMultiplier;
                     _tubeBloomPrePassLightWithId.SetField("_tubeBloomPrePassLight", tubeBloomPrePassLight);
-                    ((BloomPrePassLight)tubeBloomPrePassLight).SetField("_lightType", BloomPrePassLight.bloomLightsDict.Keys.First(x => x.name == "AddBloomPrePassLightType"));
+                    ((BloomPrePassLight)tubeBloomPrePassLight).SetField("_lightType", BloomPrePassLight.bloomLightsDict.Keys.First(static x => x.name == "AddBloomPrePassLightType"));
                     ((LightWithIdMonoBehaviour)_tubeBloomPrePassLightWithId).SetField("_ID", (int)lightsID);
                     _tubeBloomPrePassLightWithId.ColorWasSet(color);
                     boxLight.SetActive(true);
@@ -97,7 +99,7 @@ namespace CustomFloorPlugin
                 else
                 {
                     Renderer renderer = GetComponent<Renderer>();
-                    renderer.sharedMaterial = _materialSwapper!.Materials.OpaqueGlowMaterial;
+                    renderer.sharedMaterial = _materialSwapper!.OpaqueGlowMaterial;
                     MaterialPropertyBlockController materialPropertyBlockController = gameObject.AddComponent<MaterialPropertyBlockController>();
                     materialPropertyBlockController.SetField("_renderers", new[] { renderer });
                     MaterialPropertyBlockColorSetter materialPropertyBlockColorSetter = gameObject.AddComponent<MaterialPropertyBlockColorSetter>();
@@ -111,7 +113,7 @@ namespace CustomFloorPlugin
                 }
             }
 
-            LightWithIdMonoBehaviour light = _instancedMaterialLightWithId as LightWithIdMonoBehaviour ?? _tubeBloomPrePassLightWithId!;
+            LightWithIdMonoBehaviour light = _tubeBloomPrePassLightWithId as LightWithIdMonoBehaviour ?? _instancedMaterialLightWithId!;
             light.SetField("_lightManager", _lightWithIdManager);
             gameObject.SetActive(activeSelf);
         }
@@ -122,56 +124,52 @@ namespace CustomFloorPlugin
             _instancedMaterialLightWithId.ColorWasSet(color);
         }
 
-        private static Mesh? _mesh;
-        private static Mesh Mesh => _mesh ??= CreateMesh();
+        private static readonly Lazy<Mesh> _mesh = new(CreateMesh);
 
-        private static Mesh CreateMesh()
+        private static Mesh CreateMesh() => new()
         {
-            return new Mesh
+            vertices = new Vector3[]
             {
-                vertices = new Vector3[]
-                {
-                    new(1, -1, -1),
-                    new(1, -1, 1),
-                    new(1, 1, -1),
-                    new(1, 1, 1),
-                    new(-1, -1, -1),
-                    new(-1, -1, 1),
-                    new(-1, 1, -1),
-                    new(-1, 1, 1),
-                    new(1, 1, -1),
-                    new(1, 1, 1),
-                    new(-1, 1, -1),
-                    new(-1, 1, 1),
-                    new(-1, -1, -1),
-                    new(1, -1, -1),
-                    new(1, -1, 1),
-                    new(-1, -1, 1),
-                    new(1, 1, -1),
-                    new(1, -1, -1),
-                    new(-1, -1, -1),
-                    new(-1, 1, -1),
-                    new(-1, 1, 1),
-                    new(-1, -1, 1),
-                    new(1, -1, 1),
-                    new(1, 1, 1)
-                },
-                triangles = new[]
-                {
-                    0, 2, 3,
-                    0, 3, 1,
-                    8, 6, 7,
-                    8, 7, 9,
-                    10, 4, 5,
-                    10, 5, 11,
-                    12, 13, 14,
-                    12, 14, 15,
-                    16, 17, 18,
-                    16, 18, 19,
-                    20, 21, 22,
-                    20, 22, 23
-                }
-            };
-        }
+                new(1, -1, -1),
+                new(1, -1, 1),
+                new(1, 1, -1),
+                new(1, 1, 1),
+                new(-1, -1, -1),
+                new(-1, -1, 1),
+                new(-1, 1, -1),
+                new(-1, 1, 1),
+                new(1, 1, -1),
+                new(1, 1, 1),
+                new(-1, 1, -1),
+                new(-1, 1, 1),
+                new(-1, -1, -1),
+                new(1, -1, -1),
+                new(1, -1, 1),
+                new(-1, -1, 1),
+                new(1, 1, -1),
+                new(1, -1, -1),
+                new(-1, -1, -1),
+                new(-1, 1, -1),
+                new(-1, 1, 1),
+                new(-1, -1, 1),
+                new(1, -1, 1),
+                new(1, 1, 1)
+            },
+            triangles = new[]
+            {
+                0, 2, 3,
+                0, 3, 1,
+                8, 6, 7,
+                8, 7, 9,
+                10, 4, 5,
+                10, 5, 11,
+                12, 13, 14,
+                12, 14, 15,
+                16, 17, 18,
+                16, 18, 19,
+                20, 21, 22,
+                20, 22, 23
+            }
+        };
     }
 }

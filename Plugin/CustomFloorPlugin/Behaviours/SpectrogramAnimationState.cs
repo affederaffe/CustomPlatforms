@@ -1,3 +1,5 @@
+using System.Linq;
+
 using CustomFloorPlugin.Interfaces;
 
 using UnityEngine;
@@ -41,21 +43,12 @@ namespace CustomFloorPlugin
             _animation["clip"].speed = 0;
         }
 
-        private void Update()
+        public void Update()
         {
-            float average = 0f;
-            for (int i = 0; i < 64; i++)
-                average += _basicSpectrogramData!.ProcessedSamples[i];
-            average /= 64.0f;
-
-            float value = averageAllSamples ? average : _basicSpectrogramData!.ProcessedSamples[sample];
-
+            float value = averageAllSamples ? _basicSpectrogramData!.ProcessedSamples.Average() : _basicSpectrogramData!.ProcessedSamples[sample];
             value *= 5f;
-            if (value > 1f)
-                value = 1f;
-
+            value = Mathf.Clamp01(value);
             value = Mathf.Pow(value, 2f);
-
             _animation!["clip"].time = value * _animation!["clip"].length;
         }
     }

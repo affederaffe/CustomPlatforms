@@ -49,7 +49,7 @@ namespace CustomFloorPlugin.UI
         public bool ShowHeart
         {
             get => _config.ShowHeart;
-            set => _assetLoader.Heart.SetActive(_config.ShowHeart = value);
+            set => _assetLoader.Heart.Value.SetActive(_config.ShowHeart = value);
         }
 
         /// <summary>

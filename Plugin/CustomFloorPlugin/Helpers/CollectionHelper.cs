@@ -40,7 +40,7 @@ namespace CustomFloorPlugin.Helpers
 
             while (lower <= upper)
             {
-                int middle = lower + ((upper - lower) / 2);
+                int middle = lower + (upper - lower) / 2;
                 int comparisonResult = comparer.Compare(value, list[middle]);
                 if (comparisonResult == 0) return middle;
                 if (comparisonResult < 0) upper = middle - 1;

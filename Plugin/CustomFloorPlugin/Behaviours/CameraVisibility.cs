@@ -19,12 +19,12 @@ namespace CustomFloorPlugin
         /// <summary>
         /// Constant for the ThirdPerson Layer
         /// </summary>
-        private const int kOnlyInThirdPerson = 3;
+        private const int OnlyInThirdPerson = 3;
 
         /// <summary>
         /// Constant for the HeadSet Layer
         /// </summary>
-        private const int kOnlyInHeadset = 4;
+        private const int OnlyInHeadset = 4;
 
         private void Awake()
         {
@@ -34,10 +34,10 @@ namespace CustomFloorPlugin
                 case VisibilityMode.Default:
                     return;
                 case VisibilityMode.HeadsetOnly:
-                    layer = kOnlyInHeadset;
+                    layer = OnlyInHeadset;
                     break;
                 case VisibilityMode.ThirdPersonOnly:
-                    layer = kOnlyInThirdPerson;
+                    layer = OnlyInThirdPerson;
                     break;
             }
 
@@ -64,8 +64,8 @@ namespace CustomFloorPlugin
         {
             Camera mainCamera = Camera.main!;
             int cullingMask = mainCamera.cullingMask;
-            cullingMask &= ~(1 << kOnlyInThirdPerson);
-            cullingMask |= 1 << kOnlyInHeadset;
+            cullingMask &= ~(1 << OnlyInThirdPerson);
+            cullingMask |= 1 << OnlyInHeadset;
             mainCamera.cullingMask = cullingMask;
         }
     }

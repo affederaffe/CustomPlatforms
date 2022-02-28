@@ -17,33 +17,33 @@ namespace CustomFloorPlugin
         public SongEventType eventType;
         public Vector3 rotationVector;
 
-        private IBeatmapObjectCallbackController? _beatmapObjectCallbackController;
+        private BeatmapCallbacksController? _beatmapCallbacksController;
 
         private LightRotationEventEffect? _lightRotationEventEffect;
         private Quaternion _startRot;
 
         [Inject]
-        public void Construct([InjectOptional] IBeatmapObjectCallbackController beatmapObjectCallbackController)
+        public void Construct([InjectOptional] BeatmapCallbacksController beatmapCallbacksController)
         {
-            _beatmapObjectCallbackController = beatmapObjectCallbackController;
+            _beatmapCallbacksController = beatmapCallbacksController;
         }
 
         public void PlatformEnabled(DiContainer container)
         {
             container.Inject(this);
-            if (_beatmapObjectCallbackController is null) return;
+            if (_beatmapCallbacksController is null) return;
             _startRot = transform.rotation;
             if (_lightRotationEventEffect is null)
             {
                 _lightRotationEventEffect = gameObject.AddComponent<LightRotationEventEffect>();
-                _lightRotationEventEffect.SetField("_event", (BeatmapEventType)eventType);
+                _lightRotationEventEffect.SetField("_event", (BasicBeatmapEventType)eventType);
                 _lightRotationEventEffect.SetField("_rotationVector", rotationVector);
                 _lightRotationEventEffect.SetField("_transform", transform);
-                _lightRotationEventEffect.SetField("_beatmapObjectCallbackController", _beatmapObjectCallbackController);
+                _lightRotationEventEffect.SetField("_beatmapCallbacksController", _beatmapCallbacksController);
             }
-            else if (_beatmapObjectCallbackController is not null)
+            else if (_beatmapCallbacksController is not null)
             {
-                _lightRotationEventEffect.SetField("_beatmapObjectCallbackController", _beatmapObjectCallbackController);
+                _lightRotationEventEffect.SetField("_beatmapCallbacksController", _beatmapCallbacksController);
                 _lightRotationEventEffect.Start();
             }
         }

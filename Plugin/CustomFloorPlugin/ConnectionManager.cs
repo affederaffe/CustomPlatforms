@@ -73,6 +73,7 @@ namespace CustomFloorPlugin
         /// <summary>
         /// Replaces the old platform with the updated version
         /// </summary>
+        // ReSharper disable once AsyncVoidMethod
         private async void OnFileChanged(object sender, FileSystemEventArgs e)
         {
             if (!UnityGame.OnMainThread)
@@ -93,6 +94,7 @@ namespace CustomFloorPlugin
         /// <summary>
         /// Create the new platform and add it to the UI
         /// </summary>
+        // ReSharper disable once AsyncVoidMethod
         private async void OnFileCreated(object sender, FileSystemEventArgs e)
         {
             if (!UnityGame.OnMainThread)
@@ -109,6 +111,7 @@ namespace CustomFloorPlugin
         /// <summary>
         /// Destroy the platform and remove all references
         /// </summary>
+        // ReSharper disable once AsyncVoidMethod
         private async void OnFileDeleted(object sender, FileSystemEventArgs e)
         {
             if (!UnityGame.OnMainThread)

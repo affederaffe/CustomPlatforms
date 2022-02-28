@@ -35,7 +35,7 @@ namespace CustomFloorPlugin
             enabled = _basicSpectrogramData is not null;
         }
 
-        private void Update()
+        public void Update()
         {
             float average = 0f;
             for (int i = 0; i < 64; i++)

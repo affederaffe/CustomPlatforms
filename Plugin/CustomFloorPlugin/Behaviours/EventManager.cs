@@ -33,7 +33,6 @@ namespace CustomFloorPlugin
         public UnityEvent? OnLevelFinish;
         public UnityEvent? OnBlueLightOn;
         public UnityEvent? OnRedLightOn;
-        public UnityEvent? OnNewHighscore;
         public ComboChangedEvent OnComboChanged = new();
         public OnSpecificSliceEvent OnSpecificSlice = new();
         public OnScoreChangedEvent OnScoreChanged = new();
@@ -66,7 +65,6 @@ namespace CustomFloorPlugin
             _events.SabersEndCollideEvent += SaberStopColliding!.Invoke;
             _events.LevelFinishedEvent += OnLevelFinish!.Invoke;
             _events.LevelFailedEvent += OnLevelFail!.Invoke;
-            _events.NewHighscore += OnNewHighscore!.Invoke;
             _events.ScoreDidChangeEvent += OnScoreChanged.Invoke;
             _events.GoodCutCountDidChangeEvent += OnGoodCutCountChanged.Invoke;
             _events.BadCutCountDidChangeEvent += OnBadCutCountChanged.Invoke;
@@ -89,7 +87,6 @@ namespace CustomFloorPlugin
             _events.SabersEndCollideEvent -= SaberStopColliding!.Invoke;
             _events.LevelFinishedEvent -= OnLevelFinish!.Invoke;
             _events.LevelFailedEvent -= OnLevelFail!.Invoke;
-            _events.NewHighscore -= OnNewHighscore!.Invoke;
             _events.ScoreDidChangeEvent -= OnScoreChanged.Invoke;
             _events.GoodCutCountDidChangeEvent -= OnGoodCutCountChanged.Invoke;
             _events.BadCutCountDidChangeEvent -= OnBadCutCountChanged.Invoke;
@@ -105,7 +102,7 @@ namespace CustomFloorPlugin
         /// <summary>
         /// Triggers subscribed functions if lights are turned on
         /// </summary>
-        private void LightEventCallBack(BeatmapEventData songEvent)
+        private void LightEventCallBack(BasicBeatmapEventData songEvent)
         {
             if ((int)songEvent.type >= 5) return;
             switch (songEvent.value)

@@ -1,4 +1,6 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
+
 using CustomFloorPlugin.Interfaces;
 using UnityEngine;
 
@@ -61,11 +63,8 @@ namespace CustomFloorPlugin
                 _materialSwapper!.ReplaceMaterials(columnPrefab);
                 _columnTransforms = CreateColumns();
                 UpdateColumnHeights(FallbackSamples);
-                foreach (INotifyPlatformEnabled notifyEnable in GetComponentsInChildren<INotifyPlatformEnabled>(true))
-                {
-                    if (!ReferenceEquals(this, notifyEnable))
-                        notifyEnable?.PlatformEnabled(container);
-                }
+                foreach (INotifyPlatformEnabled? notifyEnable in GetComponentsInChildren<INotifyPlatformEnabled>(true).Where(x => !ReferenceEquals(x, this)))
+                    notifyEnable?.PlatformEnabled(container);
             }
 
             enabled = _basicSpectrogramData is not null;
@@ -80,7 +79,7 @@ namespace CustomFloorPlugin
         /// Updates all columns heights with the processed samples
         /// [Unity calls this once per frame!]
         /// </summary>
-        private void Update()
+        public void Update()
         {
             UpdateColumnHeights(_basicSpectrogramData!.ProcessedSamples);
         }
@@ -135,7 +134,7 @@ namespace CustomFloorPlugin
                 if (_fallbackSamples is not null) return _fallbackSamples;
                 _fallbackSamples = new float[64];
                 for (int i = 0; i < _fallbackSamples.Length; i++)
-                    _fallbackSamples[i] = (Mathf.Sin((0.4f * i) - (0.5f * Mathf.PI)) + 1) / 2;
+                    _fallbackSamples[i] = (Mathf.Sin(0.4f * i - 0.5f * Mathf.PI) + 1) / 2;
                 return _fallbackSamples;
             }
         }

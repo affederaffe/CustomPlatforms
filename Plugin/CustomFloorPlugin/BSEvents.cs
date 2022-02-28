@@ -1,7 +1,5 @@
 ﻿using System;
 
-using UnityEngine;
-
 using Zenject;
 
 
@@ -12,46 +10,41 @@ namespace CustomFloorPlugin
     /// </summary>
     public sealed class BSEvents : IInitializable, IDisposable
     {
-        private readonly GameEnergyCounter _gameEnergyCounter;
-        private readonly GameplayCoreSceneSetupData _gameplayCoreSceneSetupData;
+        private readonly ILevelEndActions _levelEndActions;
+        private readonly IReadonlyBeatmapData _beatmapData;
         private readonly ObstacleSaberSparkleEffectManager _obstacleSaberSparkleEffectManager;
         private readonly ScoreController _scoreController;
-        private readonly PlayerDataModel _playerDataModel;
-        private readonly PrepareLevelCompletionResults _prepareLevelCompletionResults;
-        private readonly IBeatmapObjectCallbackController _beatmapObjectCallbackController;
-        private readonly IDifficultyBeatmap _difficultyBeatmap;
+        private readonly BeatmapObjectManager _beatmapObjectManager;
+        private readonly ComboController _comboController;
+        private readonly BeatmapCallbacksController _beatmapCallbacksController;
 
-        private float _lastNoteTime;
+        private BeatmapDataCallbackWrapper? _beatmapDataCallbackWrapper;
         private int _anyCutCount;
         private int _goodCutCount;
         private int _badCutCount;
         private int _missCount;
         private int _cuttableNotesCount;
-        private int _highScore;
 
-        public BSEvents(GameEnergyCounter gameEnergyCounter,
-                        GameplayCoreSceneSetupData gameplayCoreSceneSetupData,
+        public BSEvents(ILevelEndActions levelEndActions,
+                        IReadonlyBeatmapData beatmapData,
                         ObstacleSaberSparkleEffectManager obstacleSaberSparkleEffectManager,
                         ScoreController scoreController,
-                        PlayerDataModel playerDataModel,
-                        PrepareLevelCompletionResults prepareLevelCompletionResults,
-                        IBeatmapObjectCallbackController beatmapObjectCallbackController,
-                        IDifficultyBeatmap difficultyBeatmap)
+                        BeatmapObjectManager beatmapObjectManager,
+                        BeatmapCallbacksController beatmapCallbacksController,
+                        ComboController comboController)
         {
-            _gameEnergyCounter = gameEnergyCounter;
-            _gameplayCoreSceneSetupData = gameplayCoreSceneSetupData;
+            _levelEndActions = levelEndActions;
+            _beatmapData = beatmapData;
             _obstacleSaberSparkleEffectManager = obstacleSaberSparkleEffectManager;
             _scoreController = scoreController;
-            _playerDataModel = playerDataModel;
-            _prepareLevelCompletionResults = prepareLevelCompletionResults;
-            _beatmapObjectCallbackController = beatmapObjectCallbackController;
-            _difficultyBeatmap = difficultyBeatmap;
+            _beatmapObjectManager = beatmapObjectManager;
+            _beatmapCallbacksController = beatmapCallbacksController;
+            _comboController = comboController;
         }
 
-        public event Action<BeatmapEventData>? BeatmapEventDidTriggerEvent;
+        public event Action<BasicBeatmapEventData>? BeatmapEventDidTriggerEvent;
         public event Action? LevelFinishedEvent;
         public event Action? LevelFailedEvent;
-        public event Action? NewHighscore;
         public event Action<int>? NoteWasCutEvent;
         public event Action? NoteWasMissedEvent;
         public event Action? ComboDidBreakEvent;
@@ -67,59 +60,43 @@ namespace CustomFloorPlugin
 
         public void Initialize()
         {
-            _cuttableNotesCount = _difficultyBeatmap.beatmapData.cuttableNotesCount - 1;
-            _highScore = _playerDataModel.playerData.GetPlayerLevelStatsData(_difficultyBeatmap).highScore;
-            _lastNoteTime = GetLastNoteTime();
-            _beatmapObjectCallbackController.beatmapEventDidTriggerEvent += BeatmapEventDidTrigger;
-            _gameEnergyCounter.gameEnergyDidReach0Event += LevelFailed;
+            _cuttableNotesCount = _beatmapData.cuttableNotesCount - 1;
+            _beatmapDataCallbackWrapper = _beatmapCallbacksController.AddBeatmapCallback<BasicBeatmapEventData>(BeatmapEventDidTrigger);
+            _levelEndActions.levelFinishedEvent += LevelFinished;
+            _levelEndActions.levelFailedEvent += LevelFailed;
             _obstacleSaberSparkleEffectManager.sparkleEffectDidStartEvent += SabersStartCollide;
             _obstacleSaberSparkleEffectManager.sparkleEffectDidEndEvent += SabersEndCollide;
-            _scoreController.noteWasCutEvent += NoteWasCut;
-            _scoreController.noteWasMissedEvent += NoteWasMissed;
-            _scoreController.comboDidChangeEvent += ComboDidChange;
-            _scoreController.comboBreakingEventHappenedEvent += ComboDidBreak;
+            _beatmapObjectManager.noteWasCutEvent += NoteWasCut;
+            _beatmapObjectManager.noteWasMissedEvent += NoteWasMissed;
+            _comboController.comboDidChangeEvent += ComboDidChange;
+            _comboController.comboBreakingEventHappenedEvent += ComboDidBreak;
             _scoreController.multiplierDidChangeEvent += MultiplierDidChange;
             _scoreController.scoreDidChangeEvent += ScoreDidChange;
         }
 
         public void Dispose()
         {
-            _beatmapObjectCallbackController.beatmapEventDidTriggerEvent -= BeatmapEventDidTrigger;
-            _gameEnergyCounter.gameEnergyDidReach0Event -= LevelFailed;
+            _beatmapCallbacksController.RemoveBeatmapCallback(_beatmapDataCallbackWrapper);
+            _levelEndActions.levelFinishedEvent -= LevelFinished;
+            _levelEndActions.levelFailedEvent -= LevelFailed;
             _obstacleSaberSparkleEffectManager.sparkleEffectDidStartEvent -= SabersStartCollide;
             _obstacleSaberSparkleEffectManager.sparkleEffectDidEndEvent -= SabersEndCollide;
-            _scoreController.noteWasCutEvent -= NoteWasCut;
-            _scoreController.noteWasMissedEvent -= NoteWasMissed;
-            _scoreController.comboDidChangeEvent -= ComboDidChange;
-            _scoreController.comboBreakingEventHappenedEvent -= ComboDidBreak;
+            _beatmapObjectManager.noteWasCutEvent -= NoteWasCut;
+            _beatmapObjectManager.noteWasMissedEvent -= NoteWasMissed;
+            _comboController.comboDidChangeEvent -= ComboDidChange;
+            _comboController.comboBreakingEventHappenedEvent -= ComboDidBreak;
             _scoreController.multiplierDidChangeEvent -= MultiplierDidChange;
             _scoreController.scoreDidChangeEvent -= ScoreDidChange;
         }
 
-        private float GetLastNoteTime()
-        {
-            float lastNoteTime = 0f;
-            foreach (IReadonlyBeatmapLineData beatmapLineData in _gameplayCoreSceneSetupData.difficultyBeatmap.beatmapData.beatmapLinesData)
-            {
-                for (int i = beatmapLineData.beatmapObjectsData.Count - 1; i >= 0; i--)
-                {
-                    BeatmapObjectData beatmapObjectData = beatmapLineData.beatmapObjectsData[i];
-                    if (beatmapObjectData.beatmapObjectType == BeatmapObjectType.Note && ((NoteData)beatmapObjectData).colorType != ColorType.None && beatmapObjectData.time > lastNoteTime)
-                        lastNoteTime = beatmapObjectData.time;
-                }
-            }
-
-            return lastNoteTime;
-        }
-
-        private void BeatmapEventDidTrigger(BeatmapEventData eventData)
+        private void BeatmapEventDidTrigger(BasicBeatmapEventData eventData)
         {
             BeatmapEventDidTriggerEvent?.Invoke(eventData);
         }
 
-        private void NoteWasCut(NoteData noteData, in NoteCutInfo noteCutInfo, int multiplier)
+        private void NoteWasCut(NoteController noteController, in NoteCutInfo noteCutInfo)
         {
-            if (noteData.colorType == ColorType.None || noteData.beatmapObjectType != BeatmapObjectType.Note) return;
+            if (noteController.noteData.subtypeIdentifier == NoteData.SubtypeIdentifier(ColorType.None)) return;
             AllNotesCountDidChangeEvent?.Invoke(_anyCutCount++, _cuttableNotesCount);
             if (noteCutInfo.allIsOK)
             {
@@ -130,31 +107,14 @@ namespace CustomFloorPlugin
             {
                 BadCutCountDidChangeEvent?.Invoke(_badCutCount++);
             }
-
-            if (Mathf.Approximately(noteData.time, _lastNoteTime))
-            {
-                _lastNoteTime = 0f;
-                LevelFinishedEvent?.Invoke();
-                LevelCompletionResults results = _prepareLevelCompletionResults.FillLevelCompletionResults(LevelCompletionResults.LevelEndStateType.Cleared, LevelCompletionResults.LevelEndAction.None);
-                if (results.modifiedScore > _highScore)
-                    NewHighscore?.Invoke();
-            }
         }
 
-        private void NoteWasMissed(NoteData noteData, int i)
+        private void NoteWasMissed(NoteController noteController)
         {
-            if (noteData.colorType == ColorType.None || noteData.beatmapObjectType != BeatmapObjectType.Note) return;
+            if (noteController.noteData.subtypeIdentifier == NoteData.SubtypeIdentifier(ColorType.None)) return;
             NoteWasMissedEvent?.Invoke();
             AllNotesCountDidChangeEvent?.Invoke(_anyCutCount++, _cuttableNotesCount);
             MissCountDidChangeEvent?.Invoke(_missCount++);
-            if (Mathf.Approximately(noteData.time, _lastNoteTime))
-            {
-                _lastNoteTime = 0f;
-                LevelFinishedEvent?.Invoke();
-                LevelCompletionResults results = _prepareLevelCompletionResults.FillLevelCompletionResults(LevelCompletionResults.LevelEndStateType.Cleared, LevelCompletionResults.LevelEndAction.None);
-                if (results.modifiedScore > _highScore)
-                    NewHighscore?.Invoke();
-            }
         }
 
         private void MultiplierDidChange(int multiplier, float progress)
@@ -163,6 +123,7 @@ namespace CustomFloorPlugin
                 MultiplierDidIncreaseEvent?.Invoke();
         }
 
+        private void LevelFinished() => LevelFinishedEvent?.Invoke();
         private void LevelFailed() => LevelFailedEvent?.Invoke();
 
         private void SabersStartCollide(SaberType saberType) => SabersStartCollideEvent?.Invoke();

@@ -41,14 +41,8 @@ namespace CustomFloorPlugin
         /// <returns>The loaded <see cref="CustomPlatform"/>, or null if an error occurs</returns>
         internal async Task<CustomPlatform?> LoadPlatformFromFileAsync(string fullPath)
         {
-            if (!File.Exists(fullPath))
-            {
-                _siraLog.Error($"File could not be found:\n{fullPath}");
-                return null;
-            }
-
             if (_pathTaskPairs.TryGetValue(fullPath, out Task<CustomPlatform?> task)) return await task;
-            task = LoadPlatformFromFileAsyncImpl(fullPath);
+            task = LoadPlatformFromFileAsyncCore(fullPath);
             _pathTaskPairs.Add(fullPath, task);
             CustomPlatform? platform = await task;
             _pathTaskPairs.Remove(fullPath);
@@ -58,10 +52,10 @@ namespace CustomFloorPlugin
         /// <summary>
         /// Asynchronously loads a <see cref="CustomPlatform"/> from a specified file path
         /// </summary>
-        private async Task<CustomPlatform?> LoadPlatformFromFileAsyncImpl(string fullPath)
+        private async Task<CustomPlatform?> LoadPlatformFromFileAsyncCore(string fullPath)
         {
             byte[] bundleData = await Task.Run(() => File.ReadAllBytes(fullPath));
-            AssetBundle assetBundle = await LoadAssetBundleFromBytesAsync(bundleData);
+            AssetBundle? assetBundle = await LoadAssetBundleFromBytesAsync(bundleData);
 
             if (assetBundle == null)
             {
@@ -69,7 +63,7 @@ namespace CustomFloorPlugin
                 return null;
             }
 
-            GameObject platformPrefab = await LoadAssetFromAssetBundleAsync<GameObject>(assetBundle, "_CustomPlatform");
+            GameObject? platformPrefab = await LoadAssetFromAssetBundleAsync<GameObject>(assetBundle, "_CustomPlatform");
 
             if (platformPrefab == null)
             {
@@ -86,7 +80,7 @@ namespace CustomFloorPlugin
             {
                 // Check for old platform
                 global::CustomPlatform? legacyPlatform = platformPrefab.GetComponent<global::CustomPlatform>();
-                if (legacyPlatform is not null)
+                if (legacyPlatform != null)
                 {
                     // Replace legacy platform component with up to date one
                     customPlatform = platformPrefab.AddComponent<CustomPlatform>();
@@ -135,32 +129,24 @@ namespace CustomFloorPlugin
         /// <summary>
         /// Asynchronously loads and <see cref="AssetBundle"/> from a <see cref="byte"/>[]
         /// </summary>
-        private static Task<AssetBundle> LoadAssetBundleFromBytesAsync(byte[] data)
+        private static Task<AssetBundle?> LoadAssetBundleFromBytesAsync(byte[] data)
         {
-            TaskCompletionSource<AssetBundle> taskCompletionSource = new();
-            AssetBundleCreateRequest assetBundleCreateRequest = AssetBundle.LoadFromMemoryAsync(data);
-            assetBundleCreateRequest.completed += delegate
-            {
-                AssetBundle assetBundle = assetBundleCreateRequest.assetBundle;
-                taskCompletionSource.SetResult(assetBundle);
-            };
-
+            TaskCompletionSource<AssetBundle?> taskCompletionSource = new();
+            AssetBundleCreateRequest? assetBundleCreateRequest = AssetBundle.LoadFromMemoryAsync(data);
+            if (assetBundleCreateRequest == null) return Task.FromResult<AssetBundle?>(null);
+            assetBundleCreateRequest.completed += _ => taskCompletionSource.TrySetResult(assetBundleCreateRequest.assetBundle);
             return taskCompletionSource.Task;
         }
 
         /// <summary>
         /// Asynchronously loads an asset of type <typeparamref name="T"/> from an <see cref="AssetBundle"/>
         /// </summary>
-        private static Task<T> LoadAssetFromAssetBundleAsync<T>(AssetBundle assetBundle, string assetName) where T : UnityEngine.Object
+        private static Task<T?> LoadAssetFromAssetBundleAsync<T>(AssetBundle assetBundle, string assetName) where T : UnityEngine.Object
         {
-            TaskCompletionSource<T> taskCompletionSource = new();
-            AssetBundleRequest assetBundleRequest = assetBundle.LoadAssetAsync<T>(assetName);
-            assetBundleRequest.completed += delegate
-            {
-                T asset = (T)assetBundleRequest.asset;
-                taskCompletionSource.SetResult(asset);
-            };
-
+            TaskCompletionSource<T?> taskCompletionSource = new();
+            AssetBundleRequest? assetBundleRequest = assetBundle.LoadAssetAsync<T>(assetName);
+            if (assetBundleRequest == null) return Task.FromResult<T?>(null);
+            assetBundleRequest.completed += _ => taskCompletionSource.TrySetResult((T?)assetBundleRequest.asset);
             return taskCompletionSource.Task;
         }
     }

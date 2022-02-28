@@ -44,9 +44,9 @@ namespace CustomFloorPlugin
         /// (Use a <see cref="System.Collections.Generic.Dictionary{TKey, TValue}"/> instead)
         /// </summary>
         /// <param name="songEventData">Event to evaluate</param>
-        private void OnSongEvent(BeatmapEventData songEventData)
+        private void OnSongEvent(BasicBeatmapEventData songEventData)
         {
-            if (songEventData.type == (BeatmapEventType)eventType && (songEventData.value == value || anyValue))
+            if (songEventData.subtypeIdentifier == BasicBeatmapEventData.SubtypeIdentifier((BasicBeatmapEventType)eventType) && (songEventData.value == value || anyValue))
                 OnTrigger!.Invoke();
         }
     }

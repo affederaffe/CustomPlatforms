@@ -15,7 +15,6 @@ namespace CustomFloorPlugin.UI
     {
         private readonly PlatformsFlowCoordinator _platformListFlowCoordinator;
         private readonly MainFlowCoordinator _mainFlowCoordinator;
-
         private readonly MenuButton _menuButton;
 
         public MenuButtonManager(PlatformsFlowCoordinator platformListFlowCoordinator, MainFlowCoordinator mainFlowCoordinator)

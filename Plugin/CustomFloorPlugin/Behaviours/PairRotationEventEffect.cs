@@ -22,40 +22,40 @@ namespace CustomFloorPlugin
         public bool useZPositionForAngleOffset;
         public float zPositionAngleOffsetScale = 1f;
 
-        private IBeatmapObjectCallbackController? _beatmapObjectCallbackController;
+        private BeatmapCallbacksController? _beatmapCallbacksController;
 
         private LightPairRotationEventEffect? _lightPairRotationEventEffect;
         private Quaternion _startRotL;
         private Quaternion _startRotR;
 
         [Inject]
-        public void Construct([InjectOptional] IBeatmapObjectCallbackController beatmapObjectCallbackController)
+        public void Construct([InjectOptional] BeatmapCallbacksController beatmapCallbacksController)
         {
-            _beatmapObjectCallbackController = beatmapObjectCallbackController;
+            _beatmapCallbacksController = beatmapCallbacksController;
         }
 
         public void PlatformEnabled(DiContainer container)
         {
             container.Inject(this);
-            if (_beatmapObjectCallbackController is null || transformL is null || transformR is null) return;
+            if (_beatmapCallbacksController is null || transformL is null || transformR is null) return;
             _startRotL = transformL.rotation;
             _startRotR = transformR.rotation;
             if (_lightPairRotationEventEffect is null)
             {
                 _lightPairRotationEventEffect = gameObject.AddComponent<LightPairRotationEventEffect>();
-                _lightPairRotationEventEffect.SetField("_eventL", (BeatmapEventType)eventL);
-                _lightPairRotationEventEffect.SetField("_eventR", (BeatmapEventType)eventR);
-                _lightPairRotationEventEffect.SetField("_switchOverrideRandomValuesEvent", (BeatmapEventType)switchOverrideRandomValuesEvent);
+                _lightPairRotationEventEffect.SetField("_eventL", (BasicBeatmapEventType)eventL);
+                _lightPairRotationEventEffect.SetField("_eventR", (BasicBeatmapEventType)eventR);
+                _lightPairRotationEventEffect.SetField("_switchOverrideRandomValuesEvent", (BasicBeatmapEventType)switchOverrideRandomValuesEvent);
                 _lightPairRotationEventEffect.SetField("_rotationVector", rotationVector);
                 _lightPairRotationEventEffect.SetField("_transformL", transformL);
                 _lightPairRotationEventEffect.SetField("_transformR", transformR);
                 _lightPairRotationEventEffect.SetField("_useZPositionForAngleOffset", useZPositionForAngleOffset);
                 _lightPairRotationEventEffect.SetField("_zPositionAngleOffsetScale", zPositionAngleOffsetScale);
-                _lightPairRotationEventEffect.SetField("_beatmapObjectCallbackController", _beatmapObjectCallbackController);
+                _lightPairRotationEventEffect.SetField("_beatmapCallbacksController", _beatmapCallbacksController);
             }
-            else if (_beatmapObjectCallbackController is not null)
+            else if (_beatmapCallbacksController is not null)
             {
-                _lightPairRotationEventEffect.SetField("_beatmapObjectCallbackController", _beatmapObjectCallbackController);
+                _lightPairRotationEventEffect.SetField("_beatmapCallbacksController", _beatmapCallbacksController);
                 _lightPairRotationEventEffect.Start();
             }
         }

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Reflection;
@@ -27,40 +28,50 @@ namespace CustomFloorPlugin
         /// <summary>
         /// The old heart, to remind everyone that this plugin is some legacy garbage
         /// </summary>
-        internal GameObject Heart { get; }
+        internal Lazy<GameObject> Heart { get; }
 
         /// <summary>
         /// Used as a players place replacement in platform preview
         /// </summary>
-        internal GameObject PlayersPlace { get; }
+        internal Lazy<GameObject> PlayersPlace { get; }
 
         /// <summary>
         /// The cover for the default platform
         /// </summary>
-        internal Sprite DefaultPlatformCover { get; }
+        internal Lazy<Sprite> DefaultPlatformCover { get; }
 
         /// <summary>
         /// The cover used for all platforms normally missing one
         /// </summary>
-        internal Sprite FallbackCover { get; }
+        internal Lazy<Sprite> FallbackCover { get; }
 
         /// <summary>
         /// Multiplayer light effects
         /// </summary>
-        internal LightEffects MultiplayerLightEffects { get; }
+        internal Lazy<LightEffects> MultiplayerLightEffects { get; }
 
         public AssetLoader(DiContainer container, Assembly assembly, MaterialSwapper materialSwapper)
         {
             _container = container;
             _assembly = assembly;
             _materialSwapper = materialSwapper;
-            Heart = CreateHeart();
-            PlayersPlace = CreatePlayersPlace();
+            Heart = new Lazy<GameObject>(CreateHeart);
+            PlayersPlace = new Lazy<GameObject>(CreatePlayersPlace);
+            DefaultPlatformCover = new Lazy<Sprite>(CreateDefaultPlatformCover);
+            FallbackCover = new Lazy<Sprite>(CreateFallbackCover);
+            MultiplayerLightEffects = new Lazy<LightEffects>(static () => new GameObject("LightEffects").AddComponent<LightEffects>());
+        }
+
+        private Sprite CreateDefaultPlatformCover()
+        {
             using Stream defaultCoverStream = GetEmbeddedResource("CustomFloorPlugin.Assets.LvlInsaneCover.png");
-            DefaultPlatformCover = defaultCoverStream.ReadTexture2D().ToSprite();
+            return defaultCoverStream.ReadTexture2D().ToSprite();
+        }
+
+        private Sprite CreateFallbackCover()
+        {
             using Stream fallbackCoverStream = GetEmbeddedResource("CustomFloorPlugin.Assets.FeetIcon.png");
-            FallbackCover = fallbackCoverStream.ReadTexture2D().ToSprite();
-            MultiplayerLightEffects = new GameObject("LightEffects").AddComponent<LightEffects>();
+            return fallbackCoverStream.ReadTexture2D().ToSprite();
         }
 
         private GameObject CreateHeart()
@@ -98,7 +109,7 @@ namespace CustomFloorPlugin
             GameObject playersPlaceCube = GameObject.CreatePrimitive(PrimitiveType.Cube);
             playersPlaceCube.SetActive(false);
             MeshRenderer cubeRenderer = playersPlaceCube.GetComponent<MeshRenderer>();
-            cubeRenderer.material = _materialSwapper.Materials.DarkEnvSimpleMaterial;
+            cubeRenderer.material = _materialSwapper.DarkEnvSimpleMaterial;
             playersPlaceCube.transform.localPosition = new Vector3(0f, -50.0075f, 0f);
             playersPlaceCube.transform.localScale = new Vector3(3f, 100f, 2f);
             playersPlaceCube.name = "PlayersPlace";
@@ -170,18 +181,18 @@ namespace CustomFloorPlugin
             private readonly SimpleColorSO _simpleHighlightColor0Boost = ScriptableObject.CreateInstance<SimpleColorSO>();
             private readonly SimpleColorSO _simpleHighlightColor1Boost = ScriptableObject.CreateInstance<SimpleColorSO>();
 
-            private IBeatmapObjectCallbackController _beatmapObjectCallbackController = null!;
+            private BeatmapCallbacksController _beatmapCallbacksController = null!;
             private LightWithIdManager _lightWithIdManager = null!;
             private ColorScheme _colorScheme = null!;
 
             private LightSwitchEventEffect[]? _lightSwitchEventEffects;
 
             [Inject]
-            public void Construct(IBeatmapObjectCallbackController beatmapObjectCallbackController,
+            public void Construct(BeatmapCallbacksController beatmapCallbacksController,
                                   LightWithIdManager lightWithIdManager,
                                   ColorScheme colorScheme)
             {
-                _beatmapObjectCallbackController = beatmapObjectCallbackController;
+                _beatmapCallbacksController = beatmapCallbacksController;
                 _lightWithIdManager = lightWithIdManager;
                 _colorScheme = colorScheme;
             }
@@ -202,8 +213,7 @@ namespace CustomFloorPlugin
                         lights[i] ??= new List<ILightWithId>();
                         _lightSwitchEventEffects[i] = container.InstantiateComponent<LightSwitchEventEffect>(gameObject);
                         _lightSwitchEventEffects[i].SetField("_lightsID", i + 1);
-                        _lightSwitchEventEffects[i].SetField("_event", (BeatmapEventType)i);
-                        _lightSwitchEventEffects[i].SetField("_colorBoostEvent", BeatmapEventType.Event5);
+                        _lightSwitchEventEffects[i].SetField("_event", (BasicBeatmapEventType)i);
                         _lightSwitchEventEffects[i].SetField("_lightColor0", (ColorSO)CreateMultipliedColorSO(_simpleLightColor0, normalColor));
                         _lightSwitchEventEffects[i].SetField("_lightColor1", (ColorSO)CreateMultipliedColorSO(_simpleLightColor1, normalColor));
                         _lightSwitchEventEffects[i].SetField("_highlightColor0", (ColorSO)CreateMultipliedColorSO(_simpleHighlightColor0, highlightColor));
@@ -219,7 +229,7 @@ namespace CustomFloorPlugin
                     foreach (LightSwitchEventEffect lse in _lightSwitchEventEffects)
                     {
                         lights[lse.lightsId] ??= new List<ILightWithId>();
-                        lse.SetField("_beatmapObjectCallbackController", _beatmapObjectCallbackController);
+                        lse.SetField("_beatmapCallbacksController", _beatmapCallbacksController);
                         lse.SetField("_lightManager", _lightWithIdManager);
                         lse.SetColor(Color.clear);
                         lse.Start();
@@ -241,7 +251,7 @@ namespace CustomFloorPlugin
             {
                 if (_lightSwitchEventEffects is null) return;
                 foreach (LightSwitchEventEffect lse in _lightSwitchEventEffects)
-                    _beatmapObjectCallbackController.beatmapEventDidTriggerEvent -= lse.HandleBeatmapObjectCallbackControllerBeatmapEventDidTrigger;
+                    lse.OnDestroy();
                 gameObject.SetActive(false);
             }
 

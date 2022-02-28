@@ -57,7 +57,7 @@ namespace CustomFloorPlugin
         /// <summary>
         /// The cache file version, change this to prevent loading older ones if something changes
         /// </summary>
-        private const byte kCacheFileVersion = 3;
+        private const byte CacheFileVersion = 3;
 
         public PlatformManager(SiraLog siraLog,
                                PluginConfig config,
@@ -102,7 +102,7 @@ namespace CustomFloorPlugin
             defaultPlatform.transform.SetParent(_anchor);
             defaultPlatform.platName = "Default Environment";
             defaultPlatform.platAuthor = "Beat Saber";
-            defaultPlatform.icon = _assetLoader.DefaultPlatformCover;
+            defaultPlatform.icon = _assetLoader.DefaultPlatformCover.Value;
             defaultPlatform.isDescriptor = false;
             return defaultPlatform;
         }
@@ -170,7 +170,7 @@ namespace CustomFloorPlugin
         {
             using FileStream stream = new(_cacheFilePath, FileMode.Open, FileAccess.Read);
             using BinaryReader reader = new(stream, Encoding.UTF8);
-            if (reader.ReadByte() != kCacheFileVersion) yield break;
+            if (reader.ReadByte() != CacheFileVersion) yield break;
             int count = reader.ReadInt32();
             for (int i = 0; i < count; i++)
             {
@@ -202,7 +202,7 @@ namespace CustomFloorPlugin
             using FileStream stream = new(_cacheFilePath, FileMode.OpenOrCreate, FileAccess.Write);
             using BinaryWriter writer = new(stream, Encoding.UTF8);
 
-            writer.Write(kCacheFileVersion);
+            writer.Write(CacheFileVersion);
             writer.Write(AllPlatforms.Count - 1);
             for (int i = 1; i < AllPlatforms.Count; i++)
             {

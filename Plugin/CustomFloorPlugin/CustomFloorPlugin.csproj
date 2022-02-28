@@ -14,18 +14,15 @@
     <LocalRefsDir Condition="Exists('..\Refs')">..\Refs</LocalRefsDir>
     <BeatSaberDir>$(LocalRefsDir)</BeatSaberDir>
     <AppOutputBase>$(MSBuildProjectDirectory)\</AppOutputBase>
-    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
     <DebugType>portable</DebugType>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
     <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
     <DebugType>portable</DebugType>
   </PropertyGroup>
 

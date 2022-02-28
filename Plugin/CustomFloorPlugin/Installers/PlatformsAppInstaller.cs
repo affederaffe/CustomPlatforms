@@ -26,7 +26,7 @@ namespace CustomFloorPlugin.Installers
             _config = config;
             MainSystemInit mainSystemInit = ((PCAppInit)sceneContext
                 .GetField<List<MonoInstaller>, Context>("_monoInstallers")
-                .First(x => x is PCAppInit))
+                .First(static x => x is PCAppInit))
                 .GetField<MainSystemInit, PCAppInit>("_mainSystemInit");
             _mirrorRenderer = mainSystemInit.GetField<MirrorRendererSO, MainSystemInit>("_mirrorRenderer");
             _bloomPrePassRenderer = _mirrorRenderer.GetField<BloomPrePassRendererSO, MirrorRendererSO>("_bloomPrePassRenderer");

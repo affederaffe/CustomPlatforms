@@ -62,7 +62,7 @@ namespace CustomFloorPlugin.UI
         [UIAction("select-tab")]
         // ReSharper disable once UnusedMember.Local
         // ReSharper disable once UnusedParameter.Local
-        private void OnDidSelectTab(SegmentedControl segmentedControl, int _)
+        public void OnDidSelectTab(SegmentedControl segmentedControl, int _)
         {
             _tabIndex = segmentedControl.selectedCellNumber;
             int index = GetPlatformIndexForTabIndex(_tabIndex);
@@ -78,7 +78,8 @@ namespace CustomFloorPlugin.UI
         [UIAction("select-platform")]
         // ReSharper disable once UnusedMember.Local
         // ReSharper disable once UnusedParameter.Local
-        private async void OnDidSelectPlatform(TableView _, int index)
+        // ReSharper disable once AsyncVoidMethod
+        public async void OnDidSelectPlatform(TableView _, int index)
         {
             await _platformSpawner.ChangeToPlatformAsync(_platformManager.AllPlatforms[index]);
             switch (_tabIndex)
@@ -133,7 +134,7 @@ namespace CustomFloorPlugin.UI
         /// </summary>
         [UIAction("#post-parse")]
         // ReSharper disable once UnusedMember.Local
-        private void PostParse()
+        public void PostParse()
         {
             _listTables = new[] { _singleplayerPlatformListTable, _multiplayerPlatformListTable, _a360PlatformListTable, _menuPlatformListTable };
             _scrollViews = new ScrollView[_listTables.Length];
@@ -190,7 +191,7 @@ namespace CustomFloorPlugin.UI
         /// <param name="index">The index the cell should be inserted at</param>
         private void AddCellForPlatform(CustomPlatform platform, int index)
         {
-            CustomListTableData.CustomCellInfo cell = new(platform.platName, platform.platAuthor, platform.icon ? platform.icon : _assetLoader.FallbackCover);
+            CustomListTableData.CustomCellInfo cell = new(platform.platName, platform.platAuthor, platform.icon ? platform.icon : _assetLoader.FallbackCover.Value);
             foreach (CustomListTableData listTable in _listTables)
                 listTable.data.Insert(index, cell);
         }

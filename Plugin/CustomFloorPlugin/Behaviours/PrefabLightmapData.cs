@@ -24,7 +24,7 @@ namespace CustomFloorPlugin
                       m_Renderers[m_Renderers.Length - 1].lightmapIndex >= LightmapSettings.lightmaps.Length;
         }
 
-        private void Update()
+        public void Update()
         {
             LightmapData[] lightmapData = LightmapSettings.lightmaps;
             LightmapData[] combinedLightmaps = new LightmapData[m_Lightmaps!.Length + lightmapData.Length];
