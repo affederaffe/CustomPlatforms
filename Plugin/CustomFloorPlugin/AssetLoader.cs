@@ -109,7 +109,7 @@ namespace CustomFloorPlugin
             GameObject playersPlaceCube = GameObject.CreatePrimitive(PrimitiveType.Cube);
             playersPlaceCube.SetActive(false);
             MeshRenderer cubeRenderer = playersPlaceCube.GetComponent<MeshRenderer>();
-            cubeRenderer.material = _materialSwapper.DarkEnvSimpleMaterial;
+            cubeRenderer.material = _materialSwapper.DarkEnvSimpleMaterial.Value;
             playersPlaceCube.transform.localPosition = new Vector3(0f, -50.0075f, 0f);
             playersPlaceCube.transform.localScale = new Vector3(3f, 100f, 2f);
             playersPlaceCube.name = "PlayersPlace";

@@ -81,7 +81,7 @@ namespace CustomFloorPlugin
                     MeshFilter meshFilter = boxLight.AddComponent<MeshFilter>();
                     meshFilter.mesh = _mesh.Value;
                     MeshRenderer renderer = boxLight.AddComponent<MeshRenderer>();
-                    renderer.sharedMaterial = _materialSwapper!.TransparentGlowMaterial;
+                    renderer.sharedMaterial = _materialSwapper!.TransparentGlowMaterial.Value;
                     ParametricBoxController parametricBoxController = boxLight.AddComponent<ParametricBoxController>();
                     parametricBoxController.SetField("_meshRenderer", renderer);
                     tubeBloomPrePassLight.SetField("_center", center);
@@ -99,7 +99,7 @@ namespace CustomFloorPlugin
                 else
                 {
                     Renderer renderer = GetComponent<Renderer>();
-                    renderer.sharedMaterial = _materialSwapper!.OpaqueGlowMaterial;
+                    renderer.sharedMaterial = _materialSwapper!.OpaqueGlowMaterial.Value;
                     MaterialPropertyBlockController materialPropertyBlockController = gameObject.AddComponent<MaterialPropertyBlockController>();
                     materialPropertyBlockController.SetField("_renderers", new[] { renderer });
                     MaterialPropertyBlockColorSetter materialPropertyBlockColorSetter = gameObject.AddComponent<MaterialPropertyBlockColorSetter>();

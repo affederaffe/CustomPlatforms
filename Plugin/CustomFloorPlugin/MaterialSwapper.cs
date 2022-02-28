@@ -1,8 +1,5 @@
-﻿using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-
-using SiraUtil.Zenject;
+﻿using System;
+using System.Linq;
 
 using UnityEngine;
 
@@ -14,25 +11,38 @@ namespace CustomFloorPlugin
     /// Primary reason for this is the absence of proper custom <see cref="Shader"/>s (or decompiled source <see cref="Shader"/>s) and a lack of knowledge about their inner workings...<br/>
     /// Part of the documentation for this file is omitted because it's a clusterfuck and under construction.
     /// </summary>
-    public class MaterialSwapper : IAsyncInitializable
+    public class MaterialSwapper
     {
-        internal Material? DarkEnvSimpleMaterial { get; private set; }
-        internal Material? TransparentGlowMaterial { get; private set; }
-        internal Material? OpaqueGlowMaterial { get; private set; }
+        private Material[]? _materials;
 
-        public async Task InitializeAsync(CancellationToken token)
+        public MaterialSwapper()
         {
-            while (DarkEnvSimpleMaterial is null || TransparentGlowMaterial is null || OpaqueGlowMaterial is null)
-            {
-                await Task.Yield();
-                Material[] materials = Resources.FindObjectsOfTypeAll<Material>();
-                DarkEnvSimpleMaterial ??= materials.FirstOrDefault(static x => x.name == "DarkEnvironmentSimple");
-                TransparentGlowMaterial ??= materials.FirstOrDefault(static x => x.name == "EnvLight");
-                OpaqueGlowMaterial ??= materials.FirstOrDefault(static x => x.name == "EnvLightOpaque");
-            }
+            DarkEnvSimpleMaterial = new Lazy<Material?>(() => FindMaterial("DarkEnvironmentSimple"));
+            TransparentGlowMaterial = new Lazy<Material?>(() => FindMaterialDisableHeightFog("EnvLight"));
+            OpaqueGlowMaterial = new Lazy<Material?>(() => FindMaterialDisableHeightFog("EnvLightOpaque"));
+        }
 
-            OpaqueGlowMaterial.DisableKeyword("ENABLE_HEIGHT_FOG");
-            TransparentGlowMaterial.DisableKeyword("ENABLE_HEIGHT_FOG");
+        internal Lazy<Material?> DarkEnvSimpleMaterial { get; }
+
+        internal Lazy<Material?> TransparentGlowMaterial { get; }
+
+        internal Lazy<Material?> OpaqueGlowMaterial { get; }
+
+        private Material? FindMaterial(string name)
+        {
+            _materials ??= Resources.FindObjectsOfTypeAll<Material>();
+            Material? material = _materials.FirstOrDefault(x => x.name == name);
+            if (material is not null) return material;
+            _materials = Resources.FindObjectsOfTypeAll<Material>();
+            return _materials.FirstOrDefault(x => x.name == name);
+        }
+
+        private Material? FindMaterialDisableHeightFog(string name)
+        {
+            Material? material = FindMaterial(name);
+            if (material is null) return null;
+            material.DisableKeyword("ENABLE_HEIGHT_FOG");
+            return material;
         }
 
         /// <summary>
@@ -58,15 +68,15 @@ namespace CustomFloorPlugin
                 switch (materialsCopy[i].name)
                 {
                     case "_dark_replace (Instance)":
-                        materialsCopy[i] = DarkEnvSimpleMaterial!;
+                        materialsCopy[i] = DarkEnvSimpleMaterial.Value!;
                         materialsDidChange = true;
                         break;
                     case "_transparent_glow_replace (Instance)":
-                        materialsCopy[i] = TransparentGlowMaterial!;
+                        materialsCopy[i] = TransparentGlowMaterial.Value!;
                         materialsDidChange = true;
                         break;
                     case "_glow_replace (Instance)":
-                        materialsCopy[i] = OpaqueGlowMaterial!;
+                        materialsCopy[i] = OpaqueGlowMaterial.Value!;
                         materialsDidChange = true;
                         break;
                 }
