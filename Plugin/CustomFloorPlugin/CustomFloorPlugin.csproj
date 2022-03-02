@@ -43,7 +43,6 @@
     <EmbeddedResource Include="Assets\Floor.png" />
     <EmbeddedResource Include="Assets\Heart.png" />
     <EmbeddedResource Include="Assets\LvlInsaneCover.png" />
-    <EmbeddedResource Include="Assets\Heart.mesh" />
     <EmbeddedResource Include="Assets\PlayersPlace.mesh" />
     <EmbeddedResource Include="Views\PlatformLists.bsml" />
     <EmbeddedResource Include="Views\Settings.bsml" />

@@ -17,6 +17,12 @@ namespace CustomFloorPlugin
         public UnityEvent? OnTrigger;
 
         private BSEvents? _events;
+        private int _subtypeIdentifier;
+
+        public void Awake()
+        {
+            _subtypeIdentifier = BasicBeatmapEventData.SubtypeIdentifier((BasicBeatmapEventType)eventType);
+        }
 
         [Inject]
         public void Construct([InjectOptional] BSEvents events)
@@ -46,7 +52,7 @@ namespace CustomFloorPlugin
         /// <param name="songEventData">Event to evaluate</param>
         private void OnSongEvent(BasicBeatmapEventData songEventData)
         {
-            if (songEventData.subtypeIdentifier == BasicBeatmapEventData.SubtypeIdentifier((BasicBeatmapEventType)eventType) && (songEventData.value == value || anyValue))
+            if (songEventData.subtypeIdentifier == _subtypeIdentifier && (songEventData.value == value || anyValue))
                 OnTrigger!.Invoke();
         }
     }

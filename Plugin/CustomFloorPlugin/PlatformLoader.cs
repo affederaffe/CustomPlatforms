@@ -54,10 +54,11 @@ namespace CustomFloorPlugin
         /// </summary>
         private async Task<CustomPlatform?> LoadPlatformFromFileAsyncCore(string fullPath)
         {
-            byte[] bundleData = await Task.Run(() => File.ReadAllBytes(fullPath));
+            byte[] bundleData = await Task.Run(() => File.ReadAllBytes(fullPath)).ConfigureAwait(true);
+
             AssetBundle? assetBundle = await LoadAssetBundleFromBytesAsync(bundleData);
 
-            if (assetBundle == null)
+            if (assetBundle is null)
             {
                 _siraLog.Error($"File could not be loaded:\n{fullPath}");
                 return null;
@@ -65,7 +66,7 @@ namespace CustomFloorPlugin
 
             GameObject? platformPrefab = await LoadAssetFromAssetBundleAsync<GameObject>(assetBundle, "_CustomPlatform");
 
-            if (platformPrefab == null)
+            if (platformPrefab is null)
             {
                 assetBundle.Unload(true);
                 _siraLog.Error($"Platform GameObject could not be loaded:\n{fullPath}");
@@ -80,7 +81,7 @@ namespace CustomFloorPlugin
             {
                 // Check for old platform
                 global::CustomPlatform? legacyPlatform = platformPrefab.GetComponent<global::CustomPlatform>();
-                if (legacyPlatform != null)
+                if (legacyPlatform is not null)
                 {
                     // Replace legacy platform component with up to date one
                     customPlatform = platformPrefab.AddComponent<CustomPlatform>();
@@ -133,7 +134,7 @@ namespace CustomFloorPlugin
         {
             TaskCompletionSource<AssetBundle?> taskCompletionSource = new();
             AssetBundleCreateRequest? assetBundleCreateRequest = AssetBundle.LoadFromMemoryAsync(data);
-            if (assetBundleCreateRequest == null) return Task.FromResult<AssetBundle?>(null);
+            if (assetBundleCreateRequest is null) return Task.FromResult<AssetBundle?>(null);
             assetBundleCreateRequest.completed += _ => taskCompletionSource.TrySetResult(assetBundleCreateRequest.assetBundle);
             return taskCompletionSource.Task;
         }
@@ -145,7 +146,7 @@ namespace CustomFloorPlugin
         {
             TaskCompletionSource<T?> taskCompletionSource = new();
             AssetBundleRequest? assetBundleRequest = assetBundle.LoadAssetAsync<T>(assetName);
-            if (assetBundleRequest == null) return Task.FromResult<T?>(null);
+            if (assetBundleRequest is null) return Task.FromResult<T?>(null);
             assetBundleRequest.completed += _ => taskCompletionSource.TrySetResult((T?)assetBundleRequest.asset);
             return taskCompletionSource.Task;
         }

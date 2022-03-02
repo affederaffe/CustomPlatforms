@@ -22,7 +22,11 @@ namespace CustomFloorPlugin.UI
         /// </summary>
         [UIValue("changelog-text")]
         public static string Changelog =>
-        @"  <size=150%><color=#888888>Version 6.1.10</color></size>
+        @"  <size=150%><color=#888888>Version 6.1.11</color></size>
+        - Updated for 1.20.0
+        - Minor performance improvements
+
+  <size=150%><color=#888888>Version 6.1.10</color></size>
         - Updated for 1.18.0
 
   <size=150%><color=#888888>Version 6.1.9</color></size>

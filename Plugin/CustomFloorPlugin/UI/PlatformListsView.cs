@@ -107,25 +107,27 @@ namespace CustomFloorPlugin.UI
         /// Changing to the current platform when the menu is shown<br/>
         /// [Called by Beat Saber]
         /// </summary>
-        protected override void DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
+        // ReSharper disable once AsyncVoidMethod
+        protected override async void DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
         {
             base.DidActivate(firstActivation, addedToHierarchy, screenSystemEnabling);
             if (firstActivation) _platformManager.AllPlatforms.CollectionChanged += OnCollectionDidChange;
             CustomPlatform platform = GetPlatformForTabIndex(_tabIndex);
-            _ = _platformSpawner.ChangeToPlatformAsync(platform);
+            await _platformSpawner.ChangeToPlatformAsync(platform);
         }
 
         /// <summary>
         /// Swapping back to the standard menu environment or to the selected singleplayer platform when the menu is closed
         /// [Called by Beat Saber]
         /// </summary>
-        protected override void DidDeactivate(bool removedFromHierarchy, bool screenSystemDisabling)
+        // ReSharper disable once AsyncVoidMethod
+        protected override async void DidDeactivate(bool removedFromHierarchy, bool screenSystemDisabling)
         {
             base.DidDeactivate(removedFromHierarchy, screenSystemDisabling);
             if (removedFromHierarchy) _platformManager.AllPlatforms.CollectionChanged -= OnCollectionDidChange;
             int index = GetPlatformIndexForTabIndex(_tabIndex);
             _listTables[_tabIndex].tableView.SelectCellWithIdx(index);
-            _ = _platformSpawner.ChangeToPlatformAsync(_config.ShufflePlatforms ? _platformSpawner.RandomPlatform : _platformManager.MenuPlatform);
+            await _platformSpawner.ChangeToPlatformAsync(_config.ShufflePlatforms ? _platformSpawner.RandomPlatform : _platformManager.MenuPlatform);
         }
 
         /// <summary>
@@ -191,7 +193,7 @@ namespace CustomFloorPlugin.UI
         /// <param name="index">The index the cell should be inserted at</param>
         private void AddCellForPlatform(CustomPlatform platform, int index)
         {
-            CustomListTableData.CustomCellInfo cell = new(platform.platName, platform.platAuthor, platform.icon ? platform.icon : _assetLoader.FallbackCover.Value);
+            CustomListTableData.CustomCellInfo cell = new(platform.platName, platform.platAuthor, platform.icon ? platform.icon : _assetLoader.FallbackCover);
             foreach (CustomListTableData listTable in _listTables)
                 listTable.data.Insert(index, cell);
         }

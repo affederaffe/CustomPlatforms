@@ -78,7 +78,7 @@ namespace CustomFloorPlugin
         {
             if (!UnityGame.OnMainThread)
             {
-                _ = UnityMainThreadTaskScheduler.Factory.StartNew(() => OnFileChanged(sender, e));
+                await UnityMainThreadTaskScheduler.Factory.StartNew(() => OnFileChanged(sender, e));
                 return;
             }
 
@@ -87,7 +87,7 @@ namespace CustomFloorPlugin
                 bool wasActivePlatform = platform == _platformManager.ActivePlatform;
                 CustomPlatform? newPlatform = await _platformManager.CreatePlatformAsync(e.FullPath);
                 if (!wasActivePlatform || newPlatform is null) return;
-                _ = _platformSpawner.ChangeToPlatformAsync(newPlatform);
+                await _platformSpawner.ChangeToPlatformAsync(newPlatform);
             }
         }
 
@@ -99,7 +99,7 @@ namespace CustomFloorPlugin
         {
             if (!UnityGame.OnMainThread)
             {
-                _ = UnityMainThreadTaskScheduler.Factory.StartNew(() => OnFileCreated(sender, e));
+                await UnityMainThreadTaskScheduler.Factory.StartNew(() => OnFileCreated(sender, e));
                 return;
             }
 
@@ -116,7 +116,7 @@ namespace CustomFloorPlugin
         {
             if (!UnityGame.OnMainThread)
             {
-                _ = UnityMainThreadTaskScheduler.Factory.StartNew(() => OnFileDeleted(sender, e));
+                await UnityMainThreadTaskScheduler.Factory.StartNew(() => OnFileDeleted(sender, e));
                 return;
             }
 
@@ -130,24 +130,24 @@ namespace CustomFloorPlugin
 
         private void InitializeSongCoreConnection()
         {
-            //SongCore.Plugin.CustomSongPlatformSelectionDidChange += OnSongCoreEvent;
-            //SongCore.Collections.RegisterCapability("Custom Platforms");
+            SongCore.Plugin.CustomSongPlatformSelectionDidChange += OnSongCoreEvent;
+            SongCore.Collections.RegisterCapability("Custom Platforms");
         }
 
         private void DisposeSongCoreConnection()
         {
-            //SongCore.Plugin.CustomSongPlatformSelectionDidChange -= OnSongCoreEvent;
-            //SongCore.Collections.DeregisterizeCapability("Custom Platforms");
+            SongCore.Plugin.CustomSongPlatformSelectionDidChange -= OnSongCoreEvent;
+            SongCore.Collections.DeregisterizeCapability("Custom Platforms");
         }
 
         private void InitializeCinemaConnection()
         {
-            //BeatSaberCinema.Events.AllowCustomPlatform += OnCinemaEvent;
+            BeatSaberCinema.Events.AllowCustomPlatform += OnCinemaEvent;
         }
 
         private void DisposeCinemaConnection()
         {
-            //BeatSaberCinema.Events.AllowCustomPlatform -= OnCinemaEvent;
+            BeatSaberCinema.Events.AllowCustomPlatform -= OnCinemaEvent;
         }
 
         /// <summary>
@@ -175,8 +175,9 @@ namespace CustomFloorPlugin
         /// <param name="usePlatform">Whether the selected song requests a platform or not</param>
         /// <param name="name">The name of the requested platform</param>
         /// <param name="hash">The hash of the requested platform</param>
-        /// /// <param name="_1">The <see cref="IPreviewBeatmapLevel"/> the platform was requested for</param>
-        private void OnSongCoreEvent(bool usePlatform, string? name, string? hash, IPreviewBeatmapLevel _1)
+        /// <param name="beatmapLevel">The <see cref="IPreviewBeatmapLevel"/> the platform was requested for</param>
+        // ReSharper disable once AsyncVoidMethod
+        private async void OnSongCoreEvent(bool usePlatform, string? name, string? hash, IPreviewBeatmapLevel beatmapLevel)
         {
             // No platform is requested, abort
             if (!usePlatform)
@@ -196,7 +197,7 @@ namespace CustomFloorPlugin
                 : name is not null ? $"https://modelsaber.com/api/v2/get.php?type=platform&filter=name:{name}"
                 : throw new ArgumentNullException($"{nameof(hash)}, {nameof(name)}", "Invalid platform request");
 
-            Task.Run(() => DownloadPlatform(url, _cancellationTokenSource.Token));
+            await DownloadPlatform(url, _cancellationTokenSource.Token);
         }
 
         /// <summary>

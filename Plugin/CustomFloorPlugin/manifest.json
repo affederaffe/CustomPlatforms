@@ -3,7 +3,7 @@
   "id": "Custom Platforms",
   "name": "Custom Platforms",
   "author": "Rolo",
-  "version": "6.1.10",
+  "version": "6.1.11",
   "description": "A plugin to support custom platforms and environments",
   "gameVersion": "1.19.0",
   "dependsOn": {

@@ -47,11 +47,17 @@ namespace CustomFloorPlugin
         internal ObservableCollection<CustomPlatform> AllPlatforms { get; }
 
         public CustomPlatform DefaultPlatform { get; }
+
         public CustomPlatform ActivePlatform { get; internal set; }
+
         public CustomPlatform SingleplayerPlatform { get; internal set; }
+
         public CustomPlatform MultiplayerPlatform { get; internal set; }
+
         public CustomPlatform A360Platform { get; internal set; }
+
         public CustomPlatform MenuPlatform { get; internal set; }
+
         public CustomPlatform? APIRequestedPlatform { get; internal set; }
 
         /// <summary>
@@ -102,7 +108,7 @@ namespace CustomFloorPlugin
             defaultPlatform.transform.SetParent(_anchor);
             defaultPlatform.platName = "Default Environment";
             defaultPlatform.platAuthor = "Beat Saber";
-            defaultPlatform.icon = _assetLoader.DefaultPlatformCover.Value;
+            defaultPlatform.icon = _assetLoader.DefaultPlatformCover;
             defaultPlatform.isDescriptor = false;
             return defaultPlatform;
         }
@@ -145,7 +151,7 @@ namespace CustomFloorPlugin
             }
 
             sw.Stop();
-            _siraLog.Info($"Loaded {AllPlatforms.Count.ToString(NumberFormatInfo.InvariantInfo)} platforms in {sw.ElapsedMilliseconds.ToString(NumberFormatInfo.InvariantInfo)}ms");
+            _siraLog.Debug($"Loaded {AllPlatforms.Count.ToString(NumberFormatInfo.InvariantInfo)} platforms in {sw.ElapsedMilliseconds.ToString(NumberFormatInfo.InvariantInfo)}ms");
         }
 
         /// <summary>

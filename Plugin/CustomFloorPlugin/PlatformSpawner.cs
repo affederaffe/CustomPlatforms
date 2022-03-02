@@ -69,30 +69,30 @@ namespace CustomFloorPlugin
         /// <summary>
         /// Clean up before switching scenes
         /// </summary>
-        private void OnTransitionDidStart(float aheadTime)
+        // ReSharper disable once AsyncVoidMethod
+        private async void OnTransitionDidStart(float aheadTime)
         {
-            _assetLoader.Heart.Value.SetActive(false);
-            _ = ChangeToPlatformAsync(_platformManager.DefaultPlatform);
+            await ChangeToPlatformAsync(_platformManager.DefaultPlatform);
         }
 
         /// <summary>
         /// Decide which platform to change to based on the type of the <see cref="ScenesTransitionSetupDataSO"/>
         /// </summary>
-        internal void OnTransitionDidFinish(ScenesTransitionSetupDataSO? setupData, DiContainer container)
+        // ReSharper disable once AsyncVoidMethod
+        internal async void OnTransitionDidFinish(ScenesTransitionSetupDataSO? setupData, DiContainer container)
         {
             CustomPlatform platform;
             switch (setupData)
             {
                 case null when _lobbyGameStateModel.gameState != MultiplayerGameState.Lobby:
                 case MenuScenesTransitionSetupDataSO:
-                    _assetLoader.Heart.Value.SetActive(_config.ShowHeart);
                     platform = _config.ShufflePlatforms ? RandomPlatform : _platformManager.MenuPlatform;
                     break;
                 case StandardLevelScenesTransitionSetupDataSO when _platformManager.APIRequestedPlatform is not null:
                     platform = _platformManager.APIRequestedPlatform;
                     break;
                 case StandardLevelScenesTransitionSetupDataSO standardLevelScenesTransitionSetupDataSO when standardLevelScenesTransitionSetupDataSO.difficultyBeatmap.parentDifficultyBeatmapSet.beatmapCharacteristic.requires360Movement:
-                    platform = _platformManager.A360Platform;
+                    platform = _config.ShufflePlatforms ? RandomPlatform : _platformManager.A360Platform;
                     break;
                 case StandardLevelScenesTransitionSetupDataSO:
                 case MissionLevelScenesTransitionSetupDataSO:
@@ -100,7 +100,7 @@ namespace CustomFloorPlugin
                     platform = _config.ShufflePlatforms ? RandomPlatform : _platformManager.SingleplayerPlatform;
                     break;
                 case MultiplayerLevelScenesTransitionSetupDataSO when container.HasBinding<MultiplayerLocalActivePlayerFacade>():
-                    platform = _platformManager.MultiplayerPlatform;
+                    platform = _config.ShufflePlatforms ? RandomPlatform : _platformManager.MultiplayerPlatform;
                     break;
                 case null:
                 case BeatmapEditorScenesTransitionSetupDataSO:
@@ -112,23 +112,22 @@ namespace CustomFloorPlugin
 
             _container = container;
             _environmentHider.UpdateEnvironmentRoot(setupData, container);
-            _ = ChangeToPlatformAsync(platform);
+            await ChangeToPlatformAsync(platform);
         }
 
         /// <summary>
         /// Despawns the current platform when entering a lobby and changing back when leaving
         /// </summary>
-        private void OnMultiplayerGameStateModelDidChange(MultiplayerGameState multiplayerGameState)
+        // ReSharper disable once AsyncVoidMethod
+        private async void OnMultiplayerGameStateModelDidChange(MultiplayerGameState multiplayerGameState)
         {
             CustomPlatform platform;
             switch (multiplayerGameState)
             {
                 case MultiplayerGameState.None:
-                    _assetLoader.Heart.Value.SetActive(_config.ShowHeart);
                     platform = _config.ShufflePlatforms ? RandomPlatform : _platformManager.MenuPlatform;
                     break;
                 case MultiplayerGameState.Lobby when _prevGameState != MultiplayerGameState.Game:
-                    _assetLoader.Heart.Value.SetActive(false);
                     platform = _platformManager.DefaultPlatform;
                     break;
                 default:
@@ -136,7 +135,7 @@ namespace CustomFloorPlugin
             }
 
             _prevGameState = multiplayerGameState;
-            _ = ChangeToPlatformAsync(platform);
+            await ChangeToPlatformAsync(platform);
         }
 
         /// <summary>
@@ -181,7 +180,7 @@ namespace CustomFloorPlugin
         /// </summary>
         private void SpawnCustomObjects()
         {
-            if (_lobbyGameStateModel.gameState == MultiplayerGameState.Game) _assetLoader.MultiplayerLightEffects.Value.PlatformEnabled(_container);
+            if (_lobbyGameStateModel.gameState == MultiplayerGameState.Game) _assetLoader.MultiplayerLightEffects.PlatformEnabled(_container);
             foreach (INotifyPlatformEnabled notifyEnable in _platformManager.ActivePlatform.GetComponentsInChildren<INotifyPlatformEnabled>(true))
                 notifyEnable?.PlatformEnabled(_container);
         }
@@ -191,7 +190,7 @@ namespace CustomFloorPlugin
         /// </summary>
         private void DestroyCustomObjects()
         {
-            if (_lobbyGameStateModel.gameState != MultiplayerGameState.None) _assetLoader.MultiplayerLightEffects.Value.PlatformDisabled();
+            if (_lobbyGameStateModel.gameState != MultiplayerGameState.None) _assetLoader.MultiplayerLightEffects.PlatformDisabled();
             foreach (INotifyPlatformDisabled notifyDisable in _platformManager.ActivePlatform.GetComponentsInChildren<INotifyPlatformDisabled>(true))
                 notifyDisable?.PlatformDisabled();
         }

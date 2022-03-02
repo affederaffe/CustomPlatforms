@@ -1,4 +1,3 @@
-using System;
 using System.Linq;
 
 using CustomFloorPlugin.Interfaces;
@@ -79,9 +78,9 @@ namespace CustomFloorPlugin
                     boxLightTransform.transform.SetParent(transform);
                     boxLightTransform.transform.localRotation = Quaternion.Euler(Vector3.zero);
                     MeshFilter meshFilter = boxLight.AddComponent<MeshFilter>();
-                    meshFilter.mesh = _mesh.Value;
+                    meshFilter.mesh = _mesh;
                     MeshRenderer renderer = boxLight.AddComponent<MeshRenderer>();
-                    renderer.sharedMaterial = _materialSwapper!.TransparentGlowMaterial.Value;
+                    renderer.sharedMaterial = _materialSwapper!.TransparentGlowMaterial;
                     ParametricBoxController parametricBoxController = boxLight.AddComponent<ParametricBoxController>();
                     parametricBoxController.SetField("_meshRenderer", renderer);
                     tubeBloomPrePassLight.SetField("_center", center);
@@ -99,7 +98,7 @@ namespace CustomFloorPlugin
                 else
                 {
                     Renderer renderer = GetComponent<Renderer>();
-                    renderer.sharedMaterial = _materialSwapper!.OpaqueGlowMaterial.Value;
+                    renderer.sharedMaterial = _materialSwapper!.OpaqueGlowMaterial;
                     MaterialPropertyBlockController materialPropertyBlockController = gameObject.AddComponent<MaterialPropertyBlockController>();
                     materialPropertyBlockController.SetField("_renderers", new[] { renderer });
                     MaterialPropertyBlockColorSetter materialPropertyBlockColorSetter = gameObject.AddComponent<MaterialPropertyBlockColorSetter>();
@@ -124,9 +123,7 @@ namespace CustomFloorPlugin
             _instancedMaterialLightWithId.ColorWasSet(color);
         }
 
-        private static readonly Lazy<Mesh> _mesh = new(CreateMesh);
-
-        private static Mesh CreateMesh() => new()
+        private static readonly Mesh _mesh = new()
         {
             vertices = new Vector3[]
             {

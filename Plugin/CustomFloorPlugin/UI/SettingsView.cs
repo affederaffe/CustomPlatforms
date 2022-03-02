@@ -19,14 +19,12 @@ namespace CustomFloorPlugin.UI
     internal class SettingsView : BSMLAutomaticViewController
     {
         private PluginConfig _config = null!;
-        private AssetLoader _assetLoader = null!;
         private EnvironmentHider _environmentHider = null!;
 
         [Inject]
-        public void Construct(PluginConfig config, AssetLoader assetLoader, EnvironmentHider environmentHider)
+        public void Construct(PluginConfig config, EnvironmentHider environmentHider)
         {
             _config = config;
-            _assetLoader = assetLoader;
             _environmentHider = environmentHider;
         }
 
@@ -39,17 +37,6 @@ namespace CustomFloorPlugin.UI
         {
             get => _config.AlwaysShowFeet;
             set => _environmentHider.ToggleFeet(!(_config.AlwaysShowFeet = value));
-        }
-
-        /// <summary>
-        /// Should the heart next to the logo be visible?<br/>
-        /// Forwards the current choice to the UI, and the new choice to the plugin
-        /// </summary>
-        [UIValue("show-heart")]
-        public bool ShowHeart
-        {
-            get => _config.ShowHeart;
-            set => _assetLoader.Heart.Value.SetActive(_config.ShowHeart = value);
         }
 
         /// <summary>
@@ -73,11 +60,5 @@ namespace CustomFloorPlugin.UI
             get => _config.DisableGradientBackground;
             set => _environmentHider.ToggleGradientBackground(_config.DisableGradientBackground = value);
         }
-
-        [UIValue("show-heart-hover-hint")]
-        public static string ShowHeartHoverHint => "I <3 Beat Saber";
-
-        [UIValue("shuffle-platforms-hover-hint")]
-        public static string ShufflePlatformsHoverHint => "Use a random platform\n singleplayer | menu only";
     }
 }

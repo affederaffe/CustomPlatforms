@@ -17,6 +17,7 @@ namespace CustomFloorPlugin
         private readonly BeatmapObjectManager _beatmapObjectManager;
         private readonly ComboController _comboController;
         private readonly BeatmapCallbacksController _beatmapCallbacksController;
+        private readonly int _bombSubtypeIdentifier;
 
         private BeatmapDataCallbackWrapper? _beatmapDataCallbackWrapper;
         private int _anyCutCount;
@@ -40,6 +41,7 @@ namespace CustomFloorPlugin
             _beatmapObjectManager = beatmapObjectManager;
             _beatmapCallbacksController = beatmapCallbacksController;
             _comboController = comboController;
+            _bombSubtypeIdentifier = NoteData.SubtypeIdentifier(ColorType.None);
         }
 
         public event Action<BasicBeatmapEventData>? BeatmapEventDidTriggerEvent;
@@ -96,7 +98,7 @@ namespace CustomFloorPlugin
 
         private void NoteWasCut(NoteController noteController, in NoteCutInfo noteCutInfo)
         {
-            if (noteController.noteData.subtypeIdentifier == NoteData.SubtypeIdentifier(ColorType.None)) return;
+            if (noteController.noteData.subtypeIdentifier == _bombSubtypeIdentifier) return;
             AllNotesCountDidChangeEvent?.Invoke(_anyCutCount++, _cuttableNotesCount);
             if (noteCutInfo.allIsOK)
             {
@@ -111,7 +113,7 @@ namespace CustomFloorPlugin
 
         private void NoteWasMissed(NoteController noteController)
         {
-            if (noteController.noteData.subtypeIdentifier == NoteData.SubtypeIdentifier(ColorType.None)) return;
+            if (noteController.noteData.subtypeIdentifier == _bombSubtypeIdentifier) return;
             NoteWasMissedEvent?.Invoke();
             AllNotesCountDidChangeEvent?.Invoke(_anyCutCount++, _cuttableNotesCount);
             MissCountDidChangeEvent?.Invoke(_missCount++);
@@ -124,6 +126,7 @@ namespace CustomFloorPlugin
         }
 
         private void LevelFinished() => LevelFinishedEvent?.Invoke();
+
         private void LevelFailed() => LevelFailedEvent?.Invoke();
 
         private void SabersStartCollide(SaberType saberType) => SabersStartCollideEvent?.Invoke();

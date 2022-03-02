@@ -13,7 +13,7 @@ namespace CustomFloorPlugin
 {
     /// <summary>
     /// Activates and deactivates world geometry in the active scene as required by the chosen custom platform<br />
-    /// Most documentation on this file is omitted because it is a giant clusterfuck and I hate it... with a passion.
+    /// Most documentation on this file is omitted because it is a giant clusterfuck and I hate it.
     /// </summary>
     public sealed class EnvironmentHider
     {
@@ -94,7 +94,7 @@ namespace CustomFloorPlugin
             SetCollectionHidden(_rotatingLasers, platform.hideRotatingLasers);
             SetCollectionHidden(_trackLights, platform.hideTrackLights);
             bool showPlayersPlace = _sceneName == "MainMenu" && !platform.hideDefaultPlatform && platform != _platformManager.DefaultPlatform;
-            _assetLoader.PlayersPlace.Value.SetActive(showPlayersPlace);
+            _assetLoader.PlayersPlace.SetActive(showPlayersPlace);
         }
 
         internal void ToggleGradientBackground(bool active)

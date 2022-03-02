@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Reflection;
@@ -26,40 +25,34 @@ namespace CustomFloorPlugin
         private readonly MaterialSwapper _materialSwapper;
 
         /// <summary>
-        /// The old heart, to remind everyone that this plugin is some legacy garbage
-        /// </summary>
-        internal Lazy<GameObject> Heart { get; }
-
-        /// <summary>
         /// Used as a players place replacement in platform preview
         /// </summary>
-        internal Lazy<GameObject> PlayersPlace { get; }
+        internal GameObject PlayersPlace => _playersPlace ??= CreatePlayersPlace();
+        private GameObject? _playersPlace;
 
         /// <summary>
         /// The cover for the default platform
         /// </summary>
-        internal Lazy<Sprite> DefaultPlatformCover { get; }
+        internal Sprite DefaultPlatformCover => _defaultPlatformCover ??= CreateDefaultPlatformCover();
+        private Sprite? _defaultPlatformCover;
 
         /// <summary>
         /// The cover used for all platforms normally missing one
         /// </summary>
-        internal Lazy<Sprite> FallbackCover { get; }
+        internal Sprite FallbackCover => _fallbackCover ??= CreateFallbackCover();
+        private Sprite? _fallbackCover;
 
         /// <summary>
         /// Multiplayer light effects
         /// </summary>
-        internal Lazy<LightEffects> MultiplayerLightEffects { get; }
+        internal LightEffects MultiplayerLightEffects => _lightEffects ??= new GameObject("LightEffects").AddComponent<LightEffects>();
+        private LightEffects? _lightEffects;
 
         public AssetLoader(DiContainer container, Assembly assembly, MaterialSwapper materialSwapper)
         {
             _container = container;
             _assembly = assembly;
             _materialSwapper = materialSwapper;
-            Heart = new Lazy<GameObject>(CreateHeart);
-            PlayersPlace = new Lazy<GameObject>(CreatePlayersPlace);
-            DefaultPlatformCover = new Lazy<Sprite>(CreateDefaultPlatformCover);
-            FallbackCover = new Lazy<Sprite>(CreateFallbackCover);
-            MultiplayerLightEffects = new Lazy<LightEffects>(static () => new GameObject("LightEffects").AddComponent<LightEffects>());
         }
 
         private Sprite CreateDefaultPlatformCover()
@@ -74,42 +67,12 @@ namespace CustomFloorPlugin
             return fallbackCoverStream.ReadTexture2D().ToSprite();
         }
 
-        private GameObject CreateHeart()
-        {
-            (Vector3[] vertices, int[] triangles) = ParseMesh("CustomFloorPlugin.Assets.Heart.mesh");
-            Mesh mesh = new()
-            {
-                vertices = vertices,
-                triangles = triangles
-            };
-
-            GameObject heart = new("<3");
-            heart.SetActive(false);
-            heart.AddComponent<MeshRenderer>();
-            MeshFilter meshFilter = heart.AddComponent<MeshFilter>();
-            meshFilter.mesh = mesh;
-            heart.transform.localPosition = new Vector3(-8f, 25f, 26f);
-            heart.transform.localRotation = Quaternion.Euler(-100f, 90f, 90f);
-            heart.transform.localScale = new Vector3(25f, 25f, 25f);
-            TubeLight tubeLight = heart.AddComponent<TubeLight>();
-            tubeLight.color = Color.magenta;
-            tubeLight.PlatformEnabled(_container);
-            return heart;
-        }
-
         private GameObject CreatePlayersPlace()
         {
-            (Vector3[] vertices, int[] triangles) = ParseMesh("CustomFloorPlugin.Assets.PlayersPlace.mesh");
-            Mesh mesh = new()
-            {
-                vertices = vertices,
-                triangles = triangles
-            };
-
             GameObject playersPlaceCube = GameObject.CreatePrimitive(PrimitiveType.Cube);
             playersPlaceCube.SetActive(false);
             MeshRenderer cubeRenderer = playersPlaceCube.GetComponent<MeshRenderer>();
-            cubeRenderer.material = _materialSwapper.DarkEnvSimpleMaterial.Value;
+            cubeRenderer.material = _materialSwapper.DarkEnvSimpleMaterial;
             playersPlaceCube.transform.localPosition = new Vector3(0f, -50.0075f, 0f);
             playersPlaceCube.transform.localScale = new Vector3(3f, 100f, 2f);
             playersPlaceCube.name = "PlayersPlace";
@@ -129,7 +92,7 @@ namespace CustomFloorPlugin
             playersPlaceFrame.transform.SetParent(playersPlaceCube.transform);
             playersPlaceFrame.AddComponent<MeshRenderer>();
             MeshFilter meshFilter = playersPlaceFrame.AddComponent<MeshFilter>();
-            meshFilter.mesh = mesh;
+            meshFilter.mesh = ParseMesh("CustomFloorPlugin.Assets.PlayersPlace.mesh");
             TubeLight tubeLight = playersPlaceFrame.AddComponent<TubeLight>();
             tubeLight.color = Color.blue;
             tubeLight.PlatformEnabled(_container);
@@ -139,7 +102,7 @@ namespace CustomFloorPlugin
 
         private Stream GetEmbeddedResource(string name) => _assembly.GetManifestResourceStream(name)!;
 
-        private (Vector3[] vertices, int[] triangles) ParseMesh(string resourcePath)
+        private Mesh ParseMesh(string resourcePath)
         {
             using Stream manifestResourceStream = GetEmbeddedResource(resourcePath);
             using StreamReader streamReader = new(manifestResourceStream);
@@ -164,7 +127,7 @@ namespace CustomFloorPlugin
             foreach (string strInt in trianglesRaw)
                 triangles[i++] = int.Parse(strInt, NumberFormatInfo.InvariantInfo);
 
-            return (vertices, triangles);
+            return new Mesh { vertices = vertices, triangles = triangles };
         }
 
         /// <summary>

@@ -1,5 +1,4 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 
 using UnityEngine;
 
@@ -15,25 +14,18 @@ namespace CustomFloorPlugin
     {
         private Material[]? _materials;
 
-        public MaterialSwapper()
-        {
-            DarkEnvSimpleMaterial = new Lazy<Material?>(() => FindMaterial("DarkEnvironmentSimple"));
-            TransparentGlowMaterial = new Lazy<Material?>(() => FindMaterialDisableHeightFog("EnvLight"));
-            OpaqueGlowMaterial = new Lazy<Material?>(() => FindMaterialDisableHeightFog("EnvLightOpaque"));
-        }
+        internal Material? DarkEnvSimpleMaterial => _darkEnvSimpleMaterial ??= FindMaterial("DarkEnvironmentSimple");
+        private Material? _darkEnvSimpleMaterial;
 
-        internal Lazy<Material?> DarkEnvSimpleMaterial { get; }
+        internal Material? TransparentGlowMaterial => _transparentGlowMaterial ??= FindMaterialDisableHeightFog("EnvLight");
+        private Material? _transparentGlowMaterial;
 
-        internal Lazy<Material?> TransparentGlowMaterial { get; }
-
-        internal Lazy<Material?> OpaqueGlowMaterial { get; }
+        internal Material? OpaqueGlowMaterial => _opaqueGlowMaterial ??= FindMaterialDisableHeightFog("EnvLightOpaque");
+        private Material? _opaqueGlowMaterial;
 
         private Material? FindMaterial(string name)
         {
             _materials ??= Resources.FindObjectsOfTypeAll<Material>();
-            Material? material = _materials.FirstOrDefault(x => x.name == name);
-            if (material is not null) return material;
-            _materials = Resources.FindObjectsOfTypeAll<Material>();
             return _materials.FirstOrDefault(x => x.name == name);
         }
 
@@ -68,15 +60,15 @@ namespace CustomFloorPlugin
                 switch (materialsCopy[i].name)
                 {
                     case "_dark_replace (Instance)":
-                        materialsCopy[i] = DarkEnvSimpleMaterial.Value!;
+                        materialsCopy[i] = DarkEnvSimpleMaterial!;
                         materialsDidChange = true;
                         break;
                     case "_transparent_glow_replace (Instance)":
-                        materialsCopy[i] = TransparentGlowMaterial.Value!;
+                        materialsCopy[i] = TransparentGlowMaterial!;
                         materialsDidChange = true;
                         break;
                     case "_glow_replace (Instance)":
-                        materialsCopy[i] = OpaqueGlowMaterial.Value!;
+                        materialsCopy[i] = OpaqueGlowMaterial!;
                         materialsDidChange = true;
                         break;
                 }
