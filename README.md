@@ -29,8 +29,6 @@ Visit the Platforms Menu page ingame to do things like:
 * Change your platform for different gamemodes
 * View the changelog
 * Always show feet, to mark the center of the room
-* Hide the :heart: that CustomPlatforms uses as a cloneable light source
-* Show your selected platform in the menu
 
 ## Adding More Platforms
 
@@ -59,6 +57,21 @@ You can use most of the built in Unity components, custom shaders and materials,
 In the inspector, click "Export". Navigate to your CustomPlatforms folder, and press save.
 
 6. Share your custom platform with other players by uploading the Platforms' .plat file
+
+## Building
+1. Clone the repository with ```git clone https://github.com/affederaffe/CustomPlatforms.git```
+2. Go to the ```./CustomPlatforms/Plugin/CustomFloorPlugin``` direcory and create a ```CustomFloorPlugin.csproj.user``` file, see the example below
+3. Open the solution file in the ```Plugins``` directory with e.g. VisualStudio or Jetbrains Rider and build the project
+
+#### Example csproj.user File:
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <BeatSaberDir>Full\Path\To\Beat Saber</BeatSaberDir>
+  </PropertyGroup>
+</Project>
+```
 
 ## Hall of Fame (Credits for major rework contributions)
 #### AkaRaiden - (The QA Department, Beta Tester, Tome of Wisdom)
