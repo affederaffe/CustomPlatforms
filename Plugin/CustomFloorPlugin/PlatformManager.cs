@@ -18,6 +18,8 @@ using SiraUtil.Zenject;
 
 using UnityEngine;
 
+using Zenject;
+
 
 namespace CustomFloorPlugin
 {
@@ -67,6 +69,7 @@ namespace CustomFloorPlugin
 
         public PlatformManager(SiraLog siraLog,
                                PluginConfig config,
+                               [Inject(Id = "CustomPlatforms")] Transform anchor,
                                AssetLoader assetLoader,
                                PlatformLoader platformLoader)
         {
@@ -74,7 +77,7 @@ namespace CustomFloorPlugin
             _config = config;
             _assetLoader = assetLoader;
             _platformLoader = platformLoader;
-            _anchor = new GameObject("CustomPlatforms").transform;
+            _anchor = anchor;
             _directoryPath = Path.Combine(UnityGame.InstallPath, "CustomPlatforms");
             _cacheFilePath = Path.Combine(DirectoryPath, "cache.dat");
             DefaultPlatform = CreateDefaultPlatform();

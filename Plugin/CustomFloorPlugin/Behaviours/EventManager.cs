@@ -54,9 +54,8 @@ namespace CustomFloorPlugin
         {
             container.Inject(this);
             if (_events is null) return;
-            _events.BeatmapEventDidTriggerEvent += LightEventCallBack;
-            _events.NoteWasCutEvent += OnSimpleSlice;
-            _events.NoteWasCutEvent += OnSpecificSlice.Invoke;
+            _events.BeatmapEventDidTriggerEvent += OnBeatmapEventDidTriggerEvent;
+            _events.NoteWasCutEvent += OnNoteWasCut;
             _events.NoteWasMissedEvent += OnMiss!.Invoke;
             _events.ComboDidBreakEvent += OnComboBreak!.Invoke;
             _events.MultiplierDidIncreaseEvent += MultiplierUp!.Invoke;
@@ -76,9 +75,8 @@ namespace CustomFloorPlugin
         public void PlatformDisabled()
         {
             if (_events is null) return;
-            _events.BeatmapEventDidTriggerEvent -= LightEventCallBack;
-            _events.NoteWasCutEvent -= OnSimpleSlice;
-            _events.NoteWasCutEvent -= OnSpecificSlice.Invoke;
+            _events.BeatmapEventDidTriggerEvent -= OnBeatmapEventDidTriggerEvent;
+            _events.NoteWasCutEvent -= OnNoteWasCut;
             _events.NoteWasMissedEvent -= OnMiss!.Invoke;
             _events.ComboDidBreakEvent -= OnComboBreak!.Invoke;
             _events.MultiplierDidIncreaseEvent -= MultiplierUp!.Invoke;
@@ -97,12 +95,16 @@ namespace CustomFloorPlugin
         /// <summary>
         /// Triggers subscribed functions when any block was cut
         /// </summary>
-        private void OnSimpleSlice(int _) => OnSlice!.Invoke();
+        private void OnNoteWasCut(SaberType saberType)
+        {
+            OnSlice!.Invoke();
+            OnSpecificSlice.Invoke((int)saberType);
+        }
 
         /// <summary>
         /// Triggers subscribed functions if lights are turned on
         /// </summary>
-        private void LightEventCallBack(BasicBeatmapEventData songEvent)
+        private void OnBeatmapEventDidTriggerEvent(BasicBeatmapEventData songEvent)
         {
             if ((int)songEvent.type >= 5) return;
             switch (songEvent.value)

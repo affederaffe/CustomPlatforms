@@ -26,7 +26,7 @@ namespace CustomFloorPlugin
         /// </summary>
         private const int OnlyInHeadset = 4;
 
-        private void Awake()
+        public void Awake()
         {
             int layer = gameObject.layer;
             switch (visibilityMode)

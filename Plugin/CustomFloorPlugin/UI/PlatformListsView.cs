@@ -60,8 +60,6 @@ namespace CustomFloorPlugin.UI
         /// <param name="segmentedControl">Used to gather the cell index</param>
         /// <param name="_">I love how optimised BSML is</param>
         [UIAction("select-tab")]
-        // ReSharper disable once UnusedMember.Local
-        // ReSharper disable once UnusedParameter.Local
         public void OnDidSelectTab(SegmentedControl segmentedControl, int _)
         {
             _tabIndex = segmentedControl.selectedCellNumber;
@@ -76,8 +74,6 @@ namespace CustomFloorPlugin.UI
         /// <param name="_">I love how optimised BSML is</param>
         /// <param name="index">Cell index of the users selection</param>
         [UIAction("select-platform")]
-        // ReSharper disable once UnusedMember.Local
-        // ReSharper disable once UnusedParameter.Local
         // ReSharper disable once AsyncVoidMethod
         public async void OnDidSelectPlatform(TableView _, int index)
         {
@@ -135,7 +131,6 @@ namespace CustomFloorPlugin.UI
         /// [Called by BSML]
         /// </summary>
         [UIAction("#post-parse")]
-        // ReSharper disable once UnusedMember.Local
         public void PostParse()
         {
             _listTables = new[] { _singleplayerPlatformListTable, _multiplayerPlatformListTable, _a360PlatformListTable, _menuPlatformListTable };

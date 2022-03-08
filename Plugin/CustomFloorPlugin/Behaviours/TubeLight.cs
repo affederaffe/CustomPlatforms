@@ -78,7 +78,7 @@ namespace CustomFloorPlugin
                     boxLightTransform.transform.SetParent(transform);
                     boxLightTransform.transform.localRotation = Quaternion.Euler(Vector3.zero);
                     MeshFilter meshFilter = boxLight.AddComponent<MeshFilter>();
-                    meshFilter.mesh = _mesh;
+                    meshFilter.mesh = Mesh;
                     MeshRenderer renderer = boxLight.AddComponent<MeshRenderer>();
                     renderer.sharedMaterial = _materialSwapper!.TransparentGlowMaterial;
                     ParametricBoxController parametricBoxController = boxLight.AddComponent<ParametricBoxController>();
@@ -123,7 +123,8 @@ namespace CustomFloorPlugin
             _instancedMaterialLightWithId.ColorWasSet(color);
         }
 
-        private static readonly Mesh _mesh = new()
+        private static Mesh? _mesh;
+        private static Mesh Mesh => _mesh ??= new Mesh
         {
             vertices = new Vector3[]
             {

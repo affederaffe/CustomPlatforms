@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Reflection;
@@ -20,6 +21,7 @@ namespace CustomFloorPlugin
     /// </summary>
     public class AssetLoader
     {
+        private readonly Transform _anchor;
         private readonly DiContainer _container;
         private readonly Assembly _assembly;
         private readonly MaterialSwapper _materialSwapper;
@@ -45,13 +47,14 @@ namespace CustomFloorPlugin
         /// <summary>
         /// Multiplayer light effects
         /// </summary>
-        internal LightEffects MultiplayerLightEffects => _lightEffects ??= new GameObject("LightEffects").AddComponent<LightEffects>();
+        internal LightEffects MultiplayerLightEffects => _lightEffects ??= CreateLightEffects();
         private LightEffects? _lightEffects;
 
-        public AssetLoader(DiContainer container, Assembly assembly, MaterialSwapper materialSwapper)
+        public AssetLoader(DiContainer container, Assembly assembly, [Inject(Id = "CustomPlatforms")] Transform anchor, MaterialSwapper materialSwapper)
         {
             _container = container;
             _assembly = assembly;
+            _anchor = anchor;
             _materialSwapper = materialSwapper;
         }
 
@@ -67,21 +70,31 @@ namespace CustomFloorPlugin
             return fallbackCoverStream.ReadTexture2D().ToSprite();
         }
 
+        private LightEffects CreateLightEffects()
+        {
+            GameObject lightEffects = new("LightEffects");
+            lightEffects.transform.SetParent(_anchor);
+            return lightEffects.AddComponent<LightEffects>();
+        }
+
         private GameObject CreatePlayersPlace()
         {
             GameObject playersPlaceCube = GameObject.CreatePrimitive(PrimitiveType.Cube);
             playersPlaceCube.SetActive(false);
+            Transform playersPlaceCubeTransform = playersPlaceCube.transform;
+            playersPlaceCubeTransform.SetParent(_anchor);
             MeshRenderer cubeRenderer = playersPlaceCube.GetComponent<MeshRenderer>();
             cubeRenderer.material = _materialSwapper.DarkEnvSimpleMaterial;
-            playersPlaceCube.transform.localPosition = new Vector3(0f, -50.0075f, 0f);
-            playersPlaceCube.transform.localScale = new Vector3(3f, 100f, 2f);
+            playersPlaceCubeTransform.localPosition = new Vector3(0f, -50.0075f, 0f);
+            playersPlaceCubeTransform.localScale = new Vector3(3f, 100f, 2f);
             playersPlaceCube.name = "PlayersPlace";
 
             GameObject playersPlaceMirror = GameObject.CreatePrimitive(PrimitiveType.Plane);
+            Transform playersPlaceMirrorTransform = playersPlaceMirror.transform;
             playersPlaceMirror.name = "Mirror";
-            playersPlaceMirror.transform.SetParent(playersPlaceCube.transform);
-            playersPlaceMirror.transform.localScale = new Vector3(0.1f, 0f, 0.1f);
-            playersPlaceMirror.transform.localPosition = new Vector3(0f, 0.5001f, 0f);
+            playersPlaceMirrorTransform.SetParent(playersPlaceCubeTransform);
+            playersPlaceMirrorTransform.localScale = new Vector3(0.1f, 0f, 0.1f);
+            playersPlaceMirrorTransform.localPosition = new Vector3(0f, 0.5001f, 0f);
             TrackMirror trackMirror = playersPlaceMirror.AddComponent<TrackMirror>();
             trackMirror.bumpIntensity = 0.02f;
             using Stream floorStream = GetEmbeddedResource("CustomFloorPlugin.Assets.Floor.png");
@@ -89,7 +102,7 @@ namespace CustomFloorPlugin
             trackMirror.PlatformEnabled(_container);
 
             GameObject playersPlaceFrame = new("Frame");
-            playersPlaceFrame.transform.SetParent(playersPlaceCube.transform);
+            playersPlaceFrame.transform.SetParent(playersPlaceCubeTransform);
             playersPlaceFrame.AddComponent<MeshRenderer>();
             MeshFilter meshFilter = playersPlaceFrame.AddComponent<MeshFilter>();
             meshFilter.mesh = ParseMesh("CustomFloorPlugin.Assets.PlayersPlace.mesh");
@@ -162,6 +175,7 @@ namespace CustomFloorPlugin
 
             public void PlatformEnabled(DiContainer container)
             {
+                Console.WriteLine("Enabling LightEffects");
                 container.Inject(this);
                 gameObject.SetActive(false);
                 List<ILightWithId>?[] lights = _lightWithIdManager.GetField<List<ILightWithId>?[], LightWithIdManager>("_lights");

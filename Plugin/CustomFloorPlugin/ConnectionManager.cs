@@ -130,24 +130,24 @@ namespace CustomFloorPlugin
 
         private void InitializeSongCoreConnection()
         {
-            SongCore.Plugin.CustomSongPlatformSelectionDidChange += OnSongCoreEvent;
-            SongCore.Collections.RegisterCapability("Custom Platforms");
+            //SongCore.Plugin.CustomSongPlatformSelectionDidChange += OnSongCoreEvent;
+            //SongCore.Collections.RegisterCapability("Custom Platforms");
         }
 
         private void DisposeSongCoreConnection()
         {
-            SongCore.Plugin.CustomSongPlatformSelectionDidChange -= OnSongCoreEvent;
-            SongCore.Collections.DeregisterizeCapability("Custom Platforms");
+            //SongCore.Plugin.CustomSongPlatformSelectionDidChange -= OnSongCoreEvent;
+            //SongCore.Collections.DeregisterizeCapability("Custom Platforms");
         }
 
         private void InitializeCinemaConnection()
         {
-            BeatSaberCinema.Events.AllowCustomPlatform += OnCinemaEvent;
+            //BeatSaberCinema.Events.AllowCustomPlatform += OnCinemaEvent;
         }
 
         private void DisposeCinemaConnection()
         {
-            BeatSaberCinema.Events.AllowCustomPlatform -= OnCinemaEvent;
+            //BeatSaberCinema.Events.AllowCustomPlatform -= OnCinemaEvent;
         }
 
         /// <summary>

@@ -10,7 +10,7 @@ namespace CustomFloorPlugin
     /// </summary>
     public sealed class BSEvents : IInitializable, IDisposable
     {
-        private readonly ILevelEndActions _levelEndActions;
+        private readonly ILevelEndActions? _levelEndActions;
         private readonly IReadonlyBeatmapData _beatmapData;
         private readonly ObstacleSaberSparkleEffectManager _obstacleSaberSparkleEffectManager;
         private readonly ScoreController _scoreController;
@@ -26,7 +26,7 @@ namespace CustomFloorPlugin
         private int _missCount;
         private int _cuttableNotesCount;
 
-        public BSEvents(ILevelEndActions levelEndActions,
+        public BSEvents([InjectOptional] ILevelEndActions levelEndActions,
                         IReadonlyBeatmapData beatmapData,
                         ObstacleSaberSparkleEffectManager obstacleSaberSparkleEffectManager,
                         ScoreController scoreController,
@@ -47,7 +47,7 @@ namespace CustomFloorPlugin
         public event Action<BasicBeatmapEventData>? BeatmapEventDidTriggerEvent;
         public event Action? LevelFinishedEvent;
         public event Action? LevelFailedEvent;
-        public event Action<int>? NoteWasCutEvent;
+        public event Action<SaberType>? NoteWasCutEvent;
         public event Action? NoteWasMissedEvent;
         public event Action? ComboDidBreakEvent;
         public event Action<int>? GoodCutCountDidChangeEvent;
@@ -64,8 +64,6 @@ namespace CustomFloorPlugin
         {
             _cuttableNotesCount = _beatmapData.cuttableNotesCount - 1;
             _beatmapDataCallbackWrapper = _beatmapCallbacksController.AddBeatmapCallback<BasicBeatmapEventData>(BeatmapEventDidTrigger);
-            _levelEndActions.levelFinishedEvent += LevelFinished;
-            _levelEndActions.levelFailedEvent += LevelFailed;
             _obstacleSaberSparkleEffectManager.sparkleEffectDidStartEvent += SabersStartCollide;
             _obstacleSaberSparkleEffectManager.sparkleEffectDidEndEvent += SabersEndCollide;
             _beatmapObjectManager.noteWasCutEvent += NoteWasCut;
@@ -74,13 +72,14 @@ namespace CustomFloorPlugin
             _comboController.comboBreakingEventHappenedEvent += ComboDidBreak;
             _scoreController.multiplierDidChangeEvent += MultiplierDidChange;
             _scoreController.scoreDidChangeEvent += ScoreDidChange;
+            if (_levelEndActions is null) return;
+            _levelEndActions.levelFinishedEvent += LevelFinished;
+            _levelEndActions.levelFailedEvent += LevelFailed;
         }
 
         public void Dispose()
         {
             _beatmapCallbacksController.RemoveBeatmapCallback(_beatmapDataCallbackWrapper);
-            _levelEndActions.levelFinishedEvent -= LevelFinished;
-            _levelEndActions.levelFailedEvent -= LevelFailed;
             _obstacleSaberSparkleEffectManager.sparkleEffectDidStartEvent -= SabersStartCollide;
             _obstacleSaberSparkleEffectManager.sparkleEffectDidEndEvent -= SabersEndCollide;
             _beatmapObjectManager.noteWasCutEvent -= NoteWasCut;
@@ -89,6 +88,9 @@ namespace CustomFloorPlugin
             _comboController.comboBreakingEventHappenedEvent -= ComboDidBreak;
             _scoreController.multiplierDidChangeEvent -= MultiplierDidChange;
             _scoreController.scoreDidChangeEvent -= ScoreDidChange;
+            if (_levelEndActions is null) return;
+            _levelEndActions.levelFinishedEvent -= LevelFinished;
+            _levelEndActions.levelFailedEvent -= LevelFailed;
         }
 
         private void BeatmapEventDidTrigger(BasicBeatmapEventData eventData)
@@ -102,7 +104,7 @@ namespace CustomFloorPlugin
             AllNotesCountDidChangeEvent?.Invoke(_anyCutCount++, _cuttableNotesCount);
             if (noteCutInfo.allIsOK)
             {
-                NoteWasCutEvent?.Invoke((int)noteCutInfo.saberType);
+                NoteWasCutEvent?.Invoke(noteCutInfo.saberType);
                 GoodCutCountDidChangeEvent?.Invoke(_goodCutCount++);
             }
             else

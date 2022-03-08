@@ -32,16 +32,16 @@ namespace CustomFloorPlugin
         {
             container.Inject(this);
             if (_events is null) return;
-            _events.NoteWasCutEvent += OnSlice;
+            _events.NoteWasCutEvent += OnNoteWasCut;
         }
 
         public void PlatformDisabled()
         {
             if (_events is null) return;
-            _events.NoteWasCutEvent -= OnSlice;
+            _events.NoteWasCutEvent -= OnNoteWasCut;
         }
 
-        private void OnSlice(int saber)
+        private void OnNoteWasCut(global::SaberType saber)
         {
             if ((SaberType)saber == saberType)
                 SaberSlice!.Invoke();

@@ -49,7 +49,7 @@ namespace CustomFloorPlugin
             _platformManager = platformManager;
         }
 
-        internal void UpdateEnvironmentRoot(ScenesTransitionSetupDataSO? setupData, DiContainer container)
+        internal void OnTransitionDidFinish(ScenesTransitionSetupDataSO? setupData, DiContainer container)
         {
             switch (setupData)
             {

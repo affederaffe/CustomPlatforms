@@ -72,6 +72,7 @@ namespace CustomFloorPlugin
         // ReSharper disable once AsyncVoidMethod
         private async void OnTransitionDidStart(float aheadTime)
         {
+            if (_lobbyGameStateModel.gameState == MultiplayerGameState.Game) _lobbyGameStateModel.SetGameStateWithoutNotification(MultiplayerGameState.Lobby);
             await ChangeToPlatformAsync(_platformManager.DefaultPlatform);
         }
 
@@ -111,7 +112,7 @@ namespace CustomFloorPlugin
             }
 
             _container = container;
-            _environmentHider.UpdateEnvironmentRoot(setupData, container);
+            _environmentHider.OnTransitionDidFinish(setupData, container);
             await ChangeToPlatformAsync(platform);
         }
 

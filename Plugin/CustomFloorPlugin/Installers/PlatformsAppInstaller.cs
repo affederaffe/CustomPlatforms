@@ -6,6 +6,8 @@ using CustomFloorPlugin.Configuration;
 
 using IPA.Utilities;
 
+using UnityEngine;
+
 using Zenject;
 
 
@@ -42,6 +44,7 @@ namespace CustomFloorPlugin.Installers
             Container.BindInstance(_bloomPrePassRenderer).AsSingle().IfNotBound();
             Container.BindInstance(_bloomPrePassEffectContainer).AsSingle().IfNotBound();
             Container.BindInstance(_postProcessEnabled).WithId("PostProcessEnabled").AsSingle().IfNotBound();
+            Container.BindInstance(new GameObject("CustomPlatforms").transform).WithId("CustomPlatforms").AsSingle();
             Container.BindInterfacesAndSelfTo<MaterialSwapper>().AsSingle();
             Container.Bind<AssetLoader>().AsSingle().WithArguments(_assembly);
             Container.Bind<PlatformLoader>().AsSingle();

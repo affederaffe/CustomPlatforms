@@ -7,6 +7,8 @@ using IPA.Config.Stores;
 using IPA.Loader;
 using IPA.Logging;
 
+using JetBrains.Annotations;
+
 using SiraUtil.Zenject;
 
 
@@ -16,9 +18,9 @@ namespace CustomFloorPlugin
     /// Main Plugin executable, loaded and instantiated by BSIPA before the game starts<br/>
     /// Different callbacks will be notified throughout the games lifespan, and can be used as hooks.
     /// </summary>
+    [UsedImplicitly]
     [NoEnableDisable]
     [Plugin(RuntimeOptions.DynamicInit)]
-    // ReSharper disable once UnusedType.Global
     public class Plugin
     {
         /// <summary>
