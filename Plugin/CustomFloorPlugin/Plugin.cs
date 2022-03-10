@@ -35,6 +35,7 @@ namespace CustomFloorPlugin
         {
             zenjector.UseLogger(logger);
             zenjector.UseHttpService();
+            zenjector.Expose<ObstacleSaberSparkleEffectManager>("Gameplay");
             zenjector.Install<PlatformsAppInstaller>(Location.App, pluginMetadata.Assembly, config.Generated<PluginConfig>());
             zenjector.Install<PlatformsMenuInstaller>(Location.Menu);
             zenjector.Install<PlatformsGameInstaller>(Location.Player);

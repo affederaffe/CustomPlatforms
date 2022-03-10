@@ -6,22 +6,17 @@ namespace CustomFloorPlugin.Installers
     internal class PlatformsGameInstaller : Installer
     {
         private readonly PlatformSpawner _platformSpawner;
-        private readonly ObstacleSaberSparkleEffectManager? _obstacleSaberSparkleEffectManager;
         private readonly MultiplayerPlayersManager? _multiplayerPlayersManager;
 
-        public PlatformsGameInstaller(PlatformSpawner platformSpawner, [InjectOptional] PlayerSpaceConvertor? playerSpaceConvertor, [InjectOptional] MultiplayerPlayersManager? multiplayerPlayersManager)
+        public PlatformsGameInstaller(PlatformSpawner platformSpawner, [InjectOptional] MultiplayerPlayersManager? multiplayerPlayersManager)
         {
             _platformSpawner = platformSpawner;
             _multiplayerPlayersManager = multiplayerPlayersManager;
-            if (playerSpaceConvertor is not null)
-                _obstacleSaberSparkleEffectManager = playerSpaceConvertor.GetComponentInChildren<ObstacleSaberSparkleEffectManager>();
         }
 
         public override void InstallBindings()
         {
             Container.BindInterfacesAndSelfTo<BSEvents>().AsSingle();
-            if (_obstacleSaberSparkleEffectManager is not null)
-                Container.BindInstance(_obstacleSaberSparkleEffectManager).AsSingle().IfNotBound();
             if (_multiplayerPlayersManager is not null)
                 _multiplayerPlayersManager.playerSpawningDidFinishEvent += OnPlayerSpawningDidFinish;
         }
