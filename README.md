@@ -25,10 +25,7 @@ After a relaunch, your Beat Saber folder should look like this:
 
 ## Controls
 
-Visit the Platforms Menu page ingame to do things like:
-* Change your platform for different gamemodes
-* View the changelog
-* Always show feet, to mark the center of the room
+Visit the Platforms Menu page ingame to change your platform for different gamemodes
 
 ## Adding More Platforms
 
@@ -51,7 +48,7 @@ Fill out the fields for your name and the name of the platform.  You can also to
 Add an icon for your platform by importing an image, settings it to Sprite/UI in import settings, and dragging it into the icon field of your CustomPlatform
 
 4. Create your custom platform as a child of this root object
-You can use most of the built in Unity components, custom shaders and materials, custom meshes, animators, etc.
+You can use most of the built-in Unity components, custom shaders and materials, custom meshes, animators, etc.
 
 1. When you are finished, select the root object you attached the "Custom Platform" component to.
 In the inspector, click "Export". Navigate to your CustomPlatforms folder, and press save.
