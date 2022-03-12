@@ -41,12 +41,10 @@
     <EmbeddedResource Include="manifest.json" />
     <EmbeddedResource Include="Assets\FeetIcon.png" />
     <EmbeddedResource Include="Assets\Floor.png" />
-    <EmbeddedResource Include="Assets\Heart.png" />
     <EmbeddedResource Include="Assets\LvlInsaneCover.png" />
     <EmbeddedResource Include="Assets\PlayersPlace.mesh" />
+    <EmbeddedResource Include="Assets\QuestionMarkIcon.png" />
     <EmbeddedResource Include="Views\PlatformLists.bsml" />
-    <EmbeddedResource Include="Views\Settings.bsml" />
-    <EmbeddedResource Include="Views\Changelog.bsml" />
   </ItemGroup>
 
   <ItemGroup>

@@ -26,13 +26,7 @@ namespace CustomFloorPlugin
         private int _missCount;
         private int _cuttableNotesCount;
 
-        public BSEvents([InjectOptional] ILevelEndActions levelEndActions,
-                        IReadonlyBeatmapData beatmapData,
-                        ObstacleSaberSparkleEffectManager obstacleSaberSparkleEffectManager,
-                        ScoreController scoreController,
-                        BeatmapObjectManager beatmapObjectManager,
-                        BeatmapCallbacksController beatmapCallbacksController,
-                        ComboController comboController)
+        public BSEvents([InjectOptional] ILevelEndActions levelEndActions, IReadonlyBeatmapData beatmapData, ObstacleSaberSparkleEffectManager obstacleSaberSparkleEffectManager, ScoreController scoreController, BeatmapObjectManager beatmapObjectManager, BeatmapCallbacksController beatmapCallbacksController, ComboController comboController)
         {
             _levelEndActions = levelEndActions;
             _beatmapData = beatmapData;

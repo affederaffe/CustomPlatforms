@@ -2,8 +2,6 @@
 using System.Globalization;
 using System.Linq;
 
-using CustomFloorPlugin.Configuration;
-
 using UnityEngine;
 
 using Zenject;
@@ -17,14 +15,11 @@ namespace CustomFloorPlugin
     /// </summary>
     public sealed class EnvironmentHider
     {
-        private readonly PluginConfig _config;
         private readonly AssetLoader _assetLoader;
         private readonly PlatformManager _platformManager;
 
         private readonly List<GameObject> _menuEnvironment = new();
-        private readonly List<GameObject> _gradientBackground = new();
         private readonly List<GameObject> _playersPlace = new();
-        private readonly List<GameObject> _feet = new();
         private readonly List<GameObject> _smallRings = new();
         private readonly List<GameObject> _bigRings = new();
         private readonly List<GameObject> _visualizer = new();
@@ -40,11 +35,8 @@ namespace CustomFloorPlugin
         private Transform? _envRoot;
         private Transform? _menuRoot;
 
-        public EnvironmentHider(PluginConfig config,
-                                AssetLoader assetLoader,
-                                PlatformManager platformManager)
+        public EnvironmentHider(AssetLoader assetLoader, PlatformManager platformManager)
         {
-            _config = config;
             _assetLoader = assetLoader;
             _platformManager = platformManager;
         }
@@ -65,7 +57,7 @@ namespace CustomFloorPlugin
                     _envRoot = container.Resolve<LightWithIdManager>().transform.parent;
                     _sceneName = _envRoot.gameObject.scene.name;
                     break;
-                case MultiplayerLevelScenesTransitionSetupDataSO:
+                case MultiplayerLevelScenesTransitionSetupDataSO when container.HasBinding<MultiplayerLocalActivePlayerFacade>():
                     _envRoot = container.Resolve<MultiplayerPlayersManager>().localPlayerTransform;
                     _sceneName = _envRoot.gameObject.scene.name;
                     break;
@@ -80,9 +72,7 @@ namespace CustomFloorPlugin
             if (_menuRoot is null && _envRoot is null) return;
             FindEnvironment();
             SetCollectionHidden(_menuEnvironment, platform != _platformManager.DefaultPlatform);
-            SetCollectionHidden(_gradientBackground, _config.DisableGradientBackground);
             SetCollectionHidden(_playersPlace, platform.hideDefaultPlatform);
-            SetCollectionHidden(_feet, !_config.AlwaysShowFeet);
             SetCollectionHidden(_smallRings, platform.hideSmallRings);
             SetCollectionHidden(_bigRings, platform.hideBigRings);
             SetCollectionHidden(_visualizer, platform.hideEQVisualizer);
@@ -97,27 +87,13 @@ namespace CustomFloorPlugin
             _assetLoader.PlayersPlace.SetActive(showPlayersPlace);
         }
 
-        internal void ToggleGradientBackground(bool active)
-        {
-            FindGradientBackground();
-            SetCollectionHidden(_gradientBackground, active);
-        }
-
-        internal void ToggleFeet(bool active)
-        {
-            FindFeetIcon();
-            SetCollectionHidden(_feet, active);
-        }
-
         /// <summary>
         /// Finds all GameObjects that make up the default environment and groups them into lists
         /// </summary>
         private void FindEnvironment()
         {
             FindMenuEnvironment();
-            FindGradientBackground();
             FindPlayersPlace();
-            FindFeetIcon();
             FindSmallRings();
             FindBigRings();
             FindVisualizers();
@@ -171,22 +147,6 @@ namespace CustomFloorPlugin
             }
         }
 
-        private void FindGradientBackground()
-        {
-            switch (_sceneName)
-            {
-                case "MainMenu":
-                    FindAddGameObject(_envRoot!, "BackgroundColor", _gradientBackground);
-                    break;
-                case "BillieEnvironment":
-                    FindAddGameObject(_envRoot!, "DayAndNight/BackgroundGradient", _gradientBackground);
-                    break;
-                default:
-                    FindAddGameObject(_envRoot!, "GradientBackground", _gradientBackground);
-                    break;
-            }
-        }
-
         private void FindPlayersPlace()
         {
             switch (_sceneName)
@@ -208,22 +168,6 @@ namespace CustomFloorPlugin
                     FindAddGameObject(_envRoot!, "PlayersPlace/SaberBurnMarksParticles", _playersPlace);
                     FindAddGameObject(_envRoot!, "PlayersPlace/SaberBurnMarksArea", _playersPlace);
                     FindAddGameObject(_envRoot!, "PlayersPlace/Collider", _playersPlace);
-                    break;
-            }
-        }
-
-        private void FindFeetIcon()
-        {
-            switch (_sceneName)
-            {
-                case "MainMenu":
-                    FindAddGameObject(_envRoot!, "PlayersPlace", _feet);
-                    break;
-                case "GameCore":
-                    FindAddGameObject(_envRoot!, "IsActiveObjects/Construction/PlayersPlace/Feet", _feet);
-                    break;
-                default:
-                    FindAddGameObject(_envRoot!, "PlayersPlace/Feet", _feet);
                     break;
             }
         }
@@ -1024,6 +968,10 @@ namespace CustomFloorPlugin
                     break;
                 case "GagaEnvironment":
                     FindAddGameObject(_envRoot!, "Aurora", _trackLights);
+                    break;
+                case "WeaveEnvironment":
+                    for (int i = 0; i < 16; i++)
+                        FindAddGameObject(_envRoot!, $"LightGroup{i.ToString(NumberFormatInfo.InvariantInfo)}", _trackLights);
                     break;
             }
         }

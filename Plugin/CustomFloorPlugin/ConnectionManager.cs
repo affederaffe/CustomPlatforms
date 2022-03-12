@@ -35,9 +35,7 @@ namespace CustomFloorPlugin
         private readonly bool _isSongCoreInstalled;
         private readonly bool _isCinemaInstalled;
 
-        public ConnectionManager(IHttpService httpService,
-                                 PlatformManager platformManager,
-                                 PlatformSpawner platformSpawner)
+        public ConnectionManager(IHttpService httpService, PlatformManager platformManager, PlatformSpawner platformSpawner)
         {
             _httpService = httpService;
             _platformManager = platformManager;
@@ -105,7 +103,7 @@ namespace CustomFloorPlugin
 
             CustomPlatform? newPlatform = await _platformManager.CreatePlatformAsync(e.FullPath);
             if (newPlatform is null) return;
-            _platformManager.AllPlatforms.AddSorted(1, _platformManager.AllPlatforms.Count - 1, newPlatform);
+            _platformManager.AllPlatforms.AddSorted(PlatformManager.BuildInPlatformsCount, _platformManager.AllPlatforms.Count - PlatformManager.BuildInPlatformsCount, newPlatform);
         }
 
         /// <summary>
@@ -130,24 +128,24 @@ namespace CustomFloorPlugin
 
         private void InitializeSongCoreConnection()
         {
-            //SongCore.Plugin.CustomSongPlatformSelectionDidChange += OnSongCoreEvent;
-            //SongCore.Collections.RegisterCapability("Custom Platforms");
+            SongCore.Plugin.CustomSongPlatformSelectionDidChange += OnSongCoreEvent;
+            SongCore.Collections.RegisterCapability("Custom Platforms");
         }
 
         private void DisposeSongCoreConnection()
         {
-            //SongCore.Plugin.CustomSongPlatformSelectionDidChange -= OnSongCoreEvent;
-            //SongCore.Collections.DeregisterizeCapability("Custom Platforms");
+            SongCore.Plugin.CustomSongPlatformSelectionDidChange -= OnSongCoreEvent;
+            SongCore.Collections.DeregisterizeCapability("Custom Platforms");
         }
 
         private void InitializeCinemaConnection()
         {
-            //BeatSaberCinema.Events.AllowCustomPlatform += OnCinemaEvent;
+            BeatSaberCinema.Events.AllowCustomPlatform += OnCinemaEvent;
         }
 
         private void DisposeCinemaConnection()
         {
-            //BeatSaberCinema.Events.AllowCustomPlatform -= OnCinemaEvent;
+            BeatSaberCinema.Events.AllowCustomPlatform -= OnCinemaEvent;
         }
 
         /// <summary>
@@ -221,7 +219,7 @@ namespace CustomFloorPlugin
                 CustomPlatform? requestedPlatform = await _platformManager.CreatePlatformAsync(path);
                 cancellationToken.ThrowIfCancellationRequested();
                 if (requestedPlatform is null) return;
-                _platformManager.AllPlatforms.AddSorted(1, _platformManager.AllPlatforms.Count - 1, requestedPlatform);
+                _platformManager.AllPlatforms.AddSorted(PlatformManager.BuildInPlatformsCount, _platformManager.AllPlatforms.Count - PlatformManager.BuildInPlatformsCount, requestedPlatform);
                 _platformManager.APIRequestedPlatform = requestedPlatform;
             }
             catch (TaskCanceledException) { }

@@ -77,26 +77,9 @@ namespace CustomFloorPlugin.UI
         // ReSharper disable once AsyncVoidMethod
         public async void OnDidSelectPlatform(TableView _, int index)
         {
-            await _platformSpawner.ChangeToPlatformAsync(_platformManager.AllPlatforms[index]);
-            switch (_tabIndex)
-            {
-                case 0:
-                    _platformManager.SingleplayerPlatform = _platformManager.ActivePlatform;
-                    _config.SingleplayerPlatformPath = _platformManager.ActivePlatform.fullPath;
-                    break;
-                case 1:
-                    _platformManager.MultiplayerPlatform = _platformManager.ActivePlatform;
-                    _config.MultiplayerPlatformPath = _platformManager.ActivePlatform.fullPath;
-                    break;
-                case 2:
-                    _platformManager.A360Platform = _platformManager.ActivePlatform;
-                    _config.A360PlatformPath = _platformManager.ActivePlatform.fullPath;
-                    break;
-                case 3:
-                    _platformManager.MenuPlatform = _platformManager.ActivePlatform;
-                    _config.MenuPlatformPath = _platformManager.ActivePlatform.fullPath;
-                    break;
-            }
+            CustomPlatform platform = _platformManager.AllPlatforms[index];
+            await _platformSpawner.ChangeToPlatformAsync(platform);
+            SetPlatformForTabIndex(_tabIndex, platform);
         }
 
         /// <summary>
@@ -123,7 +106,7 @@ namespace CustomFloorPlugin.UI
             if (removedFromHierarchy) _platformManager.AllPlatforms.CollectionChanged -= OnCollectionDidChange;
             int index = GetPlatformIndexForTabIndex(_tabIndex);
             _listTables[_tabIndex].tableView.SelectCellWithIdx(index);
-            await _platformSpawner.ChangeToPlatformAsync(_config.ShufflePlatforms ? _platformSpawner.RandomPlatform : _platformManager.MenuPlatform);
+            await _platformSpawner.ChangeToPlatformAsync(_platformManager.MenuPlatform);
         }
 
         /// <summary>
@@ -209,22 +192,38 @@ namespace CustomFloorPlugin.UI
             }
         }
 
-        private int GetPlatformIndexForTabIndex(int tabIndex)
-        {
-            CustomPlatform platform = GetPlatformForTabIndex(tabIndex);
-            return _platformManager.AllPlatforms.IndexOf(platform);
-        }
+        private int GetPlatformIndexForTabIndex(int tabIndex) => _platformManager.AllPlatforms.IndexOf(GetPlatformForTabIndex(tabIndex));
 
-        private CustomPlatform GetPlatformForTabIndex(int tabIndex)
+        private CustomPlatform GetPlatformForTabIndex(int tabIndex) => tabIndex switch
         {
-            return tabIndex switch
+            0 => _platformManager.SingleplayerPlatform,
+            1 => _platformManager.MultiplayerPlatform,
+            2 => _platformManager.A360Platform,
+            3 => _platformManager.MenuPlatform,
+            _ => _platformManager.DefaultPlatform
+        };
+
+        private void SetPlatformForTabIndex(int tabIndex, CustomPlatform platform)
+        {
+            switch (tabIndex)
             {
-                0 => _platformManager.SingleplayerPlatform,
-                1 => _platformManager.MultiplayerPlatform,
-                2 => _platformManager.A360Platform,
-                3 => _platformManager.MenuPlatform,
-                _ => _platformManager.DefaultPlatform
-            };
+                case 0:
+                    _platformManager.SingleplayerPlatform = platform;
+                    _config.SingleplayerPlatformHash = platform.platHash;
+                    break;
+                case 1:
+                    _platformManager.MultiplayerPlatform = platform;
+                    _config.MultiplayerPlatformHash = platform.platHash;
+                    break;
+                case 2:
+                    _platformManager.A360Platform = platform;
+                    _config.A360PlatformHash = platform.platHash;
+                    break;
+                case 3:
+                    _platformManager.MenuPlatform = platform;
+                    _config.MenuPlatformHash = platform.platHash;
+                    break;
+            }
         }
     }
 }

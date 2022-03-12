@@ -12,6 +12,7 @@ namespace CustomFloorPlugin
     /// </summary>
     public class MaterialSwapper
     {
+        private Material[] Materials => _materials ??= Resources.FindObjectsOfTypeAll<Material>();
         private Material[]? _materials;
 
         internal Material? DarkEnvSimpleMaterial => _darkEnvSimpleMaterial ??= FindMaterial("DarkEnvironmentSimple");
@@ -23,11 +24,7 @@ namespace CustomFloorPlugin
         internal Material? OpaqueGlowMaterial => _opaqueGlowMaterial ??= FindMaterialDisableHeightFog("EnvLightOpaque");
         private Material? _opaqueGlowMaterial;
 
-        private Material? FindMaterial(string name)
-        {
-            _materials ??= Resources.FindObjectsOfTypeAll<Material>();
-            return _materials.FirstOrDefault(x => x.name == name);
-        }
+        private Material? FindMaterial(string name) => Materials.FirstOrDefault(x => x.name == name);
 
         private Material? FindMaterialDisableHeightFog(string name)
         {

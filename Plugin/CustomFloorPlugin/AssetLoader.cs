@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Reflection;
@@ -35,13 +34,16 @@ namespace CustomFloorPlugin
         /// <summary>
         /// The cover for the default platform
         /// </summary>
-        internal Sprite DefaultPlatformCover => _defaultPlatformCover ??= CreateDefaultPlatformCover();
+        internal Sprite DefaultPlatformCover => _defaultPlatformCover ??= CreateSpriteFromEmbeddedResource("CustomFloorPlugin.Assets.LvlInsaneCover.png");
         private Sprite? _defaultPlatformCover;
+
+        internal Sprite RandomPlatformCover => _randomPlatformCover ??= CreateSpriteFromEmbeddedResource("CustomFloorPlugin.Assets.QuestionMarkIcon.png");
+        private Sprite? _randomPlatformCover;
 
         /// <summary>
         /// The cover used for all platforms normally missing one
         /// </summary>
-        internal Sprite FallbackCover => _fallbackCover ??= CreateFallbackCover();
+        internal Sprite FallbackCover => _fallbackCover ??= CreateSpriteFromEmbeddedResource("CustomFloorPlugin.Assets.FeetIcon.png");
         private Sprite? _fallbackCover;
 
         /// <summary>
@@ -58,16 +60,10 @@ namespace CustomFloorPlugin
             _materialSwapper = materialSwapper;
         }
 
-        private Sprite CreateDefaultPlatformCover()
+        private Sprite CreateSpriteFromEmbeddedResource(string resourcePath)
         {
-            using Stream defaultCoverStream = GetEmbeddedResource("CustomFloorPlugin.Assets.LvlInsaneCover.png");
-            return defaultCoverStream.ReadTexture2D().ToSprite();
-        }
-
-        private Sprite CreateFallbackCover()
-        {
-            using Stream fallbackCoverStream = GetEmbeddedResource("CustomFloorPlugin.Assets.FeetIcon.png");
-            return fallbackCoverStream.ReadTexture2D().ToSprite();
+            using Stream stream = GetEmbeddedResource(resourcePath);
+            return stream.ReadTexture2D().ToSprite();
         }
 
         private LightEffects CreateLightEffects()
@@ -175,7 +171,6 @@ namespace CustomFloorPlugin
 
             public void PlatformEnabled(DiContainer container)
             {
-                Console.WriteLine("Enabling LightEffects");
                 container.Inject(this);
                 gameObject.SetActive(false);
                 List<ILightWithId>?[] lights = _lightWithIdManager.GetField<List<ILightWithId>?[], LightWithIdManager>("_lights");

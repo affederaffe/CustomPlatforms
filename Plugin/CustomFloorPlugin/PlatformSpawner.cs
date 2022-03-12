@@ -2,7 +2,6 @@
 using System.Threading;
 using System.Threading.Tasks;
 
-using CustomFloorPlugin.Configuration;
 using CustomFloorPlugin.Helpers;
 using CustomFloorPlugin.Interfaces;
 
@@ -19,7 +18,6 @@ namespace CustomFloorPlugin
     public sealed class PlatformSpawner : IInitializable, IDisposable
     {
         private readonly SiraLog _siraLog;
-        private readonly PluginConfig _config;
         private readonly Random _random;
         private readonly AssetLoader _assetLoader;
         private readonly EnvironmentHider _environmentHider;
@@ -31,19 +29,9 @@ namespace CustomFloorPlugin
         private CancellationTokenSource? _cancellationTokenSource;
         private DiContainer _container = null!;
 
-        internal CustomPlatform RandomPlatform => _platformManager.AllPlatforms[_random.Next(0, _platformManager.AllPlatforms.Count)];
-
-        public PlatformSpawner(SiraLog siraLog,
-                               PluginConfig config,
-                               Random random,
-                               AssetLoader assetLoader,
-                               EnvironmentHider environmentHider,
-                               PlatformManager platformManager,
-                               GameScenesManager gameScenesManager,
-                               LobbyGameStateModel lobbyGameStateModel)
+        public PlatformSpawner(SiraLog siraLog, Random random, AssetLoader assetLoader, EnvironmentHider environmentHider, PlatformManager platformManager, GameScenesManager gameScenesManager, LobbyGameStateModel lobbyGameStateModel)
         {
             _siraLog = siraLog;
-            _config = config;
             _random = random;
             _assetLoader = assetLoader;
             _environmentHider = environmentHider;
@@ -72,7 +60,6 @@ namespace CustomFloorPlugin
         // ReSharper disable once AsyncVoidMethod
         private async void OnTransitionDidStart(float aheadTime)
         {
-            if (_lobbyGameStateModel.gameState == MultiplayerGameState.Game) _lobbyGameStateModel.SetGameStateWithoutNotification(MultiplayerGameState.Lobby);
             await ChangeToPlatformAsync(_platformManager.DefaultPlatform);
         }
 
@@ -82,37 +69,20 @@ namespace CustomFloorPlugin
         // ReSharper disable once AsyncVoidMethod
         internal async void OnTransitionDidFinish(ScenesTransitionSetupDataSO? setupData, DiContainer container)
         {
-            CustomPlatform platform;
-            switch (setupData)
+            CustomPlatform? platform = setupData switch
             {
-                case null when _lobbyGameStateModel.gameState != MultiplayerGameState.Lobby:
-                case MenuScenesTransitionSetupDataSO:
-                    platform = _config.ShufflePlatforms ? RandomPlatform : _platformManager.MenuPlatform;
-                    break;
-                case StandardLevelScenesTransitionSetupDataSO when _platformManager.APIRequestedPlatform is not null:
-                    platform = _platformManager.APIRequestedPlatform;
-                    break;
-                case StandardLevelScenesTransitionSetupDataSO standardLevelScenesTransitionSetupDataSO when standardLevelScenesTransitionSetupDataSO.difficultyBeatmap.parentDifficultyBeatmapSet.beatmapCharacteristic.requires360Movement:
-                    platform = _config.ShufflePlatforms ? RandomPlatform : _platformManager.A360Platform;
-                    break;
-                case StandardLevelScenesTransitionSetupDataSO:
-                case MissionLevelScenesTransitionSetupDataSO:
-                case TutorialScenesTransitionSetupDataSO:
-                    platform = _config.ShufflePlatforms ? RandomPlatform : _platformManager.SingleplayerPlatform;
-                    break;
-                case MultiplayerLevelScenesTransitionSetupDataSO when container.HasBinding<MultiplayerLocalActivePlayerFacade>():
-                    platform = _config.ShufflePlatforms ? RandomPlatform : _platformManager.MultiplayerPlatform;
-                    break;
-                case null:
-                case BeatmapEditorScenesTransitionSetupDataSO:
-                    platform = _platformManager.DefaultPlatform;
-                    break;
-                default:
-                    return;
-            }
+                MenuScenesTransitionSetupDataSO or null when _lobbyGameStateModel.gameState == MultiplayerGameState.None => _platformManager.MenuPlatform,
+                StandardLevelScenesTransitionSetupDataSO when _platformManager.APIRequestedPlatform is not null => _platformManager.APIRequestedPlatform,
+                StandardLevelScenesTransitionSetupDataSO standardLevelScenesTransitionSetupDataSO when standardLevelScenesTransitionSetupDataSO.difficultyBeatmap.parentDifficultyBeatmapSet.beatmapCharacteristic.requires360Movement => _platformManager.A360Platform,
+                StandardLevelScenesTransitionSetupDataSO or MissionLevelScenesTransitionSetupDataSO or TutorialScenesTransitionSetupDataSO => _platformManager.SingleplayerPlatform,
+                MultiplayerLevelScenesTransitionSetupDataSO when container.HasBinding<MultiplayerLocalActivePlayerFacade>() => _platformManager.MultiplayerPlatform,
+                BeatmapEditorScenesTransitionSetupDataSO => _platformManager.DefaultPlatform,
+                _ => null
+            };
 
             _container = container;
             _environmentHider.OnTransitionDidFinish(setupData, container);
+            if (platform is null) return;
             await ChangeToPlatformAsync(platform);
         }
 
@@ -122,20 +92,15 @@ namespace CustomFloorPlugin
         // ReSharper disable once AsyncVoidMethod
         private async void OnMultiplayerGameStateModelDidChange(MultiplayerGameState multiplayerGameState)
         {
-            CustomPlatform platform;
-            switch (multiplayerGameState)
+            CustomPlatform? platform = multiplayerGameState switch
             {
-                case MultiplayerGameState.None:
-                    platform = _config.ShufflePlatforms ? RandomPlatform : _platformManager.MenuPlatform;
-                    break;
-                case MultiplayerGameState.Lobby when _prevGameState != MultiplayerGameState.Game:
-                    platform = _platformManager.DefaultPlatform;
-                    break;
-                default:
-                    return;
-            }
+                MultiplayerGameState.None when _prevGameState == MultiplayerGameState.Lobby => _platformManager.MenuPlatform,
+                MultiplayerGameState.Lobby when _prevGameState == MultiplayerGameState.None => _platformManager.DefaultPlatform,
+                _ => null
+            };
 
             _prevGameState = multiplayerGameState;
+            if (platform is null) return;
             await ChangeToPlatformAsync(platform);
         }
 
@@ -149,51 +114,50 @@ namespace CustomFloorPlugin
             _cancellationTokenSource?.Cancel();
             _cancellationTokenSource?.Dispose();
             _cancellationTokenSource = new CancellationTokenSource();
-            CancellationToken cancellationToken = _cancellationTokenSource.Token;
-
-            DestroyCustomObjects();
-            _platformManager.ActivePlatform.gameObject.SetActive(false);
-            _platformManager.ActivePlatform = platform;
-
+            CancellationToken token = _cancellationTokenSource.Token;
+            DestroyPlatform(_platformManager.ActivePlatform.gameObject);
+            if (platform == _platformManager.RandomPlatform)
+                platform = GetRandomPlatform();
             if (platform.isDescriptor)
-            {
-                CustomPlatform? newPlatform = await _platformManager.CreatePlatformAsync(platform.fullPath);
-                if (newPlatform is null)
-                {
-                    await ChangeToPlatformAsync(_platformManager.DefaultPlatform);
-                    return;
-                }
-
-                _platformManager.AllPlatforms.Replace(platform, newPlatform);
-                UnityEngine.Object.Destroy(platform.gameObject);
-                if (cancellationToken.IsCancellationRequested) return;
-                _platformManager.ActivePlatform = newPlatform;
-            }
-
-            _siraLog.Debug($"Switching to {_platformManager.ActivePlatform.name}");
-            _environmentHider.HideObjectsForPlatform(_platformManager.ActivePlatform);
-            _platformManager.ActivePlatform.gameObject.SetActive(true);
-            SpawnCustomObjects();
+                platform = await ReplaceDescriptorAsync(platform) ?? _platformManager.DefaultPlatform;
+            if (token.IsCancellationRequested) return;
+            _platformManager.ActivePlatform = platform;
+            _siraLog.Debug($"Switching to {platform.name}");
+            _environmentHider.HideObjectsForPlatform(platform);
+            SpawnPlatform(platform.gameObject);
         }
 
         /// <summary>
         /// Enables or spawns all registered custom objects, as required by the selected <see cref="CustomPlatform"/>
         /// </summary>
-        private void SpawnCustomObjects()
+        private void SpawnPlatform(UnityEngine.GameObject platform)
         {
+            platform.SetActive(true);
             if (_lobbyGameStateModel.gameState == MultiplayerGameState.Game) _assetLoader.MultiplayerLightEffects.PlatformEnabled(_container);
-            foreach (INotifyPlatformEnabled notifyEnable in _platformManager.ActivePlatform.GetComponentsInChildren<INotifyPlatformEnabled>(true))
+            foreach (INotifyPlatformEnabled notifyEnable in platform.GetComponentsInChildren<INotifyPlatformEnabled>(true))
                 notifyEnable?.PlatformEnabled(_container);
         }
 
         /// <summary>
         /// Disables all registered custom objects, as required by the selected <see cref="CustomPlatform"/>
         /// </summary>
-        private void DestroyCustomObjects()
+        private void DestroyPlatform(UnityEngine.GameObject platform)
         {
-            if (_lobbyGameStateModel.gameState != MultiplayerGameState.None) _assetLoader.MultiplayerLightEffects.PlatformDisabled();
-            foreach (INotifyPlatformDisabled notifyDisable in _platformManager.ActivePlatform.GetComponentsInChildren<INotifyPlatformDisabled>(true))
+            if (_lobbyGameStateModel.gameState == MultiplayerGameState.Game) _assetLoader.MultiplayerLightEffects.PlatformDisabled();
+            foreach (INotifyPlatformDisabled notifyDisable in platform.GetComponentsInChildren<INotifyPlatformDisabled>(true))
                 notifyDisable?.PlatformDisabled();
+            platform.SetActive(false);
         }
+
+        private async Task<CustomPlatform?> ReplaceDescriptorAsync(CustomPlatform descriptor)
+        {
+            CustomPlatform? platform = await _platformManager.CreatePlatformAsync(descriptor.fullPath);
+            if (platform is null) return null;
+            _platformManager.AllPlatforms.Replace(descriptor, platform);
+            UnityEngine.Object.Destroy(descriptor.gameObject);
+            return platform;
+        }
+
+        private CustomPlatform GetRandomPlatform() => _platformManager.AllPlatforms[_random.Next(PlatformManager.BuildInPlatformsCount, _platformManager.AllPlatforms.Count)];
     }
 }

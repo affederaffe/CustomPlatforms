@@ -40,15 +40,17 @@ namespace CustomFloorPlugin
         /// <summary>
         /// Getter for the CustomPlatforms directory path
         /// </summary>
-        internal string DirectoryPath => Directory.CreateDirectory(_directoryPath).FullName;
+        public string DirectoryPath => Directory.CreateDirectory(_directoryPath).FullName;
 
         /// <summary>
         /// An <see cref="ObservableCollection{T}"/> of all currently loaded <see cref="CustomPlatform"/>s<br/>
         /// When a platform is loaded, the <see cref="ObservableCollection{T}"/> will be notified
         /// </summary>
-        internal ObservableCollection<CustomPlatform> AllPlatforms { get; }
+        public ObservableCollection<CustomPlatform> AllPlatforms { get; }
 
         public CustomPlatform DefaultPlatform { get; }
+
+        public CustomPlatform RandomPlatform { get; }
 
         public CustomPlatform ActivePlatform { get; internal set; }
 
@@ -67,11 +69,9 @@ namespace CustomFloorPlugin
         /// </summary>
         private const byte CacheFileVersion = 3;
 
-        public PlatformManager(SiraLog siraLog,
-                               PluginConfig config,
-                               [Inject(Id = "CustomPlatforms")] Transform anchor,
-                               AssetLoader assetLoader,
-                               PlatformLoader platformLoader)
+        internal const int BuildInPlatformsCount = 2;
+
+        public PlatformManager(SiraLog siraLog, PluginConfig config, AssetLoader assetLoader, PlatformLoader platformLoader, [Inject(Id = "CustomPlatforms")] Transform anchor)
         {
             _siraLog = siraLog;
             _config = config;
@@ -81,12 +81,9 @@ namespace CustomFloorPlugin
             _directoryPath = Path.Combine(UnityGame.InstallPath, "CustomPlatforms");
             _cacheFilePath = Path.Combine(DirectoryPath, "cache.dat");
             DefaultPlatform = CreateDefaultPlatform();
-            AllPlatforms = new ObservableCollection<CustomPlatform> { DefaultPlatform };
-            SingleplayerPlatform = DefaultPlatform;
-            MultiplayerPlatform = DefaultPlatform;
-            A360Platform = DefaultPlatform;
-            MenuPlatform = DefaultPlatform;
-            ActivePlatform = DefaultPlatform;
+            RandomPlatform = CreateRandomPlatform();
+            AllPlatforms = new ObservableCollection<CustomPlatform> { DefaultPlatform, RandomPlatform };
+            SingleplayerPlatform = MultiplayerPlatform = A360Platform = MenuPlatform = ActivePlatform = DefaultPlatform;
         }
 
         public async Task InitializeAsync(CancellationToken token)
@@ -109,7 +106,7 @@ namespace CustomFloorPlugin
         {
             CustomPlatform defaultPlatform = new GameObject("Default Platform").AddComponent<CustomPlatform>();
             defaultPlatform.transform.SetParent(_anchor);
-            defaultPlatform.platName = "Default Environment";
+            defaultPlatform.platName = defaultPlatform.platHash = "Default Environment";
             defaultPlatform.platAuthor = "Beat Saber";
             defaultPlatform.icon = _assetLoader.DefaultPlatformCover;
             defaultPlatform.isDescriptor = false;
@@ -117,17 +114,31 @@ namespace CustomFloorPlugin
         }
 
         /// <summary>
+        /// Creates a stub <see cref="CustomPlatform"/> that indicates that a random platform should be used
+        /// </summary>
+        private CustomPlatform CreateRandomPlatform()
+        {
+            CustomPlatform randomPlatform = new GameObject("Random Platform").AddComponent<CustomPlatform>();
+            randomPlatform.transform.SetParent(_anchor);
+            randomPlatform.platName = randomPlatform.platHash = "Random Platform";
+            randomPlatform.platAuthor = "???";
+            randomPlatform.icon = _assetLoader.RandomPlatformCover;
+            randomPlatform.isDescriptor = false;
+            return randomPlatform;
+        }
+
+        /// <summary>
         /// Restores the last platform selection
         /// </summary>
         private void LastSelectedPlatform(CustomPlatform platform)
         {
-            if (platform.fullPath == _config.SingleplayerPlatformPath)
+            if (platform.platHash == _config.SingleplayerPlatformHash)
                 SingleplayerPlatform = platform;
-            if (platform.fullPath == _config.MultiplayerPlatformPath)
+            if (platform.platHash == _config.MultiplayerPlatformHash)
                 MultiplayerPlatform = platform;
-            if (platform.fullPath == _config.A360PlatformPath)
+            if (platform.platHash == _config.A360PlatformHash)
                 A360Platform = platform;
-            if (platform.fullPath == _config.MenuPlatformPath)
+            if (platform.platHash == _config.MenuPlatformHash)
                 MenuPlatform = platform;
         }
 
@@ -141,7 +152,7 @@ namespace CustomFloorPlugin
             if (File.Exists(_cacheFilePath))
             {
                 foreach (CustomPlatform platform in EnumeratePlatformDescriptorsFromFile())
-                    AllPlatforms.AddSorted(1, AllPlatforms.Count - 1, platform);
+                    AllPlatforms.AddSorted(BuildInPlatformsCount, AllPlatforms.Count - BuildInPlatformsCount, platform);
             }
 
             // Load all remaining platforms, or all if no cache file is found
@@ -150,7 +161,7 @@ namespace CustomFloorPlugin
                 if (cancellationToken.IsCancellationRequested) return;
                 CustomPlatform? platform = await CreatePlatformAsync(path);
                 if (platform is null) continue;
-                AllPlatforms.AddSorted(1, AllPlatforms.Count - 1, platform);
+                AllPlatforms.AddSorted(BuildInPlatformsCount, AllPlatforms.Count - BuildInPlatformsCount, platform);
             }
 
             sw.Stop();

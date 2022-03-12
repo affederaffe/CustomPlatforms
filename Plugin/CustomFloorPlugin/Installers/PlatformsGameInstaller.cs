@@ -20,8 +20,8 @@ namespace CustomFloorPlugin.Installers
         public override void InstallBindings()
         {
             Container.BindInterfacesAndSelfTo<BSEvents>().AsSingle();
-            if (_obstacleSaberSparkleEffectManager is not null)
-                Container.BindInstance(_obstacleSaberSparkleEffectManager).AsSingle().IfNotBound();
+            if (_obstacleSaberSparkleEffectManager is not null && !Container.HasBinding<ObstacleSaberSparkleEffectManager>())
+                Container.BindInstance(_obstacleSaberSparkleEffectManager).AsSingle();
             if (_multiplayerPlayersManager is not null)
                 _multiplayerPlayersManager.playerSpawningDidFinishEvent += OnPlayerSpawningDidFinish;
         }
