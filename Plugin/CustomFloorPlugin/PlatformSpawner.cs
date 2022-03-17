@@ -40,6 +40,11 @@ namespace CustomFloorPlugin
             _lobbyGameStateModel = lobbyGameStateModel;
         }
 
+        private CustomPlatform RandomPlatform =>
+            _platformManager.AllPlatforms.Count >= PlatformManager.BuildInPlatformsCount
+                ? _platformManager.AllPlatforms[_random.Next(PlatformManager.BuildInPlatformsCount, _platformManager.AllPlatforms.Count)]
+                : _platformManager.DefaultPlatform;
+
         public void Initialize()
         {
             _gameScenesManager.transitionDidStartEvent += OnTransitionDidStart;
@@ -117,9 +122,9 @@ namespace CustomFloorPlugin
             CancellationToken token = _cancellationTokenSource.Token;
             DestroyPlatform(_platformManager.ActivePlatform.gameObject);
             if (platform == _platformManager.RandomPlatform)
-                platform = GetRandomPlatform();
+                platform = RandomPlatform;
             if (platform.isDescriptor)
-                platform = await ReplaceDescriptorAsync(platform) ?? _platformManager.DefaultPlatform;
+                platform = await ReplaceDescriptorAsync(platform);
             if (token.IsCancellationRequested) return;
             _platformManager.ActivePlatform = platform;
             _siraLog.Debug($"Switching to {platform.name}");
@@ -149,15 +154,13 @@ namespace CustomFloorPlugin
             platform.SetActive(false);
         }
 
-        private async Task<CustomPlatform?> ReplaceDescriptorAsync(CustomPlatform descriptor)
+        private async Task<CustomPlatform> ReplaceDescriptorAsync(CustomPlatform descriptor)
         {
             CustomPlatform? platform = await _platformManager.CreatePlatformAsync(descriptor.fullPath);
-            if (platform is null) return null;
+            if (platform is null) return _platformManager.DefaultPlatform;
             _platformManager.AllPlatforms.Replace(descriptor, platform);
             UnityEngine.Object.Destroy(descriptor.gameObject);
             return platform;
         }
-
-        private CustomPlatform GetRandomPlatform() => _platformManager.AllPlatforms[_random.Next(PlatformManager.BuildInPlatformsCount, _platformManager.AllPlatforms.Count)];
     }
 }
