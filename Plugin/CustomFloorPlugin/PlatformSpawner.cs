@@ -41,7 +41,7 @@ namespace CustomFloorPlugin
         }
 
         private CustomPlatform RandomPlatform =>
-            _platformManager.AllPlatforms.Count >= PlatformManager.BuildInPlatformsCount
+            _platformManager.AllPlatforms.Count > PlatformManager.BuildInPlatformsCount
                 ? _platformManager.AllPlatforms[_random.Next(PlatformManager.BuildInPlatformsCount, _platformManager.AllPlatforms.Count)]
                 : _platformManager.DefaultPlatform;
 
