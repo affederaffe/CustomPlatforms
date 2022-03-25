@@ -42,13 +42,15 @@ namespace CustomFloorPlugin
         /// </summary>
         public float columnDepth = 1f;
 
+        private MaterialSwapper? _materialSwapper;
         private BasicSpectrogramData? _basicSpectrogramData;
 
         private Transform[]? _columnTransforms;
 
         [Inject]
-        public void Construct([InjectOptional] BasicSpectrogramData basicSpectrogramData)
+        public void Construct(MaterialSwapper materialSwapper, [InjectOptional] BasicSpectrogramData basicSpectrogramData)
         {
+            _materialSwapper = materialSwapper;
             _basicSpectrogramData = basicSpectrogramData;
         }
 
@@ -58,6 +60,7 @@ namespace CustomFloorPlugin
             container.Inject(this);
             if (_columnTransforms is null)
             {
+                _materialSwapper!.ReplaceMaterials(columnPrefab);
                 _columnTransforms = CreateColumns();
                 UpdateColumnHeights(FallbackSamples);
                 foreach (INotifyPlatformEnabled? notifyEnable in GetComponentsInChildren<INotifyPlatformEnabled>(true).Where(x => !ReferenceEquals(x, this)))

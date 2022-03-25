@@ -7,6 +7,8 @@ using CustomFloorPlugin.Interfaces;
 
 using SiraUtil.Logging;
 
+using UnityEngine;
+
 using Zenject;
 
 
@@ -18,7 +20,7 @@ namespace CustomFloorPlugin
     public sealed class PlatformSpawner : IInitializable, IDisposable
     {
         private readonly SiraLog _siraLog;
-        private readonly Random _random;
+        private readonly System.Random _random;
         private readonly AssetLoader _assetLoader;
         private readonly MaterialSwapper _materialSwapper;
         private readonly EnvironmentHider _environmentHider;
@@ -30,7 +32,7 @@ namespace CustomFloorPlugin
         private CancellationTokenSource? _cancellationTokenSource;
         private DiContainer _container = null!;
 
-        public PlatformSpawner(SiraLog siraLog, Random random, MaterialSwapper materialSwapper, AssetLoader assetLoader, EnvironmentHider environmentHider, PlatformManager platformManager, GameScenesManager gameScenesManager, LobbyGameStateModel lobbyGameStateModel)
+        public PlatformSpawner(SiraLog siraLog, System.Random random, MaterialSwapper materialSwapper, AssetLoader assetLoader, EnvironmentHider environmentHider, PlatformManager platformManager, GameScenesManager gameScenesManager, LobbyGameStateModel lobbyGameStateModel)
         {
             _siraLog = siraLog;
             _random = random;
@@ -122,7 +124,7 @@ namespace CustomFloorPlugin
             _cancellationTokenSource?.Dispose();
             _cancellationTokenSource = new CancellationTokenSource();
             CancellationToken token = _cancellationTokenSource.Token;
-            DestroyPlatform(_platformManager.ActivePlatform);
+            DestroyPlatform(_platformManager.ActivePlatform.gameObject);
             if (platform == _platformManager.RandomPlatform)
                 platform = RandomPlatform;
             if (platform.isDescriptor)
@@ -131,27 +133,26 @@ namespace CustomFloorPlugin
             _platformManager.ActivePlatform = platform;
             _siraLog.Debug($"Switching to {platform.name}");
             _environmentHider.HideObjectsForPlatform(platform);
-            SpawnPlatform(platform);
+            SpawnPlatform(platform.gameObject);
         }
 
         /// <summary>
         /// Enables or spawns all registered custom objects, as required by the selected <see cref="CustomPlatform"/>
         /// </summary>
-        private void SpawnPlatform(CustomPlatform platform)
+        private void SpawnPlatform(GameObject platform)
         {
+            _materialSwapper.ReplaceMaterials(platform.gameObject);
             platform.gameObject.SetActive(true);
             if (_lobbyGameStateModel.gameState == MultiplayerGameState.Game)
                 _assetLoader.MultiplayerLightEffects.PlatformEnabled(_container);
             foreach (INotifyPlatformEnabled notifyEnable in platform.GetComponentsInChildren<INotifyPlatformEnabled>(true))
                 notifyEnable?.PlatformEnabled(_container);
-            if (platform.replacedMaterials)
-                _materialSwapper.ReplaceMaterials(platform.gameObject);
         }
 
         /// <summary>
         /// Disables all registered custom objects, as required by the selected <see cref="CustomPlatform"/>
         /// </summary>
-        private void DestroyPlatform(CustomPlatform platform)
+        private void DestroyPlatform(GameObject platform)
         {
             if (_lobbyGameStateModel.gameState == MultiplayerGameState.Game)
                 _assetLoader.MultiplayerLightEffects.PlatformDisabled();

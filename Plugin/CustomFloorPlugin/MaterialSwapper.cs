@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 
 using UnityEngine;
 
@@ -12,7 +13,7 @@ namespace CustomFloorPlugin
     /// </summary>
     public class MaterialSwapper
     {
-        private Material[] Materials => _materials ??= Resources.FindObjectsOfTypeAll<Material>();
+        private IEnumerable<Material> Materials => _materials ??= Resources.FindObjectsOfTypeAll<Material>();
         private Material[]? _materials;
 
         internal Material? DarkEnvSimpleMaterial => _darkEnvSimpleMaterial ??= FindMaterial("DarkEnvironmentSimple");
