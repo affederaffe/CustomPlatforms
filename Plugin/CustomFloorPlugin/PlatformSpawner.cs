@@ -20,6 +20,7 @@ namespace CustomFloorPlugin
         private readonly SiraLog _siraLog;
         private readonly Random _random;
         private readonly AssetLoader _assetLoader;
+        private readonly MaterialSwapper _materialSwapper;
         private readonly EnvironmentHider _environmentHider;
         private readonly PlatformManager _platformManager;
         private readonly GameScenesManager _gameScenesManager;
@@ -29,10 +30,11 @@ namespace CustomFloorPlugin
         private CancellationTokenSource? _cancellationTokenSource;
         private DiContainer _container = null!;
 
-        public PlatformSpawner(SiraLog siraLog, Random random, AssetLoader assetLoader, EnvironmentHider environmentHider, PlatformManager platformManager, GameScenesManager gameScenesManager, LobbyGameStateModel lobbyGameStateModel)
+        public PlatformSpawner(SiraLog siraLog, Random random, MaterialSwapper materialSwapper, AssetLoader assetLoader, EnvironmentHider environmentHider, PlatformManager platformManager, GameScenesManager gameScenesManager, LobbyGameStateModel lobbyGameStateModel)
         {
             _siraLog = siraLog;
             _random = random;
+            _materialSwapper = materialSwapper;
             _assetLoader = assetLoader;
             _environmentHider = environmentHider;
             _platformManager = platformManager;
@@ -120,7 +122,7 @@ namespace CustomFloorPlugin
             _cancellationTokenSource?.Dispose();
             _cancellationTokenSource = new CancellationTokenSource();
             CancellationToken token = _cancellationTokenSource.Token;
-            DestroyPlatform(_platformManager.ActivePlatform.gameObject);
+            DestroyPlatform(_platformManager.ActivePlatform);
             if (platform == _platformManager.RandomPlatform)
                 platform = RandomPlatform;
             if (platform.isDescriptor)
@@ -129,34 +131,38 @@ namespace CustomFloorPlugin
             _platformManager.ActivePlatform = platform;
             _siraLog.Debug($"Switching to {platform.name}");
             _environmentHider.HideObjectsForPlatform(platform);
-            SpawnPlatform(platform.gameObject);
+            SpawnPlatform(platform);
         }
 
         /// <summary>
         /// Enables or spawns all registered custom objects, as required by the selected <see cref="CustomPlatform"/>
         /// </summary>
-        private void SpawnPlatform(UnityEngine.GameObject platform)
+        private void SpawnPlatform(CustomPlatform platform)
         {
-            platform.SetActive(true);
-            if (_lobbyGameStateModel.gameState == MultiplayerGameState.Game) _assetLoader.MultiplayerLightEffects.PlatformEnabled(_container);
+            platform.gameObject.SetActive(true);
+            if (_lobbyGameStateModel.gameState == MultiplayerGameState.Game)
+                _assetLoader.MultiplayerLightEffects.PlatformEnabled(_container);
             foreach (INotifyPlatformEnabled notifyEnable in platform.GetComponentsInChildren<INotifyPlatformEnabled>(true))
                 notifyEnable?.PlatformEnabled(_container);
+            if (platform.replacedMaterials)
+                _materialSwapper.ReplaceMaterials(platform.gameObject);
         }
 
         /// <summary>
         /// Disables all registered custom objects, as required by the selected <see cref="CustomPlatform"/>
         /// </summary>
-        private void DestroyPlatform(UnityEngine.GameObject platform)
+        private void DestroyPlatform(CustomPlatform platform)
         {
-            if (_lobbyGameStateModel.gameState == MultiplayerGameState.Game) _assetLoader.MultiplayerLightEffects.PlatformDisabled();
+            if (_lobbyGameStateModel.gameState == MultiplayerGameState.Game)
+                _assetLoader.MultiplayerLightEffects.PlatformDisabled();
             foreach (INotifyPlatformDisabled notifyDisable in platform.GetComponentsInChildren<INotifyPlatformDisabled>(true))
                 notifyDisable?.PlatformDisabled();
-            platform.SetActive(false);
+            platform.gameObject.SetActive(false);
         }
 
         private async Task<CustomPlatform> ReplaceDescriptorAsync(CustomPlatform descriptor)
         {
-            CustomPlatform? platform = await _platformManager.CreatePlatformAsync(descriptor.fullPath);
+            CustomPlatform? platform = await _platformManager.CreatePlatformAsync(descriptor.fullPath!);
             if (platform is null) return _platformManager.DefaultPlatform;
             _platformManager.AllPlatforms.Replace(descriptor, platform);
             UnityEngine.Object.Destroy(descriptor.gameObject);

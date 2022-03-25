@@ -41,7 +41,6 @@ namespace CustomFloorPlugin
         public float maxPositionStep = 2f;
         public float moveSpeed = 1f;
 
-        private MaterialSwapper? _materialSwapper;
         private BeatmapCallbacksController? _beatmapCallbacksController;
 
         private TrackLaneRingsManager? _trackLaneRingsManager;
@@ -49,9 +48,8 @@ namespace CustomFloorPlugin
         private TrackLaneRingsPositionStepEffectSpawner? _trackLaneRingsPositionStepEffectSpawner;
 
         [Inject]
-        public void Construct(MaterialSwapper materialSwapper, [InjectOptional] BeatmapCallbacksController beatmapCallbacksController)
+        public void Construct([InjectOptional] BeatmapCallbacksController beatmapCallbacksController)
         {
-            _materialSwapper = materialSwapper;
             _beatmapCallbacksController = beatmapCallbacksController;
         }
 
@@ -63,7 +61,6 @@ namespace CustomFloorPlugin
 
             if (_trackLaneRingsManager is null)
             {
-                _materialSwapper!.ReplaceMaterials(trackLaneRingPrefab);
                 gameObject.SetActive(false);
                 TrackLaneRing trackLaneRing = trackLaneRingPrefab.AddComponent<TrackLaneRing>();
                 _trackLaneRingsManager = gameObject.AddComponent<TrackLaneRingsManager>();

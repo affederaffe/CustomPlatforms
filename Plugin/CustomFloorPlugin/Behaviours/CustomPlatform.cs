@@ -27,13 +27,16 @@ namespace CustomFloorPlugin
         public bool hideTrackLights;
 
         [SerializeField]
-        internal string platHash = string.Empty;
+        internal string? platHash;
 
         [SerializeField]
-        internal string fullPath = string.Empty;
+        internal string? fullPath;
 
         [SerializeField]
         internal bool isDescriptor = true;
+
+        [SerializeField]
+        internal bool replacedMaterials;
 
         public void Awake()
         {

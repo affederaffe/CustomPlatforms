@@ -21,15 +21,13 @@ namespace CustomFloorPlugin
         private readonly SiraLog _siraLog;
         private readonly BloomPrePassRendererSO _bloomPrepassRenderer;
         private readonly BloomPrePassEffectContainerSO _bloomPrePassEffectContainer;
-        private readonly MaterialSwapper _materialSwapper;
         private readonly Dictionary<string, Task<CustomPlatform?>> _pathTaskPairs;
 
-        public PlatformLoader(SiraLog siraLog, BloomPrePassRendererSO bloomPrepassRenderer, BloomPrePassEffectContainerSO bloomPrePassEffectContainer, MaterialSwapper materialSwapper)
+        public PlatformLoader(SiraLog siraLog, BloomPrePassRendererSO bloomPrepassRenderer, BloomPrePassEffectContainerSO bloomPrePassEffectContainer)
         {
             _siraLog = siraLog;
             _bloomPrepassRenderer = bloomPrepassRenderer;
             _bloomPrePassEffectContainer = bloomPrePassEffectContainer;
-            _materialSwapper = materialSwapper;
             _pathTaskPairs = new Dictionary<string, Task<CustomPlatform?>>();
         }
 
@@ -54,7 +52,7 @@ namespace CustomFloorPlugin
         /// </summary>
         private async Task<CustomPlatform?> LoadPlatformFromFileAsyncCore(string fullPath)
         {
-            byte[] bundleData = await Task.Run(() => File.ReadAllBytes(fullPath)).ConfigureAwait(true);
+            byte[] bundleData = await Task.Run(() => File.ReadAllBytes(fullPath));
 
             AssetBundle? assetBundle = await LoadAssetBundleFromBytesAsync(bundleData);
 
@@ -111,8 +109,6 @@ namespace CustomFloorPlugin
             customPlatform.platHash = await Task.Run(() => ComputeHash(bundleData));
             customPlatform.fullPath = fullPath;
             customPlatform.name = $"{customPlatform.platName} by {customPlatform.platAuthor}";
-
-            _materialSwapper.ReplaceMaterials(customPlatform.gameObject);
 
             return customPlatform;
         }
