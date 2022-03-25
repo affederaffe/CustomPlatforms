@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
@@ -149,10 +150,14 @@ namespace CustomFloorPlugin
         {
             Stopwatch sw = Stopwatch.StartNew();
 
-            if (File.Exists(_cacheFilePath))
+            try
             {
                 foreach (CustomPlatform platform in EnumeratePlatformDescriptorsFromFile())
                     AllPlatforms.AddSorted(BuildInPlatformsCount, AllPlatforms.Count - BuildInPlatformsCount, platform);
+            }
+            catch (Exception e)
+            {
+                _siraLog.Debug($"Failed to read cache file:\n{e}");
             }
 
             // Load all remaining platforms, or all if no cache file is found
@@ -175,8 +180,8 @@ namespace CustomFloorPlugin
         {
             CustomPlatform? platform = await _platformLoader.LoadPlatformFromFileAsync(fullPath);
             if (platform is null) return null;
-            CustomPlatform newPlatform = Object.Instantiate(platform, _anchor);
-            Object.Destroy(platform.gameObject);
+            CustomPlatform newPlatform = UnityEngine.Object.Instantiate(platform, _anchor);
+            UnityEngine.Object.Destroy(platform.gameObject);
             newPlatform.name = platform.name;
             newPlatform.isDescriptor = false;
             LastSelectedPlatform(newPlatform);
@@ -203,7 +208,7 @@ namespace CustomFloorPlugin
                 if (!File.Exists(platform.fullPath))
                 {
                     _siraLog.Debug($"File {platform.fullPath} no longer exists; skipped");
-                    Object.Destroy(platform.gameObject);
+                    UnityEngine.Object.Destroy(platform.gameObject);
                     continue;
                 }
 
