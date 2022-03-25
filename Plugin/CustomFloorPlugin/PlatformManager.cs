@@ -27,7 +27,7 @@ namespace CustomFloorPlugin
     /// <summary>
     /// Handles platform loading and saving
     /// </summary>
-    public sealed class PlatformManager : IAsyncInitializable, System.IDisposable
+    public sealed class PlatformManager : IAsyncInitializable, IDisposable
     {
         private readonly SiraLog _siraLog;
         private readonly PluginConfig _config;
@@ -158,6 +158,11 @@ namespace CustomFloorPlugin
             catch (Exception e)
             {
                 _siraLog.Debug($"Failed to read cache file:\n{e}");
+                try
+                {
+                    File.Delete(_cacheFilePath);
+                }
+                catch { /* Ignored */ }
             }
 
             // Load all remaining platforms, or all if no cache file is found
@@ -228,7 +233,7 @@ namespace CustomFloorPlugin
             using BinaryWriter writer = new(stream, Encoding.UTF8);
 
             writer.Write(CacheFileVersion);
-            writer.Write(AllPlatforms.Count - 1);
+            writer.Write(AllPlatforms.Count - BuildInPlatformsCount);
             for (int i = 1; i < AllPlatforms.Count; i++)
             {
                 writer.Write(AllPlatforms[i].platName);
