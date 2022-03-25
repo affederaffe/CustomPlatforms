@@ -234,7 +234,7 @@ namespace CustomFloorPlugin
 
             writer.Write(CacheFileVersion);
             writer.Write(AllPlatforms.Count - BuildInPlatformsCount);
-            for (int i = 1; i < AllPlatforms.Count; i++)
+            for (int i = BuildInPlatformsCount; i < AllPlatforms.Count; i++)
             {
                 writer.Write(AllPlatforms[i].platName);
                 writer.Write(AllPlatforms[i].platAuthor);
