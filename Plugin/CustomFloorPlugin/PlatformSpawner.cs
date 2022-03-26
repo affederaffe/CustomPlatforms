@@ -119,16 +119,15 @@ namespace CustomFloorPlugin
         /// <param name="platform">The <see cref="CustomPlatform"/> to change to</param>
         public async Task ChangeToPlatformAsync(CustomPlatform platform)
         {
-            if (_platformManager.ActivePlatform == platform) return;
+            if (platform == _platformManager.ActivePlatform) return;
             _cancellationTokenSource?.Cancel();
             _cancellationTokenSource?.Dispose();
             _cancellationTokenSource = new CancellationTokenSource();
             CancellationToken token = _cancellationTokenSource.Token;
             DestroyPlatform(_platformManager.ActivePlatform.gameObject);
-            if (platform == _platformManager.RandomPlatform)
-                platform = RandomPlatform;
-            if (platform.isDescriptor)
-                platform = await ReplaceDescriptorAsync(platform);
+            if (platform == _platformManager.RandomPlatform) platform = RandomPlatform;
+            _platformManager.ActivePlatform = platform;
+            if (platform.isDescriptor) platform = await ReplaceDescriptorAsync(platform);
             if (token.IsCancellationRequested) return;
             _platformManager.ActivePlatform = platform;
             _siraLog.Debug($"Switching to {platform.name}");
@@ -141,12 +140,12 @@ namespace CustomFloorPlugin
         /// </summary>
         private void SpawnPlatform(GameObject platform)
         {
-            _materialSwapper.ReplaceMaterials(platform.gameObject);
             platform.gameObject.SetActive(true);
+            _materialSwapper.ReplaceMaterials(platform.gameObject);
             if (_lobbyGameStateModel.gameState == MultiplayerGameState.Game)
                 _assetLoader.MultiplayerLightEffects.PlatformEnabled(_container);
             foreach (INotifyPlatformEnabled notifyEnable in platform.GetComponentsInChildren<INotifyPlatformEnabled>(true))
-                notifyEnable?.PlatformEnabled(_container);
+                notifyEnable.PlatformEnabled(_container);
         }
 
         /// <summary>
@@ -157,13 +156,13 @@ namespace CustomFloorPlugin
             if (_lobbyGameStateModel.gameState == MultiplayerGameState.Game)
                 _assetLoader.MultiplayerLightEffects.PlatformDisabled();
             foreach (INotifyPlatformDisabled notifyDisable in platform.GetComponentsInChildren<INotifyPlatformDisabled>(true))
-                notifyDisable?.PlatformDisabled();
+                notifyDisable.PlatformDisabled();
             platform.gameObject.SetActive(false);
         }
 
         private async Task<CustomPlatform> ReplaceDescriptorAsync(CustomPlatform descriptor)
         {
-            CustomPlatform? platform = await _platformManager.CreatePlatformAsync(descriptor.fullPath!);
+            CustomPlatform? platform = await _platformManager.CreatePlatformAsync(descriptor.fullPath);
             if (platform is null) return _platformManager.DefaultPlatform;
             _platformManager.AllPlatforms.Replace(descriptor, platform);
             UnityEngine.Object.Destroy(descriptor.gameObject);

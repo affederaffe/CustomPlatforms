@@ -77,9 +77,8 @@ namespace CustomFloorPlugin.UI
         // ReSharper disable once AsyncVoidMethod
         public async void OnDidSelectPlatform(TableView _, int index)
         {
-            CustomPlatform platform = _platformManager.AllPlatforms[index];
-            await _platformSpawner.ChangeToPlatformAsync(platform);
-            SetPlatformForTabIndex(_tabIndex, platform);
+            await _platformSpawner.ChangeToPlatformAsync(_platformManager.AllPlatforms[index]);
+            SetPlatformForTabIndex(_tabIndex, _platformManager.AllPlatforms[index]);
         }
 
         /// <summary>
