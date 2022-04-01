@@ -560,6 +560,18 @@ namespace CustomFloorPlugin
                     FindAddGameObject(_envRoot!, "BackCube", _highway);
                     FindAddGameObject(_envRoot!, "Logo", _highway);
                     break;
+                case "PyroEnvironment":
+                    FindAddGameObject(_envRoot!, "PlayerSetup", _highway);
+                    FindAddGameObject(_envRoot!, "Runway", _highway);
+                    FindAddGameObject(_envRoot!, "Fire", _highway);
+                    FindAddGameObject(_envRoot!, "SmokeLeft", _highway);
+                    FindAddGameObject(_envRoot!, "CrowdFlipbookGroup", _highway);
+                    FindAddGameObject(_envRoot!, "ScreenSetupLeft", _highway);
+                    FindAddGameObject(_envRoot!, "ScreenSetupRight", _highway);
+                    FindAddGameObject(_envRoot!, "StageRing", _highway);
+                    FindAddGameObject(_envRoot!, "FrontScaffolding", _highway);
+                    FindAddGameObject(_envRoot!, "ProjectorArray", _highway);
+                    break;
             }
         }
 
@@ -791,6 +803,9 @@ namespace CustomFloorPlugin
                 case "GagaEnvironment":
                     FindAddGameObject(_envRoot!, "FrontLasers", _backLasers);
                     break;
+                case "PyroEnvironment":
+                    FindAddGameObject(_envRoot!, "PyroLogo", _backLasers);
+                    break;
                 default:
                     FindAddGameObject(_envRoot!, "FrontLights", _backLasers);
                     break;
@@ -972,6 +987,15 @@ namespace CustomFloorPlugin
                 case "WeaveEnvironment":
                     for (int i = 0; i < 16; i++)
                         FindAddGameObject(_envRoot!, $"LightGroup{i.ToString(NumberFormatInfo.InvariantInfo)}", _trackLights);
+                    break;
+                case "PyroEnvironment":
+                    FindAddGameObject(_envRoot!, "Behind", _highway);
+                    FindAddGameObject(_envRoot!, "Video", _backLasers);
+                    FindAddGameObject(_envRoot!, "MainLasers", _backLasers);
+                    FindAddGameObject(_envRoot!, "Stairs", _backLasers);
+                    FindAddGameObject(_envRoot!, "MainStageSetup", _backLasers);
+                    FindAddGameObject(_envRoot!, "LightBoxesScaffoldingLeft", _backLasers);
+                    FindAddGameObject(_envRoot!, "LightBoxesScaffoldingRight", _backLasers);
                     break;
             }
         }

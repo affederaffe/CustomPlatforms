@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+
 using CustomFloorPlugin.Interfaces;
 using UnityEngine;
 
@@ -42,9 +44,9 @@ namespace CustomFloorPlugin
             LightmapSettings.lightmaps = combinedLightmaps;
         }
 
-        private static void ApplyRendererInfo(Renderer[] renderers, Vector4[] lightmapOffsetScales, int lightmapIndexOffset)
+        private static void ApplyRendererInfo(IReadOnlyList<Renderer> renderers, IReadOnlyList<Vector4> lightmapOffsetScales, int lightmapIndexOffset)
         {
-            for (int i = 0; i < renderers.Length; i++)
+            for (int i = 0; i < renderers.Count; i++)
             {
                 Renderer renderer = renderers[i];
                 renderer.lightmapIndex = i + lightmapIndexOffset;

@@ -25,7 +25,7 @@ namespace CustomFloorPlugin
         internal Material? OpaqueGlowMaterial => _opaqueGlowMaterial ??= FindMaterialDisableHeightFog("EnvLightOpaque");
         private Material? _opaqueGlowMaterial;
 
-        private Material? FindMaterial(string name) => Materials.FirstOrDefault(x => x.name == name);
+        private Material? FindMaterial(string name) => Materials.Where(static x => x != null).FirstOrDefault(x => x.name == name);
 
         private Material? FindMaterialDisableHeightFog(string name)
         {

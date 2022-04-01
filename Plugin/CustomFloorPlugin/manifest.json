@@ -5,11 +5,11 @@
   "author": "Rolo",
   "version": "6.1.13",
   "description": "A plugin to support custom platforms and environments",
-  "gameVersion": "1.12.0",
+  "gameVersion": "1.21.0",
   "dependsOn": {
     "BSIPA": "^4.2.2",
-    "BeatSaberMarkupLanguage": "^1.6.2",
-    "SiraUtil": "^3.0.5"
+    "BeatSaberMarkupLanguage": "^1.6.3",
+    "SiraUtil": "^3.0.6"
   },
   "loadAfter": [
     "SongCore",

@@ -80,13 +80,11 @@ namespace CustomFloorPlugin
                 return;
             }
 
-            if (_platformManager.AllPlatforms.TryGetFirst(x => x.fullPath == e.FullPath, out CustomPlatform platform))
-            {
-                bool wasActivePlatform = platform == _platformManager.ActivePlatform;
-                CustomPlatform? newPlatform = await _platformManager.CreatePlatformAsync(e.FullPath);
-                if (!wasActivePlatform || newPlatform is null) return;
-                await _platformSpawner.ChangeToPlatformAsync(newPlatform);
-            }
+            if (!_platformManager.AllPlatforms.TryGetFirst(x => x.fullPath == e.FullPath, out CustomPlatform platform)) return;
+            bool wasActivePlatform = platform == _platformManager.ActivePlatform;
+            CustomPlatform? newPlatform = await _platformManager.CreatePlatformAsync(e.FullPath);
+            if (!wasActivePlatform || newPlatform is null) return;
+            await _platformSpawner.ChangeToPlatformAsync(newPlatform);
         }
 
         /// <summary>
@@ -118,12 +116,10 @@ namespace CustomFloorPlugin
                 return;
             }
 
-            if (_platformManager.AllPlatforms.TryGetFirst(x => x.fullPath == e.FullPath, out CustomPlatform platform))
-            {
-                if (platform == _platformManager.ActivePlatform) await _platformSpawner.ChangeToPlatformAsync(_platformManager.DefaultPlatform);
-                _platformManager.AllPlatforms.Remove(platform);
-                UnityEngine.Object.Destroy(platform.gameObject);
-            }
+            if (!_platformManager.AllPlatforms.TryGetFirst(x => x.fullPath == e.FullPath, out CustomPlatform platform)) return;
+            if (platform == _platformManager.ActivePlatform) await _platformSpawner.ChangeToPlatformAsync(_platformManager.DefaultPlatform);
+            _platformManager.AllPlatforms.Remove(platform);
+            UnityEngine.Object.Destroy(platform.gameObject);
         }
 
         private void InitializeSongCoreConnection()
@@ -203,27 +199,21 @@ namespace CustomFloorPlugin
         /// </summary>
         private async Task DownloadPlatform(string url, CancellationToken cancellationToken)
         {
-            try
-            {
-                IHttpResponse downloadDataWebResponse = await _httpService.GetAsync(url, null, cancellationToken);
-                if (!downloadDataWebResponse.Successful) return;
-                string json = await downloadDataWebResponse.ReadAsStringAsync();
-                PlatformDownloadData platformDownloadData = JsonConvert.DeserializeObject<Dictionary<string, PlatformDownloadData>>(json).First().Value;
-                IHttpResponse platDownloadWebResponse = await _httpService.GetAsync(platformDownloadData.download!, null, cancellationToken);
-                if (!platDownloadWebResponse.Successful) return;
-                byte[] platData = await platDownloadWebResponse.ReadAsByteArrayAsync();
-                string path = Path.Combine(_platformManager.DirectoryPath, $"{platformDownloadData.name}.plat");
-                _fileSystemWatcher.EnableRaisingEvents = false;
-                File.WriteAllBytes(path, platData);
-                _fileSystemWatcher.EnableRaisingEvents = true;
-                CustomPlatform? requestedPlatform = await _platformManager.CreatePlatformAsync(path);
-                cancellationToken.ThrowIfCancellationRequested();
-                if (requestedPlatform is null) return;
-                _platformManager.AllPlatforms.AddSorted(PlatformManager.BuildInPlatformsCount, _platformManager.AllPlatforms.Count - PlatformManager.BuildInPlatformsCount, requestedPlatform);
-                _platformManager.APIRequestedPlatform = requestedPlatform;
-            }
-            catch (TaskCanceledException) { }
-            catch (OperationCanceledException) { }
+            IHttpResponse downloadDataWebResponse = await _httpService.GetAsync(url, null, cancellationToken);
+            if (!downloadDataWebResponse.Successful) return;
+            string json = await downloadDataWebResponse.ReadAsStringAsync();
+            PlatformDownloadData platformDownloadData = JsonConvert.DeserializeObject<Dictionary<string, PlatformDownloadData>>(json).First().Value;
+            IHttpResponse platDownloadWebResponse = await _httpService.GetAsync(platformDownloadData.download!, null, cancellationToken);
+            if (!platDownloadWebResponse.Successful) return;
+            byte[] platData = await platDownloadWebResponse.ReadAsByteArrayAsync();
+            string path = Path.Combine(_platformManager.DirectoryPath, $"{platformDownloadData.name}.plat");
+            _fileSystemWatcher.EnableRaisingEvents = false;
+            File.WriteAllBytes(path, platData);
+            _fileSystemWatcher.EnableRaisingEvents = true;
+            CustomPlatform? requestedPlatform = await _platformManager.CreatePlatformAsync(path);
+            if (cancellationToken.IsCancellationRequested || requestedPlatform is null) return;
+            _platformManager.AllPlatforms.AddSorted(PlatformManager.BuildInPlatformsCount, _platformManager.AllPlatforms.Count - PlatformManager.BuildInPlatformsCount, requestedPlatform);
+            _platformManager.APIRequestedPlatform = requestedPlatform;
         }
     }
 }
