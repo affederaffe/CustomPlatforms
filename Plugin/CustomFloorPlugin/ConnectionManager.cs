@@ -202,8 +202,9 @@ namespace CustomFloorPlugin
             IHttpResponse downloadDataWebResponse = await _httpService.GetAsync(url, null, cancellationToken);
             if (!downloadDataWebResponse.Successful) return;
             string json = await downloadDataWebResponse.ReadAsStringAsync();
-            PlatformDownloadData platformDownloadData = JsonConvert.DeserializeObject<Dictionary<string, PlatformDownloadData>>(json).First().Value;
-            IHttpResponse platDownloadWebResponse = await _httpService.GetAsync(platformDownloadData.download!, null, cancellationToken);
+            PlatformDownloadData? platformDownloadData = JsonConvert.DeserializeObject<Dictionary<string, PlatformDownloadData>>(json).FirstOrDefault().Value;
+            if (platformDownloadData?.download is null) return;
+            IHttpResponse platDownloadWebResponse = await _httpService.GetAsync(platformDownloadData.download, null, cancellationToken);
             if (!platDownloadWebResponse.Successful) return;
             byte[] platData = await platDownloadWebResponse.ReadAsByteArrayAsync();
             string path = Path.Combine(_platformManager.DirectoryPath, $"{platformDownloadData.name}.plat");
