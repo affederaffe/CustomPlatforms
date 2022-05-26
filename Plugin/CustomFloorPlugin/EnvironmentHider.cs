@@ -50,7 +50,7 @@ namespace CustomFloorPlugin
                     _envRoot = container.Resolve<LightWithIdManager>().transform.parent;
                     _sceneName = _envRoot.gameObject.scene.name;
                     break;
-                case null:
+                case null when container.HasBinding<LightWithIdManager>():
                 case StandardLevelScenesTransitionSetupDataSO:
                 case TutorialScenesTransitionSetupDataSO:
                 case MissionLevelScenesTransitionSetupDataSO:

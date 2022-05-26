@@ -2,6 +2,8 @@
 using System.Threading;
 using System.Threading.Tasks;
 
+using BeatmapEditor3D;
+
 using CustomFloorPlugin.Helpers;
 using CustomFloorPlugin.Interfaces;
 
@@ -78,20 +80,18 @@ namespace CustomFloorPlugin
         // ReSharper disable once AsyncVoidMethod
         internal async void OnTransitionDidFinish(ScenesTransitionSetupDataSO? setupData, DiContainer container)
         {
-            CustomPlatform? platform = setupData switch
+            CustomPlatform platform = setupData switch
             {
                 MenuScenesTransitionSetupDataSO or null when _lobbyGameStateModel.gameState == MultiplayerGameState.None => _platformManager.MenuPlatform,
                 StandardLevelScenesTransitionSetupDataSO when _platformManager.APIRequestedPlatform is not null => _platformManager.APIRequestedPlatform,
                 StandardLevelScenesTransitionSetupDataSO standardLevelScenesTransitionSetupDataSO when standardLevelScenesTransitionSetupDataSO.difficultyBeatmap.parentDifficultyBeatmapSet.beatmapCharacteristic.requires360Movement => _platformManager.A360Platform,
                 StandardLevelScenesTransitionSetupDataSO or MissionLevelScenesTransitionSetupDataSO or TutorialScenesTransitionSetupDataSO => _platformManager.SingleplayerPlatform,
                 MultiplayerLevelScenesTransitionSetupDataSO when container.HasBinding<MultiplayerLocalActivePlayerFacade>() => _platformManager.MultiplayerPlatform,
-                BeatmapEditorScenesTransitionSetupDataSO => _platformManager.DefaultPlatform,
-                _ => null
+                _ => _platformManager.DefaultPlatform
             };
 
             _container = container;
             _environmentHider.OnTransitionDidFinish(setupData, container);
-            if (platform is null) return;
             await ChangeToPlatformAsync(platform);
         }
 
