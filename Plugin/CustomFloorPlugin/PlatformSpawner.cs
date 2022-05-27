@@ -2,8 +2,6 @@
 using System.Threading;
 using System.Threading.Tasks;
 
-using BeatmapEditor3D;
-
 using CustomFloorPlugin.Helpers;
 using CustomFloorPlugin.Interfaces;
 

@@ -19,7 +19,8 @@ namespace CustomFloorPlugin
         private readonly BeatmapCallbacksController _beatmapCallbacksController;
         private readonly int _bombSubtypeIdentifier;
 
-        private BeatmapDataCallbackWrapper? _beatmapDataCallbackWrapper;
+        private BeatmapDataCallbackWrapper? _basicBeatmapEventCallbackWrapper;
+        private BeatmapDataCallbackWrapper? _colorBoostBeatmapEventCallbackWrapper;
         private int _anyCutCount;
         private int _goodCutCount;
         private int _badCutCount;
@@ -38,7 +39,7 @@ namespace CustomFloorPlugin
             _bombSubtypeIdentifier = NoteData.SubtypeIdentifier(ColorType.None);
         }
 
-        public event Action<BasicBeatmapEventData>? BeatmapEventDidTriggerEvent;
+        public event Action<BeatmapDataItem>? BeatmapEventDidTriggerEvent;
         public event Action? LevelFinishedEvent;
         public event Action? LevelFailedEvent;
         public event Action<SaberType>? NoteWasCutEvent;
@@ -57,7 +58,8 @@ namespace CustomFloorPlugin
         public void Initialize()
         {
             _cuttableNotesCount = _beatmapData.cuttableNotesCount - 1;
-            _beatmapDataCallbackWrapper = _beatmapCallbacksController.AddBeatmapCallback<BasicBeatmapEventData>(BeatmapEventDidTrigger);
+            _basicBeatmapEventCallbackWrapper = _beatmapCallbacksController.AddBeatmapCallback<BasicBeatmapEventData>(BeatmapEventDidTrigger);
+            _colorBoostBeatmapEventCallbackWrapper = _beatmapCallbacksController.AddBeatmapCallback<ColorBoostBeatmapEventData>(BeatmapEventDidTrigger);
             _obstacleSaberSparkleEffectManager.sparkleEffectDidStartEvent += SabersStartCollide;
             _obstacleSaberSparkleEffectManager.sparkleEffectDidEndEvent += SabersEndCollide;
             _beatmapObjectManager.noteWasCutEvent += NoteWasCut;
@@ -73,7 +75,8 @@ namespace CustomFloorPlugin
 
         public void Dispose()
         {
-            _beatmapCallbacksController.RemoveBeatmapCallback(_beatmapDataCallbackWrapper);
+            _beatmapCallbacksController.RemoveBeatmapCallback(_basicBeatmapEventCallbackWrapper);
+            _beatmapCallbacksController.RemoveBeatmapCallback(_colorBoostBeatmapEventCallbackWrapper);
             _obstacleSaberSparkleEffectManager.sparkleEffectDidStartEvent -= SabersStartCollide;
             _obstacleSaberSparkleEffectManager.sparkleEffectDidEndEvent -= SabersEndCollide;
             _beatmapObjectManager.noteWasCutEvent -= NoteWasCut;
@@ -87,8 +90,12 @@ namespace CustomFloorPlugin
             _levelEndActions.levelFailedEvent -= LevelFailed;
         }
 
-        private void BeatmapEventDidTrigger(BasicBeatmapEventData eventData)
+        [Inject]
+        private readonly SiraUtil.Logging.SiraLog _siraLog = null!;
+
+        private void BeatmapEventDidTrigger(BeatmapDataItem eventData)
         {
+            _siraLog.Info($"{eventData.GetType().Name} with subType: {eventData.subtypeIdentifier}");
             BeatmapEventDidTriggerEvent?.Invoke(eventData);
         }
 

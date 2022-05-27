@@ -104,10 +104,10 @@ namespace CustomFloorPlugin
         /// <summary>
         /// Triggers subscribed functions if lights are turned on
         /// </summary>
-        private void OnBeatmapEventDidTriggerEvent(BasicBeatmapEventData songEvent)
+        private void OnBeatmapEventDidTriggerEvent(BeatmapDataItem songEvent)
         {
-            if ((int)songEvent.type >= 5) return;
-            switch (songEvent.value)
+            if (songEvent is not BasicBeatmapEventData { subtypeIdentifier: < 5 } basicBeatmapEventData) return;
+            switch (basicBeatmapEventData.value)
             {
                 case > 0 and < 4:
                     OnBlueLightOn!.Invoke();
