@@ -90,12 +90,8 @@ namespace CustomFloorPlugin
             _levelEndActions.levelFailedEvent -= LevelFailed;
         }
 
-        [Inject]
-        private readonly SiraUtil.Logging.SiraLog _siraLog = null!;
-
         private void BeatmapEventDidTrigger(BeatmapDataItem eventData)
         {
-            _siraLog.Info($"{eventData.GetType().Name} with subType: {eventData.subtypeIdentifier}");
             BeatmapEventDidTriggerEvent?.Invoke(eventData);
         }
 

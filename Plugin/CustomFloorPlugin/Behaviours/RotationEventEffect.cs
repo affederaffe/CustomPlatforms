@@ -17,14 +17,16 @@ namespace CustomFloorPlugin
         public SongEventType eventType;
         public Vector3 rotationVector;
 
+        private IAudioTimeSource? _audioTimeSource;
         private BeatmapCallbacksController? _beatmapCallbacksController;
 
         private LightRotationEventEffect? _lightRotationEventEffect;
         private Quaternion _startRot;
 
         [Inject]
-        public void Construct([InjectOptional] BeatmapCallbacksController beatmapCallbacksController)
+        public void Construct([InjectOptional] IAudioTimeSource audioTimeSource, [InjectOptional] BeatmapCallbacksController beatmapCallbacksController)
         {
+            _audioTimeSource = audioTimeSource;
             _beatmapCallbacksController = beatmapCallbacksController;
         }
 
@@ -39,6 +41,7 @@ namespace CustomFloorPlugin
                 _lightRotationEventEffect.SetField("_event", (BasicBeatmapEventType)eventType);
                 _lightRotationEventEffect.SetField("_rotationVector", rotationVector);
                 _lightRotationEventEffect.SetField("_transform", transform);
+                _lightRotationEventEffect.SetField("_audioTimeSource", _audioTimeSource);
                 _lightRotationEventEffect.SetField("_beatmapCallbacksController", _beatmapCallbacksController);
             }
             else if (_beatmapCallbacksController is not null)
