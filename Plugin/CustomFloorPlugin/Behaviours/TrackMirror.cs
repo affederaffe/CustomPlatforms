@@ -27,6 +27,11 @@ namespace CustomFloorPlugin
         private Mirror? _mirror;
         private MirrorRendererSO? _mirrorRenderer;
 
+        private static readonly FieldAccessor<Mirror, MeshRenderer>.Accessor _rendererAccessor = FieldAccessor<Mirror, MeshRenderer>.GetAccessor("_renderer");
+        private static readonly FieldAccessor<Mirror, MirrorRendererSO?>.Accessor _mirrorRendererAccessor = FieldAccessor<Mirror, MirrorRendererSO?>.GetAccessor("_mirrorRenderer");
+        private static readonly FieldAccessor<Mirror, Material>.Accessor _mirrorMaterialAccessor = FieldAccessor<Mirror, Material>.GetAccessor("_mirrorMaterial");
+        private static readonly FieldAccessor<Mirror, Material>.Accessor _noMirrorMaterialAccessor = FieldAccessor<Mirror, Material>.GetAccessor("_noMirrorMaterial");
+
         [Inject]
         public void Construct(MirrorRendererSO mirrorRenderer)
         {
@@ -38,10 +43,10 @@ namespace CustomFloorPlugin
             if (_mirror is not null) return;
             container.Inject(this);
             _mirror = gameObject.AddComponent<Mirror>();
-            _mirror.SetField("_renderer", GetComponent<MeshRenderer>());
-            _mirror.SetField("_mirrorRenderer", Instantiate(_mirrorRenderer));
-            _mirror.SetField("_mirrorMaterial", CreateMirrorMaterial());
-            _mirror.SetField("_noMirrorMaterial", CreateNoMirrorMaterial());
+            _rendererAccessor(ref _mirror) = GetComponent<MeshRenderer>();
+            _mirrorRendererAccessor(ref _mirror) = Instantiate(_mirrorRenderer);
+            _mirrorMaterialAccessor(ref _mirror) = CreateMirrorMaterial();
+            _noMirrorMaterialAccessor(ref _mirror) = CreateNoMirrorMaterial();
         }
 
         private Material CreateMirrorMaterial()

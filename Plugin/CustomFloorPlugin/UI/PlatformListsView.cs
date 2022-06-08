@@ -28,6 +28,9 @@ namespace CustomFloorPlugin.UI
         private PlatformManager _platformManager = null!;
         private PlatformSpawner _platformSpawner = null!;
 
+        private static readonly FieldAccessor<TableView, ScrollView>.Accessor _scrollViewAccessor = FieldAccessor<TableView, ScrollView>.GetAccessor("_scrollView");
+        private static readonly FieldAccessor<ScrollView, float>.Accessor _destinationPosAccessor = FieldAccessor<ScrollView, float>.GetAccessor("_destinationPos");
+
         [UIComponent("singleplayer-platforms-list")]
         private readonly CustomListTableData _singleplayerPlatformListTable = null!;
 
@@ -125,7 +128,7 @@ namespace CustomFloorPlugin.UI
                 _listTables[i].tableView.ReloadData();
                 _listTables[i].tableView.ScrollToCellWithIdx(index, TableView.ScrollPositionType.Beginning, false);
                 _listTables[i].tableView.SelectCellWithIdx(index);
-                _scrollViews[i] = _listTables[i].tableView.GetField<ScrollView, TableView>("_scrollView");
+                _scrollViews[i] = _scrollViewAccessor(ref _listTables[i].tableView);
             }
         }
 
@@ -157,7 +160,7 @@ namespace CustomFloorPlugin.UI
         {
             for (int i = 0; i < _listTables.Length; i++)
             {
-                float pos = _scrollViews[i].GetField<float, ScrollView>("_destinationPos");
+                float pos = _destinationPosAccessor(ref _scrollViews[i]);
                 _listTables[i].tableView.ReloadData();
                 _scrollViews[i].ScrollTo(pos, false);
             }

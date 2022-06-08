@@ -30,8 +30,7 @@ namespace CustomFloorPlugin
         private Material? FindMaterialDisableHeightFog(string name)
         {
             Material? material = FindMaterial(name);
-            if (material is null) return null;
-            material.DisableKeyword("ENABLE_HEIGHT_FOG");
+            material?.DisableKeyword("ENABLE_HEIGHT_FOG");
             return material;
         }
 
