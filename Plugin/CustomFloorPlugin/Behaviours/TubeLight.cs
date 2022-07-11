@@ -41,7 +41,9 @@ namespace CustomFloorPlugin
         public float length = 1f;
         [Range(0, 1)] public float center = 0.5f;
         public Color color = Color.cyan;
+        public float colorAlphaMultiplier = 1f;
         public float bloomFogIntensityMultiplier = 1f;
+        public float boostToWhite = 0f;
         public LightsID lightsID;
 
         private MaterialSwapper? _materialSwapper;
@@ -53,6 +55,8 @@ namespace CustomFloorPlugin
 
         private static readonly FieldAccessor<ParametricBoxController, MeshRenderer>.Accessor _meshRendererAccessor = FieldAccessor<ParametricBoxController, MeshRenderer>.GetAccessor("_meshRenderer");
         private static readonly FieldAccessor<TubeBloomPrePassLight, float>.Accessor _centerAccessor = FieldAccessor<TubeBloomPrePassLight, float>.GetAccessor("_center");
+        private static readonly FieldAccessor<TubeBloomPrePassLight, float>.Accessor _colorAlphaMultiplierAccessor = FieldAccessor<TubeBloomPrePassLight, float>.GetAccessor("_colorAlphaMultiplier");
+        private static readonly FieldAccessor<TubeBloomPrePassLight, float>.Accessor _boostToWhiteAccessor = FieldAccessor<TubeBloomPrePassLight, float>.GetAccessor("_boostToWhite");
         private static readonly FieldAccessor<TubeBloomPrePassLight, ParametricBoxController>.Accessor _parametricBoxControllerAccessor = FieldAccessor<TubeBloomPrePassLight, ParametricBoxController>.GetAccessor("_parametricBoxController");
         private static readonly FieldAccessor<TubeBloomPrePassLight, BoolSO?>.Accessor _mainEffectPostProcessEnabledAccessor = FieldAccessor<TubeBloomPrePassLight, BoolSO?>.GetAccessor("_mainEffectPostProcessEnabled");
         private static readonly FieldAccessor<TubeBloomPrePassLightWithId, TubeBloomPrePassLight>.Accessor _tubeBloomPrePassLightAccessor = FieldAccessor<TubeBloomPrePassLightWithId, TubeBloomPrePassLight>.GetAccessor("_tubeBloomPrePassLight");
@@ -87,6 +91,7 @@ namespace CustomFloorPlugin
                     TubeBloomPrePassLight tubeBloomPrePassLight = gameObject.AddComponent<TubeBloomPrePassLight>();
                     GameObject boxLight = new("BoxLight");
                     boxLight.SetActive(false);
+                    boxLight.layer = 13; // NeonLight
                     Transform boxLightTransform = boxLight.transform;
                     boxLightTransform.transform.SetParent(transform);
                     boxLightTransform.transform.localRotation = Quaternion.Euler(Vector3.zero);
@@ -97,6 +102,8 @@ namespace CustomFloorPlugin
                     ParametricBoxController parametricBoxController = boxLight.AddComponent<ParametricBoxController>();
                     _meshRendererAccessor(ref parametricBoxController) = renderer;
                     _centerAccessor(ref tubeBloomPrePassLight) = center;
+                    _colorAlphaMultiplierAccessor(ref tubeBloomPrePassLight) = colorAlphaMultiplier;
+                    _boostToWhiteAccessor(ref tubeBloomPrePassLight) = boostToWhite;
                     _parametricBoxControllerAccessor(ref tubeBloomPrePassLight) = parametricBoxController;
                     _mainEffectPostProcessEnabledAccessor(ref tubeBloomPrePassLight) = _postProcessEnabled;
                     tubeBloomPrePassLight.width = width * 2;
