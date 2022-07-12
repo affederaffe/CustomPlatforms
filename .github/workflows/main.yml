@@ -15,6 +15,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    environment: Actions
     steps:
       - uses: actions/checkout@v2
       - name: Setup dotnet
@@ -24,7 +25,7 @@ jobs:
       - name: Get Stripped Refs
         env:
           FILES_URL: ${{ secrets.BSFILES_URL }}
-        run: wget --no-check-certificate "$FILES_URL" -O bsfiles.zip
+        run: wget --no-check-certificate "$FILES_URL" -q -O bsfiles.zip
       - name: Extract Refs
         run: unzip -q -n bsfiles.zip -d ./Plugin/Refs
       - name: Build
