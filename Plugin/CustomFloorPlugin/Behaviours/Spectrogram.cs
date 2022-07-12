@@ -70,19 +70,13 @@ namespace CustomFloorPlugin
             enabled = _basicSpectrogramData is not null;
         }
 
-        public void PlatformDisabled()
-        {
-            UpdateColumnHeights(FallbackSamples);
-        }
+        public void PlatformDisabled() => UpdateColumnHeights(FallbackSamples);
 
         /// <summary>
         /// Updates all columns heights with the processed samples
         /// [Unity calls this once per frame!]
         /// </summary>
-        public void Update()
-        {
-            UpdateColumnHeights(_basicSpectrogramData!.ProcessedSamples);
-        }
+        public void Update() => UpdateColumnHeights(_basicSpectrogramData!.ProcessedSamples);
 
         /// <summary>
         /// Updates all columns heights

@@ -39,10 +39,7 @@ namespace CustomFloorPlugin
         private static readonly FieldAccessor<LightPairRotationEventEffect, BeatmapCallbacksController>.Accessor _beatmapCallbacksControllerAccessor = FieldAccessor<LightPairRotationEventEffect, BeatmapCallbacksController>.GetAccessor("_beatmapCallbacksController");
 
         [Inject]
-        public void Construct([InjectOptional] BeatmapCallbacksController beatmapCallbacksController)
-        {
-            _beatmapCallbacksController = beatmapCallbacksController;
-        }
+        public void Construct([InjectOptional] BeatmapCallbacksController beatmapCallbacksController) => _beatmapCallbacksController = beatmapCallbacksController;
 
         public void PlatformEnabled(DiContainer container)
         {

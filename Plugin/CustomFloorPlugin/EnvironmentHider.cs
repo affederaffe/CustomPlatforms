@@ -2,6 +2,8 @@
 using System.Globalization;
 using System.Linq;
 
+using JetBrains.Annotations;
+
 using UnityEngine;
 
 using Zenject;
@@ -13,6 +15,7 @@ namespace CustomFloorPlugin
     /// Activates and deactivates world geometry in the active scene as required by the chosen custom platform<br />
     /// Most documentation on this file is omitted because it is a giant clusterfuck and I hate it.
     /// </summary>
+    [UsedImplicitly]
     public sealed class EnvironmentHider
     {
         private readonly AssetLoader _assetLoader;

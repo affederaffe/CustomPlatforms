@@ -108,7 +108,7 @@ namespace CustomFloorPlugin
                     _startupRotationStepAccessor(ref trackLaneRingsRotationEffect) = startupRotationStep;
                     int timePerRing = startupRotationPropagationSpeed / ringCount;
                     float ringsPerFrame = Time.fixedDeltaTime / timePerRing;
-                    _startupRotationPropagationSpeedAccessor(ref trackLaneRingsRotationEffect) = Mathf.Max((int) ringsPerFrame, 1);
+                    _startupRotationPropagationSpeedAccessor(ref trackLaneRingsRotationEffect) = Mathf.Max((int)ringsPerFrame, 1);
                     _startupRotationFlexySpeedAccessor(ref trackLaneRingsRotationEffect) = startupRotationFlexySpeed;
 
                     _trackLaneRingsRotationEffectSpawner = gameObject.AddComponent<TrackLaneRingsRotationEffectSpawner>();
@@ -118,7 +118,7 @@ namespace CustomFloorPlugin
                     _rotationStepAccessor(ref _trackLaneRingsRotationEffectSpawner) = rotationStep;
                     int timePerRing2 = rotationPropagationSpeed / ringCount;
                     float ringsPerFrame2 = Time.fixedDeltaTime / timePerRing2;
-                    _rotationPropagationSpeedAccessor(ref _trackLaneRingsRotationEffectSpawner) = Mathf.Max((int) ringsPerFrame2, 1);
+                    _rotationPropagationSpeedAccessor(ref _trackLaneRingsRotationEffectSpawner) = Mathf.Max((int)ringsPerFrame2, 1);
                     _rotationFlexySpeedAccessor(ref _trackLaneRingsRotationEffectSpawner) = rotationFlexySpeed;
                     _trackLaneRingsRotationEffectAccessor(ref _trackLaneRingsRotationEffectSpawner) = trackLaneRingsRotationEffect;
                 }

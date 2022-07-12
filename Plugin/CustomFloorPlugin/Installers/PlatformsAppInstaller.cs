@@ -5,6 +5,8 @@ using CustomFloorPlugin.Configuration;
 
 using IPA.Utilities;
 
+using JetBrains.Annotations;
+
 using UnityEngine;
 
 using Zenject;
@@ -12,6 +14,7 @@ using Zenject;
 
 namespace CustomFloorPlugin.Installers
 {
+    [UsedImplicitly]
     internal class PlatformsAppInstaller : Installer
     {
         private readonly Assembly _assembly;

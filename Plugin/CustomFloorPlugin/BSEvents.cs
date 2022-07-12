@@ -1,5 +1,7 @@
 ﻿using System;
 
+using JetBrains.Annotations;
+
 using Zenject;
 
 
@@ -8,6 +10,7 @@ namespace CustomFloorPlugin
     /// <summary>
     /// Should be pretty self-explanatory, this is a giant wrapper for many events Beat Saber uses
     /// </summary>
+    [UsedImplicitly]
     public sealed class BSEvents : IInitializable, IDisposable
     {
         private readonly ILevelEndActions? _levelEndActions;

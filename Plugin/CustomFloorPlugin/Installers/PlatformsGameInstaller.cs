@@ -1,8 +1,11 @@
-﻿using Zenject;
+﻿using JetBrains.Annotations;
+
+using Zenject;
 
 
 namespace CustomFloorPlugin.Installers
 {
+    [UsedImplicitly]
     internal class PlatformsGameInstaller : Installer
     {
         private readonly PlatformSpawner _platformSpawner;

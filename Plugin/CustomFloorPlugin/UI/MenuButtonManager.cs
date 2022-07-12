@@ -3,6 +3,8 @@
 using BeatSaberMarkupLanguage;
 using BeatSaberMarkupLanguage.MenuButtons;
 
+using JetBrains.Annotations;
+
 using Zenject;
 
 
@@ -11,6 +13,7 @@ namespace CustomFloorPlugin.UI
     /// <summary>
     /// UI Class, sets up the menu button
     /// </summary>
+    [UsedImplicitly]
     internal class MenuButtonManager : IInitializable, IDisposable
     {
         private readonly PlatformsFlowCoordinator _platformListFlowCoordinator;

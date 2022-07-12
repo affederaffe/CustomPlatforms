@@ -5,6 +5,8 @@ using System.Threading.Tasks;
 using CustomFloorPlugin.Helpers;
 using CustomFloorPlugin.Interfaces;
 
+using JetBrains.Annotations;
+
 using SiraUtil.Logging;
 
 using UnityEngine;
@@ -17,6 +19,7 @@ namespace CustomFloorPlugin
     /// <summary>
     /// Handles platform spawning and despawning
     /// </summary>
+    [UsedImplicitly]
     public sealed class PlatformSpawner : IInitializable, IDisposable
     {
         private readonly SiraLog _siraLog;
@@ -67,10 +70,7 @@ namespace CustomFloorPlugin
         /// Clean up before switching scenes
         /// </summary>
         // ReSharper disable once AsyncVoidMethod
-        private async void OnTransitionDidStart(float aheadTime)
-        {
-            await ChangeToPlatformAsync(_platformManager.DefaultPlatform);
-        }
+        private async void OnTransitionDidStart(float aheadTime) => await ChangeToPlatformAsync(_platformManager.DefaultPlatform);
 
         /// <summary>
         /// Decide which platform to change to based on the type of the <see cref="ScenesTransitionSetupDataSO"/>

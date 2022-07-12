@@ -42,10 +42,7 @@ namespace CustomFloorPlugin
             _lightWithIdManager!.didChangeSomeColorsThisFrameEvent += OnColorsDidChange;
         }
 
-        public void PlatformDisabled()
-        {
-            _lightWithIdManager!.didChangeSomeColorsThisFrameEvent -= OnColorsDidChange;
-        }
+        public void PlatformDisabled() => _lightWithIdManager!.didChangeSomeColorsThisFrameEvent -= OnColorsDidChange;
 
         private void OnColorsDidChange()
         {

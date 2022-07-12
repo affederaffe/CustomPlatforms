@@ -14,6 +14,8 @@ using CustomFloorPlugin.Helpers;
 
 using IPA.Utilities;
 
+using JetBrains.Annotations;
+
 using SiraUtil.Logging;
 using SiraUtil.Zenject;
 
@@ -27,6 +29,7 @@ namespace CustomFloorPlugin
     /// <summary>
     /// Handles platform loading and saving
     /// </summary>
+    [UsedImplicitly]
     public sealed class PlatformManager : IAsyncInitializable, IDisposable
     {
         private readonly SiraLog _siraLog;
@@ -87,18 +90,12 @@ namespace CustomFloorPlugin
             SingleplayerPlatform = MultiplayerPlatform = A360Platform = MenuPlatform = ActivePlatform = DefaultPlatform;
         }
 
-        public async Task InitializeAsync(CancellationToken token)
-        {
-            await LoadPlatformsAsync(token);
-        }
+        public async Task InitializeAsync(CancellationToken token) => await LoadPlatformsAsync(token);
 
         /// <summary>
         /// Automatically save the descriptors on exit
         /// </summary>
-        public void Dispose()
-        {
-            SavePlatformInfosToFile();
-        }
+        public void Dispose() => SavePlatformInfosToFile();
 
         /// <summary>
         /// Creates a fake <see cref="CustomPlatform"/> used to indicate that no platform should be used
@@ -157,12 +154,15 @@ namespace CustomFloorPlugin
             }
             catch (Exception e)
             {
-                _siraLog.Debug($"Failed to read cache file:\n{e}");
+                _siraLog.Debug($"Failed to read cache file:{Environment.NewLine}{e}");
                 try
                 {
                     File.Delete(_cacheFilePath);
                 }
-                catch { /* Ignored */ }
+                catch (Exception ex)
+                {
+                    _siraLog.Warn($"Failed to delete corrupted cache file:{Environment.NewLine}{ex}");
+                }
             }
 
             // Load all remaining platforms, or all if no cache file is found

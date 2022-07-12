@@ -31,10 +31,7 @@ namespace CustomFloorPlugin
         private string? _startText;
 
         [Inject]
-        public void Construct([InjectOptional] BSEvents events)
-        {
-            _events = events;
-        }
+        public void Construct([InjectOptional] BSEvents events) => _events = events;
 
         public void PlatformEnabled(DiContainer container)
         {

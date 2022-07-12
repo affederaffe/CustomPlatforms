@@ -43,7 +43,7 @@ namespace CustomFloorPlugin
         public Color color = Color.cyan;
         public float colorAlphaMultiplier = 1f;
         public float bloomFogIntensityMultiplier = 1f;
-        public float boostToWhite = 0f;
+        public float boostToWhite;
         public LightsID lightsID;
 
         private MaterialSwapper? _materialSwapper;
@@ -112,7 +112,7 @@ namespace CustomFloorPlugin
                     _tubeBloomPrePassLightAccessor(ref _tubeBloomPrePassLightWithId) = tubeBloomPrePassLight;
                     BloomPrePassLight bloomPrePassLight = tubeBloomPrePassLight;
                     _lightTypeAccessor(ref bloomPrePassLight) = BloomPrePassLight.bloomLightsDict.Keys.First(static x => x.name == "AddBloomPrePassLightType");
-                    LightWithIdMonoBehaviour lightWithIdMonoBehaviour = (LightWithIdMonoBehaviour)_tubeBloomPrePassLightWithId;
+                    LightWithIdMonoBehaviour lightWithIdMonoBehaviour = _tubeBloomPrePassLightWithId;
                     _idAccessor(ref lightWithIdMonoBehaviour) = (int)lightsID;
                     _tubeBloomPrePassLightWithId.ColorWasSet(color);
                     boxLight.SetActive(true);
@@ -129,7 +129,7 @@ namespace CustomFloorPlugin
                     _instancedMaterialLightWithId = gameObject.AddComponent<InstancedMaterialLightWithId>();
                     _materialPropertyBlockColorSetterAccessor(ref _instancedMaterialLightWithId) = materialPropertyBlockColorSetter;
                     _intensityAccessor(ref _instancedMaterialLightWithId) = 1.25f;
-                    LightWithIdMonoBehaviour lightWithIdMonoBehaviour = (LightWithIdMonoBehaviour)_instancedMaterialLightWithId;
+                    LightWithIdMonoBehaviour lightWithIdMonoBehaviour = _instancedMaterialLightWithId;
                     _idAccessor(ref lightWithIdMonoBehaviour) = (int)lightsID;
                     _instancedMaterialLightWithId.ColorWasSet(color);
                 }
@@ -140,10 +140,7 @@ namespace CustomFloorPlugin
             gameObject.SetActive(activeSelf);
         }
 
-        public void PlatformDisabled()
-        {
-            _instancedMaterialLightWithId?.ColorWasSet(color);
-        }
+        public void PlatformDisabled() => _instancedMaterialLightWithId?.ColorWasSet(color);
 
         private static Mesh? _mesh;
         private static Mesh Mesh => _mesh ??= new Mesh
