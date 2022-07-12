@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -175,7 +174,7 @@ namespace CustomFloorPlugin
             }
 
             sw.Stop();
-            _siraLog.Debug($"Loaded {AllPlatforms.Count.ToString(NumberFormatInfo.InvariantInfo)} platforms in {sw.ElapsedMilliseconds.ToString(NumberFormatInfo.InvariantInfo)}ms");
+            _siraLog.Debug($"Loaded {AllPlatforms.Count - BuildInPlatformsCount} platforms in {sw.ElapsedMilliseconds}ms");
         }
 
         /// <summary>
