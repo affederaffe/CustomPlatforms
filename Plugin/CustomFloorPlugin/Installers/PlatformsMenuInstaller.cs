@@ -1,10 +1,13 @@
 ﻿using CustomFloorPlugin.UI;
 
+using JetBrains.Annotations;
+
 using Zenject;
 
 
 namespace CustomFloorPlugin.Installers
 {
+    [UsedImplicitly]
     internal class PlatformsMenuInstaller : Installer
     {
         public override void InstallBindings()

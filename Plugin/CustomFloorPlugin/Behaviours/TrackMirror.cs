@@ -33,10 +33,7 @@ namespace CustomFloorPlugin
         private static readonly FieldAccessor<Mirror, Material>.Accessor _noMirrorMaterialAccessor = FieldAccessor<Mirror, Material>.GetAccessor("_noMirrorMaterial");
 
         [Inject]
-        public void Construct(MirrorRendererSO mirrorRenderer)
-        {
-            _mirrorRenderer = mirrorRenderer;
-        }
+        public void Construct(MirrorRendererSO mirrorRenderer) => _mirrorRenderer = mirrorRenderer;
 
         public void PlatformEnabled(DiContainer container)
         {

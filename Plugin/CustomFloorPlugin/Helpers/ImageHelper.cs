@@ -10,8 +10,8 @@ namespace CustomFloorPlugin.Helpers
         internal static Texture2D ReadTexture2D(this Stream stream)
         {
             byte[] array = new byte[stream.Length];
-            stream.Read(array, 0, array.Length);
-            return BytesToTexture2D(array);
+            int read = stream.Read(array, 0, array.Length);
+            return read < array.Length ? Texture2D.blackTexture : BytesToTexture2D(array);
         }
 
         internal static Sprite? ReadNullableSprite(this BinaryReader binaryReader)

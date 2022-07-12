@@ -8,6 +8,8 @@ using CustomFloorPlugin.Interfaces;
 
 using IPA.Utilities;
 
+using JetBrains.Annotations;
+
 using UnityEngine;
 
 using Zenject;
@@ -18,6 +20,7 @@ namespace CustomFloorPlugin
     /// <summary>
     /// Loads all images and creates the heart and a replacement for the default players place
     /// </summary>
+    [UsedImplicitly]
     public class AssetLoader
     {
         private readonly Transform _anchor;
@@ -162,9 +165,7 @@ namespace CustomFloorPlugin
             private LightSwitchEventEffect[]? _lightSwitchEventEffects;
 
             [Inject]
-            public void Construct(BeatmapCallbacksController beatmapCallbacksController,
-                                  LightWithIdManager lightWithIdManager,
-                                  ColorScheme colorScheme)
+            public void Construct(BeatmapCallbacksController beatmapCallbacksController, LightWithIdManager lightWithIdManager, ColorScheme colorScheme)
             {
                 _beatmapCallbacksController = beatmapCallbacksController;
                 _lightWithIdManager = lightWithIdManager;

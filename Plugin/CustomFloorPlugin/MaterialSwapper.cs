@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 
+using JetBrains.Annotations;
+
 using UnityEngine;
 
 
@@ -11,6 +13,7 @@ namespace CustomFloorPlugin
     /// Primary reason for this is the absence of proper custom <see cref="Shader"/>s (or decompiled source <see cref="Shader"/>s) and a lack of knowledge about their inner workings...<br/>
     /// Part of the documentation for this file is omitted because it's a clusterfuck and under construction.
     /// </summary>
+    [UsedImplicitly]
     public class MaterialSwapper
     {
         private IEnumerable<Material> Materials => _materials ??= Resources.FindObjectsOfTypeAll<Material>();

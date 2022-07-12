@@ -24,10 +24,7 @@ namespace CustomFloorPlugin
         private Renderer? _renderer;
 
         [Inject]
-        public void Construct([InjectOptional] BasicSpectrogramData basicSpectrogramData)
-        {
-            _basicSpectrogramData = basicSpectrogramData;
-        }
+        public void Construct([InjectOptional] BasicSpectrogramData basicSpectrogramData) => _basicSpectrogramData = basicSpectrogramData;
 
         public void PlatformEnabled(DiContainer container)
         {

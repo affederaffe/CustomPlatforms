@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -13,6 +12,8 @@ using CustomFloorPlugin.Configuration;
 using CustomFloorPlugin.Helpers;
 
 using IPA.Utilities;
+
+using JetBrains.Annotations;
 
 using SiraUtil.Logging;
 using SiraUtil.Zenject;
@@ -27,6 +28,7 @@ namespace CustomFloorPlugin
     /// <summary>
     /// Handles platform loading and saving
     /// </summary>
+    [UsedImplicitly]
     public sealed class PlatformManager : IAsyncInitializable, IDisposable
     {
         private readonly SiraLog _siraLog;
@@ -87,18 +89,12 @@ namespace CustomFloorPlugin
             SingleplayerPlatform = MultiplayerPlatform = A360Platform = MenuPlatform = ActivePlatform = DefaultPlatform;
         }
 
-        public async Task InitializeAsync(CancellationToken token)
-        {
-            await LoadPlatformsAsync(token);
-        }
+        public async Task InitializeAsync(CancellationToken token) => await LoadPlatformsAsync(token);
 
         /// <summary>
         /// Automatically save the descriptors on exit
         /// </summary>
-        public void Dispose()
-        {
-            SavePlatformInfosToFile();
-        }
+        public void Dispose() => SavePlatformInfosToFile();
 
         /// <summary>
         /// Creates a fake <see cref="CustomPlatform"/> used to indicate that no platform should be used
@@ -157,12 +153,15 @@ namespace CustomFloorPlugin
             }
             catch (Exception e)
             {
-                _siraLog.Debug($"Failed to read cache file:\n{e}");
+                _siraLog.Debug($"Failed to read cache file:{Environment.NewLine}{e}");
                 try
                 {
                     File.Delete(_cacheFilePath);
                 }
-                catch { /* Ignored */ }
+                catch (Exception ex)
+                {
+                    _siraLog.Warn($"Failed to delete corrupted cache file:{Environment.NewLine}{ex}");
+                }
             }
 
             // Load all remaining platforms, or all if no cache file is found
@@ -175,7 +174,7 @@ namespace CustomFloorPlugin
             }
 
             sw.Stop();
-            _siraLog.Debug($"Loaded {AllPlatforms.Count.ToString(NumberFormatInfo.InvariantInfo)} platforms in {sw.ElapsedMilliseconds.ToString(NumberFormatInfo.InvariantInfo)}ms");
+            _siraLog.Debug($"Loaded {AllPlatforms.Count - BuildInPlatformsCount} platforms in {sw.ElapsedMilliseconds}ms");
         }
 
         /// <summary>

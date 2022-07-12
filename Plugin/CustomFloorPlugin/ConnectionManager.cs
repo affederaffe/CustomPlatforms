@@ -11,6 +11,8 @@ using IPA.Loader;
 using IPA.Utilities;
 using IPA.Utilities.Async;
 
+using JetBrains.Annotations;
+
 using Newtonsoft.Json;
 
 using SiraUtil.Web;
@@ -24,6 +26,7 @@ namespace CustomFloorPlugin
     /// A class that handles all interaction with outside plugins, at the moment just SongCore and Cinema<br/>
     /// Also detects changes in the directory and reflects them in-game, e.g. loading, updating or removing platforms
     /// </summary>
+    [UsedImplicitly]
     internal class ConnectionManager : IInitializable, IDisposable
     {
         private readonly IHttpService _httpService;
@@ -52,8 +55,10 @@ namespace CustomFloorPlugin
             _fileSystemWatcher.Created += OnFileCreated;
             _fileSystemWatcher.Deleted += OnFileDeleted;
             _fileSystemWatcher.EnableRaisingEvents = true;
-            if (_isCinemaInstalled) InitializeCinemaConnection();
-            if (_isSongCoreInstalled) InitializeSongCoreConnection();
+            if (_isCinemaInstalled)
+                InitializeCinemaConnection();
+            if (_isSongCoreInstalled)
+                InitializeSongCoreConnection();
         }
 
         public void Dispose()
@@ -64,8 +69,10 @@ namespace CustomFloorPlugin
             _fileSystemWatcher.Dispose();
             _cancellationTokenSource.Cancel();
             _cancellationTokenSource.Dispose();
-            if (_isCinemaInstalled) DisposeCinemaConnection();
-            if (_isSongCoreInstalled) DisposeSongCoreConnection();
+            if (_isCinemaInstalled)
+                DisposeCinemaConnection();
+            if (_isSongCoreInstalled)
+                DisposeSongCoreConnection();
         }
 
         /// <summary>
@@ -134,15 +141,9 @@ namespace CustomFloorPlugin
             SongCore.Collections.DeregisterizeCapability("Custom Platforms");
         }
 
-        private void InitializeCinemaConnection()
-        {
-            BeatSaberCinema.Events.AllowCustomPlatform += OnCinemaEvent;
-        }
+        private void InitializeCinemaConnection() => BeatSaberCinema.Events.AllowCustomPlatform += OnCinemaEvent;
 
-        private void DisposeCinemaConnection()
-        {
-            BeatSaberCinema.Events.AllowCustomPlatform -= OnCinemaEvent;
-        }
+        private void DisposeCinemaConnection() => BeatSaberCinema.Events.AllowCustomPlatform -= OnCinemaEvent;
 
         /// <summary>
         /// Disable platform spawning as required by Cinema

@@ -20,16 +20,10 @@ namespace CustomFloorPlugin
         private BSEvents? _events;
         private int _subtypeIdentifier;
 
-        public void Awake()
-        {
-            _subtypeIdentifier = BasicBeatmapEventData.SubtypeIdentifier((BasicBeatmapEventType)eventType);
-        }
+        public void Awake() => _subtypeIdentifier = BasicBeatmapEventData.SubtypeIdentifier((BasicBeatmapEventType)eventType);
 
         [Inject]
-        public void Construct([InjectOptional] BSEvents events)
-        {
-            _events = events;
-        }
+        public void Construct([InjectOptional] BSEvents events) => _events = events;
 
         public void PlatformEnabled(DiContainer container)
         {

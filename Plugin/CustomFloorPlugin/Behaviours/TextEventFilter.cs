@@ -1,6 +1,4 @@
-﻿using System.Globalization;
-
-using CustomFloorPlugin.Interfaces;
+﻿using CustomFloorPlugin.Interfaces;
 
 using TMPro;
 
@@ -31,10 +29,7 @@ namespace CustomFloorPlugin
         private string? _startText;
 
         [Inject]
-        public void Construct([InjectOptional] BSEvents events)
-        {
-            _events = events;
-        }
+        public void Construct([InjectOptional] BSEvents events) => _events = events;
 
         public void PlatformEnabled(DiContainer container)
         {
@@ -91,16 +86,16 @@ namespace CustomFloorPlugin
             }
         }
 
-        private void OnAllNotesCountDidChange(int anyCuts, int cuttableNotes) => textMeshPro!.text = $"{anyCuts.ToString(NumberFormatInfo.InvariantInfo)} | {cuttableNotes.ToString(NumberFormatInfo.InvariantInfo)}";
+        private void OnAllNotesCountDidChange(int anyCuts, int cuttableNotes) => textMeshPro!.text = $"{anyCuts} | {cuttableNotes}";
 
-        private void OnGoodCutCountDidChange(int goodCuts) => textMeshPro!.text = $"{goodCuts.ToString(NumberFormatInfo.InvariantInfo)}";
+        private void OnGoodCutCountDidChange(int goodCuts) => textMeshPro!.text = $"{goodCuts}";
 
-        private void OnBadCutCountDidChange(int badCuts) => textMeshPro!.text = $"{badCuts.ToString(NumberFormatInfo.InvariantInfo)}";
+        private void OnBadCutCountDidChange(int badCuts) => textMeshPro!.text = $"{badCuts}";
 
-        private void OnMissCountDidChange(int misses) => textMeshPro!.text = $"{misses.ToString(NumberFormatInfo.InvariantInfo)}";
+        private void OnMissCountDidChange(int misses) => textMeshPro!.text = $"{misses}";
 
-        private void OnScoreDidChange(int rawScore, int modifiedScore) => textMeshPro!.text = $"{rawScore.ToString(NumberFormatInfo.InvariantInfo)} | {modifiedScore.ToString(NumberFormatInfo.InvariantInfo)}";
+        private void OnScoreDidChange(int rawScore, int modifiedScore) => textMeshPro!.text = $"{rawScore} | {modifiedScore}";
 
-        private void OnComboDidChange(int combo) => textMeshPro!.text = $"{combo.ToString(NumberFormatInfo.InvariantInfo)}";
+        private void OnComboDidChange(int combo) => textMeshPro!.text = $"{combo}";
     }
 }

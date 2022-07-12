@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 
 using IPA.Utilities;
 
+using JetBrains.Annotations;
+
 using SiraUtil.Logging;
 
 using UnityEngine;
@@ -16,6 +18,7 @@ namespace CustomFloorPlugin
     /// <summary>
     /// Loads AssetBundles containing <see cref="CustomPlatform"/>s
     /// </summary>
+    [UsedImplicitly]
     public class PlatformLoader
     {
         private readonly SiraLog _siraLog;
@@ -61,7 +64,7 @@ namespace CustomFloorPlugin
 
             if (assetBundle is null)
             {
-                _siraLog.Error($"File could not be loaded:\n{fullPath}");
+                _siraLog.Error($"File could not be loaded:{Environment.NewLine}{fullPath}");
                 return null;
             }
 
@@ -70,7 +73,7 @@ namespace CustomFloorPlugin
             if (platformPrefab is null)
             {
                 assetBundle.Unload(true);
-                _siraLog.Error($"Platform GameObject could not be loaded:\n{fullPath}");
+                _siraLog.Error($"Platform GameObject could not be loaded:{Environment.NewLine}{fullPath}");
                 return null;
             }
 
@@ -96,7 +99,7 @@ namespace CustomFloorPlugin
                 {
                     // No CustomPlatform component, abort
                     UnityEngine.Object.Destroy(platformPrefab);
-                    _siraLog.Error($"AssetBundle does not contain a CustomPlatform:\n{fullPath}");
+                    _siraLog.Error($"AssetBundle does not contain a CustomPlatform:{Environment.NewLine}{fullPath}");
                     return null;
                 }
             }

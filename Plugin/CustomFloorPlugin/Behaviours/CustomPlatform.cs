@@ -35,10 +35,7 @@ namespace CustomFloorPlugin
         [SerializeField]
         internal bool isDescriptor = true;
 
-        public void Awake()
-        {
-            gameObject.SetActive(false);
-        }
+        public void Awake() => gameObject.SetActive(false);
 
         public int CompareTo(CustomPlatform other)
         {
