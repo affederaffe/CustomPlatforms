@@ -212,6 +212,9 @@ namespace CustomFloorPlugin
                 case "SkrillexEnvironment":
                     ringsManager = _envRoot!.Find("TrackLaneRings1").GetComponent<TrackLaneRingsManager>();
                     break;
+                case "TheSecondEnvironment":
+                    FindAddGameObject(_envRoot!, "SmallTrackLaneRingsGroup", _smallRings);
+                    return;
             }
 
             if (ringsManager is null) return;
@@ -243,6 +246,9 @@ namespace CustomFloorPlugin
                 case "SkrillexEnvironment":
                     ringsManager = _envRoot!.Find("TrackLaneRings2").GetComponent<TrackLaneRingsManager>();
                     break;
+                case "TheSecondEnvironment":
+                    FindAddGameObject(_envRoot!, "BigTrackLaneRingsGroup", _bigRings);
+                    return;
             }
 
             if (ringsManager is null) return;
@@ -254,6 +260,9 @@ namespace CustomFloorPlugin
         {
             switch (_sceneName)
             {
+                case "TheSecondEnvironment":
+                    FindAddGameObject(_envRoot!, "SpectrogramsTheSecond", _visualizer);
+                    break;
                 default:
                     FindAddGameObject(_envRoot!, "Spectrograms", _visualizer);
                     break;
@@ -360,6 +369,9 @@ namespace CustomFloorPlugin
                     FindAddGameObject(_envRoot!, "TubeR", _towers);
                     FindAddGameObject(_envRoot!, "TubeL", _towers);
                     FindAddGameObject(_envRoot!, "TubeL (1)", _towers);
+                    break;
+                case "TheSecondEnvironment":
+                    FindAddGameObject(_envRoot!, "Buildings", _towers);
                     break;
             }
         }
@@ -573,6 +585,14 @@ namespace CustomFloorPlugin
                     FindAddGameObject(_envRoot!, "FrontScaffolding", _highway);
                     FindAddGameObject(_envRoot!, "ProjectorArray", _highway);
                     break;
+                case "EDMEnvironment":
+                    FindAddGameObject(_envRoot!, "Spectrograms", _highway);
+                    FindAddGameObject(_envRoot!, "Spectrograms (1)", _highway);
+                    break;
+                case "TheSecondEnvironment":
+                    FindAddGameObject(_envRoot!, "TrackMirror", _highway);
+                    FindAddGameObject(_envRoot!, "TrackConstruction", _highway);
+                    break;
             }
         }
 
@@ -689,6 +709,10 @@ namespace CustomFloorPlugin
                     for (int i = 7; i < 24; i++)
                         FindAddGameObject(_envRoot!, $"RotatingLasersPair ({i})", _rotatingLasers);
                     break;
+                case "TheSecondEnvironment":
+                    FindAddGameObject(_envRoot!, "SpotlightGroupLeft", _rotatingLasers);
+                    FindAddGameObject(_envRoot!, "SpotlightGroupRight", _rotatingLasers);
+                    break;
             }
         }
 
@@ -751,6 +775,10 @@ namespace CustomFloorPlugin
                     for (int i = 1; i < 9; i++)
                         FindAddGameObject(_envRoot!, $"BottomPairLasers ({i})", _doubleColorLasers);
                     break;
+                case "TheSecondEnvironment":
+                    FindAddGameObject(_envRoot!, "Main Lasers Top", _doubleColorLasers);
+                    FindAddGameObject(_envRoot!, "Main Lasers Bottom", _doubleColorLasers);
+                    break;
             }
         }
 
@@ -805,6 +833,9 @@ namespace CustomFloorPlugin
                     break;
                 case "PyroEnvironment":
                     FindAddGameObject(_envRoot!, "PyroLogo", _backLasers);
+                    break;
+                case "TheSecondEnvironment":
+                    FindAddGameObject(_envRoot!, "FrontLogo", _backLasers);
                     break;
                 default:
                     FindAddGameObject(_envRoot!, "FrontLights", _backLasers);
@@ -990,12 +1021,32 @@ namespace CustomFloorPlugin
                     break;
                 case "PyroEnvironment":
                     FindAddGameObject(_envRoot!, "Behind", _highway);
-                    FindAddGameObject(_envRoot!, "Video", _backLasers);
-                    FindAddGameObject(_envRoot!, "MainLasers", _backLasers);
-                    FindAddGameObject(_envRoot!, "Stairs", _backLasers);
-                    FindAddGameObject(_envRoot!, "MainStageSetup", _backLasers);
-                    FindAddGameObject(_envRoot!, "LightBoxesScaffoldingLeft", _backLasers);
-                    FindAddGameObject(_envRoot!, "LightBoxesScaffoldingRight", _backLasers);
+                    FindAddGameObject(_envRoot!, "Video",_highway);
+                    FindAddGameObject(_envRoot!, "MainLasers", _highway);
+                    FindAddGameObject(_envRoot!, "Stairs", _highway);
+                    FindAddGameObject(_envRoot!, "MainStageSetup", _highway);
+                    FindAddGameObject(_envRoot!, "LightBoxesScaffoldingLeft", _highway);
+                    FindAddGameObject(_envRoot!, "LightBoxesScaffoldingRight", _highway);
+                    break;
+                case "EDMEnvironment":
+                    FindAddGameObject(_envRoot!, "CloseCircle", _trackLights);
+                    FindAddGameObject(_envRoot!, "DistantCircle1", _trackLights);
+                    FindAddGameObject(_envRoot!, "DistantCircle2", _trackLights);
+                    FindAddGameObject(_envRoot!, "Laser", _trackLights);
+                    FindAddGameObject(_envRoot!, "TopCircle", _trackLights);
+                    FindAddGameObject(_envRoot!, "SingleSourceCircularLY", _trackLights);
+                    FindAddGameObject(_envRoot!, "SingleSourceCircularRY", _trackLights);
+                    FindAddGameObject(_envRoot!, "SingleSourceLaserUp", _trackLights);
+                    FindAddGameObject(_envRoot!, "SingleSourceLaserLeftMid", _trackLights);
+                    FindAddGameObject(_envRoot!, "SingleSourceLaserDown", _trackLights);
+                    FindAddGameObject(_envRoot!, "SingleSourceLaserUp", _trackLights);
+                    FindAddGameObject(_envRoot!, "SingleSourceLaserRightMid", _trackLights);
+                    FindAddGameObject(_envRoot!, "SingleSourceLaserDown", _trackLights);
+                    for (int i = 1; i < 5; i++)
+                        FindAddGameObject(_envRoot!, $"Laser ({i})", _trackLights);
+                    break;
+                case "TheSecondEnvironment":
+                    FindAddGameObject(_envRoot!, "RunwayLasers", _trackLights);
                     break;
             }
         }
