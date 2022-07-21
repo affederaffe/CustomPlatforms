@@ -48,7 +48,8 @@ namespace CustomFloorPlugin
         private TrackLaneRingsRotationEffectSpawner? _trackLaneRingsRotationEffectSpawner;
         private TrackLaneRingsPositionStepEffectSpawner? _trackLaneRingsPositionStepEffectSpawner;
 
-        private static readonly FieldAccessor<TrackLaneRingsManager, TrackLaneRing>.Accessor _trackLaneRingPrefabAccessor = FieldAccessor<TrackLaneRingsManager, TrackLaneRing>.GetAccessor("_trackLaneRingPrefab");
+        private static readonly FieldAccessor<TrackLaneRingsManager, TrackLaneRing>.Accessor _trackLaneRingsManagerPrefabAccessor = FieldAccessor<TrackLaneRingsManager, TrackLaneRing>.GetAccessor("_trackLaneRingPrefab");
+        private static readonly FieldAccessor<TrackLaneRingsManager, DiContainer>.Accessor _trackLaneRingsManagerContainerAccessor = FieldAccessor<TrackLaneRingsManager, DiContainer>.GetAccessor("_container");
         private static readonly FieldAccessor<TrackLaneRingsManager, int>.Accessor _ringCountAccessor = FieldAccessor<TrackLaneRingsManager, int>.GetAccessor("_ringCount");
         private static readonly FieldAccessor<TrackLaneRingsManager, float>.Accessor _ringPositionStepAccessor = FieldAccessor<TrackLaneRingsManager, float>.GetAccessor("_ringPositionStep");
         private static readonly FieldAccessor<TrackLaneRingsManager, bool>.Accessor _spawnAsChildrenAccessor = FieldAccessor<TrackLaneRingsManager, bool>.GetAccessor("_spawnAsChildren");
@@ -89,7 +90,8 @@ namespace CustomFloorPlugin
                 gameObject.SetActive(false);
                 TrackLaneRing trackLaneRing = trackLaneRingPrefab.AddComponent<TrackLaneRing>();
                 _trackLaneRingsManager = gameObject.AddComponent<TrackLaneRingsManager>();
-                _trackLaneRingPrefabAccessor(ref _trackLaneRingsManager) = trackLaneRing;
+                _trackLaneRingsManagerPrefabAccessor(ref _trackLaneRingsManager) = trackLaneRing;
+                _trackLaneRingsManagerContainerAccessor(ref _trackLaneRingsManager) = container;
                 _ringCountAccessor(ref _trackLaneRingsManager) = ringCount;
                 _ringPositionStepAccessor(ref _trackLaneRingsManager) = ringPositionStep;
                 _spawnAsChildrenAccessor(ref _trackLaneRingsManager) = true;
