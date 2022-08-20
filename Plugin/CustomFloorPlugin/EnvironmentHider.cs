@@ -1021,7 +1021,7 @@ namespace CustomFloorPlugin
                     break;
                 case "PyroEnvironment":
                     FindAddGameObject(_envRoot!, "Behind", _highway);
-                    FindAddGameObject(_envRoot!, "Video",_highway);
+                    FindAddGameObject(_envRoot!, "Video", _highway);
                     FindAddGameObject(_envRoot!, "MainLasers", _highway);
                     FindAddGameObject(_envRoot!, "Stairs", _highway);
                     FindAddGameObject(_envRoot!, "MainStageSetup", _highway);
