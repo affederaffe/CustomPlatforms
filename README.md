@@ -1,7 +1,7 @@
 ## Installation
 ### Easy Method
 
-* Ensure you have the latest verion of ModAssistant https://github.com/Assistant/ModAssistant/releases
+* Ensure you have the latest verion of [BeatSaberModManager](https://github.com/affederaffe/BeatSaberModManager/releases) or [ModAssistant](https://github.com/Assistant/ModAssistant/releases)
 * Launch the mod installer
 * Select the checkbox for Custom Platforms
 * Click Install
@@ -31,19 +31,19 @@ Visit the Platforms Menu page ingame to change your platform for different gamem
 
 Place platforms (.plat) files in the "BeatSaber\CustomPlatforms" folder.
 Your installed platforms will be available after a few seconds.
-A possible source for platforms is [modelsaber](https://modelsaber.com/Platforms/?pc).
+A possible source for platforms is [ModelSaber](https://modelsaber.com/Platforms/?pc).
 
 ## Creating New Platforms
 
 There's a comprehensive guide at https://bsmg.wiki/models/platforms-guide.html written by Emma.
 The following are the basic steps:
 
-1. Download the Unity project from [releases](https://github.com/affederaffe/CustomPlatforms/releases/latest), unzip it.
+1. Download the Unity project from [Releases](https://github.com/affederaffe/CustomPlatforms/releases/latest), unzip it.
 
 2. Open the Unity project
-The project was created and tested in version [2019.4.18f1](https://unity3d.com/get-unity/download/archive), other versions may not be supported.
+The project was created and tested in version [2019.3.15f1](https://unity3d.com/get-unity/download/archive), other versions may not be supported.
 
-3. Create an empty GameObject and attach a "Custom Platform" component to it
+3. Create an empty GameObject and attach a "Custom Platform" component to it.
 Fill out the fields for your name and the name of the platform.  You can also toggle the visibility of default environment parts if you need to make room for your platform.
 Add an icon for your platform by importing an image, settings it to Sprite/UI in import settings, and dragging it into the icon field of your CustomPlatform
 
