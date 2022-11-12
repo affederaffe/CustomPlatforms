@@ -17,11 +17,11 @@ jobs:
     runs-on: ubuntu-latest
     environment: Actions
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Setup dotnet
-        uses: actions/setup-dotnet@v2.0.0
+        uses: actions/setup-dotnet@v3
         with:
-          dotnet-version: 6.0.x
+          dotnet-version: 7.0.x
       - name: Get Stripped Refs
         env:
           FILES_URL: ${{ secrets.BSFILES_URL }}
@@ -34,7 +34,7 @@ jobs:
           FrameworkPathOverride: /usr/lib/mono/4.8-api
         run: dotnet build ./Plugin/CustomFloorPlugin.sln --configuration Release
       - name: Upload Plugin Artifact
-        uses: actions/upload-artifact@v2.3.1
+        uses: actions/upload-artifact@v3
         with:
           name: ${{ steps.Build.outputs.filename }}
           path: ${{ steps.Build.outputs.artifactpath }}
