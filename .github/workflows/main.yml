@@ -39,7 +39,7 @@ jobs:
           name: ${{ steps.Build.outputs.filename }}
           path: ${{ steps.Build.outputs.artifactpath }}
       - name: Upload Unity Project Artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: Unity Project
           path: |
