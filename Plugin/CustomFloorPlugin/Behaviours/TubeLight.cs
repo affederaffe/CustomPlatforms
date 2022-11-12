@@ -119,7 +119,6 @@ namespace CustomFloorPlugin
                     _idAccessor(ref lightWithIdMonoBehaviour) = (int)lightsID;
                     _tubeBloomPrePassLightWithId.ColorWasSet(color);
                     boxLight.SetActive(true);
-                    _lightManagerAccessor(ref lightWithIdMonoBehaviour) = _lightWithIdManager;
                 }
                 else
                 {
@@ -136,10 +135,11 @@ namespace CustomFloorPlugin
                     LightWithIdMonoBehaviour lightWithIdMonoBehaviour = _instancedMaterialLightWithId;
                     _idAccessor(ref lightWithIdMonoBehaviour) = (int)lightsID;
                     _instancedMaterialLightWithId.ColorWasSet(color);
-                    _lightManagerAccessor(ref lightWithIdMonoBehaviour) = _lightWithIdManager;
                 }
             }
 
+            LightWithIdMonoBehaviour? lightWithIdMonoBehaviour1 = _instancedMaterialLightWithId is not null ? _instancedMaterialLightWithId : _tubeBloomPrePassLightWithId;
+            _lightManagerAccessor(ref lightWithIdMonoBehaviour1!) = _lightWithIdManager;
             gameObject.SetActive(activeSelf);
         }
 
