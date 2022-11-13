@@ -28,7 +28,7 @@ namespace CustomFloorPlugin
     /// Enables the light mapping data saved in this PrefabLightmapData
     /// Adapted from https://github.com/Ayfel/PrefabLightmapping for use in Beat Saber
     /// </summary>
-    public class PrefabLightmapData : MonoBehaviour, INotifyPlatformEnabled
+    public class PrefabLightmapData : MonoBehaviour, INotifyPlatformEnabled, INotifyPlatformDisabled
     {
         // This version of Unity can't reconstruct structs or classes no matter how much you mark 
         // it up with SerializeField or Serializable. RendererInfo and LightInfo has to be expanded out.
@@ -46,11 +46,22 @@ namespace CustomFloorPlugin
         public Light[]? lightInfo_light;
         public int[]? lightInfo_lightmapBaketype;
         public int[]? lightInfo_mixedLightingMode;
+
+        private LightmapData[]? oldLightmaps;
         // ReSharper restore InconsistentNaming
 
         public void PlatformEnabled(DiContainer container)
         {
             Init();
+        }
+
+        public void PlatformDisabled()
+        {
+            if (this.oldLightmaps == null) 
+                return;
+
+            // Restore the old lightmaps
+            LightmapSettings.lightmaps = this.oldLightmaps;
         }
 
         private void Init()
@@ -60,6 +71,9 @@ namespace CustomFloorPlugin
                 lightInfo_light == null || lightInfo_lightmapBaketype == null || lightInfo_mixedLightingMode == null ||
                 m_Lightmaps == null || m_LightmapsDir == null || m_ShadowMasks == null)
                 return;
+
+            // Save old LightmapData for restoration
+            this.oldLightmaps = LightmapSettings.lightmaps.Clone() as LightmapData[] ?? Array.Empty<LightmapData>();
 
             // Create new LightmapData for all recorded lightmaps with their index
             var newLightmaps = m_Lightmaps.Select((lm, i) => new LightmapData
@@ -87,7 +101,7 @@ namespace CustomFloorPlugin
             var rendererInfo = renderInfo_renderer.Select((r, i) => new RendererInfo // Use the struct in case future versions will succeeed
             {
                 renderer = r,
-                lightmapIndex = renderInfo_lightmapIndex[i],
+                lightmapIndex = renderInfo_lightmapIndex[i] + this.oldLightmaps.Length,
                 lightmapOffsetScale = renderInfo_lightmapOffsetScale[i],
             }).ToArray();
             ApplyRendererInfo(rendererInfo);
@@ -135,5 +149,6 @@ namespace CustomFloorPlugin
                 lightInfo.light.bakingOutput = bakingOutput;
             }
         }
+
     }
 }
