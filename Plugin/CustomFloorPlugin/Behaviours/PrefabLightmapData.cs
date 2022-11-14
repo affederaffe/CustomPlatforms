@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using CustomFloorPlugin.Interfaces;
-using Newtonsoft.Json;
 using UnityEngine;
 using Zenject;
 
@@ -66,6 +64,8 @@ namespace CustomFloorPlugin
 
         private void Init()
         {
+            // Perform an exhaustive check to see if we have enough of the baked lightmap data to proceed
+            // This data is supplied when the editor script is run to bake the lightmaps data into the platform
             if (renderInfo_renderer == null || renderInfo_renderer.Length == 0 ||
                 renderInfo_lightmapIndex == null || renderInfo_lightmapOffsetScale == null ||
                 lightInfo_light == null || lightInfo_lightmapBaketype == null || lightInfo_mixedLightingMode == null ||
@@ -75,7 +75,7 @@ namespace CustomFloorPlugin
             // Save old LightmapData for restoration
             this.oldLightmaps = LightmapSettings.lightmaps.Clone() as LightmapData[] ?? Array.Empty<LightmapData>();
 
-            // Create new LightmapData for all recorded lightmaps with their index
+            // Create a new combined LightmapData for all recorded lightmaps with their index
             var newLightmaps = m_Lightmaps.Select((lm, i) => new LightmapData
             {
                 lightmapColor = m_Lightmaps[i],
@@ -85,8 +85,8 @@ namespace CustomFloorPlugin
 
             var combinedLightmaps = LightmapSettings.lightmaps.Concat(newLightmaps).ToArray();
 
+            // Determine if directional lighting is used
             bool directional = true;
-
             foreach (Texture2D t in m_LightmapsDir!)
             {
                 if (t == null)
@@ -95,10 +95,10 @@ namespace CustomFloorPlugin
                     break;
                 }
             }
-
             LightmapSettings.lightmapsMode = (m_LightmapsDir.Length == m_Lightmaps.Length && directional) ? LightmapsMode.CombinedDirectional : LightmapsMode.NonDirectional;
 
-            var rendererInfo = renderInfo_renderer.Select((r, i) => new RendererInfo // Use the struct in case future versions will succeeed
+            // Apply lighting maps to the renderers
+            var rendererInfo = renderInfo_renderer.Select((r, i) => new RendererInfo // Use the struct from the original code in case future versions will succeeed
             {
                 renderer = r,
                 lightmapIndex = renderInfo_lightmapIndex[i] + this.oldLightmaps.Length,
@@ -106,7 +106,7 @@ namespace CustomFloorPlugin
             }).ToArray();
             ApplyRendererInfo(rendererInfo);
 
-            var lightInfo = lightInfo_light.Select((l, i) => new LightInfo // Use the struct in case future versions will succeeed
+            var lightInfo = lightInfo_light.Select((l, i) => new LightInfo // Use the struct from the original code in case future versions will succeeed
             {
                 light = l,
                 lightmapBaketype = lightInfo_lightmapBaketype[i],
@@ -114,9 +114,13 @@ namespace CustomFloorPlugin
             }).ToArray();
             ApplyLightInfo(lightInfo);
 
+            // Finally set the new light maps to the global light settings
             LightmapSettings.lightmaps = combinedLightmaps;
         }
 
+        /// <summary>
+        /// Applies the light map data to the renderer associated in the given structs
+        /// </summary>
         private void ApplyRendererInfo(RendererInfo[] rendererInfos)
         {
             foreach (var rendererInfo in rendererInfos)
@@ -137,6 +141,9 @@ namespace CustomFloorPlugin
             }
         }
 
+        /// <summary>
+        /// Create a new LightBakingOutput for the given light and apply the associated light map info in the given structs
+        /// </summary>
         private void ApplyLightInfo(LightInfo[] lightInfos)
         { 
             foreach (var lightInfo in lightInfos)
