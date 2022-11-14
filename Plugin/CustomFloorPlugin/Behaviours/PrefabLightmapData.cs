@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+
 using CustomFloorPlugin.Interfaces;
+
 using UnityEngine;
+
 using Zenject;
 
 
@@ -11,15 +14,16 @@ namespace CustomFloorPlugin
 {
     public struct RendererInfo
     {
-        public Renderer renderer;
-        public int lightmapIndex;
-        public Vector4 lightmapOffsetScale;
+        public Renderer Renderer;
+        public int LightmapIndex;
+        public Vector4 LightmapOffsetScale;
     }
+
     public struct LightInfo
     {
-        public Light light;
-        public int lightmapBaketype;
-        public int mixedLightingMode;
+        public Light Light;
+        public int LightmapBaketype;
+        public int MixedLightingMode;
     }
 
     /// <summary>
@@ -28,25 +32,23 @@ namespace CustomFloorPlugin
     /// </summary>
     public class PrefabLightmapData : MonoBehaviour, INotifyPlatformEnabled, INotifyPlatformDisabled
     {
-        // This version of Unity can't reconstruct structs or classes no matter how much you mark 
+        // This version of Unity can't reconstruct structs or classes no matter how much you mark
         // it up with SerializeField or Serializable. RendererInfo and LightInfo has to be expanded out.
         // Is this because of Unity's use of a flat-JSON serializer?! WTF
 
-        // ReSharper disable InconsistentNaming
-        public Renderer[]? renderInfo_renderer;
-        public int[]? renderInfo_lightmapIndex;
-        public Vector4[]? renderInfo_lightmapOffsetScale;
+        public Renderer[]? renderInfoRenderer;
+        public int[]? renderInfoLightmapIndex;
+        public Vector4[]? renderInfoLightmapOffsetScale;
 
-        public Texture2D[]? m_Lightmaps;
-        public Texture2D[]? m_LightmapsDir;
-        public Texture2D[]? m_ShadowMasks;
+        public Texture2D[]? lightmaps;
+        public Texture2D[]? lightmapsDir;
+        public Texture2D[]? shadowMasks;
 
-        public Light[]? lightInfo_light;
-        public int[]? lightInfo_lightmapBaketype;
-        public int[]? lightInfo_mixedLightingMode;
+        public Light[]? lightInfoLight;
+        public int[]? lightInfoLightmapBakeType;
+        public int[]? lightInfoMixedLightingMode;
 
-        private LightmapData[]? oldLightmaps;
-        // ReSharper restore InconsistentNaming
+        private LightmapData[]? _oldLightmaps;
 
         public void PlatformEnabled(DiContainer container)
         {
@@ -55,62 +57,54 @@ namespace CustomFloorPlugin
 
         public void PlatformDisabled()
         {
-            if (this.oldLightmaps == null) 
+            if (_oldLightmaps is null)
                 return;
 
             // Restore the old lightmaps
-            LightmapSettings.lightmaps = this.oldLightmaps;
+            LightmapSettings.lightmaps = _oldLightmaps;
         }
 
         private void Init()
         {
             // Perform an exhaustive check to see if we have enough of the baked lightmap data to proceed
             // This data is supplied when the editor script is run to bake the lightmaps data into the platform
-            if (renderInfo_renderer == null || renderInfo_renderer.Length == 0 ||
-                renderInfo_lightmapIndex == null || renderInfo_lightmapOffsetScale == null ||
-                lightInfo_light == null || lightInfo_lightmapBaketype == null || lightInfo_mixedLightingMode == null ||
-                m_Lightmaps == null || m_LightmapsDir == null || m_ShadowMasks == null)
+            if (renderInfoRenderer is null || renderInfoRenderer.Length == 0 ||
+                renderInfoLightmapIndex is null || renderInfoLightmapOffsetScale is null ||
+                lightInfoLight is null || lightInfoLightmapBakeType is null || lightInfoMixedLightingMode is null ||
+                lightmaps is null || lightmapsDir is null || shadowMasks is null)
                 return;
 
             // Save old LightmapData for restoration
-            this.oldLightmaps = LightmapSettings.lightmaps.Clone() as LightmapData[] ?? Array.Empty<LightmapData>();
+            _oldLightmaps = LightmapSettings.lightmaps.Clone() as LightmapData[] ?? Array.Empty<LightmapData>();
 
             // Create a new combined LightmapData for all recorded lightmaps with their index
-            var newLightmaps = m_Lightmaps.Select((lm, i) => new LightmapData
+            LightmapData[] newLightmaps = lightmaps.Select((_, i) => new LightmapData
             {
-                lightmapColor = m_Lightmaps[i],
-                lightmapDir = m_LightmapsDir[i],
-                shadowMask = m_ShadowMasks[i],
+                lightmapColor = lightmaps[i],
+                lightmapDir = lightmapsDir[i],
+                shadowMask = shadowMasks[i]
             }).ToArray();
 
-            var combinedLightmaps = LightmapSettings.lightmaps.Concat(newLightmaps).ToArray();
+            LightmapData[] combinedLightmaps = LightmapSettings.lightmaps.Concat(newLightmaps).ToArray();
 
             // Determine if directional lighting is used
-            bool directional = true;
-            foreach (Texture2D t in m_LightmapsDir!)
-            {
-                if (t == null)
-                {
-                    directional = false;
-                    break;
-                }
-            }
-            LightmapSettings.lightmapsMode = (m_LightmapsDir.Length == m_Lightmaps.Length && directional) ? LightmapsMode.CombinedDirectional : LightmapsMode.NonDirectional;
+            bool directional = lightmapsDir!.All(static t => t != null);
+            LightmapSettings.lightmapsMode = lightmapsDir.Length == lightmaps.Length && directional ? LightmapsMode.CombinedDirectional : LightmapsMode.NonDirectional;
 
             // Apply lighting maps to the renderers
-            var rendererInfo = renderInfo_renderer.Select((r, i) => new RendererInfo // Use the struct from the original code in case future versions will succeeed
+            RendererInfo[] rendererInfo = renderInfoRenderer.Select((r, i) => new RendererInfo // Use the struct from the original code in case future versions will succeed
             {
-                renderer = r,
-                lightmapIndex = renderInfo_lightmapIndex[i] + this.oldLightmaps.Length,
-                lightmapOffsetScale = renderInfo_lightmapOffsetScale[i],
+                Renderer = r,
+                LightmapIndex = renderInfoLightmapIndex[i] + _oldLightmaps.Length,
+                LightmapOffsetScale = renderInfoLightmapOffsetScale[i]
             }).ToArray();
             ApplyRendererInfo(rendererInfo);
 
-            var lightInfo = lightInfo_light.Select((l, i) => new LightInfo // Use the struct from the original code in case future versions will succeeed
+            LightInfo[] lightInfo = lightInfoLight.Select((l, i) => new LightInfo // Use the struct from the original code in case future versions will succeed
             {
-                light = l,
-                lightmapBaketype = lightInfo_lightmapBaketype[i],
-                mixedLightingMode = lightInfo_mixedLightingMode[i],
+                Light = l,
+                LightmapBaketype = lightInfoLightmapBakeType[i],
+                MixedLightingMode = lightInfoMixedLightingMode[i]
             }).ToArray();
             ApplyLightInfo(lightInfo);
 
@@ -121,21 +115,19 @@ namespace CustomFloorPlugin
         /// <summary>
         /// Applies the light map data to the renderer associated in the given structs
         /// </summary>
-        private void ApplyRendererInfo(RendererInfo[] rendererInfos)
+        private static void ApplyRendererInfo(IEnumerable<RendererInfo> rendererInfos)
         {
-            foreach (var rendererInfo in rendererInfos)
+            foreach (RendererInfo rendererInfo in rendererInfos)
             {
-                rendererInfo.renderer.lightmapIndex = rendererInfo.lightmapIndex;
-                rendererInfo.renderer.lightmapScaleOffset = rendererInfo.lightmapOffsetScale;
+                rendererInfo.Renderer.lightmapIndex = rendererInfo.LightmapIndex;
+                rendererInfo.Renderer.lightmapScaleOffset = rendererInfo.LightmapOffsetScale;
 
                 // Find common shaders
-                foreach (var sharedMaterial in rendererInfo.renderer.sharedMaterials.Where(sm => sm != null))
+                foreach (Material? sharedMaterial in rendererInfo.Renderer.sharedMaterials.Where(static sm => sm != null))
                 {
-                    var commonShader = Shader.Find(sharedMaterial.shader!.name);
-                    if (commonShader != null)
-                    {
+                    Shader? commonShader = Shader.Find(sharedMaterial.shader!.name);
+                    if (commonShader is not null)
                         sharedMaterial.shader = commonShader;
-                    }
                 }
 
             }
@@ -144,16 +136,18 @@ namespace CustomFloorPlugin
         /// <summary>
         /// Create a new LightBakingOutput for the given light and apply the associated light map info in the given structs
         /// </summary>
-        private void ApplyLightInfo(LightInfo[] lightInfos)
-        { 
-            foreach (var lightInfo in lightInfos)
+        private static void ApplyLightInfo(IEnumerable<LightInfo> lightInfos)
+        {
+            foreach (LightInfo lightInfo in lightInfos)
             {
-                LightBakingOutput bakingOutput = new LightBakingOutput();
-                bakingOutput.isBaked = true;
-                bakingOutput.lightmapBakeType = (LightmapBakeType)lightInfo.lightmapBaketype;
-                bakingOutput.mixedLightingMode = (MixedLightingMode)lightInfo.mixedLightingMode;
+                LightBakingOutput bakingOutput = new()
+                {
+                    isBaked = true,
+                    lightmapBakeType = (LightmapBakeType)lightInfo.LightmapBaketype,
+                    mixedLightingMode = (MixedLightingMode)lightInfo.MixedLightingMode
+                };
 
-                lightInfo.light.bakingOutput = bakingOutput;
+                lightInfo.Light.bakingOutput = bakingOutput;
             }
         }
 

@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+
 using CustomFloorPlugin;
+
 using UnityEditor;
 using UnityEngine;
 
@@ -36,33 +38,26 @@ public class PrefabLightmapDataEditor : MonoBehaviour
 
             GenerateLightmapInfo(gameObject, rendererInfos, lightmaps, lightmapsDir, shadowMasks, lightsInfos);
 
-            // ReSharper disable InconsistentNaming
-            instance.renderInfo_renderer = rendererInfos.Select(r => r.renderer).ToArray();
-            instance.renderInfo_lightmapIndex = rendererInfos.Select(r => r.lightmapIndex).ToArray();
-            instance.renderInfo_lightmapOffsetScale = rendererInfos.Select(r => r.lightmapOffsetScale).ToArray();
+            instance.renderInfoRenderer = rendererInfos.Select(r => r.renderer).ToArray();
+            instance.renderInfoLightmapIndex = rendererInfos.Select(r => r.lightmapIndex).ToArray();
+            instance.renderInfoLightmapOffsetScale = rendererInfos.Select(r => r.lightmapOffsetScale).ToArray();
 
-            instance.m_Lightmaps = lightmaps.ToArray();
-            instance.m_LightmapsDir = lightmapsDir.ToArray();
-            instance.m_ShadowMasks = shadowMasks.ToArray();
+            instance.lightmaps = lightmaps.ToArray();
+            instance.lightmapsDir = lightmapsDir.ToArray();
+            instance.shadowMasks = shadowMasks.ToArray();
 
-            instance.lightInfo_light = lightsInfos.Select(l => l.light).ToArray();
-            instance.lightInfo_lightmapBaketype = lightsInfos.Select(l => l.lightmapBaketype).ToArray();
-            instance.lightInfo_mixedLightingMode = lightsInfos.Select(l => l.mixedLightingMode).ToArray();
-            // ReSharper restore InconsistentNaming
-
+            instance.lightInfoLight = lightsInfos.Select(l => l.light).ToArray();
+            instance.lightInfoLightmapBakeType = lightsInfos.Select(l => l.lightmapBaketype).ToArray();
+            instance.lightInfoMixedLightingMode = lightsInfos.Select(l => l.mixedLightingMode).ToArray();
 
             var targetPrefab = PrefabUtility.GetCorrespondingObjectFromSource(gameObject);
-            if (targetPrefab != null)
-            {
+            if (targetPrefab is not null)
                 PrefabUtility.ReplacePrefab(gameObject, targetPrefab);
-            }
-
         }
     }
 
-    static void GenerateLightmapInfo(GameObject root, List<PrefabLightmapData.RendererInfo> rendererInfos, List<Texture2D> lightmaps, List<Texture2D> lightmapsDir, List<Texture2D> shadowMasks, List<PrefabLightmapData.LightInfo> lightsInfo)
+    private static void GenerateLightmapInfo(GameObject root, List<PrefabLightmapData.RendererInfo> rendererInfos, List<Texture2D> lightmaps, List<Texture2D> lightmapsDir, List<Texture2D> shadowMasks, List<PrefabLightmapData.LightInfo> lightsInfo)
     {
-
         foreach (MeshRenderer renderer in root.GetComponentsInChildren<MeshRenderer>())
         {
             if (renderer.lightmapIndex != -1)
@@ -97,7 +92,7 @@ public class PrefabLightmapDataEditor : MonoBehaviour
                 {
                     PrefabLightmapData.LightInfo lightInfo = new PrefabLightmapData.LightInfo();
                     lightInfo.light = l;
-                    lightInfo.lightmapBaketype = (int)l.lightmapBakeType;
+                    lightInfo.lightmapBakeType = (int)l.lightmapBakeType;
                     lightInfo.mixedLightingMode = (int)UnityEditor.LightmapEditorSettings.mixedBakeMode;
                     lightsInfo.Add(lightInfo);
                 }

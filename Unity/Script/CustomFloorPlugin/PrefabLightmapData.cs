@@ -5,18 +5,16 @@ namespace CustomFloorPlugin
 {
     public class PrefabLightmapData : MonoBehaviour
     {
-        // ReSharper disable InconsistentNaming
-        public Renderer[]? renderInfo_renderer;
-        public int[]? renderInfo_lightmapIndex;
-        public Vector4[]? renderInfo_lightmapOffsetScale;
+        public Renderer[]? renderInfoRenderer;
+        public int[]? renderInfoLightmapIndex;
+        public Vector4[]? renderInfoLightmapOffsetScale;
 
-        public Texture2D[]? m_Lightmaps;
-        public Texture2D[]? m_LightmapsDir;
-        public Texture2D[]? m_ShadowMasks;
+        public Texture2D[]? lightmaps;
+        public Texture2D[]? lightmapsDir;
+        public Texture2D[]? shadowMasks;
 
-        public Light[]? lightInfo_light;
-        public int[]? lightInfo_lightmapBaketype;
-        public int[]? lightInfo_mixedLightingMode;
-        // ReSharper restore InconsistentNaming
+        public Light[]? lightInfoLight;
+        public int[]? lightInfoLightmapBakeType;
+        public int[]? lightInfoMixedLightingMode;
     }
 }
