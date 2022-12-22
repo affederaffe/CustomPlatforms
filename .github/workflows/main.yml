@@ -4,12 +4,14 @@ on:
   push:
     branches: ["**"]
     paths:
-      - 'Plugin/CustomFloorPlugin/**'
+      - 'Plugin/**'
+      - 'Unity/**'
       - '.github/workflows/main.yml'
   pull_request:
     branches: ["**"]
     paths:
-      - 'Plugin/CustomFloorPlugin/**'
+      - 'Plugin/**'
+      - 'Unity/**'
       - '.github/workflows/main.yml'
 
 jobs:
