@@ -27,7 +27,7 @@ namespace CustomFloorPlugin
         public struct LightInfo
         {
             public Light Light;
-            public int LightmapBaketype;
+            public int LightmapBakeType;
             public int MixedLightingMode;
         }
     }

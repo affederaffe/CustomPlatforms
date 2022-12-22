@@ -22,7 +22,7 @@ namespace CustomFloorPlugin
     public struct LightInfo
     {
         public Light Light;
-        public int LightmapBaketype;
+        public int LightmapBakeType;
         public int MixedLightingMode;
     }
 
@@ -103,7 +103,7 @@ namespace CustomFloorPlugin
             LightInfo[] lightInfo = lightInfoLight.Select((l, i) => new LightInfo // Use the struct from the original code in case future versions will succeed
             {
                 Light = l,
-                LightmapBaketype = lightInfoLightmapBakeType[i],
+                LightmapBakeType = lightInfoLightmapBakeType[i],
                 MixedLightingMode = lightInfoMixedLightingMode[i]
             }).ToArray();
             ApplyLightInfo(lightInfo);
@@ -143,7 +143,7 @@ namespace CustomFloorPlugin
                 LightBakingOutput bakingOutput = new()
                 {
                     isBaked = true,
-                    lightmapBakeType = (LightmapBakeType)lightInfo.LightmapBaketype,
+                    lightmapBakeType = (LightmapBakeType)lightInfo.LightmapBakeType,
                     mixedLightingMode = (MixedLightingMode)lightInfo.MixedLightingMode
                 };
 
