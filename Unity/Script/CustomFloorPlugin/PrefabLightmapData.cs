@@ -16,5 +16,19 @@ namespace CustomFloorPlugin
         public Light[]? lightInfoLight;
         public int[]? lightInfoLightmapBakeType;
         public int[]? lightInfoMixedLightingMode;
+
+        public struct RendererInfo
+        {
+            public Renderer Renderer;
+            public int LightmapIndex;
+            public Vector4 LightmapOffsetScale;
+        }
+
+        public struct LightInfo
+        {
+            public Light Light;
+            public int LightmapBaketype;
+            public int MixedLightingMode;
+        }
     }
 }
