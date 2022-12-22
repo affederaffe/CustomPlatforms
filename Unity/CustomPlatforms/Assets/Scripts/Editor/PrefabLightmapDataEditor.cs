@@ -47,7 +47,7 @@ public class PrefabLightmapDataEditor : MonoBehaviour
             instance.shadowMasks = shadowMasks.ToArray();
 
             instance.lightInfoLight = lightsInfos.Select(l => l.Light).ToArray();
-            instance.lightInfoLightmapBakeType = lightsInfos.Select(l => l.LightmapBaketype).ToArray();
+            instance.lightInfoLightmapBakeType = lightsInfos.Select(l => l.LightmapBakeType).ToArray();
             instance.lightInfoMixedLightingMode = lightsInfos.Select(l => l.MixedLightingMode).ToArray();
 
             var targetPrefab = PrefabUtility.GetCorrespondingObjectFromSource(gameObject);
