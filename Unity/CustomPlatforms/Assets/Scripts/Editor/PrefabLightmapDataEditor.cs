@@ -38,17 +38,17 @@ public class PrefabLightmapDataEditor : MonoBehaviour
 
             GenerateLightmapInfo(gameObject, rendererInfos, lightmaps, lightmapsDir, shadowMasks, lightsInfos);
 
-            instance.renderInfoRenderer = rendererInfos.Select(r => r.renderer).ToArray();
-            instance.renderInfoLightmapIndex = rendererInfos.Select(r => r.lightmapIndex).ToArray();
-            instance.renderInfoLightmapOffsetScale = rendererInfos.Select(r => r.lightmapOffsetScale).ToArray();
+            instance.renderInfoRenderer = rendererInfos.Select(r => r.Renderer).ToArray();
+            instance.renderInfoLightmapIndex = rendererInfos.Select(r => r.LightmapIndex).ToArray();
+            instance.renderInfoLightmapOffsetScale = rendererInfos.Select(r => r.LightmapOffsetScale).ToArray();
 
             instance.lightmaps = lightmaps.ToArray();
             instance.lightmapsDir = lightmapsDir.ToArray();
             instance.shadowMasks = shadowMasks.ToArray();
 
-            instance.lightInfoLight = lightsInfos.Select(l => l.light).ToArray();
-            instance.lightInfoLightmapBakeType = lightsInfos.Select(l => l.lightmapBaketype).ToArray();
-            instance.lightInfoMixedLightingMode = lightsInfos.Select(l => l.mixedLightingMode).ToArray();
+            instance.lightInfoLight = lightsInfos.Select(l => l.Light).ToArray();
+            instance.lightInfoLightmapBakeType = lightsInfos.Select(l => l.LightmapBaketype).ToArray();
+            instance.lightInfoMixedLightingMode = lightsInfos.Select(l => l.MixedLightingMode).ToArray();
 
             var targetPrefab = PrefabUtility.GetCorrespondingObjectFromSource(gameObject);
             if (targetPrefab != null)
@@ -63,21 +63,21 @@ public class PrefabLightmapDataEditor : MonoBehaviour
             if (renderer.lightmapIndex != -1)
             {
                 PrefabLightmapData.RendererInfo info = new PrefabLightmapData.RendererInfo();
-                info.renderer = renderer;
+                info.Renderer = renderer;
                 if (renderer.lightmapScaleOffset != Vector4.zero)
                 {
                     //1ibrium's pointed out this issue : https://docs.unity3d.com/ScriptReference/Renderer-lightmapIndex.html
                     if (renderer.lightmapIndex < 0 || renderer.lightmapIndex == 0xFFFE) continue;
-                    info.lightmapOffsetScale = renderer.lightmapScaleOffset;
+                    info.LightmapOffsetScale = renderer.lightmapScaleOffset;
 
                     Texture2D lightmap = LightmapSettings.lightmaps[renderer.lightmapIndex].lightmapColor;
                     Texture2D lightmapDir = LightmapSettings.lightmaps[renderer.lightmapIndex].lightmapDir;
                     Texture2D shadowMask = LightmapSettings.lightmaps[renderer.lightmapIndex].shadowMask;
 
-                    info.lightmapIndex = lightmaps.IndexOf(lightmap);
-                    if (info.lightmapIndex == -1)
+                    info.LightmapIndex = lightmaps.IndexOf(lightmap);
+                    if (info.LightmapIndex == -1)
                     {
-                        info.lightmapIndex = lightmaps.Count;
+                        info.LightmapIndex = lightmaps.Count;
                         lightmaps.Add(lightmap);
                         lightmapsDir.Add(lightmapDir);
                         shadowMasks.Add(shadowMask);
@@ -91,9 +91,9 @@ public class PrefabLightmapDataEditor : MonoBehaviour
                 foreach (Light l in lights)
                 {
                     PrefabLightmapData.LightInfo lightInfo = new PrefabLightmapData.LightInfo();
-                    lightInfo.light = l;
-                    lightInfo.lightmapBakeType = (int)l.lightmapBakeType;
-                    lightInfo.mixedLightingMode = (int)UnityEditor.LightmapEditorSettings.mixedBakeMode;
+                    lightInfo.Light = l;
+                    lightInfo.LightmapBakeType = (int)l.lightmapBakeType;
+                    lightInfo.MixedLightingMode = (int)UnityEditor.LightmapEditorSettings.mixedBakeMode;
                     lightsInfo.Add(lightInfo);
                 }
             }
