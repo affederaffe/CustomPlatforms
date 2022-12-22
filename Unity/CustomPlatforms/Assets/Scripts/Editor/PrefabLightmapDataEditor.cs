@@ -51,7 +51,7 @@ public class PrefabLightmapDataEditor : MonoBehaviour
             instance.lightInfoMixedLightingMode = lightsInfos.Select(l => l.mixedLightingMode).ToArray();
 
             var targetPrefab = PrefabUtility.GetCorrespondingObjectFromSource(gameObject);
-            if (targetPrefab is not null)
+            if (targetPrefab != null)
                 PrefabUtility.ReplacePrefab(gameObject, targetPrefab);
         }
     }
