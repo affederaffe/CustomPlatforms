@@ -81,7 +81,8 @@ namespace CustomFloorPlugin
         // ReSharper disable once CognitiveComplexity
         public void PlatformEnabled(DiContainer container)
         {
-            if (trackLaneRingPrefab is null) return;
+            if (trackLaneRingPrefab is null)
+                return;
             container.Inject(this);
 
             if (_trackLaneRingsManager is null)

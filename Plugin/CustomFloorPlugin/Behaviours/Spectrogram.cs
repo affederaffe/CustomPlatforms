@@ -56,7 +56,8 @@ namespace CustomFloorPlugin
 
         public void PlatformEnabled(DiContainer container)
         {
-            if (columnPrefab is null) return;
+            if (columnPrefab is null)
+                return;
             container.Inject(this);
             if (_columnTransforms is null)
             {
@@ -125,7 +126,8 @@ namespace CustomFloorPlugin
         {
             get
             {
-                if (_fallbackSamples is not null) return _fallbackSamples;
+                if (_fallbackSamples is not null)
+                    return _fallbackSamples;
                 _fallbackSamples = new float[64];
                 for (int i = 0; i < _fallbackSamples.Length; i++)
                     _fallbackSamples[i] = (Mathf.Sin(0.4f * i - 0.5f * Mathf.PI) + 1) / 2;

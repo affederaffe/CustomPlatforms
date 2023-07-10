@@ -9,7 +9,6 @@ using CustomFloorPlugin.Helpers;
 
 using IPA.Loader;
 using IPA.Utilities;
-using IPA.Utilities.Async;
 
 using JetBrains.Annotations;
 
@@ -82,11 +81,7 @@ namespace CustomFloorPlugin
         private async void OnFileChanged(object sender, FileSystemEventArgs e)
         {
             if (!UnityGame.OnMainThread)
-            {
-                await UnityMainThreadTaskScheduler.Factory.StartNew(() => OnFileChanged(sender, e));
-                return;
-            }
-
+                await UnityGame.SwitchToMainThreadAsync();
             if (!_platformManager.AllPlatforms.TryGetFirst(x => x.fullPath == e.FullPath, out CustomPlatform platform)) return;
             bool wasActivePlatform = platform == _platformManager.ActivePlatform;
             CustomPlatform? newPlatform = await _platformManager.CreatePlatformAsync(e.FullPath);
@@ -101,11 +96,7 @@ namespace CustomFloorPlugin
         private async void OnFileCreated(object sender, FileSystemEventArgs e)
         {
             if (!UnityGame.OnMainThread)
-            {
-                await UnityMainThreadTaskScheduler.Factory.StartNew(() => OnFileCreated(sender, e));
-                return;
-            }
-
+                await UnityGame.SwitchToMainThreadAsync();
             CustomPlatform? newPlatform = await _platformManager.CreatePlatformAsync(e.FullPath);
             if (newPlatform is null) return;
             _platformManager.AllPlatforms.AddSorted(PlatformManager.BuildInPlatformsCount, _platformManager.AllPlatforms.Count - PlatformManager.BuildInPlatformsCount, newPlatform);
@@ -118,11 +109,7 @@ namespace CustomFloorPlugin
         private async void OnFileDeleted(object sender, FileSystemEventArgs e)
         {
             if (!UnityGame.OnMainThread)
-            {
-                await UnityMainThreadTaskScheduler.Factory.StartNew(() => OnFileDeleted(sender, e));
-                return;
-            }
-
+                await UnityGame.SwitchToMainThreadAsync();
             if (!_platformManager.AllPlatforms.TryGetFirst(x => x.fullPath == e.FullPath, out CustomPlatform platform)) return;
             if (platform == _platformManager.ActivePlatform) await _platformSpawner.ChangeToPlatformAsync(_platformManager.DefaultPlatform);
             _platformManager.AllPlatforms.Remove(platform);
@@ -203,14 +190,14 @@ namespace CustomFloorPlugin
             IHttpResponse downloadDataWebResponse = await _httpService.GetAsync(url, null, cancellationToken);
             if (!downloadDataWebResponse.Successful) return;
             string json = await downloadDataWebResponse.ReadAsStringAsync();
-            PlatformDownloadData? platformDownloadData = JsonConvert.DeserializeObject<Dictionary<string, PlatformDownloadData>>(json).FirstOrDefault().Value;
+            PlatformDownloadData? platformDownloadData = JsonConvert.DeserializeObject<Dictionary<string, PlatformDownloadData>>(json)?.FirstOrDefault().Value;
             if (platformDownloadData?.download is null) return;
             IHttpResponse platDownloadWebResponse = await _httpService.GetAsync(platformDownloadData.download, null, cancellationToken);
             if (!platDownloadWebResponse.Successful) return;
             byte[] platData = await platDownloadWebResponse.ReadAsByteArrayAsync();
             string path = Path.Combine(_platformManager.DirectoryPath, $"{platformDownloadData.name}.plat");
             _fileSystemWatcher.EnableRaisingEvents = false;
-            File.WriteAllBytes(path, platData);
+            await File.WriteAllBytesAsync(path, platData, cancellationToken);
             _fileSystemWatcher.EnableRaisingEvents = true;
             CustomPlatform? requestedPlatform = await _platformManager.CreatePlatformAsync(path);
             if (cancellationToken.IsCancellationRequested || requestedPlatform is null) return;

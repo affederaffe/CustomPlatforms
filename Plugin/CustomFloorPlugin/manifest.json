@@ -3,10 +3,11 @@
   "id": "Custom Platforms",
   "name": "Custom Platforms",
   "author": "Rolo",
-  "version": "6.1.17",
+  "version": "6.1.18",
   "description": "A plugin to support custom platforms and environments",
-  "gameVersion": "1.26.0",
+  "gameVersion": "1.31.0",
   "dependsOn": {
+    "AssetBundleLoadingTools": "^1.0.0",
     "BSIPA": "^4.2.2",
     "BeatSaberMarkupLanguage": "^1.6.8",
     "SiraUtil": "^3.1.2"

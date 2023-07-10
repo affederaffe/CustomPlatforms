@@ -28,14 +28,14 @@ namespace CustomFloorPlugin
         public void PlatformEnabled(DiContainer container)
         {
             container.Inject(this);
-            if (_events is null) return;
-            _events.BeatmapEventDidTriggerEvent += OnSongEvent;
+            if (_events is not null)
+                _events.BeatmapEventDidTriggerEvent += OnSongEvent;
         }
 
         public void PlatformDisabled()
         {
-            if (_events is null) return;
-            _events.BeatmapEventDidTriggerEvent -= OnSongEvent;
+            if (_events is not null)
+                _events.BeatmapEventDidTriggerEvent -= OnSongEvent;
         }
 
         /// <summary>
@@ -49,10 +49,10 @@ namespace CustomFloorPlugin
         {
             switch (songEventData)
             {
-                case BasicBeatmapEventData basicBeatmapEventData when basicBeatmapEventData.subtypeIdentifier == _subtypeIdentifier && basicBeatmapEventData.value == value || anyValue:
+                case BasicBeatmapEventData basicBeatmapEventData when (basicBeatmapEventData.subtypeIdentifier == _subtypeIdentifier && basicBeatmapEventData.value == value) || anyValue:
                     OnTrigger!.Invoke();
                     break;
-                case ColorBoostBeatmapEventData colorBoostBeatmapEventData when colorBoostBeatmapEventData.boostColorsAreOn == value > 0 || anyValue:
+                case ColorBoostBeatmapEventData colorBoostBeatmapEventData when colorBoostBeatmapEventData.boostColorsAreOn == (value > 0) || anyValue:
                     OnTrigger!.Invoke();
                     break;
             }

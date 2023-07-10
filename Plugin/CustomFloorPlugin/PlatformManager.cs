@@ -167,9 +167,11 @@ namespace CustomFloorPlugin
             // Load all remaining platforms, or all if no cache file is found
             foreach (string path in Directory.EnumerateFiles(DirectoryPath, "*.plat").Where(x => AllPlatforms.All(y => y.fullPath != x)))
             {
-                if (cancellationToken.IsCancellationRequested) return;
+                if (cancellationToken.IsCancellationRequested)
+                    return;
                 CustomPlatform? platform = await CreatePlatformAsync(path);
-                if (platform is null) continue;
+                if (platform is null)
+                    continue;
                 AllPlatforms.AddSorted(BuildInPlatformsCount, AllPlatforms.Count - BuildInPlatformsCount, platform);
             }
 
@@ -183,7 +185,8 @@ namespace CustomFloorPlugin
         public async Task<CustomPlatform?> CreatePlatformAsync(string fullPath)
         {
             CustomPlatform? platform = await _platformLoader.LoadPlatformFromFileAsync(fullPath);
-            if (platform is null) return null;
+            if (platform is null)
+                return null;
             CustomPlatform newPlatform = UnityEngine.Object.Instantiate(platform, _anchor);
             UnityEngine.Object.Destroy(platform.gameObject);
             newPlatform.name = platform.name;

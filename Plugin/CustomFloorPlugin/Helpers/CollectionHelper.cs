@@ -10,7 +10,7 @@ namespace CustomFloorPlugin.Helpers
         internal static void AddSorted<T>(this IList<T> list, int index, int count, T value, IComparer<T>? comparer = null)
         {
             comparer ??= Comparer<T>.Default;
-            if (list.Count == 0 || comparer.Compare(list[list.Count - 1], value) <= 0)
+            if (list.Count == 0 || comparer.Compare(list[^1], value) <= 0)
             {
                 list.Add(value);
                 return;
@@ -29,7 +29,8 @@ namespace CustomFloorPlugin.Helpers
         internal static void Replace<T>(this IList<T> list, T oldItem, T newItem)
         {
             int index = list.IndexOf(oldItem);
-            if (index == -1) return;
+            if (index == -1)
+                return;
             list[index] = newItem;
         }
 
@@ -42,9 +43,12 @@ namespace CustomFloorPlugin.Helpers
             {
                 int middle = lower + (upper - lower) / 2;
                 int comparisonResult = comparer.Compare(value, list[middle]);
-                if (comparisonResult == 0) return middle;
-                if (comparisonResult < 0) upper = middle - 1;
-                else lower = middle + 1;
+                if (comparisonResult == 0)
+                    return middle;
+                if (comparisonResult < 0)
+                    upper = middle - 1;
+                else
+                    lower = middle + 1;
             }
 
             return lower;

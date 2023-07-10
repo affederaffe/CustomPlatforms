@@ -28,14 +28,14 @@ namespace CustomFloorPlugin
         public void PlatformEnabled(DiContainer container)
         {
             container.Inject(this);
-            if (_events is null) return;
-            _events.NoteWasCutEvent += OnNoteWasCut;
+            if (_events is not null)
+                _events.NoteWasCutEvent += OnNoteWasCut;
         }
 
         public void PlatformDisabled()
         {
-            if (_events is null) return;
-            _events.NoteWasCutEvent -= OnNoteWasCut;
+            if (_events is not null)
+                _events.NoteWasCutEvent -= OnNoteWasCut;
         }
 
         private void OnNoteWasCut(global::SaberType saber)

@@ -50,7 +50,8 @@ namespace CustomFloorPlugin
         public void PlatformEnabled(DiContainer container)
         {
             container.Inject(this);
-            if (_events is null) return;
+            if (_events is null)
+                return;
             _events.BeatmapEventDidTriggerEvent += OnBeatmapEventDidTriggerEvent;
             _events.NoteWasCutEvent += OnNoteWasCut;
             _events.NoteWasMissedEvent += OnMiss!.Invoke;
@@ -71,7 +72,8 @@ namespace CustomFloorPlugin
 
         public void PlatformDisabled()
         {
-            if (_events is null) return;
+            if (_events is null)
+                return;
             _events.BeatmapEventDidTriggerEvent -= OnBeatmapEventDidTriggerEvent;
             _events.NoteWasCutEvent -= OnNoteWasCut;
             _events.NoteWasMissedEvent -= OnMiss!.Invoke;
@@ -103,7 +105,8 @@ namespace CustomFloorPlugin
         /// </summary>
         private void OnBeatmapEventDidTriggerEvent(BeatmapDataItem songEvent)
         {
-            if (songEvent is not BasicBeatmapEventData { subtypeIdentifier: < 5 } basicBeatmapEventData) return;
+            if (songEvent is not BasicBeatmapEventData { subtypeIdentifier: < 5 } basicBeatmapEventData)
+                return;
             switch (basicBeatmapEventData.value)
             {
                 case > 0 and < 4:

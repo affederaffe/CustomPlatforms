@@ -37,7 +37,8 @@ namespace CustomFloorPlugin
 
         public void PlatformEnabled(DiContainer container)
         {
-            if (_mirror is not null) return;
+            if (_mirror is not null)
+                return;
             container.Inject(this);
             _mirror = gameObject.AddComponent<Mirror>();
             _rendererAccessor(ref _mirror) = GetComponent<MeshRenderer>();

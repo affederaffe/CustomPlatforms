@@ -130,7 +130,7 @@ namespace CustomFloorPlugin
         private void FindAddGameObject(Transform root, string name, ICollection<GameObject> list, bool rename = false)
         {
             GameObject? go = root.Find(name)?.gameObject;
-            if (go is null || !go.activeSelf && _sceneName != "MainMenu") return;
+            if (go is null || (!go.activeSelf && _sceneName != "MainMenu")) return;
             if (rename) go.name += "renamed";
             list.Add(go);
         }

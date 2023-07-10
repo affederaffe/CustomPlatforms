@@ -93,10 +93,7 @@ namespace CustomFloorPlugin
             _levelEndActions.levelFailedEvent -= LevelFailed;
         }
 
-        private void BeatmapEventDidTrigger(BeatmapDataItem eventData)
-        {
-            BeatmapEventDidTriggerEvent?.Invoke(eventData);
-        }
+        private void BeatmapEventDidTrigger(BeatmapDataItem eventData) => BeatmapEventDidTriggerEvent?.Invoke(eventData);
 
         private void NoteWasCut(NoteController noteController, in NoteCutInfo noteCutInfo)
         {

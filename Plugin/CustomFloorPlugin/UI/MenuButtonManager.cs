@@ -34,8 +34,7 @@ namespace CustomFloorPlugin.UI
 
         public void Dispose()
         {
-            if (MenuButtons.IsSingletonAvailable && BSMLParser.IsSingletonAvailable)
-                MenuButtons.instance.UnregisterButton(_menuButton);
+            MenuButtons.instance.UnregisterButton(_menuButton);
         }
 
         /// <summary>

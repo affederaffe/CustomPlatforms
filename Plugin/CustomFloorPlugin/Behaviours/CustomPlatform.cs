@@ -39,9 +39,11 @@ namespace CustomFloorPlugin
 
         public int CompareTo(CustomPlatform other)
         {
-            if (this == other) return 0;
+            if (this == other)
+                return 0;
             int nameComparison = string.CompareOrdinal(platName, other.platName);
-            if (nameComparison != 0) return nameComparison;
+            if (nameComparison != 0)
+                return nameComparison;
             int authorComparison = string.CompareOrdinal(platAuthor, other.platAuthor);
             return authorComparison;
         }

@@ -4,6 +4,8 @@ using System.IO;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
 
+using AssetBundleLoadingTools.Utilities;
+
 using IPA.Utilities;
 
 using JetBrains.Annotations;
@@ -60,7 +62,7 @@ namespace CustomFloorPlugin
         {
             byte[] bundleData = await Task.Run(() => File.ReadAllBytes(fullPath));
 
-            AssetBundle? assetBundle = await LoadAssetBundleFromBytesAsync(bundleData);
+            AssetBundle? assetBundle = await AssetBundleExtensions.LoadFromMemoryAsync(bundleData);
 
             if (assetBundle is null)
             {
@@ -68,7 +70,7 @@ namespace CustomFloorPlugin
                 return null;
             }
 
-            GameObject? platformPrefab = await LoadAssetFromAssetBundleAsync<GameObject>(assetBundle, "_CustomPlatform");
+            GameObject? platformPrefab = await AssetBundleExtensions.LoadAssetAsync<GameObject>(assetBundle, "_CustomPlatform");
 
             if (platformPrefab is null)
             {
@@ -127,30 +129,6 @@ namespace CustomFloorPlugin
             using MD5 md5 = MD5.Create();
             byte[] hash = md5.ComputeHash(data);
             return BitConverter.ToString(hash).Replace("-", string.Empty).ToLowerInvariant();
-        }
-
-        /// <summary>
-        /// Asynchronously loads and <see cref="AssetBundle"/> from a <see cref="byte"/>[]
-        /// </summary>
-        private static Task<AssetBundle?> LoadAssetBundleFromBytesAsync(byte[] data)
-        {
-            TaskCompletionSource<AssetBundle?> taskCompletionSource = new();
-            AssetBundleCreateRequest? assetBundleCreateRequest = AssetBundle.LoadFromMemoryAsync(data);
-            if (assetBundleCreateRequest is null) return Task.FromResult<AssetBundle?>(null);
-            assetBundleCreateRequest.completed += _ => taskCompletionSource.TrySetResult(assetBundleCreateRequest.assetBundle);
-            return taskCompletionSource.Task;
-        }
-
-        /// <summary>
-        /// Asynchronously loads an asset of type <typeparamref name="T"/> from an <see cref="AssetBundle"/>
-        /// </summary>
-        private static Task<T?> LoadAssetFromAssetBundleAsync<T>(AssetBundle assetBundle, string assetName) where T : UnityEngine.Object
-        {
-            TaskCompletionSource<T?> taskCompletionSource = new();
-            AssetBundleRequest? assetBundleRequest = assetBundle.LoadAssetAsync<T>(assetName);
-            if (assetBundleRequest is null) return Task.FromResult<T?>(null);
-            assetBundleRequest.completed += _ => taskCompletionSource.TrySetResult((T?)assetBundleRequest.asset);
-            return taskCompletionSource.Task;
         }
     }
 }

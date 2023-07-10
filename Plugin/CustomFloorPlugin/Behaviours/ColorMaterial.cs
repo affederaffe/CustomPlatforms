@@ -38,7 +38,8 @@ namespace CustomFloorPlugin
         public void PlatformEnabled(DiContainer container)
         {
             container.Inject(this);
-            if (_colorManager is null) return;
+            if (_colorManager is null)
+                return;
             _lightWithIdManager!.didChangeSomeColorsThisFrameEvent += OnColorsDidChange;
         }
 

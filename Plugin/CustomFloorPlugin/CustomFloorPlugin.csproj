@@ -1,9 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net48</TargetFramework>
+    <TargetFramework>netstandard2.1</TargetFramework>
     <OutputType>Library</OutputType>
-    <LangVersion>9</LangVersion>
+    <LangVersion>latest</LangVersion>
     <Nullable>enable</Nullable>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
@@ -132,6 +132,9 @@
     </Reference>
     <Reference Include="BeatSaberCinema">
       <HintPath>$(BeatSaberDir)\Plugins\BeatSaberCinema.dll</HintPath>
+    </Reference>
+    <Reference Include="AssetBundleLoadingTools">
+      <HintPath>$(BeatSaberDir)\Plugins\AssetBundleLoadingTools.dll</HintPath>
     </Reference>
   </ItemGroup>
 

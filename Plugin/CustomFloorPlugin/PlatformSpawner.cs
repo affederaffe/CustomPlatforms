@@ -117,16 +117,20 @@ namespace CustomFloorPlugin
         /// <param name="platform">The <see cref="CustomPlatform"/> to change to</param>
         public async Task ChangeToPlatformAsync(CustomPlatform platform)
         {
-            if (platform == _platformManager.ActivePlatform) return;
+            if (platform == _platformManager.ActivePlatform)
+                return;
             _cancellationTokenSource?.Cancel();
             _cancellationTokenSource?.Dispose();
             _cancellationTokenSource = new CancellationTokenSource();
             CancellationToken token = _cancellationTokenSource.Token;
             DestroyPlatform(_platformManager.ActivePlatform.gameObject);
-            if (platform == _platformManager.RandomPlatform) platform = RandomPlatform;
+            if (platform == _platformManager.RandomPlatform)
+                platform = RandomPlatform;
             _platformManager.ActivePlatform = platform;
-            if (platform.isDescriptor) platform = await ReplaceDescriptorAsync(platform);
-            if (token.IsCancellationRequested) return;
+            if (platform.isDescriptor)
+                platform = await ReplaceDescriptorAsync(platform);
+            if (token.IsCancellationRequested)
+                return;
             _platformManager.ActivePlatform = platform;
             _siraLog.Debug($"Switching to {platform.name}");
             _environmentHider.HideObjectsForPlatform(platform);
@@ -161,7 +165,8 @@ namespace CustomFloorPlugin
         private async Task<CustomPlatform> ReplaceDescriptorAsync(CustomPlatform descriptor)
         {
             CustomPlatform? platform = await _platformManager.CreatePlatformAsync(descriptor.fullPath);
-            if (platform is null) return _platformManager.DefaultPlatform;
+            if (platform is null)
+                return _platformManager.DefaultPlatform;
             _platformManager.AllPlatforms.Replace(descriptor, platform);
             UnityEngine.Object.Destroy(descriptor.gameObject);
             return platform;

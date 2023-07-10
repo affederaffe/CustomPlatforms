@@ -29,7 +29,6 @@ namespace CustomFloorPlugin.UI
         private PlatformSpawner _platformSpawner = null!;
 
         private static readonly FieldAccessor<TableView, ScrollView>.Accessor _scrollViewAccessor = FieldAccessor<TableView, ScrollView>.GetAccessor("_scrollView");
-        private static readonly FieldAccessor<ScrollView, float>.Accessor _destinationPosAccessor = FieldAccessor<ScrollView, float>.GetAccessor("_destinationPos");
 
         [UIComponent("singleplayer-platforms-list")]
         private readonly CustomListTableData _singleplayerPlatformListTable = null!;
@@ -44,7 +43,6 @@ namespace CustomFloorPlugin.UI
         private readonly CustomListTableData _menuPlatformListTable = null!;
 
         private CustomListTableData[] _listTables = null!;
-        private ScrollView[] _scrollViews = null!;
         private int _tabIndex;
 
         [Inject]
@@ -92,7 +90,8 @@ namespace CustomFloorPlugin.UI
         protected override async void DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
         {
             base.DidActivate(firstActivation, addedToHierarchy, screenSystemEnabling);
-            if (firstActivation) _platformManager.AllPlatforms.CollectionChanged += OnCollectionDidChange;
+            if (firstActivation)
+                _platformManager.AllPlatforms.CollectionChanged += OnCollectionDidChange;
             CustomPlatform platform = GetPlatformForTabIndex(_tabIndex);
             await _platformSpawner.ChangeToPlatformAsync(platform);
         }
@@ -105,7 +104,8 @@ namespace CustomFloorPlugin.UI
         protected override async void DidDeactivate(bool removedFromHierarchy, bool screenSystemDisabling)
         {
             base.DidDeactivate(removedFromHierarchy, screenSystemDisabling);
-            if (removedFromHierarchy) _platformManager.AllPlatforms.CollectionChanged -= OnCollectionDidChange;
+            if (removedFromHierarchy)
+                _platformManager.AllPlatforms.CollectionChanged -= OnCollectionDidChange;
             int index = GetPlatformIndexForTabIndex(_tabIndex);
             _listTables[_tabIndex].tableView.SelectCellWithIdx(index);
             await _platformSpawner.ChangeToPlatformAsync(_platformManager.MenuPlatform);
@@ -119,7 +119,6 @@ namespace CustomFloorPlugin.UI
         public void PostParse()
         {
             _listTables = new[] { _singleplayerPlatformListTable, _multiplayerPlatformListTable, _a360PlatformListTable, _menuPlatformListTable };
-            _scrollViews = new ScrollView[_listTables.Length];
             for (int i = 0; i < _platformManager.AllPlatforms.Count; i++)
                 AddCellForPlatform(_platformManager.AllPlatforms[i], i);
             for (int i = 0; i < _listTables.Length; i++)
@@ -128,7 +127,6 @@ namespace CustomFloorPlugin.UI
                 _listTables[i].tableView.ReloadData();
                 _listTables[i].tableView.ScrollToCellWithIdx(index, TableView.ScrollPositionType.Beginning, false);
                 _listTables[i].tableView.SelectCellWithIdx(index);
-                _scrollViews[i] = _scrollViewAccessor(ref _listTables[i].tableView);
             }
         }
 
@@ -158,12 +156,8 @@ namespace CustomFloorPlugin.UI
         /// </summary>
         private void RefreshListViews()
         {
-            for (int i = 0; i < _listTables.Length; i++)
-            {
-                float pos = _destinationPosAccessor(ref _scrollViews[i]);
-                _listTables[i].tableView.ReloadData();
-                _scrollViews[i].ScrollTo(pos, false);
-            }
+            foreach (CustomListTableData t in _listTables)
+                t.tableView.ReloadDataKeepingPosition();
         }
 
         /// <summary>
@@ -188,7 +182,8 @@ namespace CustomFloorPlugin.UI
             foreach (CustomListTableData listTable in _listTables)
             {
                 listTable.data.RemoveAt(index);
-                if (platform != GetPlatformForTabIndex(_tabIndex)) continue;
+                if (platform != GetPlatformForTabIndex(_tabIndex))
+                    continue;
                 listTable.tableView.SelectCellWithIdx(0);
                 listTable.tableView.ScrollToCellWithIdx(0, TableView.ScrollPositionType.Beginning, false);
             }

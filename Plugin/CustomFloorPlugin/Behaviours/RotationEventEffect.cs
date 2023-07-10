@@ -39,7 +39,8 @@ namespace CustomFloorPlugin
         public void PlatformEnabled(DiContainer container)
         {
             container.Inject(this);
-            if (_beatmapCallbacksController is null) return;
+            if (_beatmapCallbacksController is null)
+                return;
             _startRot = transform.rotation;
             if (_lightRotationEventEffect is null)
             {
@@ -59,7 +60,8 @@ namespace CustomFloorPlugin
 
         public void PlatformDisabled()
         {
-            if (_lightRotationEventEffect is null) return;
+            if (_lightRotationEventEffect is null)
+                return;
             transform.rotation = _startRot;
             _lightRotationEventEffect.enabled = false;
             _lightRotationEventEffect.OnDestroy();

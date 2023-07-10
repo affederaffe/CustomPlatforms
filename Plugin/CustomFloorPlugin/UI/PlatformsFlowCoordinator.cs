@@ -28,7 +28,8 @@ namespace CustomFloorPlugin.UI
         /// </summary>
         protected override void DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
         {
-            if (!firstActivation) return;
+            if (!firstActivation)
+                return;
             showBackButton = true;
             SetTitle("Custom Platforms");
             ProvideInitialViewControllers(_platformsListView);
