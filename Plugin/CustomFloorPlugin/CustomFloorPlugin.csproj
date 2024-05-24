@@ -1,5 +1,4 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
     <OutputType>Library</OutputType>
@@ -15,28 +14,23 @@
     <BeatSaberDir>$(LocalRefsDir)</BeatSaberDir>
     <AppOutputBase>$(MSBuildProjectDirectory)\</AppOutputBase>
   </PropertyGroup>
-
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <Optimize>false</Optimize>
     <DebugType>portable</DebugType>
   </PropertyGroup>
-
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
     <Optimize>true</Optimize>
     <DebugType>portable</DebugType>
   </PropertyGroup>
-
   <PropertyGroup Condition="'$(NCrunch)' == '1'">
     <DisableCopyToPlugins>True</DisableCopyToPlugins>
     <DisableZipRelease>True</DisableZipRelease>
   </PropertyGroup>
-
   <ItemGroup>
     <None Include="Directory.Build.props" Condition="Exists('Directory.Build.props')" Visible="false" />
     <None Include="Directory.Build.targets" Condition="Exists('Directory.Build.targets')" Visible="false" />
     <None Include="CustomFloorPlugin.csproj.user" Condition="Exists('CustomFloorPlugin.csproj.user')" Visible="false" />
   </ItemGroup>
-
   <ItemGroup>
     <EmbeddedResource Include="manifest.json" />
     <EmbeddedResource Include="Assets\FeetIcon.png" />
@@ -46,15 +40,48 @@
     <EmbeddedResource Include="Assets\QuestionMarkIcon.png" />
     <EmbeddedResource Include="Views\PlatformLists.bsml" />
   </ItemGroup>
-
   <ItemGroup>
     <PackageReference Include="BeatSaberModdingTools.Tasks" Version="1.4.3">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
   </ItemGroup>
-
   <ItemGroup>
+    <Reference Include="BeatSaber.Init">
+      <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\BeatSaber.Init.dll</HintPath>
+      <Private>False</Private>
+      <SpecificVersion>False</SpecificVersion>
+    </Reference>
+    <Reference Include="BeatSaberCinema">
+      <HintPath>$(BeatSaberDir)\Plugins\BeatSaberCinema.dll</HintPath>
+      <Private>False</Private>
+      <SpecificVersion>False</SpecificVersion>
+    </Reference>
+    <Reference Include="BGLib.AppFlow">
+      <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\BGLib.AppFlow.dll</HintPath>
+      <Private>False</Private>
+      <SpecificVersion>False</SpecificVersion>
+    </Reference>
+    <Reference Include="BGLib.UnityExtension">
+      <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\BGLib.UnityExtension.dll</HintPath>
+      <Private>False</Private>
+      <SpecificVersion>False</SpecificVersion>
+    </Reference>
+    <Reference Include="BGNet">
+      <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\BGNet.dll</HintPath>
+      <Private>False</Private>
+      <SpecificVersion>False</SpecificVersion>
+    </Reference>
+    <Reference Include="BGNetCore">
+      <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\BGNetCore.dll</HintPath>
+      <Private>False</Private>
+      <SpecificVersion>False</SpecificVersion>
+    </Reference>
+    <Reference Include="DataModels">
+      <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\DataModels.dll</HintPath>
+      <Private>False</Private>
+      <SpecificVersion>False</SpecificVersion>
+    </Reference>
     <Reference Include="UnityEngine">
       <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\UnityEngine.dll</HintPath>
     </Reference>
@@ -106,9 +133,6 @@
     <Reference Include="BeatmapCore">
       <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\BeatmapCore.dll</HintPath>
     </Reference>
-    <Reference Include="BGNet">
-      <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\BGNet.dll</HintPath>
-    </Reference>
     <Reference Include="Zenject">
       <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\Zenject.dll</HintPath>
     </Reference>
@@ -130,12 +154,8 @@
     <Reference Include="SongCore">
       <HintPath>$(BeatSaberDir)\Plugins\SongCore.dll</HintPath>
     </Reference>
-    <Reference Include="BeatSaberCinema">
-      <HintPath>$(BeatSaberDir)\Plugins\BeatSaberCinema.dll</HintPath>
-    </Reference>
     <Reference Include="AssetBundleLoadingTools">
       <HintPath>$(BeatSaberDir)\Plugins\AssetBundleLoadingTools.dll</HintPath>
     </Reference>
   </ItemGroup>
-
 </Project>
