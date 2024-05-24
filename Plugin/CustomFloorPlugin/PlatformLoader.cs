@@ -81,6 +81,8 @@ namespace CustomFloorPlugin
 
             assetBundle.Unload(false);
 
+            await RepairPlatformShadersAsync(platformPrefab);
+
             CustomPlatform? customPlatform = platformPrefab.GetComponent<CustomPlatform>();
 
             if (customPlatform is null)
@@ -129,6 +131,26 @@ namespace CustomFloorPlugin
             using MD5 md5 = MD5.Create();
             byte[] hash = md5.ComputeHash(data);
             return BitConverter.ToString(hash).Replace("-", string.Empty).ToLowerInvariant();
+        }
+
+        /// <summary>
+        /// Shader repair so that single pass shaders used prior to BS 1.29.4 show properly in VR
+        /// </summary>
+        private async Task RepairPlatformShadersAsync(GameObject platformPrefab)
+        {
+            List<Material> materials = ShaderRepair.GetMaterialsFromGameObjectRenderers(platformPrefab);
+
+            var replacementInfo = await ShaderRepair.FixShadersOnMaterialsAsync(materials);
+
+            if (!replacementInfo.AllShadersReplaced)
+            {
+                _siraLog.Warn($"Missing shader replacement data:");
+                foreach (var shaderName in replacementInfo.MissingShaderNames)
+                {
+                    _siraLog.Warn($"\t- {shaderName}");
+                }
+            }
+            else _siraLog.Info("All shaders replaced!");
         }
     }
 }
