@@ -3,8 +3,6 @@ using System.Reflection;
 
 using CustomFloorPlugin.Configuration;
 
-using IPA.Utilities;
-
 using JetBrains.Annotations;
 
 using UnityEngine;
@@ -24,24 +22,14 @@ namespace CustomFloorPlugin.Installers
         private readonly BloomPrePassEffectContainerSO _bloomPrePassEffectContainer;
         private readonly BoolSO _postProcessEnabled;
 
-        private static readonly FieldAccessor<PCAppInit, MainSystemInit>.Accessor _pcAppInitAccessor = FieldAccessor<PCAppInit, MainSystemInit>.GetAccessor("_mainSystemInit");
-        private static readonly FieldAccessor<MainSystemInit, MirrorRendererSO>.Accessor _mirrorRendererAccessor = FieldAccessor<MainSystemInit, MirrorRendererSO>.GetAccessor("_mirrorRenderer");
-        private static readonly FieldAccessor<MirrorRendererSO, BloomPrePassRendererSO>.Accessor _bloomPrePassRendererAccessor = FieldAccessor<MirrorRendererSO, BloomPrePassRendererSO>.GetAccessor("_bloomPrePassRenderer");
-        private static readonly FieldAccessor<MainSystemInit, BloomPrePassEffectContainerSO>.Accessor _bloomPrePassEffectContainerAccessor = FieldAccessor<MainSystemInit, BloomPrePassEffectContainerSO>.GetAccessor("_bloomPrePassEffectContainer");
-        private static readonly FieldAccessor<MainSystemInit, MainEffectContainerSO>.Accessor _mainEffectContainerAccessor = FieldAccessor<MainSystemInit, MainEffectContainerSO>.GetAccessor("_mainEffectContainer");
-        private static readonly FieldAccessor<MainEffectContainerSO, BoolSO>.Accessor _postProcessEnabledAccessor = FieldAccessor<MainEffectContainerSO, BoolSO>.GetAccessor("_postProcessEnabled");
-
-        public PlatformsAppInstaller(Assembly assembly, PluginConfig config, SceneContext sceneContext)
+        public PlatformsAppInstaller(Assembly assembly, PluginConfig config)
         {
             _assembly = assembly;
             _config = config;
-            PCAppInit? pcAppInit = sceneContext.Installers.First(static x => x is PCAppInit) as PCAppInit;
-            MainSystemInit mainSystemInit = _pcAppInitAccessor(ref pcAppInit!);
-            _mirrorRenderer = _mirrorRendererAccessor(ref mainSystemInit);
-            _bloomPrePassRenderer = _bloomPrePassRendererAccessor(ref _mirrorRenderer);
-            _bloomPrePassEffectContainer = _bloomPrePassEffectContainerAccessor(ref mainSystemInit);
-            MainEffectContainerSO mainEffectContainer = _mainEffectContainerAccessor(ref mainSystemInit);
-            _postProcessEnabled = _postProcessEnabledAccessor(ref mainEffectContainer);
+            _mirrorRenderer = Resources.FindObjectsOfTypeAll<MirrorRendererSO>().FirstOrDefault();
+            _bloomPrePassRenderer = _mirrorRenderer._bloomPrePassRenderer;
+            _bloomPrePassEffectContainer = Resources.FindObjectsOfTypeAll<BloomPrePassEffectContainerSO>().FirstOrDefault();
+            _postProcessEnabled = Resources.FindObjectsOfTypeAll<MainEffectContainerSO>().FirstOrDefault()._postProcessEnabled;
         }
 
         public override void InstallBindings()
