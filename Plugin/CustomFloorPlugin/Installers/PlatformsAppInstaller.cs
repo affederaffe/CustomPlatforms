@@ -47,6 +47,7 @@ namespace CustomFloorPlugin.Installers
             Container.BindInterfacesAndSelfTo<EnvironmentHider>().AsSingle();
             Container.BindInterfacesAndSelfTo<PlatformSpawner>().AsSingle();
             Container.BindInterfacesTo<ConnectionManager>().AsSingle();
+            Container.BindInterfacesAndSelfTo<GameShaders>().AsSingle();
         }
     }
 }

@@ -146,7 +146,7 @@ namespace CustomFloorPlugin
                     _siraLog.Warn($"\t- {shaderName}");
                 }
             }
-            else _siraLog.Info("All shaders replaced!");
+            else _siraLog.Debug("All shaders replaced!");
         }
     }
 }
