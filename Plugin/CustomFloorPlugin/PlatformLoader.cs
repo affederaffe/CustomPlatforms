@@ -6,8 +6,6 @@ using System.Threading.Tasks;
 
 using AssetBundleLoadingTools.Utilities;
 
-using IPA.Utilities;
-
 using JetBrains.Annotations;
 
 using SiraUtil.Logging;
@@ -28,8 +26,6 @@ namespace CustomFloorPlugin
         private readonly BloomPrePassEffectContainerSO _bloomPrePassEffectContainer;
         private readonly Dictionary<string, Task<CustomPlatform?>> _pathTaskPairs;
 
-        private static readonly FieldAccessor<BloomPrePass, BloomPrePassRendererSO>.Accessor _bloomPrepassRendererAccessor = FieldAccessor<BloomPrePass, BloomPrePassRendererSO>.GetAccessor("_bloomPrepassRenderer");
-        private static readonly FieldAccessor<BloomPrePass, BloomPrePassEffectContainerSO>.Accessor _bloomPrePassEffectContainerAccessor = FieldAccessor<BloomPrePass, BloomPrePassEffectContainerSO>.GetAccessor("_bloomPrePassEffectContainer");
 
         public PlatformLoader(SiraLog siraLog, BloomPrePassRendererSO bloomPrepassRenderer, BloomPrePassEffectContainerSO bloomPrePassEffectContainer)
         {
@@ -112,8 +108,8 @@ namespace CustomFloorPlugin
             foreach (Camera camera in cameras)
             {
                 BloomPrePass bloomPrePass = camera.gameObject.AddComponent<BloomPrePass>();
-                _bloomPrepassRendererAccessor(ref bloomPrePass) = _bloomPrepassRenderer;
-                _bloomPrePassEffectContainerAccessor(ref bloomPrePass) = _bloomPrePassEffectContainer;
+                bloomPrePass._bloomPrepassRenderer = _bloomPrepassRenderer;
+                bloomPrePass._bloomPrePassEffectContainer = _bloomPrePassEffectContainer;
             }
 
             customPlatform.platHash = await Task.Run(() => ComputeHash(bundleData));

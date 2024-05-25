@@ -45,6 +45,10 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="BepInEx.AssemblyPublicizer.MSBuild" Version="0.4.2">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
   </ItemGroup>
   <ItemGroup>
     <Reference Include="BeatSaber.Init">
@@ -112,19 +116,19 @@
     <Reference Include="HMLib">
       <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\HMLib.dll</HintPath>
     </Reference>
-    <Reference Include="HMRendering">
+    <Reference Include="HMRendering" publicize="True">
       <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\HMRendering.dll</HintPath>
     </Reference>
     <Reference Include="HMUI">
       <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\HMUI.dll</HintPath>
     </Reference>
-    <Reference Include="Main">
+    <Reference Include="Main" publicize="True">
       <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\Main.dll</HintPath>
     </Reference>
-    <Reference Include="Colors">
+    <Reference Include="Colors" publicize="True">
       <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\Colors.dll</HintPath>
     </Reference>
-    <Reference Include="Rendering">
+    <Reference Include="Rendering" publicize="True">
       <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\Rendering.dll</HintPath>
     </Reference>
     <Reference Include="GameplayCore">

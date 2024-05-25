@@ -2,8 +2,6 @@ using System.Linq;
 
 using CustomFloorPlugin.Interfaces;
 
-using IPA.Utilities;
-
 using UnityEngine;
 
 using Zenject;
@@ -53,22 +51,6 @@ namespace CustomFloorPlugin
         private TubeBloomPrePassLightWithId? _tubeBloomPrePassLightWithId;
         private InstancedMaterialLightWithId? _instancedMaterialLightWithId;
 
-        private static readonly FieldAccessor<ParametricBoxController, MeshRenderer>.Accessor _meshRendererAccessor = FieldAccessor<ParametricBoxController, MeshRenderer>.GetAccessor("_meshRenderer");
-        private static readonly FieldAccessor<TubeBloomPrePassLight, float>.Accessor _centerAccessor = FieldAccessor<TubeBloomPrePassLight, float>.GetAccessor("_center");
-        private static readonly FieldAccessor<TubeBloomPrePassLight, float>.Accessor _colorAlphaMultiplierAccessor = FieldAccessor<TubeBloomPrePassLight, float>.GetAccessor("_colorAlphaMultiplier");
-        private static readonly FieldAccessor<TubeBloomPrePassLight, float>.Accessor _boostToWhiteAccessor = FieldAccessor<TubeBloomPrePassLight, float>.GetAccessor("_boostToWhite");
-        private static readonly FieldAccessor<TubeBloomPrePassLight, ParametricBoxController>.Accessor _parametricBoxControllerAccessor = FieldAccessor<TubeBloomPrePassLight, ParametricBoxController>.GetAccessor("_parametricBoxController");
-        private static readonly FieldAccessor<TubeBloomPrePassLight, BoolSO?>.Accessor _mainEffectPostProcessEnabledAccessor = FieldAccessor<TubeBloomPrePassLight, BoolSO?>.GetAccessor("_mainEffectPostProcessEnabled");
-        private static readonly FieldAccessor<TubeBloomPrePassLightWithId, TubeBloomPrePassLight>.Accessor _tubeBloomPrePassLightAccessor = FieldAccessor<TubeBloomPrePassLightWithId, TubeBloomPrePassLight>.GetAccessor("_tubeBloomPrePassLight");
-        private static readonly FieldAccessor<TubeBloomPrePassLightWithId, bool>.Accessor _setOnlyOnceAccessor = FieldAccessor<TubeBloomPrePassLightWithId, bool>.GetAccessor("_setOnlyOnce");
-        private static readonly FieldAccessor<BloomPrePassLight, BloomPrePassLightTypeSO>.Accessor _lightTypeAccessor = FieldAccessor<BloomPrePassLight, BloomPrePassLightTypeSO>.GetAccessor("_lightType");
-        private static readonly FieldAccessor<LightWithIdMonoBehaviour, int>.Accessor _idAccessor = FieldAccessor<LightWithIdMonoBehaviour, int>.GetAccessor("_ID");
-        private static readonly FieldAccessor<LightWithIdMonoBehaviour, LightWithIdManager?>.Accessor _lightManagerAccessor = FieldAccessor<LightWithIdMonoBehaviour, LightWithIdManager?>.GetAccessor("_lightManager");
-        private static readonly FieldAccessor<MaterialPropertyBlockController, Renderer[]>.Accessor _renderersAccessor = FieldAccessor<MaterialPropertyBlockController, Renderer[]>.GetAccessor("_renderers");
-        private static readonly FieldAccessor<MaterialPropertyBlockColorSetter, string>.Accessor _propertyAccessor = FieldAccessor<MaterialPropertyBlockColorSetter, string>.GetAccessor("_property");
-        private static readonly FieldAccessor<InstancedMaterialLightWithId, MaterialPropertyBlockColorSetter>.Accessor _materialPropertyBlockColorSetterAccessor = FieldAccessor<InstancedMaterialLightWithId, MaterialPropertyBlockColorSetter>.GetAccessor("_materialPropertyBlockColorSetter");
-        private static readonly FieldAccessor<InstancedMaterialLightWithId, float>.Accessor _intensityAccessor = FieldAccessor<InstancedMaterialLightWithId, float>.GetAccessor("_intensity");
-
         [Inject]
         public void Construct(MaterialSwapper materialSwapper, [Inject(Id = "PostProcessEnabled")] BoolSO postProcessEnabled, [InjectOptional] LightWithIdManager lightWithIdManager)
         {
@@ -91,7 +73,7 @@ namespace CustomFloorPlugin
                     _tubeBloomPrePassLightWithId = gameObject.AddComponent<TubeBloomPrePassLightWithId>();
                     TubeBloomPrePassLight tubeBloomPrePassLight = gameObject.AddComponent<TubeBloomPrePassLight>();
                     if (lightsID == LightsID.Static)
-                        _setOnlyOnceAccessor(ref _tubeBloomPrePassLightWithId) = true;
+                        _tubeBloomPrePassLightWithId._setOnlyOnce = true;
                     GameObject boxLight = new("BoxLight");
                     boxLight.SetActive(false);
                     boxLight.layer = 13; // NeonLight
@@ -103,20 +85,20 @@ namespace CustomFloorPlugin
                     MeshRenderer renderer = boxLight.AddComponent<MeshRenderer>();
                     renderer.sharedMaterial = _materialSwapper!.TransparentGlowMaterial;
                     ParametricBoxController parametricBoxController = boxLight.AddComponent<ParametricBoxController>();
-                    _meshRendererAccessor(ref parametricBoxController) = renderer;
-                    _centerAccessor(ref tubeBloomPrePassLight) = center;
-                    _colorAlphaMultiplierAccessor(ref tubeBloomPrePassLight) = colorAlphaMultiplier;
-                    _boostToWhiteAccessor(ref tubeBloomPrePassLight) = boostToWhite;
-                    _parametricBoxControllerAccessor(ref tubeBloomPrePassLight) = parametricBoxController;
-                    _mainEffectPostProcessEnabledAccessor(ref tubeBloomPrePassLight) = _postProcessEnabled;
+                    parametricBoxController._meshRenderer = renderer;
+                    tubeBloomPrePassLight._center = center;
+                    tubeBloomPrePassLight._colorAlphaMultiplier = colorAlphaMultiplier;
+                    tubeBloomPrePassLight._boostToWhite = boostToWhite;
+                    tubeBloomPrePassLight._parametricBoxController = parametricBoxController;
+                    tubeBloomPrePassLight._mainEffectPostProcessEnabled = _postProcessEnabled;
                     tubeBloomPrePassLight.width = width * 2;
                     tubeBloomPrePassLight.length = length;
                     tubeBloomPrePassLight.bloomFogIntensityMultiplier = bloomFogIntensityMultiplier;
-                    _tubeBloomPrePassLightAccessor(ref _tubeBloomPrePassLightWithId) = tubeBloomPrePassLight;
+                    _tubeBloomPrePassLightWithId._tubeBloomPrePassLight = tubeBloomPrePassLight;
                     BloomPrePassLight bloomPrePassLight = tubeBloomPrePassLight;
-                    _lightTypeAccessor(ref bloomPrePassLight) = BloomPrePassLight.bloomLightsDict.Keys.First(static x => x.name == "AddBloomPrePassLightType");
+                    bloomPrePassLight._lightType = BloomPrePassLight.bloomLightsDict.Keys.First(static x => x.name == "AddBloomPrePassLightType");
                     LightWithIdMonoBehaviour lightWithIdMonoBehaviour = _tubeBloomPrePassLightWithId;
-                    _idAccessor(ref lightWithIdMonoBehaviour) = (int)lightsID;
+                    lightWithIdMonoBehaviour._ID = (int)lightsID;
                     _tubeBloomPrePassLightWithId.ColorWasSet(color);
                     boxLight.SetActive(true);
                 }
@@ -125,21 +107,21 @@ namespace CustomFloorPlugin
                     Renderer renderer = GetComponent<Renderer>();
                     renderer.sharedMaterial = _materialSwapper!.OpaqueGlowMaterial;
                     MaterialPropertyBlockController materialPropertyBlockController = gameObject.AddComponent<MaterialPropertyBlockController>();
-                    _renderersAccessor(ref materialPropertyBlockController) = new[] { renderer };
+                    materialPropertyBlockController._renderers = [renderer];
                     MaterialPropertyBlockColorSetter materialPropertyBlockColorSetter = gameObject.AddComponent<MaterialPropertyBlockColorSetter>();
                     materialPropertyBlockColorSetter.materialPropertyBlockController = materialPropertyBlockController;
-                    _propertyAccessor(ref materialPropertyBlockColorSetter) = "_Color";
+                    materialPropertyBlockColorSetter._property = "_Color";
                     _instancedMaterialLightWithId = gameObject.AddComponent<InstancedMaterialLightWithId>();
-                    _materialPropertyBlockColorSetterAccessor(ref _instancedMaterialLightWithId) = materialPropertyBlockColorSetter;
-                    _intensityAccessor(ref _instancedMaterialLightWithId) = 1.25f;
+                    _instancedMaterialLightWithId._materialPropertyBlockColorSetter = materialPropertyBlockColorSetter;
+                    _instancedMaterialLightWithId._intensity = 1.25f;
                     LightWithIdMonoBehaviour lightWithIdMonoBehaviour = _instancedMaterialLightWithId;
-                    _idAccessor(ref lightWithIdMonoBehaviour) = (int)lightsID;
+                    lightWithIdMonoBehaviour._ID = (int)lightsID;
                     _instancedMaterialLightWithId.ColorWasSet(color);
                 }
             }
 
             LightWithIdMonoBehaviour? lightWithIdMonoBehaviour1 = _instancedMaterialLightWithId is not null ? _instancedMaterialLightWithId : _tubeBloomPrePassLightWithId;
-            _lightManagerAccessor(ref lightWithIdMonoBehaviour1!) = _lightWithIdManager;
+            lightWithIdMonoBehaviour1!._lightManager = _lightWithIdManager;
             gameObject.SetActive(activeSelf);
         }
 
@@ -148,8 +130,8 @@ namespace CustomFloorPlugin
         private static Mesh? _mesh;
         private static Mesh Mesh => _mesh ??= new Mesh
         {
-            vertices = new Vector3[]
-            {
+            vertices =
+            [
                 new(1, -1, -1),
                 new(1, -1, 1),
                 new(1, 1, -1),
@@ -174,9 +156,9 @@ namespace CustomFloorPlugin
                 new(-1, -1, 1),
                 new(1, -1, 1),
                 new(1, 1, 1)
-            },
-            triangles = new[]
-            {
+            ],
+            triangles =
+            [
                 0, 2, 3,
                 0, 3, 1,
                 8, 6, 7,
@@ -189,7 +171,7 @@ namespace CustomFloorPlugin
                 16, 18, 19,
                 20, 21, 22,
                 20, 22, 23
-            }
+            ]
         };
     }
 }
