@@ -28,16 +28,6 @@ namespace CustomFloorPlugin
         private Quaternion _startRotL;
         private Quaternion _startRotR;
 
-        private static readonly FieldAccessor<LightPairRotationEventEffect, BasicBeatmapEventType>.Accessor _eventLAccessor = FieldAccessor<LightPairRotationEventEffect, BasicBeatmapEventType>.GetAccessor("_eventL");
-        private static readonly FieldAccessor<LightPairRotationEventEffect, BasicBeatmapEventType>.Accessor _eventRAccessor = FieldAccessor<LightPairRotationEventEffect, BasicBeatmapEventType>.GetAccessor("_eventR");
-        private static readonly FieldAccessor<LightPairRotationEventEffect, BasicBeatmapEventType>.Accessor _switchOverrideRandomValuesEventAccessor = FieldAccessor<LightPairRotationEventEffect, BasicBeatmapEventType>.GetAccessor("_switchOverrideRandomValuesEvent");
-        private static readonly FieldAccessor<LightPairRotationEventEffect, Vector3>.Accessor _rotationVectorAccessor = FieldAccessor<LightPairRotationEventEffect, Vector3>.GetAccessor("_rotationVector");
-        private static readonly FieldAccessor<LightPairRotationEventEffect, Transform>.Accessor _transformLAccessor = FieldAccessor<LightPairRotationEventEffect, Transform>.GetAccessor("_transformL");
-        private static readonly FieldAccessor<LightPairRotationEventEffect, Transform>.Accessor _transformRAccessor = FieldAccessor<LightPairRotationEventEffect, Transform>.GetAccessor("_transformR");
-        private static readonly FieldAccessor<LightPairRotationEventEffect, bool>.Accessor _useZPositionForAngleOffsetAccessor = FieldAccessor<LightPairRotationEventEffect, bool>.GetAccessor("_useZPositionForAngleOffset");
-        private static readonly FieldAccessor<LightPairRotationEventEffect, float>.Accessor _zPositionAngleOffsetScaleAccessor = FieldAccessor<LightPairRotationEventEffect, float>.GetAccessor("_zPositionAngleOffsetScale");
-        private static readonly FieldAccessor<LightPairRotationEventEffect, BeatmapCallbacksController>.Accessor _beatmapCallbacksControllerAccessor = FieldAccessor<LightPairRotationEventEffect, BeatmapCallbacksController>.GetAccessor("_beatmapCallbacksController");
-
         [Inject]
         public void Construct([InjectOptional] BeatmapCallbacksController beatmapCallbacksController) => _beatmapCallbacksController = beatmapCallbacksController;
 
@@ -51,19 +41,19 @@ namespace CustomFloorPlugin
             if (_lightPairRotationEventEffect is null)
             {
                 _lightPairRotationEventEffect = gameObject.AddComponent<LightPairRotationEventEffect>();
-                _eventLAccessor(ref _lightPairRotationEventEffect) = (BasicBeatmapEventType)eventL;
-                _eventRAccessor(ref _lightPairRotationEventEffect) = (BasicBeatmapEventType)eventR;
-                _switchOverrideRandomValuesEventAccessor(ref _lightPairRotationEventEffect) = (BasicBeatmapEventType)switchOverrideRandomValuesEvent;
-                _rotationVectorAccessor(ref _lightPairRotationEventEffect) = rotationVector;
-                _transformLAccessor(ref _lightPairRotationEventEffect) = transformL;
-                _transformRAccessor(ref _lightPairRotationEventEffect) = transformR;
-                _useZPositionForAngleOffsetAccessor(ref _lightPairRotationEventEffect) = useZPositionForAngleOffset;
-                _zPositionAngleOffsetScaleAccessor(ref _lightPairRotationEventEffect) = zPositionAngleOffsetScale;
-                _beatmapCallbacksControllerAccessor(ref _lightPairRotationEventEffect) = _beatmapCallbacksController;
+                _lightPairRotationEventEffect._eventL = (BasicBeatmapEventType)eventL;
+                _lightPairRotationEventEffect._eventR = (BasicBeatmapEventType)eventR;
+                _lightPairRotationEventEffect._switchOverrideRandomValuesEvent = (BasicBeatmapEventType)switchOverrideRandomValuesEvent;
+                _lightPairRotationEventEffect._rotationVector = rotationVector;
+                _lightPairRotationEventEffect._transformL = transformL;
+                _lightPairRotationEventEffect._transformR = transformR;
+                _lightPairRotationEventEffect._useZPositionForAngleOffset = useZPositionForAngleOffset;
+                _lightPairRotationEventEffect._zPositionAngleOffsetScale = zPositionAngleOffsetScale;
+                _lightPairRotationEventEffect.SetField("_beatmapCallbacksController", _beatmapCallbacksController);
             }
             else if (_beatmapCallbacksController is not null)
             {
-                _beatmapCallbacksControllerAccessor(ref _lightPairRotationEventEffect) = _beatmapCallbacksController;
+                _lightPairRotationEventEffect.SetField("_beatmapCallbacksController", _beatmapCallbacksController);
                 _lightPairRotationEventEffect.Start();
             }
         }

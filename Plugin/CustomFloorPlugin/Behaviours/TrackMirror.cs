@@ -1,7 +1,5 @@
 ﻿using CustomFloorPlugin.Interfaces;
 
-using IPA.Utilities;
-
 using UnityEngine;
 
 using Zenject;
@@ -26,14 +24,14 @@ namespace CustomFloorPlugin
 
         private Mirror? _mirror;
         private MirrorRendererSO? _mirrorRenderer;
-
-        private static readonly FieldAccessor<Mirror, MeshRenderer>.Accessor _rendererAccessor = FieldAccessor<Mirror, MeshRenderer>.GetAccessor("_renderer");
-        private static readonly FieldAccessor<Mirror, MirrorRendererSO?>.Accessor _mirrorRendererAccessor = FieldAccessor<Mirror, MirrorRendererSO?>.GetAccessor("_mirrorRenderer");
-        private static readonly FieldAccessor<Mirror, Material>.Accessor _mirrorMaterialAccessor = FieldAccessor<Mirror, Material>.GetAccessor("_mirrorMaterial");
-        private static readonly FieldAccessor<Mirror, Material>.Accessor _noMirrorMaterialAccessor = FieldAccessor<Mirror, Material>.GetAccessor("_noMirrorMaterial");
+        private GameShaders? _gameShaders;
 
         [Inject]
-        public void Construct(MirrorRendererSO mirrorRenderer) => _mirrorRenderer = mirrorRenderer;
+        private void Construct(MirrorRendererSO mirrorRenderer, GameShaders gameShaders)
+        {
+            _mirrorRenderer = mirrorRenderer;
+            _gameShaders = gameShaders;
+        }
 
         public void PlatformEnabled(DiContainer container)
         {
@@ -41,16 +39,15 @@ namespace CustomFloorPlugin
                 return;
             container.Inject(this);
             _mirror = gameObject.AddComponent<Mirror>();
-            _rendererAccessor(ref _mirror) = GetComponent<MeshRenderer>();
-            _mirrorRendererAccessor(ref _mirror) = Instantiate(_mirrorRenderer);
-            _mirrorMaterialAccessor(ref _mirror) = CreateMirrorMaterial();
-            _noMirrorMaterialAccessor(ref _mirror) = CreateNoMirrorMaterial();
+            _mirror._renderer = GetComponent<MeshRenderer>();
+            _mirror._mirrorRenderer = Instantiate(_mirrorRenderer);
+            _mirror._mirrorMaterial = CreateMirrorMaterial();
+            _mirror._noMirrorMaterial = CreateNoMirrorMaterial();
         }
 
         private Material CreateMirrorMaterial()
         {
-            Shader mirrorShader = Shader.Find("Custom/Mirror");
-            Material mirrorMaterial = new(mirrorShader);
+            Material mirrorMaterial = new(_gameShaders?.Mirror);
             mirrorMaterial.EnableKeyword("ENABLE_MIRROR");
             mirrorMaterial.EnableKeyword("ETC1_EXTERNAL_ALPHA");
             mirrorMaterial.EnableKeyword("_EMISSION");
@@ -70,8 +67,7 @@ namespace CustomFloorPlugin
 
         private Material CreateNoMirrorMaterial()
         {
-            Shader noMirrorShader = Shader.Find("Custom/SimpleLit");
-            Material noMirrorMaterial = new(noMirrorShader);
+            Material noMirrorMaterial = new(_gameShaders?.SimpleLit);
             noMirrorMaterial.EnableKeyword("DIFFUSE");
             noMirrorMaterial.EnableKeyword("ENABLE_DIFFUSE");
             noMirrorMaterial.EnableKeyword("ENABLE_FOG");
