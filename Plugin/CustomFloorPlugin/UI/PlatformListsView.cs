@@ -28,8 +28,6 @@ namespace CustomFloorPlugin.UI
         private PlatformManager _platformManager = null!;
         private PlatformSpawner _platformSpawner = null!;
 
-        private static readonly FieldAccessor<TableView, ScrollView>.Accessor _scrollViewAccessor = FieldAccessor<TableView, ScrollView>.GetAccessor("_scrollView");
-
         [UIComponent("singleplayer-platforms-list")]
         private readonly CustomListTableData _singleplayerPlatformListTable = null!;
 
@@ -118,7 +116,7 @@ namespace CustomFloorPlugin.UI
         [UIAction("#post-parse")]
         public void PostParse()
         {
-            _listTables = new[] { _singleplayerPlatformListTable, _multiplayerPlatformListTable, _a360PlatformListTable, _menuPlatformListTable };
+            _listTables = [_singleplayerPlatformListTable, _multiplayerPlatformListTable, _a360PlatformListTable, _menuPlatformListTable];
             for (int i = 0; i < _platformManager.AllPlatforms.Count; i++)
                 AddCellForPlatform(_platformManager.AllPlatforms[i], i);
             for (int i = 0; i < _listTables.Length; i++)

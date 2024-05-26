@@ -125,7 +125,7 @@ namespace CustomFloorPlugin
         private void DisposeSongCoreConnection()
         {
             SongCore.Plugin.CustomSongPlatformSelectionDidChange -= OnSongCoreEvent;
-            SongCore.Collections.DeregisterizeCapability("Custom Platforms");
+            SongCore.Collections.DeregisterCapability("Custom Platforms");
         }
 
         private void InitializeCinemaConnection() => BeatSaberCinema.Events.AllowCustomPlatform += OnCinemaEvent;
@@ -157,9 +157,9 @@ namespace CustomFloorPlugin
         /// <param name="usePlatform">Whether the selected song requests a platform or not</param>
         /// <param name="name">The name of the requested platform</param>
         /// <param name="hash">The hash of the requested platform</param>
-        /// <param name="beatmapLevel">The <see cref="IPreviewBeatmapLevel"/> the platform was requested for</param>
+        /// <param name="beatmapLevel">The <see cref="BeatmapLevel"/> the platform was requested for</param>
         // ReSharper disable once AsyncVoidMethod
-        private async void OnSongCoreEvent(bool usePlatform, string? name, string? hash, IPreviewBeatmapLevel beatmapLevel)
+        private async void OnSongCoreEvent(bool usePlatform, string? name, string? hash, BeatmapLevel beatmapLevel)
         {
             // No platform is requested, abort
             if (!usePlatform)

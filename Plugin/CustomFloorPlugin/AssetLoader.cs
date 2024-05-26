@@ -21,14 +21,12 @@ namespace CustomFloorPlugin
     /// Loads all images and creates the heart and a replacement for the default players place
     /// </summary>
     [UsedImplicitly]
-    public class AssetLoader
+    public class AssetLoader(DiContainer container, Assembly assembly, [Inject(Id = "CustomPlatforms")] Transform anchor, MaterialSwapper materialSwapper)
     {
-        private readonly Transform _anchor;
-        private readonly DiContainer _container;
-        private readonly Assembly _assembly;
-        private readonly MaterialSwapper _materialSwapper;
-
-        private static readonly FieldAccessor<LightWithIdManager, List<ILightWithId>?[]>.Accessor _lightsAccessor = FieldAccessor<LightWithIdManager, List<ILightWithId>?[]>.GetAccessor("_lights");
+        private readonly Transform _anchor = anchor;
+        private readonly DiContainer _container = container;
+        private readonly Assembly _assembly = assembly;
+        private readonly MaterialSwapper _materialSwapper = materialSwapper;
 
         /// <summary>
         /// Used as a players place replacement in platform preview
@@ -56,14 +54,6 @@ namespace CustomFloorPlugin
         /// </summary>
         internal LightEffects MultiplayerLightEffects => _lightEffects ??= CreateLightEffects();
         private LightEffects? _lightEffects;
-
-        public AssetLoader(DiContainer container, Assembly assembly, [Inject(Id = "CustomPlatforms")] Transform anchor, MaterialSwapper materialSwapper)
-        {
-            _container = container;
-            _assembly = assembly;
-            _anchor = anchor;
-            _materialSwapper = materialSwapper;
-        }
 
         private Sprite CreateSpriteFromEmbeddedResource(string resourcePath)
         {
@@ -172,26 +162,11 @@ namespace CustomFloorPlugin
                 _colorScheme = colorScheme;
             }
 
-            private static readonly FieldAccessor<LightSwitchEventEffect, int>.Accessor _lightsIDAccessor = FieldAccessor<LightSwitchEventEffect, int>.GetAccessor("_lightsID");
-            private static readonly FieldAccessor<LightSwitchEventEffect, BasicBeatmapEventType>.Accessor _eventAccessor = FieldAccessor<LightSwitchEventEffect, BasicBeatmapEventType>.GetAccessor("_event");
-            private static readonly FieldAccessor<LightSwitchEventEffect, ColorSO>.Accessor _lightColor0Accessor = FieldAccessor<LightSwitchEventEffect, ColorSO>.GetAccessor("_lightColor0");
-            private static readonly FieldAccessor<LightSwitchEventEffect, ColorSO>.Accessor _lightColor1Accessor = FieldAccessor<LightSwitchEventEffect, ColorSO>.GetAccessor("_lightColor1");
-            private static readonly FieldAccessor<LightSwitchEventEffect, ColorSO>.Accessor _highlightColor0Accessor = FieldAccessor<LightSwitchEventEffect, ColorSO>.GetAccessor("_highlightColor0");
-            private static readonly FieldAccessor<LightSwitchEventEffect, ColorSO>.Accessor _highlightColor1Accessor = FieldAccessor<LightSwitchEventEffect, ColorSO>.GetAccessor("_highlightColor1");
-            private static readonly FieldAccessor<LightSwitchEventEffect, ColorSO>.Accessor _lightColor0BoostAccessor = FieldAccessor<LightSwitchEventEffect, ColorSO>.GetAccessor("_lightColor0Boost");
-            private static readonly FieldAccessor<LightSwitchEventEffect, ColorSO>.Accessor _lightColor1BoostAccessor = FieldAccessor<LightSwitchEventEffect, ColorSO>.GetAccessor("_lightColor1Boost");
-            private static readonly FieldAccessor<LightSwitchEventEffect, ColorSO>.Accessor _highlightColor0BoostAccessor = FieldAccessor<LightSwitchEventEffect, ColorSO>.GetAccessor("_highlightColor0Boost");
-            private static readonly FieldAccessor<LightSwitchEventEffect, ColorSO>.Accessor _highlightColor1BoostAccessor = FieldAccessor<LightSwitchEventEffect, ColorSO>.GetAccessor("_highlightColor1Boost");
-            private static readonly FieldAccessor<LightSwitchEventEffect, BeatmapCallbacksController>.Accessor _beatmapCallbacksControllerAccessor = FieldAccessor<LightSwitchEventEffect, BeatmapCallbacksController>.GetAccessor("_beatmapCallbacksController");
-            private static readonly FieldAccessor<LightSwitchEventEffect, LightWithIdManager>.Accessor _lightManagerAccessor = FieldAccessor<LightSwitchEventEffect, LightWithIdManager>.GetAccessor("_lightManager");
-            private static readonly FieldAccessor<MultipliedColorSO, SimpleColorSO>.Accessor _baseColorAccessor = FieldAccessor<MultipliedColorSO, SimpleColorSO>.GetAccessor("_baseColor");
-            private static readonly FieldAccessor<MultipliedColorSO, Color>.Accessor _multiplierColorAccessor = FieldAccessor<MultipliedColorSO, Color>.GetAccessor("_multiplierColor");
-
             public void PlatformEnabled(DiContainer container)
             {
                 container.Inject(this);
                 gameObject.SetActive(false);
-                List<ILightWithId>?[] lights = _lightsAccessor(ref _lightWithIdManager);
+                List<ILightWithId>?[] lights = _lightWithIdManager._lights;
                 if (_lightSwitchEventEffects is null)
                 {
                     Color normalColor = new(1f, 1f, 1f, 0.7490196f);
@@ -200,27 +175,27 @@ namespace CustomFloorPlugin
                     _lightSwitchEventEffects = new LightSwitchEventEffect[5];
                     for (int i = 0; i < _lightSwitchEventEffects.Length; i++)
                     {
-                        lights[i] ??= new List<ILightWithId>();
+                        lights[i] ??= [];
                         _lightSwitchEventEffects[i] = container.InstantiateComponent<LightSwitchEventEffect>(gameObject);
-                        _lightsIDAccessor(ref _lightSwitchEventEffects[i]) = i + 1;
-                        _eventAccessor(ref _lightSwitchEventEffects[i]) = (BasicBeatmapEventType)i;
-                        _lightColor0Accessor(ref _lightSwitchEventEffects[i]) = CreateMultipliedColorSO(_simpleLightColor0, normalColor);
-                        _lightColor1Accessor(ref _lightSwitchEventEffects[i]) = CreateMultipliedColorSO(_simpleLightColor1, normalColor);
-                        _highlightColor0Accessor(ref _lightSwitchEventEffects[i]) = CreateMultipliedColorSO(_simpleHighlightColor0, highlightColor);
-                        _highlightColor1Accessor(ref _lightSwitchEventEffects[i]) = CreateMultipliedColorSO(_simpleHighlightColor1, highlightColor);
-                        _lightColor0BoostAccessor(ref _lightSwitchEventEffects[i]) = CreateMultipliedColorSO(_simpleLightColor0Boost, boostColor);
-                        _lightColor1BoostAccessor(ref _lightSwitchEventEffects[i]) = CreateMultipliedColorSO(_simpleLightColor1Boost, boostColor);
-                        _highlightColor0BoostAccessor(ref _lightSwitchEventEffects[i]) = CreateMultipliedColorSO(_simpleHighlightColor0Boost, highlightColor);
-                        _highlightColor1BoostAccessor(ref _lightSwitchEventEffects[i]) = CreateMultipliedColorSO(_simpleHighlightColor1Boost, highlightColor);
+                        _lightSwitchEventEffects[i].SetField("_lightsID", i + 1);
+                        _lightSwitchEventEffects[i]._event = (BasicBeatmapEventType)i;
+                        _lightSwitchEventEffects[i]._lightColor0 = CreateMultipliedColorSO(_simpleLightColor0, normalColor);
+                        _lightSwitchEventEffects[i]._lightColor1 = CreateMultipliedColorSO(_simpleLightColor1, normalColor);
+                        _lightSwitchEventEffects[i]._highlightColor0 = CreateMultipliedColorSO(_simpleHighlightColor0, highlightColor);
+                        _lightSwitchEventEffects[i]._highlightColor1 = CreateMultipliedColorSO(_simpleHighlightColor1, highlightColor);
+                        _lightSwitchEventEffects[i]._lightColor0Boost = CreateMultipliedColorSO(_simpleLightColor0Boost, boostColor);
+                        _lightSwitchEventEffects[i]._lightColor1Boost = CreateMultipliedColorSO(_simpleLightColor1Boost, boostColor);
+                        _lightSwitchEventEffects[i]._highlightColor0Boost = CreateMultipliedColorSO(_simpleHighlightColor0Boost, highlightColor);
+                        _lightSwitchEventEffects[i]._highlightColor1Boost = CreateMultipliedColorSO(_simpleHighlightColor1Boost, highlightColor);
                     }
                 }
                 else
                 {
                     for (int i = 0; i < _lightSwitchEventEffects.Length; i++)
                     {
-                        lights[_lightSwitchEventEffects[i].lightsId] ??= new List<ILightWithId>();
-                        _beatmapCallbacksControllerAccessor(ref _lightSwitchEventEffects[i]) = _beatmapCallbacksController;
-                        _lightManagerAccessor(ref _lightSwitchEventEffects[i]) = _lightWithIdManager;
+                        lights[_lightSwitchEventEffects[i].lightsId] ??= [];
+                        _lightSwitchEventEffects[i].SetField("_beatmapCallbacksController", _beatmapCallbacksController);
+                        _lightSwitchEventEffects[i].SetField("_lightManager", _lightWithIdManager);
                         _lightSwitchEventEffects[i].SetColor(Color.clear);
                         _lightSwitchEventEffects[i].Start();
                     }
@@ -248,8 +223,8 @@ namespace CustomFloorPlugin
             private static MultipliedColorSO CreateMultipliedColorSO(SimpleColorSO simpleColor, Color color)
             {
                 MultipliedColorSO multipliedColor = ScriptableObject.CreateInstance<MultipliedColorSO>();
-                _baseColorAccessor(ref multipliedColor) = simpleColor;
-                _multiplierColorAccessor(ref multipliedColor) = color;
+                multipliedColor._baseColor = simpleColor;
+                multipliedColor._multiplierColor = color;
                 return multipliedColor;
             }
         }

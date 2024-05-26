@@ -6,8 +6,6 @@ using System.Threading.Tasks;
 
 using AssetBundleLoadingTools.Utilities;
 
-using IPA.Utilities;
-
 using JetBrains.Annotations;
 
 using SiraUtil.Logging;
@@ -28,8 +26,6 @@ namespace CustomFloorPlugin
         private readonly BloomPrePassEffectContainerSO _bloomPrePassEffectContainer;
         private readonly Dictionary<string, Task<CustomPlatform?>> _pathTaskPairs;
 
-        private static readonly FieldAccessor<BloomPrePass, BloomPrePassRendererSO>.Accessor _bloomPrepassRendererAccessor = FieldAccessor<BloomPrePass, BloomPrePassRendererSO>.GetAccessor("_bloomPrepassRenderer");
-        private static readonly FieldAccessor<BloomPrePass, BloomPrePassEffectContainerSO>.Accessor _bloomPrePassEffectContainerAccessor = FieldAccessor<BloomPrePass, BloomPrePassEffectContainerSO>.GetAccessor("_bloomPrePassEffectContainer");
 
         public PlatformLoader(SiraLog siraLog, BloomPrePassRendererSO bloomPrepassRenderer, BloomPrePassEffectContainerSO bloomPrePassEffectContainer)
         {
@@ -81,6 +77,8 @@ namespace CustomFloorPlugin
 
             assetBundle.Unload(false);
 
+            await RepairPlatformShadersAsync(platformPrefab);
+
             CustomPlatform? customPlatform = platformPrefab.GetComponent<CustomPlatform>();
 
             if (customPlatform is null)
@@ -110,8 +108,8 @@ namespace CustomFloorPlugin
             foreach (Camera camera in cameras)
             {
                 BloomPrePass bloomPrePass = camera.gameObject.AddComponent<BloomPrePass>();
-                _bloomPrepassRendererAccessor(ref bloomPrePass) = _bloomPrepassRenderer;
-                _bloomPrePassEffectContainerAccessor(ref bloomPrePass) = _bloomPrePassEffectContainer;
+                bloomPrePass._bloomPrepassRenderer = _bloomPrepassRenderer;
+                bloomPrePass._bloomPrePassEffectContainer = _bloomPrePassEffectContainer;
             }
 
             customPlatform.platHash = await Task.Run(() => ComputeHash(bundleData));
@@ -129,6 +127,26 @@ namespace CustomFloorPlugin
             using MD5 md5 = MD5.Create();
             byte[] hash = md5.ComputeHash(data);
             return BitConverter.ToString(hash).Replace("-", string.Empty).ToLowerInvariant();
+        }
+
+        /// <summary>
+        /// Shader repair so that single pass shaders used prior to BS 1.29.4 show properly in VR
+        /// </summary>
+        private async Task RepairPlatformShadersAsync(GameObject platformPrefab)
+        {
+            List<Material> materials = ShaderRepair.GetMaterialsFromGameObjectRenderers(platformPrefab);
+
+            var replacementInfo = await ShaderRepair.FixShadersOnMaterialsAsync(materials);
+
+            if (!replacementInfo.AllShadersReplaced)
+            {
+                _siraLog.Warn($"Missing shader replacement data:");
+                foreach (var shaderName in replacementInfo.MissingShaderNames)
+                {
+                    _siraLog.Warn($"\t- {shaderName}");
+                }
+            }
+            else _siraLog.Debug("All shaders replaced!");
         }
     }
 }
